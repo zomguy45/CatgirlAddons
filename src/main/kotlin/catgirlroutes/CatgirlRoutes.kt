@@ -1,0 +1,126 @@
+package catgirlroutes
+
+import catgirlroutes.commands.*
+import catgirlroutes.config.ModuleConfig
+import catgirlroutes.module.ModuleManager
+import catgirlroutes.ui.clickgui.ClickGUI
+import catgirlroutes.utils.AutoRouteUtils
+import catgirlroutes.utils.ClientListener
+import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.ServerRotateUtils
+import catgirlroutes.utils.clock.Executor
+import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.ScanUtils
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiScreen
+import net.minecraftforge.client.ClientCommandHandler
+import net.minecraftforge.common.MinecraftForge
+import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.Mod
+import net.minecraftforge.fml.common.event.FMLInitializationEvent
+import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
+import net.minecraftforge.fml.common.network.FMLNetworkEvent
+import java.io.File
+import kotlin.coroutines.EmptyCoroutineContext
+
+@Mod(
+    modid = "catgirlroutes",
+    name = "CatgirlRoutes",
+    version = "0.0.0",
+    clientSideOnly = true
+)
+class CatgirlRoutes {
+
+    @Mod.EventHandler
+    fun onInit(event: FMLInitializationEvent) {
+        ModuleManager.loadModules()
+
+        listOf(
+            CatgirlAddonsCommands(),
+
+            //AutoP3
+            AutoP3Commands(),
+            AutoP3Remove(),
+            AutoP3Load(),
+            AutoP3Undo(),
+            AutoP3EditMode(),
+            AutoP3Force(),
+            AutoP3Await(),
+            Test(),
+        ).forEach {
+            ClientCommandHandler.instance.registerCommand((it))
+        }
+
+        listOf(
+            this,
+            ModuleManager,
+            LocationManager,
+            Executor,
+            DungeonUtils,
+            ScanUtils,
+            ServerRotateUtils,
+            ClientListener,
+            AutoRouteUtils,
+        ).forEach(MinecraftForge.EVENT_BUS::register)
+    }
+    @Mod.EventHandler
+    fun postInit(event: FMLLoadCompleteEvent) = runBlocking {
+        //Load in the module config post init so that all the minecraft classes are already present.
+        runBlocking {
+            launch(Dispatchers.IO) {
+                moduleConfig.loadConfig()
+            }
+        }
+        ModuleManager.initializeModules()
+
+        clickGUI = ClickGUI()
+    }
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
+        tickRamp++
+        totalTicks++
+        if (display != null) {
+            mc.displayGuiScreen(display)
+            display = null
+        }
+        if (tickRamp % 20 == 0) {
+            tickRamp = 0
+        }
+    }
+
+    @SubscribeEvent
+    fun onDisconnect(event: FMLNetworkEvent.ClientDisconnectionFromServerEvent) {
+        moduleConfig.saveConfig()
+    }
+
+    @SubscribeEvent
+    fun onWorldChange(@Suppress("UNUSED_PARAMETER") event: WorldEvent.Load) {
+        tickRamp = 18
+    }
+    companion object {
+        const val MOD_ID = "cga"
+        const val MOD_NAME = "CatgirlRoutes"
+        const val MOD_VERSION = "0.0.0"
+        const val CHAT_PREFIX = "§5[§dCatgirlAddons§5]§r"
+        const val SHORT_PREFIX = "§5[§dCga§5]§r"
+        const val RESOURCE_DOMAIN = "catgirlroutes"
+        const val CONFIG_DOMAIN = RESOURCE_DOMAIN
+        val mc: Minecraft = Minecraft.getMinecraft()
+        val scope = CoroutineScope(EmptyCoroutineContext)
+
+        lateinit var clickGUI: ClickGUI
+        val moduleConfig = ModuleConfig(File(CatgirlRoutes.mc.mcDataDir, "config/${CatgirlRoutes.CONFIG_DOMAIN}"))
+        val onHypixel: Boolean  by LocationManager::onHypixel
+        var display: GuiScreen? = null
+        var tickRamp = 0
+        var totalTicks: Long = 0
+    }
+}
+

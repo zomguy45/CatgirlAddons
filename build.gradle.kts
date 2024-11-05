@@ -1,82 +1,38 @@
-import org.apache.commons.lang3.SystemUtils
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import dev.architectury.pack200.java.Pack200Adapter
+import net.fabricmc.loom.task.RemapJarTask
+import org.jetbrains.dokka.gradle.DokkaTask
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    idea
-    java
+    kotlin("jvm") version "1.8.10"
+    // This is for creating a documentation from the documentation comments. Use it with the dokkaHtml gradle task
+    id("org.jetbrains.dokka") version "1.7.20"
+    id("com.github.johnrengelman.shadow") version "7.1.2"
     id("gg.essential.loom") version "0.10.0.+"
     id("dev.architectury.architectury-pack200") version "0.1.3"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    kotlin("jvm") version "2.0.0"
+    idea
+    java
+    `maven-publish`
 }
 
-//Constants:
-
-val baseGroup: String by project
-val mcVersion: String by project
-val version: String by project
-val mixinGroup = "$baseGroup.mixin"
-val modid: String by project
-val transformerFile = file("src/main/resources/accesstransformer.cfg")
-
-// Toolchains:
-java {
-    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
-}
-
-// Minecraft configuration:
-loom {
-    log4jConfigs.from(file("log4j2.xml"))
-    launchConfigs {
-        "client" {
-            // If you don't want mixins, remove these lines
-            property("mixin.debug", "true")
-            arg("--tweakClass", "org.spongepowered.asm.launch.MixinTweaker")
-        }
-    }
-    runConfigs {
-        "client" {
-            if (SystemUtils.IS_OS_MAC_OSX) {
-                // This argument causes a crash on macOS
-                vmArgs.remove("-XstartOnFirstThread")
-            }
-        }
-        remove(getByName("server"))
-    }
-    forge {
-        pack200Provider.set(dev.architectury.pack200.java.Pack200Adapter())
-        // If you don't want mixins, remove this lines
-        mixinConfig("mixins.$modid.json")
-	    if (transformerFile.exists()) {
-			println("Installing access transformer")
-		    accessTransformer(transformerFile)
-	    }
-    }
-    // If you don't want mixins, remove these lines
-    mixin {
-        defaultRefmapName.set("mixins.$modid.refmap.json")
+buildscript {
+    dependencies {
+        classpath("com.google.code.gson:gson:2.8.9")
+        classpath("org.jetbrains.dokka:dokka-base:1.7.10")
     }
 }
 
-tasks.compileJava {
-    dependsOn(tasks.processResources)
-}
-
-sourceSets.main {
-    output.setResourcesDir(sourceSets.main.flatMap { it.java.classesDirectory })
-    java.srcDir(layout.projectDirectory.dir("src/main/kotlin"))
-    kotlin.destinationDirectory.set(java.destinationDirectory)
-}
-
-// Dependencies:
+// This variable determine the filename of the produced jar file.
+version = "1.0.3-0.2"
+group = "catgirlroutes"
 
 repositories {
-    mavenCentral()
-    maven("https://repo.spongepowered.org/maven/")
-    // If you don't want to log in with your real minecraft account, remove this line
-    maven("https://pkgs.dev.azure.com/djtheredstoner/DevAuth/_packaging/public/maven/v1")
+    maven("https://repo.spongepowered.org/repository/maven-public/")
+    maven("https://repo.sk1er.club/repository/maven-public")
 }
 
-val shadowImpl: Configuration by configurations.creating {
+val packageLib by configurations.creating {
     configurations.implementation.get().extendsFrom(this)
 }
 
@@ -85,77 +41,126 @@ dependencies {
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
 
-    shadowImpl(kotlin("stdlib-jdk8"))
+    compileOnly("org.spongepowered:mixin:0.8.2")
+    runtimeOnly("org.spongepowered:mixin:0.8.2")
+    annotationProcessor("org.spongepowered:mixin:0.8.2:processor")
 
-    // If you don't want mixins, remove these lines
-    shadowImpl("org.spongepowered:mixin:0.7.11-SNAPSHOT") {
-        isTransitive = false
-    }
-    annotationProcessor("org.spongepowered:mixin:0.8.5-SNAPSHOT")
+    // Essentials is still a dependency because it is used for the tweaker and to provide external libraries.
+    packageLib("gg.essential:loader-launchwrapper:1.1.3")
+    implementation("gg.essential:essential-1.8.9-forge:3662")
 
-    // If you don't want to log in with your real minecraft account, remove this line
-    runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
-
+    // For scanning self registering modules packaged within the mod. -- Removed!
+//    packageLib("org.reflections:reflections:0.10.2")
 }
 
-// Tasks:
-
-tasks.withType(JavaCompile::class) {
-    options.encoding = "UTF-8"
-}
-
-tasks.withType(org.gradle.jvm.tasks.Jar::class) {
-    archiveBaseName.set(modid)
-    manifest.attributes.run {
-        this["FMLCorePluginContainsFMLMod"] = "true"
-        this["ForceLoadAsMod"] = "true"
-
-        // If you don't want mixins, remove these lines
-        this["TweakClass"] = "org.spongepowered.asm.launch.MixinTweaker"
-        this["MixinConfigs"] = "mixins.$modid.json"
-	    if (transformerFile.exists())
-			this["FMLAT"] = "${modid}_at.cfg"
+sourceSets {
+    main {
+        output.setResourcesDir(file("${buildDir}/classes/kotlin/main"))
     }
 }
 
-tasks.processResources {
-    inputs.property("version", project.version)
-    inputs.property("mcversion", mcVersion)
-    inputs.property("modid", modid)
-    inputs.property("basePackage", baseGroup)
 
-    filesMatching(listOf("mcmod.info", "mixins.$modid.json")) {
-        expand(inputs.properties)
-    }
-
-    rename("accesstransformer.cfg", "META-INF/${modid}_at.cfg")
-}
-
-
-val remapJar by tasks.named<net.fabricmc.loom.task.RemapJarTask>("remapJar") {
-    archiveClassifier.set("")
-    from(tasks.shadowJar)
-    input.set(tasks.shadowJar.get().archiveFile)
-}
-
-tasks.jar {
-    archiveClassifier.set("without-deps")
-    destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
-}
-
-tasks.shadowJar {
-    destinationDirectory.set(layout.buildDirectory.dir("intermediates"))
-    archiveClassifier.set("non-obfuscated-with-deps")
-    configurations = listOf(shadowImpl)
-    doLast {
-        configurations.forEach {
-            println("Copying dependencies into mod: ${it.files}")
+loom {
+    launchConfigs {
+        getByName("client") {
+            property("mixin.debug", "true")
+            property("asmhelper.verbose", "true")
+            arg("--tweakClass", "catgirlroutes.tweaker.CatgirlRoutesTweaker")
+            arg("--mixin", "mixins.catgirlroutes.json")
         }
     }
-
-    // If you want to include other dependencies and shadow them, you can relocate them in here
-    fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
+    forge {
+        pack200Provider.set(Pack200Adapter())
+        mixinConfig("mixins.catgirlroutes.json")
+    }
+    mixin {
+        defaultRefmapName.set("mixins.catgirlroutes.refmap.json")
+    }
 }
 
-tasks.assemble.get().dependsOn(tasks.remapJar)
+tasks {
+    processResources {
+        inputs.property("version", project.version)
+        inputs.property("mcversion", "1.8.9")
 
+        filesMatching("mcmod.info") {
+            expand(mapOf("version" to project.version, "mcversion" to "1.8.9"))
+        }
+        dependsOn(compileJava)
+    }
+    named<Jar>("jar") {
+        manifest.attributes(
+            "FMLCorePluginContainsFMLMod" to true,
+            "FMLCorePlugin" to "catgirlroutes.forge.FMLLoadingPlugin",
+            "ForceLoadAsMod" to true,
+            "MixinConfigs" to "mixins.catgirlroutes.json",
+            "ModSide" to "CLIENT",
+            "TweakClass" to "catgirlroutes.tweaker.CatgirlRoutesTweaker",
+            "TweakOrder" to "0"
+        )
+        dependsOn(shadowJar)
+        enabled = false
+    }
+    named<RemapJarTask>("remapJar") {
+        archiveBaseName.set("CatgirlRoutes")
+        input.set(shadowJar.get().archiveFile)
+    }
+    named<ShadowJar>("shadowJar") {
+        archiveBaseName.set("CatgirlRoutes")
+        archiveClassifier.set("dev")
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+        configurations = listOf(packageLib)
+        mergeServiceFiles()
+    }
+    withType<JavaCompile> {
+        options.encoding = "UTF-8"
+    }
+    withType<KotlinCompile> {
+        kotlinOptions {
+            jvmTarget = "1.8"
+        }
+    }
+    // Task for custom formatted ducumentation
+    register<DokkaTask>("dokkaCustomFormat") {
+        pluginConfiguration<org.jetbrains.dokka.base.DokkaBase, org.jetbrains.dokka.base.DokkaBaseConfiguration> {
+            // Dokka's stylesheets and assets with conflicting names will be overriden.
+            // In this particular case, logo-styles.css will be overriden and Icon.png will
+            // be added as an additional image asset
+            // see the original assets at: https://github.com/Kotlin/dokka/tree/1.7.20/plugins/base/src/main/resources/dokka/styles
+            customStyleSheets = listOf(file("documentation/dokka/logo-styles.css"))
+            customAssets = listOf(file("documentation/dokka/Icon.png"))
+            footerMessage = "CatgirlRoutes"
+            separateInheritedMembers = false
+            // templatesDir = file("documentation/dokka/templates")
+            mergeImplicitExpectActualDeclarations = false
+        }
+    }
+    // Required by jitpack
+    publishing {
+        publications {
+            create<MavenPublication>("maven") {
+                groupId = "catgirlroutes"
+                artifactId = "catgirlroutes"
+                version = "1.0.3-0.1"
+
+                // A wrong components variable is overloading the correct one, so the getter is used instead.
+//                from(components["java"])
+                from(getComponents().getByName("java"))
+            }
+        }
+    }
+}
+
+java {
+    toolchain.languageVersion.set(JavaLanguageVersion.of(8))
+}
+
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
+}
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    languageVersion = "1.9"
+}

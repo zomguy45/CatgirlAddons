@@ -1,0 +1,18 @@
+{
+  "minVersion": "0.6",
+  "compatibilityLevel": "JAVA_8",
+  "package": "catgirlroutes.mixins",
+  "refmap": "mixins.catgirlroutes.refmap.json",
+  "mixins": [
+    "entity.MixinEntity",
+    "entity.MixinEntityLivingBase",
+    "entity.MixinPlayer"
+  ],
+  "client": [
+    "MixinMinecraft",
+    "MixinNetworkManager",
+    "accessors.IEntityPlayerSPAccessor",
+    "entity.MixinAbstractClientPlayer",
+    "entity.MovementUpdateEvent"
+  ]
+}
