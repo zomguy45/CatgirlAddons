@@ -4,10 +4,7 @@ import catgirlroutes.commands.*
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
-import catgirlroutes.utils.AutoRouteUtils
-import catgirlroutes.utils.ClientListener
-import catgirlroutes.utils.LocationManager
-import catgirlroutes.utils.ServerRotateUtils
+import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.ScanUtils
@@ -36,7 +33,6 @@ import kotlin.coroutines.EmptyCoroutineContext
     clientSideOnly = true
 )
 class CatgirlRoutes {
-
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
         ModuleManager.loadModules()
@@ -53,6 +49,15 @@ class CatgirlRoutes {
             AutoP3Force(),
             AutoP3Await(),
             Test(),
+
+            //Features
+            PearlClipCommand(),
+            LavaClipCommand(),
+
+            //AutoRoutes
+            AutoRoutesCommands(),
+            AutoRoutesAwait(),
+            AutoRoutesRemove(),
         ).forEach {
             ClientCommandHandler.instance.registerCommand((it))
         }
@@ -67,6 +72,9 @@ class CatgirlRoutes {
             ServerRotateUtils,
             ClientListener,
             AutoRouteUtils,
+            FakeRotater,
+            Rotater,
+            NodesActive,
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
@@ -123,4 +131,3 @@ class CatgirlRoutes {
         var totalTicks: Long = 0
     }
 }
-

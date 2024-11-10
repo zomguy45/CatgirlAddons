@@ -5,6 +5,7 @@ import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.Utils.findDistanceToAirBlocks
 import catgirlroutes.utils.Utils.relativeClip
 import catgirlroutes.utils.Utils.renderText
 import net.minecraft.client.gui.ScaledResolution
@@ -18,7 +19,7 @@ object LavaClip : Module(
     category = Category.MISC,
     description = "Clips you x blocks down when jumping into lava."
 ){
-    private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 5.0, 50.0, 1.0, description = "Distance to clip down")
+    private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, description = "Distance to clip down")
     init {
         this.addSettings(
             LavaClip.lavaclipDistance
@@ -29,16 +30,16 @@ object LavaClip : Module(
     private var velocancelled = true
 
     override fun onKeyBind() {
-        lavaClipToggle()
+        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1)
     }
 
-    private var adjustedDistance: Double = lavaclipDistance.value * -1
+    private var adjustedDistance: Double? = lavaclipDistance.value * -1
 
-    fun lavaClipToggle(distance: Double = lavaclipDistance.value, onlyToggle: Boolean = false) {
+    fun lavaClipToggle(distance: Double = 0.0, onlyToggle: Boolean = false) {
         if (!lavaclipping || onlyToggle) {
             lavaclipping = true
             velocancelled = false
-            adjustedDistance = distance * -1
+            adjustedDistance = distance
         } else {
             lavaclipping = false
             velocancelled = true
@@ -48,17 +49,21 @@ object LavaClip : Module(
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         if (!mc.thePlayer.isInLava || !lavaclipping) return
-        //if (!lavaclipping) return
-        //val block = mc.theWorld.getBlockState(BlockPos(floor(mc.thePlayer.posX), floor(mc.thePlayer.posY - (mc.thePlayer.motionY / 1.45)), floor(mc.thePlayer.posZ))).block
-        //if (block.toString() != "Block{minecraft:lava}") return
         lavaclipping = false
-        relativeClip(0.0, adjustedDistance, 0.0)
+        if (adjustedDistance == 0.0) adjustedDistance = findDistanceToAirBlocks()
+        if (adjustedDistance == null) {
+            velocancelled = true
+            return
+        }
+        relativeClip(0.0, adjustedDistance!!, 0.0)
     }
+
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaclipping || mc.ingameGUI == null) return
         val sr = ScaledResolution(mc)
-        val text = "Lava clipping $adjustedDistance"
+        var text = "Lava clipping $adjustedDistance"
+        if (adjustedDistance == 0.0) text = "Lava clipping"
         val width = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
         renderText(
             text = text,
@@ -66,6 +71,7 @@ object LavaClip : Module(
             y = sr.scaledHeight / 2 + 10
         )
     }
+
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {
         if (velocancelled) return

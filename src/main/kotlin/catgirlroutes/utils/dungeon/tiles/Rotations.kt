@@ -10,7 +10,10 @@ enum class Rotations(
     EAST(-15, 15),
     NONE(0, 0);
 
-
+    //SOUTH = 0
+    //WEST = 1
+    //NORTH = 2
+    //EAST = 3
 
     fun rotateY(): Rotations {
         return when (this) {

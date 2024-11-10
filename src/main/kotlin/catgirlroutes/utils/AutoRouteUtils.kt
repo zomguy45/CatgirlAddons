@@ -23,8 +23,7 @@ object AutoRouteUtils {
         val y: Double = mc.thePlayer.posY - player.lastReportedPosY
         val z: Double = mc.thePlayer.posZ - player.lastReportedPosZ
         val moving = x * x + y * y + z * z > 9.0E-40 || player.positionUpdateTicks >= 20
-        modMessage(moving.toString())
-        modMessage("$x | $y | $z || ${player.positionUpdateTicks}")
+        if (cancelling) return
         if (moving) {
             modMessage("C06")
             mc.netHandler.networkManager.sendPacket(

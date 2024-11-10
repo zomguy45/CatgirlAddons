@@ -4,8 +4,7 @@ import Hclip
 import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
-import catgirlroutes.module.impl.dungeons.AutoP3
-import catgirlroutes.module.impl.dungeons.VertJerry
+import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.Setting
@@ -55,6 +54,9 @@ object ModuleManager {
         //Dungeons
         AutoP3,
         VertJerry,
+        SecretChime,
+        AutoRoutes,
+        InstaMid,
     )
 
     /**

@@ -14,6 +14,7 @@ import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.Utils.posY
 import catgirlroutes.utils.Utils.rotateAroundNorth
 import catgirlroutes.utils.Utils.rotateToNorth
+import catgirlroutes.utils.Utils.rotationNumber
 import catgirlroutes.utils.Utils.subtractVec
 import catgirlroutes.utils.dungeon.tiles.FullRoom
 import net.minecraft.block.BlockSkull
@@ -249,8 +250,19 @@ object DungeonUtils {
         }
     }
 
+    private fun Vec3.toBlockPos(add: Double = 0.0): BlockPos {
+        return BlockPos(this.xCoord + add, this.yCoord + add, this.zCoord + add)
+    }
+
     fun FullRoom.getRelativeCoords(pos: Vec3) = pos.subtractVec(x = this.clayPos.x, z = this.clayPos.z).rotateToNorth(this.room.rotation)
     fun FullRoom.getRealCoords(pos: Vec3) = pos.rotateAroundNorth(this.room.rotation).addVec(x = this.clayPos.x, z = this.clayPos.z)
+    fun FullRoom.getRelativeYaw(yaw: Float) = yaw + ((rotationNumber(this.room.rotation) - 2) * 90)
+    fun FullRoom.getRealYaw(yaw: Float) = yaw - ((rotationNumber(this.room.rotation) - 2) * 90)
+
+    fun FullRoom.getRelativeCoords(pos: BlockPos) = getRelativeCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
+    fun FullRoom.getRealCoords(pos: BlockPos) = getRealCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
+    fun FullRoom.getRelativeCoords(x: Int, y: Int, z: Int) = getRelativeCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
+    fun FullRoom.getRealCoords(x: Int, y: Int, z: Int) = getRealCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
 
     val dungeonItemDrops = listOf(
         "Health Potion VIII Splash Potion", "Healing Potion 8 Splash Potion", "Healing Potion VIII Splash Potion", "Healing VIII Splash Potion", "Healing 8 Splash Potion",

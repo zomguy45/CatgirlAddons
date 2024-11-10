@@ -5,6 +5,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Utils.relativeClip
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
@@ -23,6 +24,7 @@ object StormClip : Module(
             StormClip.stormclipdistance
         )
     }
+    @SubscribeEvent
     fun onWorldUnload(event: WorldEvent.Unload) {
         clipped = false
     }
@@ -30,6 +32,7 @@ object StormClip : Module(
     fun onPacket(event: ReceivePacketEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !this.enabled || clipped) return
         if (event.packet.x == 73.5 && event.packet.y == 221.5 && event.packet.z == 14.5) {
+            modMessage("boss tp packet found")
             clipped = true
             scheduleTask(1) {relativeClip(0.0, stormclipdistance.value * -1, 0.0)}
         }

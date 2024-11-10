@@ -241,17 +241,19 @@ class AutoP3Load : CommandBase() {
 }
 
 class Test : CommandBase() {
-    override fun getCommandName(): String = "canceltest"
+    override fun getCommandName(): String = "fakerotate"
 
     override fun getCommandUsage(sender: ICommandSender?): String =
-        "/canceltest"
+        "/fakerotate"
 
     override fun processCommand(sender: ICommandSender, args: Array<String>) {
         if (args.size != 2) {
             return
         }
+        //rotate(args[0].toFloat(), args[1].toFloat())
         cancelRotate(args[0].toFloat(), args[1].toFloat())
         airClick()
+        //scheduleTask(1) {stopRotating()}
     }
 
     override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean = true

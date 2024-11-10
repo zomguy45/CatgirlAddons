@@ -9,6 +9,7 @@ import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
+import catgirlroutes.utils.Utils.findDistanceToAirBlocks
 import catgirlroutes.utils.Utils.relativeClip
 import catgirlroutes.utils.Utils.swapFromName
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
@@ -19,7 +20,7 @@ object PearlClip : Module(
     category = Category.MISC,
     description = "Clips you down selected blocks using an ender pearl."
 ){
-    private val pearlclipdistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 5.0, 80.0, 1.0, description = "Distance to clip down")
+    private val pearlclipdistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
     init {
         this.addSettings(
             PearlClip.pearlclipdistance
@@ -29,6 +30,15 @@ object PearlClip : Module(
     override fun onKeyBind() {
         if (!this.enabled) return
         modMessage("Pearl clipping!")
+        pearlClip((pearlclipdistance.value * -1))
+    }
+
+    private var clipdepth: Double? = 0.0
+
+    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) {
+        clipdepth = depth
+        if (depth == 0.0) clipdepth = findDistanceToAirBlocks()
+        if (clipdepth == null) return
         val swapresult = swapFromName("ender pearl")
         if (!swapresult) return
         active = true
@@ -38,12 +48,13 @@ object PearlClip : Module(
             resetRotations()
         }
     }
+
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {
-            relativeClip(0.0, pearlclipdistance.value * -1, 0.0)
+            relativeClip(0.0, clipdepth!!, 0.0)
         }
     }
 }

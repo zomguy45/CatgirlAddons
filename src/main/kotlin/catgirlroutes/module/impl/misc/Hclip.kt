@@ -15,7 +15,6 @@ object Hclip : Module(
     category = Category.MISC,
     description = "Boosts you forward when keybind is pressed"
 ){
-    private val forward = mc.gameSettings.keyBindForward.keyCode
     private var pendingHclip = false
     private var yawtouse: Float? = null
 

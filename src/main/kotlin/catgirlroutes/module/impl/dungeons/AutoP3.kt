@@ -14,6 +14,7 @@ import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ChatUtils.sendChat
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.FakeRotater.rotate
 import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopVelo
@@ -24,7 +25,6 @@ import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
-import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -43,7 +43,7 @@ object AutoP3 : Module(
 
     init {
         this.addSettings(
-            AutoP3.selectedRoute
+            selectedRoute
         )
     }
 
@@ -52,32 +52,12 @@ object AutoP3 : Module(
         loadRings()
     }
 
-    private val registeredmessages: MutableList<String> = ArrayList()
-
-    @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
-        val message = event.message.unformattedText
-        rings.forEach{ ring ->
-            if (ring.message == null) return@forEach
-            if (message.contains(ring.message!!) && registeredmessages.indexOf(message) == -1) {
-                registeredmessages.add(message)
-            }
-        }
-    }
-
-
     private val cooldownMap = mutableMapOf<String, Boolean>()
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         if (!ringsActive || !this.enabled || editmodetoggled) return
         rings.forEach { ring ->
-            //if(registeredmessages.indexOf(ring.message) == -1 && ring.message != null) {
-                //return
-            //} else if (registeredmessages.indexOf(ring.message) != -1) {
-                //val index = registeredmessages.indexOf(ring.message)
-                //scheduleTask(1) {if(index != -1) registeredmessages.removeAt(index)}
-            //}
             val key = "${ring.x},${ring.y},${ring.z},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inRing(ring)) {
@@ -96,11 +76,7 @@ object AutoP3 : Module(
         rings.forEach { ring ->
             val key = "${ring.x},${ring.y},${ring.z},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
-            val color = if (cooldown) {
-                white
-            } else {
-                black
-            }
+            val color = if (cooldown) white else black
             drawP3box(ring.x - ring.width / 2, ring.y, ring.z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
         }
     }
@@ -171,7 +147,7 @@ object AutoP3 : Module(
             "command" -> {
                 modMessage("Commanding!")
                 modMessage(ring.command!!)
-                sendChat(ring.command!!)
+                sendChat(ring.command)
             }
             "align" -> {
                 modMessage("Aligning!")
@@ -181,11 +157,7 @@ object AutoP3 : Module(
             "useitem" -> {
                 modMessage("Iteming!")
                 swapFromName(ring.item!!)
-                set(ring.yaw, ring.pitch)
-                scheduleTask(1) {
-                    airClick()
-                    resetRotations()
-                }
+                rotate(ring.yaw, ring.pitch)
             }
         }
     }

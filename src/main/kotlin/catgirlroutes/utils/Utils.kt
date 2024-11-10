@@ -4,16 +4,14 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
 import gg.essential.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
+import net.minecraft.block.BlockAir
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
-import net.minecraft.util.ChatComponentText
-import net.minecraft.util.ChatStyle
-import net.minecraft.util.Vec3
-import net.minecraft.util.Vec3i
+import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
 import kotlin.math.round
@@ -126,6 +124,17 @@ object Utils {
         }
     }
 
+    fun rotationNumber(rotation: Rotations): Int {
+        return when (rotation) {
+            Rotations.SOUTH -> 0
+            Rotations.WEST -> 1
+            Rotations.NORTH -> 2
+            Rotations.EAST -> 3
+            else -> throw IllegalStateException("Unable to get integer facing of $this")
+        }
+    }
+
+
     fun Vec3.rotateAroundNorth(rotation: Rotations): Vec3 {
         return when (rotation) {
             Rotations.NORTH -> Vec3(-this.xCoord, this.yCoord, -this.zCoord)
@@ -134,6 +143,29 @@ object Utils {
             Rotations.EAST -> Vec3(this.zCoord, this.yCoord, -this.xCoord)
             else -> this
         }
+    }
+
+    fun findDistanceToAirBlocks(): Double? {
+        val player = mc.thePlayer
+        val world = mc.theWorld
+
+        if (player == null || world == null) return null
+
+        val startPos = BlockPos(player.posX, player.posY, player.posZ)
+        var airCount = 0
+
+        for ((distance, y) in (startPos.y downTo 0).withIndex()) {
+            val pos = BlockPos(startPos.x, y, startPos.z)
+            val block = world.getBlockState(pos).block
+
+            if (block is BlockAir) {
+                airCount++
+                if (airCount == 2) return (distance * -1).toDouble() - 1.0
+            } else {
+                airCount = 0
+            }
+        }
+        return null
     }
 
     fun renderText(

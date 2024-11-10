@@ -1,20 +1,12 @@
 package catgirlroutes.events
 
-import net.minecraft.block.state.IBlockState
-import net.minecraft.client.audio.ISound
 import net.minecraft.client.gui.inventory.GuiContainer
-import net.minecraft.client.model.ModelBase
 import net.minecraft.entity.Entity
-import net.minecraft.entity.EntityLivingBase
 import net.minecraft.inventory.Container
 import net.minecraft.inventory.Slot
 import net.minecraft.network.Packet
 import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
-import net.minecraft.network.play.server.S12PacketEntityVelocity
-import net.minecraft.network.play.server.S27PacketExplosion
-import net.minecraft.util.BlockPos
-import net.minecraft.util.EnumFacing
 import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 
@@ -47,84 +39,54 @@ open class MovementUpdateEvent : Event() {
     class Post : MovementUpdateEvent()
 }
 
-@Cancelable
-class DrawContainerEvent(val mouseX: Int, val mouseY: Int) : Event()
+open class MotionUpdateEvent(
+    @JvmField var x: Double,
+    @JvmField var y: Double,
+    @JvmField var z: Double,
+    @JvmField var motionX: Double,
+    @JvmField var motionY: Double,
+    @JvmField var motionZ: Double,
+    @JvmField var yaw: Float,
+    @JvmField var pitch: Float,
+    @JvmField var onGround: Boolean
+) : Event() {
 
-class DrawContainerLastEvent(val mouseX: Int, val mouseY: Int) : Event()
+    class PreMotionUpdateEvent(
+        x: Double,
+        y: Double,
+        z: Double,
+        motionX: Double,
+        motionY: Double,
+        motionZ: Double,
+        yaw: Float,
+        pitch: Float,
+        onGround: Boolean
+    ) : MotionUpdateEvent(x, y, z, motionX, motionY, motionZ, yaw, pitch, onGround)
 
-@Cancelable
-class ContainerMouseClickedEvent(val mouseX: Int, val mouseY: Int, val mouseButton: Int): Event()
-
-@Cancelable
-class ContainerKeyTypedEvent(val keyCode: Int): Event()
+    class PostMotionUpdateEvent(
+        x: Double,
+        y: Double,
+        z: Double,
+        motionX: Double,
+        motionY: Double,
+        motionZ: Double,
+        yaw: Float,
+        pitch: Float,
+        onGround: Boolean
+    ) : MotionUpdateEvent(x, y, z, motionX, motionY, motionZ, yaw, pitch, onGround)
+}
 
 @Cancelable
 class ReceivePacketEvent(val packet: Packet<*>) : Event()
 
-@Cancelable
-class VelocityUpdateEvent(val packet: S12PacketEntityVelocity) : Event()
+class EntityRemovedEvent(val entity: Entity) : Event()
 
-/**
- * Gets fired right before the momentum of an S27 is handled by the net handler.
- */
-@Cancelable
-class ExplosionHandledEvent(val packet: S27PacketExplosion) : Event()
+class DungeonSecretEvent : Event()
 
 class ReceiveChatPacketEvent(val packet: S02PacketChat) : Event()
 
-/**
- * Gets called upon receiving a S08PacketPlayerPosLook packet
- */
 @Cancelable
 class TeleportEventPre(val packet: S08PacketPlayerPosLook) : Event()
-// This event only gets fired after the vanilla action by the NetHandlerPlayClient ist performed, which does not happen when the
-// pacet is cancelled.
-class TeleportEventPost(val packet: S08PacketPlayerPosLook) : Event()
-
-class PlaySoundEventPre(val p_sound: ISound) : Event()
-
-/**
- * Fired when an entity is removed from the world.
- */
-class EntityRemovedEvent(val entity: Entity) : Event()
-
-@Cancelable
-class RenderLivingEntityEvent(
-    var entity: EntityLivingBase,
-    var p_77036_2_: Float,
-    var p_77036_3_: Float,
-    var p_77036_4_: Float,
-    var p_77036_5_: Float,
-    var p_77036_6_: Float,
-    var scaleFactor: Float,
-    var modelBase: ModelBase
-) : Event()
-
 
 @Cancelable
 class PacketSentEvent(val packet: Packet<*>) : Event()
-
-//<editor-fold desc="Dungeon Events">
-
-/**
- * Fired when a secret is picked up in dungeons.
- * Currently gets fired whenever SecretChime plays its sound.
- */
-class DungeonSecretEvent : Event()
-
-/**
- * Fired in [Dungeon.onChat][floppaclient.floppamap.dungeon.Dungeon.onChat] when the "> EXTRA STATS <" message is received.
- */
-class DungeonEndEvent : Event()
-
-//</editor-fold>
-
-@Cancelable
-class BlockStateChangeEvent(val pos: BlockPos, val oldState: IBlockState, val newState: IBlockState) : Event()
-
-class BlockDestroyEvent(val pos: BlockPos, val side: EnumFacing, val state: IBlockState) : Event()
-
-/**
- * Fired when a clip chain is finished.
- */
-class ClipFinishEvent : Event()

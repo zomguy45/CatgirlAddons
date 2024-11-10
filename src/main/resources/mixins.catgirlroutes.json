@@ -4,6 +4,7 @@
   "package": "catgirlroutes.mixins",
   "refmap": "mixins.catgirlroutes.refmap.json",
   "mixins": [
+    "MixinWorld",
     "entity.MixinEntity",
     "entity.MixinEntityLivingBase",
     "entity.MixinPlayer"
@@ -13,6 +14,7 @@
     "MixinNetworkManager",
     "accessors.IEntityPlayerSPAccessor",
     "entity.MixinAbstractClientPlayer",
+    "entity.MixinEntityPlayerSP",
     "entity.MovementUpdateEvent"
   ]
 }

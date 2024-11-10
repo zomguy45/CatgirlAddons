@@ -20,8 +20,3 @@ public abstract class MovementUpdateEvent extends MixinAbstractClientPlayer {
         //ServerRotateUtils.INSTANCE.handlePost();
     }
 }
-
-
-
-
-

@@ -16,7 +16,7 @@ object F7sim : Module(
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!this.enabled || onHypixel || mc.thePlayer == null) return
         mc.thePlayer.getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.movementSpeed).baseValue = 0.50000000745
-        if (mc.thePlayer.isInLava == true) {
+        if (mc.thePlayer.isInLava) {
             mc.thePlayer.setVelocity(mc.thePlayer.motionX, 3.37, mc.thePlayer.motionZ)
         }
     }
