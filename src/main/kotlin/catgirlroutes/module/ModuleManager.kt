@@ -50,6 +50,7 @@ object ModuleManager {
         PearlClip,
         AutoSprint,
         F7sim,
+        StonkSwap,
 
         //Dungeons
         AutoP3,
@@ -57,6 +58,7 @@ object ModuleManager {
         SecretChime,
         AutoRoutes,
         InstaMid,
+        SecretAura,
     )
 
     /**

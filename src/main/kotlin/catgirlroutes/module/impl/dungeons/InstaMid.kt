@@ -6,9 +6,13 @@ import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.MovementUtils.setKey
+import catgirlroutes.utils.Utils
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0CPacketInput
 import net.minecraft.network.play.server.S1BPacketEntityAttach
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
 import kotlin.math.pow
@@ -20,13 +24,14 @@ object InstaMid : Module(
 ){
     private var preparing = false
     private var active = false
+    private var riding = false
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
         if (!active) return
         if (event.packet !is C03PacketPlayer && event.packet !is C0CPacketInput) return
         event.isCanceled = true
-        val riding = mc.thePlayer.isRiding
+        riding = mc.thePlayer.isRiding
         if (riding) preparing = false
         if (!riding && !preparing) {
             active = false
@@ -41,6 +46,7 @@ object InstaMid : Module(
                     false
                 )
             )
+            setKey("shift", false)
         }
     }
 
@@ -54,6 +60,20 @@ object InstaMid : Module(
         preparing = true
         active = true
         modMessage("Attempting to instamid")
+        setKey("shift", true)
+    }
+
+    @SubscribeEvent
+    fun onOverlay(event: RenderGameOverlayEvent.Post) {
+        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !riding || mc.ingameGUI == null) return
+        val sr = ScaledResolution(mc)
+        val text = "Instamid active"
+        val width = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
+        Utils.renderText(
+            text = text,
+            x = width,
+            y = sr.scaledHeight / 2 + 10
+        )
     }
 
     private fun isOnPlatform(): Boolean {
