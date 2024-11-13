@@ -269,7 +269,6 @@ object RingManager {
         if (file.exists()) {
             allrings = gson.fromJson(file.readText(), object : TypeToken<List<Ring>>() {}.type)
             rings = allrings.filter { it.route == route }.toMutableList()
-            mc.theWorld.getBlockState()
         }
     }
 
