@@ -18,6 +18,7 @@ object AutoSprint : Module(
 ){
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
         setKeyBindState(mc.gameSettings.keyBindSprint.keyCode, true)
     }
 }

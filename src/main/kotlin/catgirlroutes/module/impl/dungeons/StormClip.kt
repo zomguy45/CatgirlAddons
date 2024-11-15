@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc;
+package catgirlroutes.module.impl.dungeons;
 
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
@@ -21,7 +21,7 @@ object StormClip : Module(
     private var clipped = false
     init {
         this.addSettings(
-            StormClip.stormclipdistance
+            stormclipdistance
         )
     }
     @SubscribeEvent

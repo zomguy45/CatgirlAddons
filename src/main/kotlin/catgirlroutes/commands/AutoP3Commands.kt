@@ -91,10 +91,11 @@ class AutoP3Commands : CommandBase() {
                 val x = Math.round(mc.thePlayer.posX * 2) / 2.0
                 val y = Math.round(mc.thePlayer.posY * 2) / 2.0
                 val z = Math.round(mc.thePlayer.posZ * 2) / 2.0
+                val location = Vec3(x, y, z)
                 val yaw = mc.thePlayer.rotationYaw
                 val pitch = mc.thePlayer.rotationPitch
 
-                val ring = Ring(type, x, y, z, yaw, pitch, height, width, lookblock, depth, arguments, delay, route)
+                val ring = Ring(type, location, yaw, pitch, height, width, lookblock, depth, arguments, delay, route)
 
                 allrings.add(ring)
 
@@ -115,7 +116,7 @@ class AutoP3Commands : CommandBase() {
                 val range = args.getOrNull(1)?.toDoubleOrNull() ?: 2.0 // Default range to 2 if not provided
                 allrings = allrings.filter { ring ->
                     if (ring.route != route) return@filter true
-                    val distance = distanceToPlayer(ring.x, ring.y, ring.z)
+                    val distance = distanceToPlayer(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord)
                     distance >= range
                 }.toMutableList()
                 saveRings()
@@ -203,9 +204,7 @@ object RingManager {
 
 data class Ring(
     val type: String,
-    var x: Double,
-    var y: Double,
-    var z: Double,
+    var location: Vec3,
     var yaw: Float,
     var pitch: Float,
     var height: Float,

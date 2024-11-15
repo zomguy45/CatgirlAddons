@@ -9,7 +9,7 @@ import catgirlroutes.commands.editmode
 import catgirlroutes.commands.ringsActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.misc.LavaClip.lavaClipToggle
+import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -62,7 +62,7 @@ object AutoP3 : Module(
     fun onRender(event: RenderWorldLastEvent) {
         if (!ringsActive || !this.enabled || editmode) return
         rings.forEach { ring ->
-            val key = "${ring.x},${ring.y},${ring.z},${ring.type}"
+            val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inRing(ring)) {
                 if (cooldown) return@forEach
@@ -80,17 +80,17 @@ object AutoP3 : Module(
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (!ringsActive || !this.enabled ) return
         rings.forEach { ring ->
-            val key = "${ring.x},${ring.y},${ring.z},${ring.type}"
+            val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             val color = if (cooldown) white else black
-            drawP3box(ring.x - ring.width / 2, ring.y, ring.z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
+            drawP3box(ring.location.xCoord - ring.width / 2, ring.location.yCoord, ring.location.zCoord - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
         }
     }
 
     private fun inRing(ring: Ring): Boolean {
-        val distanceX = abs(mc.renderManager.viewerPosX - ring.x)
-        val distanceY = abs(mc.renderManager.viewerPosY - ring.y)
-        val distanceZ = abs(mc.renderManager.viewerPosZ - ring.z)
+        val distanceX = abs(mc.renderManager.viewerPosX - ring.location.xCoord)
+        val distanceY = abs(mc.renderManager.viewerPosY - ring.location.yCoord)
+        val distanceZ = abs(mc.renderManager.viewerPosZ - ring.location.zCoord)
 
         return distanceX < (ring.width / 2) && distanceY < ring.height && distanceY >= -0.5 && distanceZ < (ring.width / 2);
     }

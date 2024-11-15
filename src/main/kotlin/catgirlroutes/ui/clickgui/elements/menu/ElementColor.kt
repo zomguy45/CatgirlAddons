@@ -156,6 +156,6 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) :
     }
 
     companion object {
-        private val HUE_SCALE = ResourceLocation(CatgirlRoutes.RESOURCE_DOMAIN, "gui/HueScale.png")
+        private val HUE_SCALE = ResourceLocation(CatgirlRoutes.RESOURCE_DOMAIN, "HueScale.png")
     }
 }

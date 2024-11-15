@@ -1,6 +1,7 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
@@ -10,6 +11,7 @@ import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
 import java.awt.Color
+
 
 /**
  * ## A Collection of Methods for Rendering within the 3D World.
@@ -135,6 +137,36 @@ object WorldRenderUtils {
         val z = entity.posZ + ((entity.posZ-entity.lastTickPosZ)*partialTicks) + zOffset - width / 2.0
 
         drawCustomSizedBoxAt(x, y, z, width.toDouble(), height.toDouble(), width.toDouble(), color, lineWidth, phase)
+    }
+
+    fun draw2DBoxByEntity(entity: Entity, color: Color, width: Double, height: Double, partialTicks: Float = 0f, lineWidth: Double = 2.0, phase: Boolean = false, xOffset: Double = 0.0, yOffset: Double = 0.0, zOffset: Double = 0.0) {
+        val x = entity.posX + ((entity.posX-entity.lastTickPosX)*partialTicks) + xOffset - width / 2.0
+        val y = entity.posY + ((entity.posY-entity.lastTickPosY)*partialTicks) + yOffset
+        val z = entity.posZ + ((entity.posZ-entity.lastTickPosZ)*partialTicks) + zOffset - width / 2.0
+
+
+        GlStateManager.pushMatrix()
+
+        GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
+            color.blue.toFloat() / 255f, 1f)
+
+        GL11.glTranslated(x, y - 0.2, z)
+        GL11.glRotated((-mc.renderManager.playerViewY).toDouble(), 0.0, 1.0, 0.0)
+
+        if (phase) GlStateManager.disableDepth()
+        val outline = Color.black.rgb
+        Gui.drawRect(-20, -1, -26, 75, outline)
+        Gui.drawRect(20, -1, 26, 75, outline)
+        Gui.drawRect(-20, -1, 21, 5, outline)
+        Gui.drawRect(-20, 70, 21, 75, outline)
+        Gui.drawRect(-21, 0, -25, 74, 1)
+        Gui.drawRect(21, 0, 25, 74, 1)
+        Gui.drawRect(-21, 0, 24, 4, 1)
+        Gui.drawRect(-21, 71, 25, 74, 1)
+
+        GlStateManager.enableDepth()
+
+        GlStateManager.popMatrix()
     }
 
     fun drawCustomSizedBoxAt(x: Double, y: Double, z: Double, xWidth: Double, yHeight: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true) {

@@ -11,7 +11,6 @@ import catgirlroutes.events.DungeonEvents
 import catgirlroutes.events.DungeonSecretEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.misc.LavaClip
 import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask

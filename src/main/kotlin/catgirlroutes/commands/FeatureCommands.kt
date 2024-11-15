@@ -1,6 +1,6 @@
 package catgirlroutes.commands
 
-import catgirlroutes.module.impl.misc.LavaClip.lavaClipToggle
+import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.misc.PearlClip.pearlClip
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender

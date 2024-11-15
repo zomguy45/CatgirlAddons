@@ -7,6 +7,7 @@ import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.render.ClickGui
+import catgirlroutes.module.impl.render.DungeonESP
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.ui.hud.EditHudGUI
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -40,17 +41,16 @@ object ModuleManager {
     val modules: ArrayList<Module> = arrayListOf(
         //Render
         ClickGui,
+        DungeonESP,
 
         //Misc
         GhostBlocks,
-        AutoClicker,
         Hclip,
-        LavaClip,
-        StormClip,
         PearlClip,
         AutoSprint,
         F7sim,
         StonkSwap,
+        CatMode,
 
         //Dungeons
         AutoP3,
@@ -58,7 +58,8 @@ object ModuleManager {
         SecretChime,
         AutoRoutes,
         InstaMid,
-        SecretAura,
+        LavaClip,
+        StormClip,
     )
 
     /**

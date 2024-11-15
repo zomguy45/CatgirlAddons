@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc
+package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.ReceivePacketEvent
@@ -22,7 +22,7 @@ object LavaClip : Module(
     private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, description = "Distance to clip down")
     init {
         this.addSettings(
-            LavaClip.lavaclipDistance
+            lavaclipDistance
         )
     }
 
