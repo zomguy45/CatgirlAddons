@@ -11,6 +11,7 @@ import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
 import java.awt.Color
+import java.awt.Color.*
 
 
 /**
@@ -243,6 +244,84 @@ object WorldRenderUtils {
         tessellator.draw()
 
         GlStateManager.popMatrix()
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableDepth()
+        GlStateManager.disableBlend()
+    }
+
+    fun renderTransFlag(
+        x: Double,
+        y: Double,
+        z: Double,
+        Width: Float,
+        Height: Float,
+    ){
+        drawSquareTwo(x, y + 0.01, z, Width, Width, cyan, 4f, false)
+        drawSquareTwo(x, y + Height * 0.25, z, Width, Width, pink, 4f, false)
+        drawSquareTwo(x, y + Height * 0.5, z, Width, Width, white, 4f, false)
+        drawSquareTwo(x, y + Height * 0.75, z, Width, Width, pink, 4f, false)
+        drawSquareTwo(x, y + Height, z, Width, Width, cyan, 4f, false)
+    }
+
+    fun renderGayFlag(
+        x: Double,
+        y: Double,
+        z: Double,
+        Width: Float,
+        Height: Float,
+    ){
+        drawSquareTwo(x, y + 0.01, z, Width, Width, red, 4f, false)
+        drawSquareTwo(x, y + Height * 0.2, z, Width, Width, orange, 4f, false)
+        drawSquareTwo(x, y + Height * 0.4, z, Width, Width, yellow, 4f, false)
+        drawSquareTwo(x, y + Height * 0.6, z, Width, Width, green, 4f, false)
+        drawSquareTwo(x, y + Height * 0.8, z, Width, Width, blue, 4f, false)
+        drawSquareTwo(x, y + Height, z, Width, Width, pink, 4f, false)
+    }
+
+
+    fun drawSquareTwo(
+        x: Double,
+        y: Double,
+        z: Double,
+        xWidth: Float,
+        zWidth: Float,
+        color: Color,
+        thickness: Float = 3f,
+        phase: Boolean = true,
+        relocate: Boolean = true
+    ) {
+        GlStateManager.disableLighting()
+        GlStateManager.enableBlend()
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+        GL11.glLineWidth(thickness)
+
+        if (phase) GlStateManager.disableDepth()
+        GlStateManager.disableTexture2D()
+
+        GlStateManager.pushMatrix()
+
+        if (relocate) {
+            GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+        }
+
+        worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
+
+        GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
+            color.blue.toFloat() / 255f, 1f)
+
+        val halfXWidth = xWidth / 2
+        val halfZWidth = zWidth / 2
+
+        worldRenderer.pos(x + halfXWidth, y, z + halfZWidth).endVertex()
+        worldRenderer.pos(x + halfXWidth, y, z - halfZWidth).endVertex()
+        worldRenderer.pos(x - halfXWidth, y, z - halfZWidth).endVertex()
+        worldRenderer.pos(x - halfXWidth, y, z + halfZWidth).endVertex()
+        worldRenderer.pos(x + halfXWidth, y, z + halfZWidth).endVertex()
+
+        tessellator.draw()
+
+        GlStateManager.popMatrix()
+
         GlStateManager.enableTexture2D()
         GlStateManager.enableDepth()
         GlStateManager.disableBlend()
