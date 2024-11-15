@@ -37,9 +37,9 @@ object Utils {
     }
 
     fun getYawAndPitch(x: Double, y:Double, z:Double): Pair<Float, Float> {
-        val dx = x - mc.thePlayer.posX   // Difference in x
-        val dy = y - mc.thePlayer.posY  // Difference in y
-        val dz = z - mc.thePlayer.posZ   // Difference in z
+        val dx = x - mc.thePlayer.posX
+        val dy = y - (mc.thePlayer.posY + mc.thePlayer.eyeHeight)
+        val dz = z - mc.thePlayer.posZ
 
         val horizontalDistance = sqrt(dx * dx + dz * dz )
 

@@ -11,6 +11,9 @@ import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
+import catgirlroutes.module.settings.Visibility
+import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -26,6 +29,9 @@ import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.render.WorldRenderUtils.drawSquareTwo
+import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -46,15 +52,24 @@ object AutoP3 : Module(
     description = "A module that allows you to place down rings that execute various actions."
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    private var termFound = false
-    private var termListener = false
-    private val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
+    private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+
+    init {
+        this.addSettings(
+            selectedRoute,
+            preset
+        )
+    }
 
     init {
         this.addSettings(
             selectedRoute
         )
     }
+
+    var termFound = false
+    var termListener = false
+    val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
 
     @SubscribeEvent
     fun onLoad(event: WorldEvent.Load) {
@@ -93,7 +108,11 @@ object AutoP3 : Module(
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             val color = if (cooldown) white else black
-            drawP3box(ring.location.xCoord - ring.width / 2, ring.location.yCoord, ring.location.zCoord - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
+            when(preset.selected) {
+                "Trans" -> renderTransFlag(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord, ring.width, ring.height)
+                "Normal" -> drawP3box(ring.location.xCoord - ring.width / 2, ring.location.yCoord, ring.location.zCoord - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
+                "LGBTQIA+" -> renderGayFlag(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord, ring.width, ring.height)
+            }
         }
     }
 

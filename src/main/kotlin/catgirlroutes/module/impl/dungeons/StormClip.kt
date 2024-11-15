@@ -32,7 +32,6 @@ object StormClip : Module(
     fun onPacket(event: ReceivePacketEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !this.enabled || clipped) return
         if (event.packet.x == 73.5 && event.packet.y == 221.5 && event.packet.z == 14.5) {
-            modMessage("boss tp packet found")
             clipped = true
             scheduleTask(1) {relativeClip(0.0, stormclipdistance.value * -1, 0.0)}
         }

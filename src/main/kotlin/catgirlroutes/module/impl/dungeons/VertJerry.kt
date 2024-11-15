@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 object VertJerry : Module(
     "Vert Jerry",
     category = Category.DUNGEON,
-    description = "Cancels horizontal kb from jerrychine gun"
+    description = "Cancels horizontal kb from Jerry-chine Gun"
 ){
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {
