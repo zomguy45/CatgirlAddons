@@ -15,6 +15,7 @@ import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
 import kotlin.math.round
+import kotlin.math.sqrt
 
 object Utils {
     fun relativeClip(x: Double, y: Double, z: Double) {
@@ -55,6 +56,14 @@ object Utils {
     }
     fun getItemSlot(item: String, ignoreCase: Boolean = true): Int? =
         mc.thePlayer?.inventory?.mainInventory?.indexOfFirst { it?.unformattedName?.contains(item, ignoreCase) == true }.takeIf { it != -1 }
+
+
+    fun distanceToPlayer(x: Double, y: Double, z: Double): Double {
+        return sqrt((mc.renderManager.viewerPosX - x) * (mc.renderManager.viewerPosX - x) +
+                (mc.renderManager.viewerPosY - y) * (mc.renderManager.viewerPosY - y) +
+                (mc.renderManager.viewerPosZ - z) * (mc.renderManager.viewerPosZ - z)
+        )
+    }
 
     fun swapFromName(name: String): Boolean {
         for (i in 0..8) {

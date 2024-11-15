@@ -5,18 +5,17 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Ring
 import catgirlroutes.commands.RingManager.loadRings
 import catgirlroutes.commands.RingManager.rings
-import catgirlroutes.commands.editmodetoggled
+import catgirlroutes.commands.editmode
 import catgirlroutes.commands.ringsActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.misc.LavaClip.lavaClipToggle
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.ChatUtils.sendChat
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.FakeRotater.rotate
 import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
+import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.ServerRotateUtils.set
@@ -25,6 +24,10 @@ import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -54,16 +57,19 @@ object AutoP3 : Module(
 
     private val cooldownMap = mutableMapOf<String, Boolean>()
 
+    @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled || editmodetoggled) return
+        if (!ringsActive || !this.enabled || editmode) return
         rings.forEach { ring ->
             val key = "${ring.x},${ring.y},${ring.z},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inRing(ring)) {
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
-                executeAction(ring)
+                GlobalScope.launch {
+                    executeAction(ring)
+                }
             } else if (cooldown) {
                 cooldownMap[key] = false
             }
@@ -89,37 +95,31 @@ object AutoP3 : Module(
         return distanceX < (ring.width / 2) && distanceY < ring.height && distanceY >= -0.5 && distanceZ < (ring.width / 2);
     }
 
-    private fun executeAction(ring: Ring) {
+    private suspend fun executeAction(ring: Ring) {
+        val actiondelay: Int = if (ring.delay == null) 0 else ring.delay!!
+        delay(actiondelay.toLong())
+        if (ring.arguments != null) {
+            if (ring.arguments!!.contains("stop")) stopVelo()
+            if (ring.arguments!!.contains("walk")) setKey("w", true)
+            if (ring.arguments!!.contains("look")) snapTo(ring.yaw, ring.pitch)
+        }
         when(ring.type) {
             "walk" -> {
                 modMessage("Walking!")
-                stopVelo()
                 setKey("w", true)
-                snapTo(ring.yaw, ring.pitch)
-            }
-            "walk2" -> {
-                modMessage("Walking!")
-                setKey("w", true)
-                snapTo(ring.yaw, ring.pitch)
             }
             "jump" -> {
-                modMessage("Jumping!")
-                snapTo(ring.yaw, ring.pitch)
-                jump()
-            }
-            "jump2" -> {
                 modMessage("Jumping!")
                 jump()
             }
             "stop" -> {
                 modMessage("Stopping!")
-                setKey("w", false)
+                stopMovement()
                 stopVelo()
             }
             "boom" -> {
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
-                snapTo(ring.yaw, ring.pitch)
                 scheduleTask(1) {leftClick()}
             }
             "hclip" -> {
@@ -132,7 +132,6 @@ object AutoP3 : Module(
             }
             "bonzo" -> {
                 modMessage("Bonzoing!")
-                stopVelo()
                 swapFromName("bonzo's staff")
                 set(ring.yaw, ring.pitch)
                 scheduleTask(1) {
@@ -144,20 +143,9 @@ object AutoP3 : Module(
                 modMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
-            "command" -> {
-                modMessage("Commanding!")
-                modMessage(ring.command!!)
-                sendChat(ring.command)
-            }
             "align" -> {
                 modMessage("Aligning!")
-                stopVelo()
                 mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
-            }
-            "useitem" -> {
-                modMessage("Iteming!")
-                swapFromName(ring.item!!)
-                rotate(ring.yaw, ring.pitch)
             }
         }
     }

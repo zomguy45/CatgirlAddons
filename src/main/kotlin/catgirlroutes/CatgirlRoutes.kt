@@ -42,13 +42,6 @@ class CatgirlRoutes {
 
             //AutoP3
             AutoP3Commands(),
-            AutoP3Remove(),
-            AutoP3Load(),
-            AutoP3Undo(),
-            AutoP3EditMode(),
-            AutoP3Force(),
-            AutoP3Await(),
-            Test(),
 
             //Features
             PearlClipCommand(),
