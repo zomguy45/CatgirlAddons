@@ -46,9 +46,9 @@ object AutoP3 : Module(
     description = "A module that allows you to place down rings that execute various actions."
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    var termFound = false
-    var termListener = false
-    val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
+    private var termFound = false
+    private var termListener = false
+    private val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
 
     init {
         this.addSettings(
