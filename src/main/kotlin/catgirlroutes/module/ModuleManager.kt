@@ -43,7 +43,7 @@ object ModuleManager {
 
         //Misc
         GhostBlocks,
-        AutoClicker,
+        //AutoClicker,
         Hclip,
         LavaClip,
         StormClip,
@@ -58,7 +58,7 @@ object ModuleManager {
         SecretChime,
         AutoRoutes,
         InstaMid,
-        SecretAura,
+        //SecretAura,
     )
 
     /**
