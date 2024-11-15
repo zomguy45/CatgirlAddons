@@ -7,6 +7,7 @@ import catgirlroutes.commands.RingManager.loadRings
 import catgirlroutes.commands.RingManager.rings
 import catgirlroutes.commands.editmode
 import catgirlroutes.commands.ringsActive
+import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
@@ -20,6 +21,7 @@ import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
+import catgirlroutes.utils.Utils.getYawAndPitch
 import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
@@ -28,6 +30,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -43,6 +46,9 @@ object AutoP3 : Module(
     description = "A module that allows you to place down rings that execute various actions."
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
+    var termFound = false
+    var termListener = false
+    val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
 
     init {
         this.addSettings(
@@ -65,6 +71,10 @@ object AutoP3 : Module(
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inRing(ring)) {
+                if (ring.arguments!!.contains("term") && !termFound) {
+                    termListener = true
+                    return
+                } else  scheduleTask (1) { termFound = false }
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -84,6 +94,17 @@ object AutoP3 : Module(
             val cooldown: Boolean = cooldownMap[key] == true
             val color = if (cooldown) white else black
             drawP3box(ring.location.xCoord - ring.width / 2, ring.location.yCoord, ring.location.zCoord - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
+        }
+    }
+
+    @SubscribeEvent
+    fun onTerm(event: ReceivePacketEvent) {
+        if (!termListener) return
+        if (event.packet !is S2DPacketOpenWindow) return
+        if (event.packet.windowTitle?.unformattedText in termTitles) {
+            modMessage("Term found")
+            termFound = true
+            termListener = false
         }
     }
 
@@ -146,6 +167,10 @@ object AutoP3 : Module(
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+            }
+            "block" -> {
+                val(yaw, pitch) = getYawAndPitch(ring.lookBlock!!.xCoord, ring.lookBlock!!.yCoord, ring.lookBlock!!.zCoord)
+                snapTo(yaw, pitch)
             }
         }
     }

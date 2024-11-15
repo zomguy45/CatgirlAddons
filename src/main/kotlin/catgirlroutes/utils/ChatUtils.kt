@@ -7,6 +7,7 @@ import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ChatUtils.sendChat
+import catgirlroutes.utils.Utils.runOnMCThread
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.*
 import net.minecraftforge.client.ClientCommandHandler
@@ -80,9 +81,10 @@ object ChatUtils {
      * @param reformat Replace the "&" in formatting strings with "§".
      * @see chatMessage
      */
-    fun modMessage(text: String, reformat: Boolean = true) {
-        val message: IChatComponent = ChatComponentText(if (reformat) reformatString(text) else text)
-        modMessage(message)
+    fun modMessage(message: Any?, prefix: String = "§5[§dCatgirlAddons§5] §8»§r ", chatStyle: ChatStyle? = null) {
+        val chatComponent = ChatComponentText("$prefix$message")
+        chatStyle?.let { chatComponent.setChatStyle(it) } // Set chat style using setChatStyle method
+        runOnMCThread { mc.thePlayer?.addChatMessage(chatComponent) }
     }
 
     /**

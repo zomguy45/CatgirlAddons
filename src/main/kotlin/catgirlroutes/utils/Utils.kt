@@ -14,6 +14,7 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
+import kotlin.math.atan2
 import kotlin.math.round
 import kotlin.math.sqrt
 
@@ -33,6 +34,21 @@ object Utils {
     fun snapTo(yaw: Float, pitch: Float) {
         mc.thePlayer.rotationYaw = yaw
         mc.thePlayer.rotationPitch = pitch
+    }
+
+    fun getYawAndPitch(x: Double, y:Double, z:Double): Pair<Float, Float> {
+        val dx = x - mc.thePlayer.posX   // Difference in x
+        val dy = y - mc.thePlayer.posY  // Difference in y
+        val dz = z - mc.thePlayer.posZ   // Difference in z
+
+        val horizontalDistance = sqrt(dx * dx + dz * dz )
+
+        val yaw = Math.toDegrees(atan2(-dx, dz))
+        val pitch = -Math.toDegrees(atan2(dy, horizontalDistance))
+
+        val normalizedYaw = if (yaw < 0) yaw + 360 else yaw
+
+        return Pair(normalizedYaw.toFloat(), pitch.toFloat())
     }
 
     fun rightClick() {

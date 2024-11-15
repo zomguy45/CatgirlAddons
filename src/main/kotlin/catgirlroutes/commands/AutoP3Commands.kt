@@ -69,6 +69,7 @@ class AutoP3Commands : CommandBase() {
                         arg == "stop" -> arguments.add(arg)
                         arg == "look" -> arguments.add(arg)
                         arg == "walk" -> arguments.add(arg)
+                        arg == "term" -> arguments.add(arg)
                         arg.startsWith("delay:") -> {
                             delay = arg.slice(6 until arg.length).toInt()
                         }
