@@ -41,8 +41,8 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import java.awt.Color.*
-import java.util.ArrayList
+import java.awt.Color.black
+import java.awt.Color.white
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -54,6 +54,7 @@ object AutoP3 : Module(
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
     private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+
     init {
         this.addSettings(
             selectedRoute,
@@ -61,10 +62,15 @@ object AutoP3 : Module(
         )
     }
 
+    init {
+        this.addSettings(
+            selectedRoute
+        )
+    }
+
     var termFound = false
     var termListener = false
     val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
-
 
     @SubscribeEvent
     fun onLoad(event: WorldEvent.Load) {
@@ -115,10 +121,8 @@ object AutoP3 : Module(
     fun onTerm(event: ReceivePacketEvent) {
         if (!termListener) return
         if (event.packet !is S2DPacketOpenWindow) return
-        val windowTitle = event.packet.windowTitle?.unformattedText
-        for (title in termTitles) {
-            if (windowTitle!!.contains(title))
-                modMessage("Term found")
+        if (event.packet.windowTitle?.unformattedText in termTitles) {
+            modMessage("Term found")
             termFound = true
             termListener = false
         }
