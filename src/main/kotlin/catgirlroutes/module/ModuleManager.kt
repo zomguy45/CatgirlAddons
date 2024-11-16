@@ -55,6 +55,7 @@ object ModuleManager {
         F7sim,
         StonkSwap,
         CatMode,
+        Zpew,
 
         //Dungeons
         AutoP3,
