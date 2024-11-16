@@ -51,6 +51,8 @@ class CatgirlRoutes {
             AutoRoutesCommands(),
             AutoRoutesAwait(),
             AutoRoutesRemove(),
+
+            //ESP
         ).forEach {
             ClientCommandHandler.instance.registerCommand((it))
         }

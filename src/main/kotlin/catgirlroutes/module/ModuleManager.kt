@@ -6,8 +6,10 @@ import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
+import catgirlroutes.module.impl.render.BossESP
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.DungeonESP
+import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.ui.hud.EditHudGUI
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -42,6 +44,8 @@ object ModuleManager {
         //Render
         ClickGui,
         DungeonESP,
+        BossESP,
+        TerminalEsp,
 
         //Misc
         GhostBlocks,
