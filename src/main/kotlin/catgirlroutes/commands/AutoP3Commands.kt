@@ -57,7 +57,7 @@ class AutoP3Commands : CommandBase() {
                 val arguments = mutableListOf<String>()
                 var lookblock: Vec3? = null
 
-                if (!arrayListOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "wait", "term", "align").contains((type))) {
+                if (!arrayListOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "term", "align").contains((type))) {
                     modMessage("Invalid ring!")
                     return
                 }
