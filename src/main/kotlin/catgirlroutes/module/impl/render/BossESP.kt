@@ -29,7 +29,8 @@ object BossESP : Module(
             val withers = mc.theWorld.loadedEntityList.filterIsInstance<EntityWither>()
             for (wither in withers) {
                 if (wither.isInvisible) return
-                drawBoxByEntity(wither, color.value, wither.width.toDouble(), wither.height.toDouble(), 0f)
+                if (wither.renderSizeModifier != 1f) return
+                drawBoxByEntity(wither, color.value, wither.width.toDouble(), wither.height.toDouble(), 0f, 4.0, true)
             }
         }
     }

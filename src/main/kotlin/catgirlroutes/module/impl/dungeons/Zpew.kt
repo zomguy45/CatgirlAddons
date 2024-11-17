@@ -1,6 +1,6 @@
 package catgirlroutes.module.impl.dungeons
 
-import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.CatgirlRoutes.Companion.import catgirlroutes.CatgirlRoutes.Companion.onHypixel
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -21,13 +21,13 @@ object Zpew : Module(
     var lastPitch = 0f
 
     override fun onKeyBind() {
+        if (!this.enabled || onHypixel || mc.thePlayer == null) return
         val etherBlock = getEtherPos(Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ), mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+        if (!etherBlock.succeeded) return
         val x = etherBlock.pos?.x!!.toDouble()
         val y = etherBlock.pos.y.toDouble()
         val z = etherBlock.pos.z.toDouble()
-
-        if (!etherBlock.succeeded) return
-
+        
         mc.thePlayer.setPosition(floor(x) + 0.5,y + 1.05, floor(z) + 0.5)
     }
 
@@ -46,7 +46,7 @@ object Zpew : Module(
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)
         }
-    }
+  }
 
     @SubscribeEvent
     fun onC03(event: PacketSentEvent) {
