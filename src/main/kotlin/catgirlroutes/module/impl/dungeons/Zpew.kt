@@ -1,6 +1,8 @@
 package catgirlroutes.module.impl.dungeons
 
-import catgirlroutes.CatgirlRoutes.Companion.import catgirlroutes.CatgirlRoutes.Companion.onHypixel
+import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.CatgirlRoutes.Companion.onHypixel
+
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
