@@ -1,10 +1,14 @@
 package catgirlroutes.module.impl.dungeons
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils
 import me.odinmain.events.impl.DungeonEvents.RoomEnterEvent
+import me.odinmain.utils.skyblock.dungeon.DungeonUtils
+import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import me.odinmain.utils.skyblock.dungeon.tiles.Room
+import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object ScanTest : Module(

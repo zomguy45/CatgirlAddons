@@ -3,6 +3,7 @@ package catgirlroutes.utils.dungeon
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.DungeonEvents.RoomEnterEvent
 import catgirlroutes.utils.*
+import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.postAndCatch
@@ -157,10 +158,10 @@ object ScanUtils {
 
     @SubscribeEvent
     fun enterDungeonRoom(event: RoomEnterEvent) {
-        modMessage("entered room")
+        devMessage("entered room")
         currentFullRoom = event.fullRoom
         if (passedRooms.none { it.room.data.name == currentFullRoom?.room?.data?.name }) passedRooms.add(currentFullRoom ?: return)
-        modMessage("${event.fullRoom?.room?.data?.name} - ${event.fullRoom?.room?.rotation} || clay: ${event.fullRoom?.clayPos}")
+        devMessage("${event.fullRoom?.room?.data?.name} - ${event.fullRoom?.room?.rotation} || clay: ${event.fullRoom?.clayPos}")
     }
 
     @SubscribeEvent
