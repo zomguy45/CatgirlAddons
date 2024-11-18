@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.NodeManager.allnodes
 import catgirlroutes.commands.NodeManager.loadNodes
 import catgirlroutes.commands.NodeManager.saveNodes
+import catgirlroutes.module.impl.dungeons.AutoRoutes
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
@@ -44,6 +45,7 @@ class AutoRoutesCommands : CommandBase() {
     }
 
     override fun processCommand(sender: ICommandSender?, args: Array<String>) {
+        if (!AutoRoutes.enabled) return;
         if (args.isEmpty()) {
             ChatUtils.modMessage("No argument specified!")
             return
