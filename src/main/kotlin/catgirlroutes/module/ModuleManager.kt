@@ -65,6 +65,7 @@ object ModuleManager {
         InstaMid,
         LavaClip,
         StormClip,
+        ScanTest
     )
 
     /**

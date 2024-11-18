@@ -29,9 +29,9 @@ import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 
 @Mod(
-    modid = "catgirlroutes",
-    name = "CatgirlRoutes",
-    version = "0.0.0",
+    modid = CatgirlRoutes.MOD_ID,
+    name = CatgirlRoutes.MOD_NAME,
+    version = CatgirlRoutes.MOD_VERSION,
     clientSideOnly = true
 )
 class CatgirlRoutes {
@@ -72,8 +72,8 @@ class CatgirlRoutes {
             FakeRotater,
             Rotater,
             NodesActive,
-            EtherWarpHelper,
-            Zpew,
+            EtherWarpHelper, // ???
+            Zpew, // ???
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
@@ -114,7 +114,8 @@ class CatgirlRoutes {
     companion object {
         const val MOD_ID = "cga"
         const val MOD_NAME = "CatgirlRoutes"
-        const val MOD_VERSION = "0.0.0"
+        const val MOD_VERSION = "@VER@"
+
         const val CHAT_PREFIX = "§5[§dCatgirlAddons§5]§r"
         const val SHORT_PREFIX = "§5[§dCga§5]§r"
         const val RESOURCE_DOMAIN = "catgirlroutes"
@@ -123,7 +124,7 @@ class CatgirlRoutes {
         val scope = CoroutineScope(EmptyCoroutineContext)
 
         lateinit var clickGUI: ClickGUI
-        val moduleConfig = ModuleConfig(File(CatgirlRoutes.mc.mcDataDir, "config/${CatgirlRoutes.CONFIG_DOMAIN}"))
+        val moduleConfig = ModuleConfig(File(mc.mcDataDir, "config/$CONFIG_DOMAIN"))
         val onHypixel: Boolean  by LocationManager::onHypixel
         var display: GuiScreen? = null
         var tickRamp = 0

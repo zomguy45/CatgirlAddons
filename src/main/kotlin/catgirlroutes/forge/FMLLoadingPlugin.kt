@@ -22,7 +22,7 @@ class FMLLoadingPlugin : IFMLLoadingPlugin {
 
     init {
         MixinBootstrap.init()
-        Mixins.addConfiguration("mixins.catgirlroutes.json")
+        Mixins.addConfiguration("mixins.cga.json")
         MixinEnvironment.getDefaultEnvironment().side = MixinEnvironment.Side.CLIENT
     }
 }

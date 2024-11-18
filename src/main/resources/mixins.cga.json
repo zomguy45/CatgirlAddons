@@ -2,8 +2,9 @@
   "minVersion": "0.6",
   "compatibilityLevel": "JAVA_8",
   "package": "catgirlroutes.mixins",
-  "refmap": "mixins.catgirlroutes.refmap.json",
+  "refmap": "mixins.cga.refmap.json",
   "mixins": [
+    "MixinModList",
     "MixinWorld",
     "entity.MixinEntity",
     "entity.MixinEntityLivingBase",

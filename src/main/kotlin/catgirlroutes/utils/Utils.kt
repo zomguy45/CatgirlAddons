@@ -3,7 +3,7 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
-import gg.essential.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
+//import gg.essential.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
 import net.minecraft.block.BlockAir
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.settings.KeyBinding
@@ -23,6 +23,8 @@ object Utils {
         modMessage("clipping2")
         mc.thePlayer.setPosition(mc.thePlayer.posX + x,mc.thePlayer.posY + y,mc.thePlayer.posZ + z)
     }
+
+    private val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
 
     val String?.noControlCodes: String
         get() = this?.let { FORMATTING_CODE_PATTERN.replace(it, "") } ?: ""

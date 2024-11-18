@@ -1,7 +1,6 @@
 package catgirlroutes.ui.clickgui.util
 
 import catgirlroutes.module.impl.render.ClickGui
-import gg.essential.elementa.utils.withAlpha
 import java.awt.Color
 
 /**
@@ -46,7 +45,9 @@ object ColorUtil {
 
     fun sliderKnobColor(dragging: Boolean): Int = clickGUIColor.withAlpha(if (dragging) 255 else 230).rgb
 
-
+    private fun Color.withAlpha(alpha: Int): Color {
+        return Color(red, green, blue, alpha)
+    }
 
     const val jellyColor = -0x44eaeaeb
     const val newColor = -0xdcdcdd
