@@ -39,6 +39,7 @@ class CatgirlRoutes {
 
         listOf(
             CatgirlAddonsCommands(),
+            DevCommands(),
 
             //AutoP3
             AutoP3Commands(),

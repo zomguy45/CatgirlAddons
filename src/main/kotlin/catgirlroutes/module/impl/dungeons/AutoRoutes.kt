@@ -74,9 +74,9 @@ object AutoRoutes : Module(
         NodeManager.nodes.forEach { node ->
             val room = currentRoom ?: return
             val realLocation = room.getRealCoords(node.location)
-            val x: Double = realLocation.xCoord
+            val x: Double = realLocation.xCoord + 0.5
             val y: Double = realLocation.yCoord
-            val z: Double = realLocation.zCoord
+            val z: Double = realLocation.zCoord + 0.5
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${node.type}"] == true
             val color = if (cooldown) Color.WHITE else Color.black
