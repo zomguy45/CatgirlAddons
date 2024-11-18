@@ -30,6 +30,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
+import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
