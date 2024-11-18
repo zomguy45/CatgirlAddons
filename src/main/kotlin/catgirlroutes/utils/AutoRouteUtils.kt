@@ -24,26 +24,26 @@ object AutoRouteUtils {
         val z: Double = mc.thePlayer.posZ - player.lastReportedPosZ
         val moving = x * x + y * y + z * z > 9.0E-40 || player.positionUpdateTicks >= 20
         if (cancelling) return
-        if (moving) {
+        val packet = if (moving) {
             modMessage("C06")
-            mc.netHandler.networkManager.sendPacket(
-                C03PacketPlayer.C06PacketPlayerPosLook(
-                    mc.thePlayer.posX,
-                    mc.thePlayer.posY,
-                    mc.thePlayer.posZ,
-                    yaw,
-                    pitch,
-                    mc.thePlayer.onGround
-                )
-            )
-        } else {
-            modMessage("C05")
-            mc.netHandler.networkManager.sendPacket(C03PacketPlayer.C05PacketPlayerLook(
+            C03PacketPlayer.C06PacketPlayerPosLook(
+                mc.thePlayer.posX,
+                mc.thePlayer.posY,
+                mc.thePlayer.posZ,
                 yaw,
                 pitch,
                 mc.thePlayer.onGround
-            ))
+            )
+        } else {
+            modMessage("C05")
+            C03PacketPlayer.C05PacketPlayerLook(
+                yaw,
+                pitch,
+                mc.thePlayer.onGround
+            )
         }
+        PacketUtils.sendPacket(packet)
+
         cancelling = true
     }
 }

@@ -6,8 +6,8 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.ServerRotateUtils.set
+import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
+import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
 import catgirlroutes.utils.Utils.findDistanceToAirBlocks
 import catgirlroutes.utils.Utils.relativeClip

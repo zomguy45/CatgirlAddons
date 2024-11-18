@@ -10,11 +10,12 @@ import catgirlroutes.module.impl.misc.PearlClip
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.FakeRotater
+import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.rotation.RotationUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -153,7 +154,7 @@ object AutoRoutes : Module(
         delay(actionDelay.toLong())
         val room = currentRoom ?: return
         val realLookLocation = room.getRealCoords(node.lookBlock)
-        val(yaw, pitch) = Utils.getYawAndPitch(
+        val(yaw, pitch) = RotationUtils.getYawAndPitch(
             realLookLocation.xCoord,
             realLookLocation.yCoord,
             realLookLocation.zCoord
@@ -161,7 +162,7 @@ object AutoRoutes : Module(
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
             if ("walk" in it) MovementUtils.setKey("w", true)
-            if ("look" in it) Utils.snapTo(yaw, pitch)
+            if ("look" in it) RotationUtils.snapTo(yaw, pitch)
         }
         when(node.type) {
             "warp" -> {
@@ -201,7 +202,7 @@ object AutoRoutes : Module(
             }
             "look" -> {
                 modMessage("Looking!")
-                Utils.snapTo(yaw, pitch)
+                RotationUtils.snapTo(yaw, pitch)
             }
             "align" -> {
                 modMessage("Aligning!")

@@ -7,6 +7,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.setKey
+import catgirlroutes.utils.PacketUtils
 import catgirlroutes.utils.Utils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -29,24 +30,19 @@ object InstaMid : Module(
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
         if (!active || (event.packet !is C03PacketPlayer && event.packet !is C0CPacketInput)) return
-        event.isCanceled = true
 
+        event.isCanceled = true
         riding = mc.thePlayer.isRiding
+
         if (riding) {
             preparing = false
-        } else if (!preparing) {
+            return
+        }
+
+        if (!preparing) {
             active = false
             preparing = true
-            mc.netHandler.networkManager.sendPacket(  // todo: use PacketUtils
-                C03PacketPlayer.C06PacketPlayerPosLook(
-                    54.0,
-                    65.0,
-                    76.0,
-                    0F,
-                    0F,
-                    false
-                )
-            )
+            PacketUtils.sendPacket(C03PacketPlayer.C06PacketPlayerPosLook(54.0, 65.0, 76.0, 0F, 0F, false))
             setKey("shift", false)
         }
     }
@@ -56,6 +52,7 @@ object InstaMid : Module(
         if (!this.enabled || event.packet !is S1BPacketEntityAttach || !isOnPlatform() || event.packet.entityId != mc.thePlayer.entityId || event.packet.vehicleEntityId < 0) return
         preparing = true
         active = true
+
         modMessage("Attempting to instamid")
         setKey("shift", true)
     }

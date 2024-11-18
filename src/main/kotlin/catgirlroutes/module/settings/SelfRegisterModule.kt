@@ -1,4 +1,4 @@
-package catgirlroutes.module
+package catgirlroutes.module.settings
 
 /**
  * [Module] classes with this annotation will automatically get loaded on game launch.

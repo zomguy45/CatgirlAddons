@@ -2,7 +2,7 @@ package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes
 import catgirlroutes.CatgirlRoutes.Companion.display
-import catgirlroutes.module.AlwaysActive
+import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Visibility
