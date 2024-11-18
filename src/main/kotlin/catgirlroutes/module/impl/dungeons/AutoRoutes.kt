@@ -14,6 +14,8 @@ import catgirlroutes.utils.FakeRotater
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.render.WorldRenderUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -26,6 +28,7 @@ import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.awt.Color
 import kotlin.collections.set
 import kotlin.math.floor
@@ -61,8 +64,8 @@ object AutoRoutes : Module(
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
-    fun onRender(event: RenderWorldLastEvent) {
-        if (!inDungeons || !this.enabled || nodeeditmode) return
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (!inDungeons || !this.enabled || nodeeditmode || event.phase != TickEvent.Phase.START) return
         NodeManager.nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -151,23 +154,18 @@ object AutoRoutes : Module(
     private suspend fun executeAction(node: Node) {
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         delay(actionDelay.toLong())
-        val room = currentRoom ?: return
-        val realLookLocation = room.getRealCoords(node.lookBlock)
-        val(yaw, pitch) = Utils.getYawAndPitch(
-            realLookLocation.xCoord,
-            realLookLocation.yCoord,
-            realLookLocation.zCoord
-        )
+        val room2 = currentFullRoom ?: return
+        val yaw = room2.getRealYaw(node.yaw)
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
             if ("walk" in it) MovementUtils.setKey("w", true)
-            if ("look" in it) Utils.snapTo(yaw, pitch)
+            if ("look" in it) Utils.snapTo(yaw, node.pitch)
         }
         when(node.type) {
             "warp" -> {
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
-                FakeRotater.rotate(yaw, pitch)
+                FakeRotater.rotate(yaw, node.pitch)
             }
             "walk" -> {
                 modMessage("Walking!")
@@ -189,7 +187,7 @@ object AutoRoutes : Module(
             }
             "pearl" -> {
                 swapFromName("ender pearl")
-                FakeRotater.rotate(yaw, pitch)
+                FakeRotater.rotate(yaw, node.pitch)
             }
             "pearlclip" -> {
                 modMessage("Pearl clipping!")
@@ -201,7 +199,7 @@ object AutoRoutes : Module(
             }
             "look" -> {
                 modMessage("Looking!")
-                Utils.snapTo(yaw, pitch)
+                Utils.snapTo(yaw, node.pitch)
             }
             "align" -> {
                 modMessage("Aligning!")
