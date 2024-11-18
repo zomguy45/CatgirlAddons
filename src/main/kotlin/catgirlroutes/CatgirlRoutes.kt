@@ -72,8 +72,6 @@ class CatgirlRoutes {
             FakeRotater,
             Rotater,
             NodesActive,
-            EtherWarpHelper, // ???
-            Zpew, // ???
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

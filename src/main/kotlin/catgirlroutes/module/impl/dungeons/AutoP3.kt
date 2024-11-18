@@ -60,12 +60,6 @@ object AutoP3 : Module(
         )
     }
 
-    init { // ???
-        this.addSettings(
-            selectedRoute
-        )
-    }
-
     private var termFound = false
     private var termListener = false
 
