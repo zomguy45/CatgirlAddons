@@ -6,161 +6,171 @@ import catgirlroutes.commands.NodeManager.allnodes
 import catgirlroutes.commands.NodeManager.loadNodes
 import catgirlroutes.commands.NodeManager.saveNodes
 import catgirlroutes.utils.ChatUtils
-import catgirlroutes.utils.dungeon.DungeonUtils
-import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.Utils
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
-import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
-import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import me.odinmain.utils.skyblock.dungeon.DungeonUtils
+import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
+import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import net.minecraft.command.CommandBase
 import net.minecraft.command.ICommandSender
+import net.minecraft.event.ClickEvent
+import net.minecraft.event.HoverEvent
+import net.minecraft.util.ChatComponentText
+import net.minecraft.util.ChatStyle
 import net.minecraft.util.Vec3
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.io.File
-import kotlin.math.pow
-import kotlin.math.round
-import kotlin.math.sqrt
+
+var nodeeditmode: Boolean = false
 
 class AutoRoutesCommands : CommandBase() {
+    override fun getCommandName(): String {
+        return "node"
+    }
 
-    override fun getCommandName(): String = "node"
+    override fun getCommandAliases(): List<String> {
+        return listOf()
+    }
 
-    override fun getCommandUsage(sender: ICommandSender?): String =
-        "/node <type> [height] [width]"
+    override fun getCommandUsage(sender: ICommandSender?): String {
+        return "/$commandName"
+    }
 
-    override fun processCommand(sender: ICommandSender, args: Array<String>) {
+    override fun getRequiredPermissionLevel(): Int {
+        return 0
+    }
+
+    override fun processCommand(sender: ICommandSender?, args: Array<String>) {
         if (args.isEmpty()) {
-            ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5]")
+            ChatUtils.modMessage("No argument specified!")
             return
         }
+        when (args[0]) {
+            "add" -> {
+                val type = args[1].lowercase()
+                var depth: Float? = null
+                var height = 1F
+                var width = 1F
+                var delay: Int? = null
+                val arguments = mutableListOf<String>()
 
-        val type = args[0].lowercase()
-        val h = args.getOrNull(1)?.toFloat() ?: 1F
-        val w = args.getOrNull(2)?.toFloat() ?: 1F
-        var depth: Int? = null
-        var command: String? = null
-        var item: String? = null
-        val roomname: String = currentRoomName
-
-        val validTypes = setOf("warp", "walk", "walk2", "jump", "jump2", "stop", "boom", "look", "pearlclip", "command", "align", "useitem")
-
-        if (!validTypes.contains(type)) {
-            ChatUtils.modMessage("Invalid node type! Use: warp, walk, jump, stop, boom, look, pearlclip, command, align, useitem!")
-            return
-        }
-
-        when (type) {
-            "pearlclip" -> {
-                if (args.size != 4) {
-                    ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5] [§ddepth§5]")
+                if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "jump", "align").contains((type))) {
+                    ChatUtils.modMessage("Invalid node!")
                     return
                 }
-                depth = args[3].toInt()
-            }
-            "useitem" -> {
-                if (args.size < 4) {
-                    ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5] [§ditem§5]")
-                    return
+
+                args.drop(2).forEachIndexed { _, arg ->
+                    when {
+                        arg.startsWith("h") -> height = arg.slice(1 until arg.length).toFloat()
+                        arg.startsWith("w") && arg != "walk" -> width = arg.slice(1 until arg.length).toFloat()
+                        arg == "stop" -> arguments.add(arg)
+                        arg == "look" -> arguments.add(arg)
+                        arg == "walk" -> arguments.add(arg)
+                        arg.startsWith("delay:") -> {
+                            delay = arg.slice(6 until arg.length).toInt()
+                        }
+                    }
                 }
-                item = args.drop(3).joinToString(" ")
-            }
-            "command" -> {
-                if (args.size < 4) {
-                    ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5] [§dcommand§5]")
-                    return
+
+                when (type) {
+                    "pearlclip" -> {
+                        if (args.size < 2) {
+                            ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5] [§ddepth§5]")
+                            return
+                        }
+                        depth = args[2].toFloat()
+                    }
                 }
-                command = args.drop(3).joinToString(" ")
+
+                val room = DungeonUtils.currentRoom ?: return
+                val x = Math.round(mc.thePlayer.posX * 2) / 2.0
+                val y = Math.round(mc.thePlayer.posY * 2) / 2.0
+                val z = Math.round(mc.thePlayer.posZ * 2) / 2.0
+                val location = room.getRelativeCoords(Vec3(x, y, z))
+                val lookblock = room.getRelativeCoords(mc.thePlayer.rayTrace(40.0, 1F).hitVec)
+
+                val node = Node(type, location, height, width, lookblock, depth, arguments, delay, currentRoomName)
+
+                allnodes.add(node)
+
+                saveNodes()
+                loadNodes()
+
+                ChatUtils.modMessage("$type placed!")
             }
-        }
-
-        val room = currentFullRoom
-        val coords = Vec3(Math.round(CatgirlRoutes.mc.thePlayer.posX * 2) / 2.0, Math.round(CatgirlRoutes.mc.thePlayer.posY * 2) / 2.0, Math.round(CatgirlRoutes.mc.thePlayer.posZ * 2) / 2.0)
-        val rcoords = room?.getRelativeCoords(coords)
-        val yaw = room?.getRelativeYaw(mc.thePlayer.rotationYaw)
-        val pitch = mc.thePlayer.rotationPitch
-
-        val node = Node(type, rcoords!!.xCoord, rcoords.yCoord, rcoords.zCoord, w, h, yaw!!, pitch, command, item, depth, roomname, false)
-
-        allnodes.add(node)
-
-        saveNodes()
-        loadNodes()
-
-        ChatUtils.modMessage("$type node placed!")
-    }
-
-    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean = true
-}
-
-class AutoRoutesAwait : CommandBase() {
-    override fun getCommandName(): String = "awaitsecret"
-
-    override fun getCommandUsage(sender: ICommandSender?): String =
-        "/awaitsecret"
-
-    override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        val coords = Vec3(round(mc.thePlayer.posX * 2) / 2.0, round(mc.thePlayer.posY * 2) / 2.0, round(mc.thePlayer.posZ * 2) / 2.0)
-        val rcoords = currentFullRoom?.getRelativeCoords(coords)
-        val x = rcoords!!.xCoord
-        val y = rcoords.yCoord
-        val z = rcoords.zCoord
-        loadNodes()
-        NodeManager.allnodes.forEach { node ->
-            if (node.roomname != currentRoomName) return@forEach
-            val distance = sqrt(
-                (x - node.x).pow(2) + (y - node.y).pow(2) + (z - node.z).pow(2)
-            )
-            if (distance <= 2.5) {
-                node.awaitsecret = true
+            "edit" -> {
+                nodeeditmode = !nodeeditmode
+                ChatUtils.modMessage("Editmode toggled!")
             }
+            "remove" -> {
+                val range = args.getOrNull(1)?.toDoubleOrNull() ?: 2.0 // Default range to 2 if not provided
+                allnodes = allnodes.filter { node ->
+                    if (node.room != currentRoomName) return@filter true
+                    val room = DungeonUtils.currentRoom ?: return
+                    val realLocation = room.getRealCoords(node.location)
+                    val distance =
+                        Utils.distanceToPlayer(realLocation.xCoord, realLocation.yCoord, realLocation.zCoord)
+                    distance >= range
+                }.toMutableList()
+                saveNodes()
+                loadNodes()
+            }
+            "undo" -> {
+                allnodes.removeLast()
+                saveNodes()
+                loadNodes()
+            }
+            "clear" -> {
+                sender?.addChatMessage(
+                    ChatComponentText("${CatgirlRoutes.CHAT_PREFIX} Are you sure?")
+                    .apply {
+                        chatStyle = ChatStyle().apply {
+                            chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/node clearconfirm")
+                            chatHoverEvent = HoverEvent(
+                                HoverEvent.Action.SHOW_TEXT,
+                                ChatComponentText("${CatgirlRoutes.CHAT_PREFIX} Click to clear ALL rooms!")
+                            )
+                        }
+                    }
+                )
+            }
+            "clearroom" -> {
+                sender?.addChatMessage(
+                    ChatComponentText("${CatgirlRoutes.CHAT_PREFIX} Are you sure?")
+                        .apply {
+                            chatStyle = ChatStyle().apply {
+                                chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/node clearroomconfirm")
+                                chatHoverEvent = HoverEvent(
+                                    HoverEvent.Action.SHOW_TEXT,
+                                    ChatComponentText("${CatgirlRoutes.CHAT_PREFIX} Click to clear CURRENT room!")
+                                )
+                            }
+                        }
+                )
+            }
+            "clearroomconfirm" -> {
+                allnodes = allnodes.filter { node ->
+                    node.room != currentRoomName
+                }.toMutableList()
+                ChatUtils.modMessage("$currentRoomName cleared!")
+                saveNodes()
+                loadNodes()
+            }
+            "clearconfirm" -> {
+                allnodes = mutableListOf()
+                ChatUtils.modMessage("All routes cleared!")
+                saveNodes()
+                loadNodes()
+            }
+            "load" -> {
+                ChatUtils.modMessage("Loaded $currentRoomName")
+                loadNodes()
+            }
+            "save" -> saveNodes()
+            else -> ChatUtils.modMessage("Invalid command!")
         }
-        saveNodes()
-        loadNodes()
-        ChatUtils.modMessage("Added await secret!")
-    }
-
-    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean = true
-}
-
-class AutoRoutesRemove : CommandBase() {
-    override fun getCommandName(): String = "removenode"
-
-    override fun getCommandUsage(sender: ICommandSender?): String =
-        "/removenode"
-
-    override fun processCommand(sender: ICommandSender, args: Array<String>) {
-        val coords = Vec3(round(mc.thePlayer.posX * 2) / 2.0, round(mc.thePlayer.posY * 2) / 2.0, round(mc.thePlayer.posZ * 2) / 2.0)
-        val rcoords = currentFullRoom?.getRelativeCoords(coords)
-        val x = rcoords!!.xCoord
-        val y = rcoords.yCoord
-        val z = rcoords.zCoord
-        loadNodes()
-        allnodes = allnodes.filter { node ->
-            if (node.roomname != currentRoomName) return@filter true
-
-            val distance = sqrt(
-                (x - node.x).pow(2) + (y - node.y).pow(2) + (z - node.z).pow(2)
-            )
-            distance >= 2.5
-        }.toMutableList()
-        saveNodes()
-        loadNodes()
-        ChatUtils.modMessage("removed nodes!")
-    }
-
-    override fun canCommandSenderUseCommand(sender: ICommandSender?): Boolean = true
-}
-
-object NodesActive {
-    var nodesActive = false
-
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
-        if (DungeonUtils.inDungeons) nodesActive = true
-        if (!DungeonUtils.inDungeons) nodesActive = false
     }
 }
 
@@ -173,7 +183,7 @@ object NodeManager {
     fun loadNodes() {
         if (file.exists()) {
             allnodes = gson.fromJson(file.readText(), object : TypeToken<List<Node>>() {}.type)
-            nodes = allnodes.filter { it.roomname == currentRoomName }.toMutableList()
+            nodes = allnodes.filter { it.room == currentRoomName }.toMutableList()
         }
     }
 
@@ -184,16 +194,12 @@ object NodeManager {
 
 data class Node(
     val type: String,
-    val x: Double,
-    val y: Double,
-    val z: Double,
-    val width: Float,
-    val height: Float,
-    val yaw: Float,
-    val pitch: Float,
-    val command: String?,
-    val item: String?,
-    val depth: Int?,
-    val roomname: String,
-    var awaitsecret: Boolean,
+    var location: Vec3,
+    var height: Float,
+    var width: Float,
+    var lookBlock: Vec3,
+    var depth: Float?,
+    var arguments: List<String>?,
+    var delay: Int?,
+    var room: String,
 )

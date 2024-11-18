@@ -5,7 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Ring
 import catgirlroutes.commands.RingManager.loadRings
 import catgirlroutes.commands.RingManager.rings
-import catgirlroutes.commands.editmode
+import catgirlroutes.commands.ringeditmode
 import catgirlroutes.commands.ringsActive
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
@@ -39,8 +39,8 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import java.awt.Color.black
 import java.awt.Color.WHITE
+import java.awt.Color.black
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -73,7 +73,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled || editmode) return
+        if (!ringsActive || !this.enabled || ringeditmode) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true

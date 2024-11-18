@@ -21,9 +21,8 @@ import net.minecraft.util.Vec3
 import java.io.File
 
 var route: String = selectedRoute.value
-var editmodetoggled: Boolean = false
 var ringsActive: Boolean = false
-var editmode: Boolean = false
+var ringeditmode: Boolean = false
 
 class AutoP3Commands : CommandBase() {
     override fun getCommandName(): String {
@@ -106,7 +105,7 @@ class AutoP3Commands : CommandBase() {
                 modMessage("$type placed!")
             }
             "edit" -> {
-                editmode = !editmode
+                ringeditmode = !ringeditmode
                 modMessage("Editmode toggled!")
             }
             "toggle" -> {
