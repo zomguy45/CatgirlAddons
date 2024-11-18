@@ -21,13 +21,16 @@ object PearlClip : Module(
     description = "Clips you down selected blocks using an ender pearl."
 ){
     private val pearlClipDistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
+
     init {
         this.addSettings(
-            PearlClip.pearlClipDistance
+            pearlClipDistance
         )
     }
+
     private var active = false
     override fun onKeyBind() {
+        if (!this.enabled) return // todo: do something about it idk?!
         modMessage("Pearl clipping!")
         pearlClip((pearlClipDistance.value * -1))
     }

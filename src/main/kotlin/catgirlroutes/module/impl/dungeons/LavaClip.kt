@@ -30,7 +30,7 @@ object LavaClip : Module(
     private var veloCancelled = true
 
     override fun onKeyBind() {
-        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1)
+        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1) // todo: do something about this.enabled idk?!
     }
 
     private var adjustedDistance: Double? = lavaclipDistance.value * -1

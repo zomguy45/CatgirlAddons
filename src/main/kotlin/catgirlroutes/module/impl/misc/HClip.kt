@@ -19,8 +19,8 @@ object HClip : Module(
     private var yawToUse: Float? = null
 
     override fun onKeyBind() {
+        if (!this.enabled) return // todo: do something about it idk?!
         modMessage("Hclipping!")
-        if (!this.enabled) return
         hClip()
     }
 

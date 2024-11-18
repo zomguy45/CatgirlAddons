@@ -17,7 +17,7 @@ object StonkSwap: Module( // todo: Merge with GhostBlocks ?maybe?
     private var prevSlot = -1
 
     override fun onKeyBind() {
-        if (running) return;
+        if (running || !this.enabled) return; // todo: do something about it idk?!
 
         running = true;
         prevSlot = mc.thePlayer.inventory.currentItem;
