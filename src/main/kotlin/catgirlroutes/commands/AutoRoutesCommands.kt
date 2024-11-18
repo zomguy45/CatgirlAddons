@@ -48,6 +48,7 @@ class AutoRoutesCommands : CommandBase() {
         if (!AutoRoutes.enabled) return;
         if (args.isEmpty()) {
             ChatUtils.modMessage("No argument specified!")
+            ChatUtils.modMessage("Arguments: warp, walk, look, stop, boom, pearlclip, pearl, jump, align")
             return
         }
         when (args[0]) {
