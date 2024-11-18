@@ -20,12 +20,11 @@ import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
-import catgirlroutes.utils.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.ServerRotateUtils.set
+import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
+import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
-import catgirlroutes.utils.Utils.getYawAndPitch
+import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.Utils.leftClick
-import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
