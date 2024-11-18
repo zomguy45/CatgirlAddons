@@ -20,6 +20,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.odinmain.events.impl.DungeonEvents
+import me.odinmain.events.impl.SecretPickupEvent
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
@@ -47,6 +48,15 @@ object AutoRoutes : Module(
         NodeManager.loadNodes()
     }
 
+    var secretPickedUp = false
+
+    @SubscribeEvent
+    fun onSecret(event: SecretPickupEvent) {
+        modMessage("secret!?!?!?!??!?!?!!??!")
+        secretPickedUp = true
+        scheduleTask (1) {secretPickedUp = false}
+    }
+
     private val cooldownMap = mutableMapOf<String, Boolean>()
 
     @OptIn(DelicateCoroutinesApi::class)
@@ -57,6 +67,7 @@ object AutoRoutes : Module(
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inNode(node)) {
+                if (node.arguments?.contains("await") == true && !secretPickedUp) return
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -175,6 +186,10 @@ object AutoRoutes : Module(
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
                 scheduleTask(1) { Utils.leftClick() }
+            }
+            "pearl" -> {
+                swapFromName("ender pearl")
+                FakeRotater.rotate(yaw, pitch)
             }
             "pearlclip" -> {
                 modMessage("Pearl clipping!")
