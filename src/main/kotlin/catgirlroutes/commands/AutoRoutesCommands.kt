@@ -22,6 +22,7 @@ import net.minecraft.util.ChatComponentText
 import net.minecraft.util.ChatStyle
 import net.minecraft.util.Vec3
 import java.io.File
+import kotlin.math.floor
 
 var nodeeditmode: Boolean = false
 
@@ -85,9 +86,9 @@ class AutoRoutesCommands : CommandBase() {
                 }
 
                 val room = DungeonUtils.currentRoom ?: return
-                val x = Math.round(mc.thePlayer.posX * 2) / 2.0
-                val y = Math.round(mc.thePlayer.posY * 2) / 2.0
-                val z = Math.round(mc.thePlayer.posZ * 2) / 2.0
+                val x = floor(mc.thePlayer.posX)
+                val y = floor(mc.thePlayer.posY)
+                val z = floor(mc.thePlayer.posZ)
                 val location = room.getRelativeCoords(Vec3(x, y, z))
                 val lookblock = room.getRelativeCoords(mc.thePlayer.rayTrace(40.0, 1F).hitVec)
 

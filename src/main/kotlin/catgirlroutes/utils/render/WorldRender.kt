@@ -220,6 +220,7 @@ object WorldRenderUtils {
         drawSquare(x, yMiddle, z, xWidth, zWidth, color, thickness, phase, relocate)
         drawSquare(x, y + 0.02, z, xWidth, zWidth, color, thickness, phase, relocate)
     }
+    /*
     private fun drawSquare(x: Double, y: Double, z: Double, xWidth: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true) {
         GlStateManager.disableLighting()
         GlStateManager.enableBlend()
@@ -248,6 +249,55 @@ object WorldRenderUtils {
         GlStateManager.enableDepth()
         GlStateManager.disableBlend()
     }
+
+     */
+
+    private fun drawSquare(
+        x: Double,
+        y: Double,
+        z: Double,
+        xWidth: Double,
+        zWidth: Double,
+        color: Color,
+        thickness: Float = 3f,
+        phase: Boolean = true,
+        relocate: Boolean = true
+    ) {
+        GlStateManager.disableLighting()
+        GlStateManager.enableBlend()
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+        GL11.glLineWidth(thickness)
+        if (phase) GlStateManager.disableDepth()
+        GlStateManager.disableTexture2D()
+
+        GlStateManager.pushMatrix()
+
+        if (relocate) GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+        worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
+        GlStateManager.color(
+            color.red.toFloat() / 255f,
+            color.green.toFloat() / 255f,
+            color.blue.toFloat() / 255f,
+            1f
+        )
+
+        val halfXWidth = xWidth / 2
+        val halfZWidth = zWidth / 2
+
+        worldRenderer.pos(x - halfXWidth, y, z - halfZWidth).endVertex()
+        worldRenderer.pos(x + halfXWidth, y, z - halfZWidth).endVertex()
+        worldRenderer.pos(x + halfXWidth, y, z + halfZWidth).endVertex()
+        worldRenderer.pos(x - halfXWidth, y, z + halfZWidth).endVertex()
+        worldRenderer.pos(x - halfXWidth, y, z - halfZWidth).endVertex()
+
+        tessellator.draw()
+
+        GlStateManager.popMatrix()
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableDepth()
+        GlStateManager.disableBlend()
+    }
+
 
     fun renderTransFlag(
         x: Double,

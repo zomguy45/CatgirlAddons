@@ -4,7 +4,6 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Node
 import catgirlroutes.commands.NodeManager
 import catgirlroutes.commands.nodeeditmode
-import catgirlroutes.commands.ringsActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.misc.PearlClip
@@ -28,7 +27,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import kotlin.collections.set
-import kotlin.math.abs
 import kotlin.math.floor
 
 object AutoRoutes : Module(
@@ -72,7 +70,7 @@ object AutoRoutes : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled) return
+        if (!inDungeons || !this.enabled) return
         NodeManager.nodes.forEach { node ->
             val room = currentRoom ?: return
             val realLocation = room.getRealCoords(node.location)
@@ -101,6 +99,7 @@ object AutoRoutes : Module(
         }
     }
 
+    /*
     private fun inNode(node: Node): Boolean {
         val viewerPos = mc.renderManager
         val room = currentRoom ?: return false
@@ -114,17 +113,39 @@ object AutoRoutes : Module(
                 distanceY >= -0.5 &&
                 distanceZ < (node.width / 2);
     }
+     */
+    private fun inNode(node: Node): Boolean {
+        val viewerPos = mc.renderManager
+        val room = currentRoom ?: return false
+        val realLocation = room.getRealCoords(node.location)
+
+        // Calculate the bounds of the node based on its dimensions and position
+        val minX = realLocation.xCoord
+        val maxX = realLocation.xCoord + node.width
+        val minY = realLocation.yCoord
+        val maxY = realLocation.yCoord + node.height
+        val minZ = realLocation.zCoord
+        val maxZ = realLocation.zCoord + node.width
+
+        // Check if the viewer's position is within these bounds
+        val viewerX = viewerPos.viewerPosX
+        val viewerY = viewerPos.viewerPosY
+        val viewerZ = viewerPos.viewerPosZ
+
+        return viewerX in minX..maxX &&
+                viewerY in minY..maxY &&
+                viewerZ in minZ..maxZ
+    }
 
     private suspend fun executeAction(node: Node) {
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         delay(actionDelay.toLong())
         val room = currentRoom ?: return
-        val realLocation = room.getRealCoords(node.location)
         val realLookLocation = room.getRealCoords(node.lookBlock)
         val(yaw, pitch) = Utils.getYawAndPitch(
-            node.lookBlock.xCoord,
-            node.lookBlock.yCoord,
-            node.lookBlock.zCoord
+            realLookLocation.xCoord,
+            realLookLocation.yCoord,
+            realLookLocation.zCoord
         )
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
