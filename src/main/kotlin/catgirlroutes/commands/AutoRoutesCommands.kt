@@ -59,7 +59,7 @@ class AutoRoutesCommands : CommandBase() {
                 var delay: Int? = null
                 val arguments = mutableListOf<String>()
 
-                if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "jump", "align").contains((type))) {
+                if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align").contains((type))) {
                     ChatUtils.modMessage("Invalid node!")
                     return
                 }
@@ -71,6 +71,7 @@ class AutoRoutesCommands : CommandBase() {
                         arg == "stop" -> arguments.add(arg)
                         arg == "look" -> arguments.add(arg)
                         arg == "walk" -> arguments.add(arg)
+                        arg == "await" -> arguments.add(arg)
                         arg.startsWith("delay:") -> {
                             delay = arg.slice(6 until arg.length).toInt()
                         }
