@@ -41,6 +41,7 @@ class CatgirlRoutes {
 
         listOf(
             CatgirlAddonsCommands(),
+            DevCommands(),
 
             //AutoP3
             AutoP3Commands(),
@@ -51,8 +52,8 @@ class CatgirlRoutes {
 
             //AutoRoutes
             AutoRoutesCommands(),
-            AutoRoutesAwait(),
-            AutoRoutesRemove(),
+//            AutoRoutesAwait(),
+//            AutoRoutesRemove(),
 
             //ESP
         ).forEach {
@@ -71,7 +72,7 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
-            NodesActive,
+//            NodesActive,
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
