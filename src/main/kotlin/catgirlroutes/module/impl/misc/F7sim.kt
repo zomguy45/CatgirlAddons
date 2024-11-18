@@ -17,9 +17,10 @@ object F7sim : Module(
         if (onHypixel || mc.thePlayer == null) return
 
         mc.thePlayer.getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.movementSpeed).baseValue = 0.50000000745
-        
+        mc.thePlayer.capabilities?.setPlayerWalkSpeed(0.5f)
+
         if (mc.thePlayer.isInLava) {
-            mc.thePlayer.setVelocity(mc.thePlayer.motionX, 3.37, mc.thePlayer.motionZ)
+            mc.thePlayer.setVelocity(mc.thePlayer.motionX, 3.5, mc.thePlayer.motionZ)
         }
     }
 }

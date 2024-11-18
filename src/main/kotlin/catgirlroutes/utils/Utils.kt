@@ -33,26 +33,6 @@ object Utils {
         return options.any { this == it }
     }
 
-    fun snapTo(yaw: Float, pitch: Float) {
-        mc.thePlayer.rotationYaw = yaw
-        mc.thePlayer.rotationPitch = pitch
-    }
-
-    fun getYawAndPitch(x: Double, y:Double, z:Double): Pair<Float, Float> {
-        val dx = x - mc.thePlayer.posX
-        val dy = y - (mc.thePlayer.posY + mc.thePlayer.eyeHeight)
-        val dz = z - mc.thePlayer.posZ
-
-        val horizontalDistance = sqrt(dx * dx + dz * dz )
-
-        val yaw = Math.toDegrees(atan2(-dx, dz))
-        val pitch = -Math.toDegrees(atan2(dy, horizontalDistance))
-
-        val normalizedYaw = if (yaw < 0) yaw + 360 else yaw
-
-        return Pair(normalizedYaw.toFloat(), pitch.toFloat())
-    }
-
     fun rightClick() {
         KeyBinding.onTick(mc.gameSettings.keyBindUseItem.keyCode)
     }
@@ -68,13 +48,13 @@ object Utils {
             it.printStackTrace()
             //logger.error("An error occurred", it)
             val style = ChatStyle()
-            style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/od copy ```${it.stackTraceToString().lineSequence().take(10).joinToString("\n")}```")
+            style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/od copy ```${it.stackTraceToString().lineSequence().take(10).joinToString("\n")}```") // odon clint
             style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText("§6Click to copy the error to your clipboard."))
             modMessage(" Caught an ${it::class.simpleName ?: "error"} at ${this::class.simpleName}. §cPlease click this message to copy and send it in the Odin discord!")}.getOrDefault(isCanceled)
     }
+
     fun getItemSlot(item: String, ignoreCase: Boolean = true): Int? =
         mc.thePlayer?.inventory?.mainInventory?.indexOfFirst { it?.unformattedName?.contains(item, ignoreCase) == true }.takeIf { it != -1 }
-
 
     fun distanceToPlayer(x: Double, y: Double, z: Double): Double {
         return sqrt((mc.renderManager.viewerPosX - x) * (mc.renderManager.viewerPosX - x) +
@@ -99,15 +79,12 @@ object Utils {
     }
 
     fun airClick() {
-        mc.netHandler.networkManager.sendPacket(C08PacketPlayerBlockPlacement(mc.thePlayer.heldItem))
+        PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(mc.thePlayer.heldItem))
     }
 
     val ItemStack?.unformattedName: String
         get() = this?.displayName?.noControlCodes ?: ""
 
-    fun Vec3.addVec(x: Number = .0, y: Number = .0, z: Number = .0): Vec3 {
-        return this.addVector(x.toDouble(), y.toDouble(), z.toDouble())
-    }
     fun runOnMCThread(run: () -> Unit) {
         if (!mc.isCallingFromMinecraftThread) mc.addScheduledTask(run) else run()
     }
@@ -126,6 +103,13 @@ object Utils {
     inline val posX get() = mc.thePlayer.posX
     inline val posY get() = mc.thePlayer.posY
     inline val posZ get() = mc.thePlayer.posZ
+
+    /**
+     * Adds the given coordinates to the Vec3.
+     */
+    fun Vec3.addVec(x: Number = .0, y: Number = .0, z: Number = .0): Vec3 {
+        return this.addVector(x.toDouble(), y.toDouble(), z.toDouble())
+    }
 
     /**
      * Removes the given coordinates to the Vec3.
@@ -165,7 +149,6 @@ object Utils {
             else -> throw IllegalStateException("Unable to get integer facing of $this")
         }
     }
-
 
     fun Vec3.rotateAroundNorth(rotation: Rotations): Vec3 {
         return when (rotation) {

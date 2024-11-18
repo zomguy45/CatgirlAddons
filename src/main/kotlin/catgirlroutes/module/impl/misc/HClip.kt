@@ -4,6 +4,7 @@ import catgirlroutes.events.MovementUpdateEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.restartMovement
 import catgirlroutes.utils.MovementUtils.stopMovement
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -26,6 +27,7 @@ object HClip : Module(
 
     fun hClip(yaw: Float = mc.thePlayer.rotationYaw) { // todo: move to ClipUtils
         stopMovement()
+        if (mc.thePlayer.onGround) jump()
         yawToUse = yaw
         mc.thePlayer.setVelocity(0.0, mc.thePlayer.motionY, 0.0)
         pendingHClip = true

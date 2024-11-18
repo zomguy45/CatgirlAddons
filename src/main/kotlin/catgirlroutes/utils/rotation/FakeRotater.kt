@@ -1,4 +1,4 @@
-package catgirlroutes.utils
+package catgirlroutes.utils.rotation
 
 import catgirlroutes.events.MotionUpdateEvent
 import catgirlroutes.events.MotionUpdateEvent.PreMotionUpdateEvent
@@ -37,8 +37,8 @@ open class Rotater {
 
 object FakeRotater : Rotater(), IRotater {
     override fun rotate(yaw: Float, pitch: Float) {
-        Rotater.yaw = yaw
-        Rotater.pitch = pitch
+        Companion.yaw = yaw
+        Companion.pitch = pitch
         fakeRotating = true
         modMessage("started")
     }

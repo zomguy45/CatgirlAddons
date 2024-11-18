@@ -1,4 +1,4 @@
-package catgirlroutes.module
+package catgirlroutes.module.settings
 
 /**
  * Annotate your [HUDElements][floppaclient.ui.hud.HudElement] with this to register them.

@@ -15,7 +15,6 @@ import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
-import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.render.WorldRenderUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope

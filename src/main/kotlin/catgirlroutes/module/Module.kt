@@ -1,6 +1,8 @@
 package catgirlroutes.module
 
 import catgirlroutes.CatgirlRoutes
+import catgirlroutes.module.settings.AlwaysActive
+import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.ChatUtils
