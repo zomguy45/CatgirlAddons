@@ -1,6 +1,6 @@
 package catgirlroutes.module.impl.dungeons
 
-import Hclip.hclip
+import HClip.hClip
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Ring
 import catgirlroutes.commands.RingManager.loadRings
@@ -11,8 +11,6 @@ import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
-import catgirlroutes.module.settings.Visibility
-import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -29,8 +27,8 @@ import catgirlroutes.utils.Utils.getYawAndPitch
 import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.snapTo
 import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
-import catgirlroutes.utils.render.WorldRenderUtils.drawSquareTwo
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -42,7 +40,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color.black
-import java.awt.Color.white
+import java.awt.Color.WHITE
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -62,18 +60,17 @@ object AutoP3 : Module(
         )
     }
 
-    init {
+    init { // ???
         this.addSettings(
             selectedRoute
         )
     }
 
-    var termFound = false
-    var termListener = false
-    val termTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
+    private var termFound = false
+    private var termListener = false
 
     @SubscribeEvent
-    fun onLoad(event: WorldEvent.Load) {
+    fun onWorldLoad(event: WorldEvent.Load) {
         loadRings()
     }
 
@@ -104,15 +101,19 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled ) return
+        if (!ringsActive || !this.enabled) return
         rings.forEach { ring ->
-            val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
-            val cooldown: Boolean = cooldownMap[key] == true
-            val color = if (cooldown) white else black
+            val x: Double = ring.location.xCoord
+            val y: Double = ring.location.yCoord
+            val z: Double = ring.location.zCoord
+
+            val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
+            val color = if (cooldown) WHITE else black
+
             when(preset.selected) {
-                "Trans" -> renderTransFlag(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord, ring.width, ring.height)
-                "Normal" -> drawP3box(ring.location.xCoord - ring.width / 2, ring.location.yCoord, ring.location.zCoord - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
-                "LGBTQIA+" -> renderGayFlag(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord, ring.width, ring.height)
+                "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
+                "Normal" -> drawP3box(x - ring.width / 2, y, z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
+                "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
         }
     }
@@ -121,7 +122,7 @@ object AutoP3 : Module(
     fun onTerm(event: ReceivePacketEvent) {
         if (!termListener) return
         if (event.packet !is S2DPacketOpenWindow) return
-        if (event.packet.windowTitle?.unformattedText in termTitles) {
+        if (event.packet.windowTitle?.unformattedText in DungeonUtils.termGuiTitles) {
             modMessage("Term found")
             termFound = true
             termListener = false
@@ -129,20 +130,24 @@ object AutoP3 : Module(
     }
 
     private fun inRing(ring: Ring): Boolean {
-        val distanceX = abs(mc.renderManager.viewerPosX - ring.location.xCoord)
-        val distanceY = abs(mc.renderManager.viewerPosY - ring.location.yCoord)
-        val distanceZ = abs(mc.renderManager.viewerPosZ - ring.location.zCoord)
+        val viewerPos = mc.renderManager
+        val distanceX = abs(viewerPos.viewerPosX - ring.location.xCoord)
+        val distanceY = abs(viewerPos.viewerPosY - ring.location.yCoord)
+        val distanceZ = abs(viewerPos.viewerPosZ - ring.location.zCoord)
 
-        return distanceX < (ring.width / 2) && distanceY < ring.height && distanceY >= -0.5 && distanceZ < (ring.width / 2);
+        return distanceX < (ring.width / 2) &&
+               distanceY < ring.height &&
+               distanceY >= -0.5 &&
+               distanceZ < (ring.width / 2);
     }
 
     private suspend fun executeAction(ring: Ring) {
-        val actiondelay: Int = if (ring.delay == null) 0 else ring.delay!!
-        delay(actiondelay.toLong())
-        if (ring.arguments != null) {
-            if (ring.arguments!!.contains("stop")) stopVelo()
-            if (ring.arguments!!.contains("walk")) setKey("w", true)
-            if (ring.arguments!!.contains("look")) snapTo(ring.yaw, ring.pitch)
+        val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
+        delay(actionDelay.toLong())
+        ring.arguments?.let {
+            if ("stop" in it) stopVelo()
+            if ("walk" in it) setKey("w", true)
+            if ("look" in it) snapTo(ring.yaw, ring.pitch)
         }
         when(ring.type) {
             "walk" -> {
@@ -165,7 +170,7 @@ object AutoP3 : Module(
             }
             "hclip" -> {
                 modMessage("Hclipping!")
-                hclip(ring.yaw)
+                hClip(ring.yaw)
             }
             "vclip" -> {
                 modMessage("Vclipping!")

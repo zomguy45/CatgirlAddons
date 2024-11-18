@@ -3,6 +3,7 @@ package catgirlroutes.utils.dungeon
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.DungeonEvents.RoomEnterEvent
 import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
@@ -33,7 +34,7 @@ import kotlin.math.floor
 object DungeonUtils {
 
     val inDungeons: Boolean
-        get() = LocationManager.currentArea.isArea(Island.Dungeon)
+        get() = LocationManager.currentArea.isArea(Island.Dungeon) || ClickGui.forceDungeon.enabled
 
     val floorNumber: Int
         get() = currentDungeon?.floor?.floorNumber ?: 0
@@ -268,4 +269,8 @@ object DungeonUtils {
         "Health Potion VIII Splash Potion", "Healing Potion 8 Splash Potion", "Healing Potion VIII Splash Potion", "Healing VIII Splash Potion", "Healing 8 Splash Potion",
         "Decoy", "Inflatable Jerry", "Spirit Leap", "Trap", "Training Weights", "Defuse Kit", "Dungeon Chest Key", "Treasure Talisman", "Revive Stone", "Architect's First Draft"
     )
+
+    val termGuiTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
+
+    val termInactiveTitles: Array<String> = arrayOf("Inactive Terminal", "Inactive Device", "Not Activated");
 }

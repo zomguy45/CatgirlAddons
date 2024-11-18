@@ -28,16 +28,20 @@ object DungeonESP: Module(
     description = "Esp for anything in dungeons."
 ){
     private val boxWidth = NumberSetting("Box Width",0.9,0.1,2.0,0.05, description = "Width of the esp box in units of blocks.")
-    private val deaultLineWidth = NumberSetting("Default LW",1.0,0.1,10.0,0.1, description = "Default line width of the esp box.")
+    private val defaultLineWidth = NumberSetting("Default LW",1.0,0.1,10.0,0.1, description = "Default line width of the esp box.")
     private val specialLineWidth = NumberSetting("Special Mob LW",2.0,0.1,10.0,0.1, description = "Line width of the esp box for special mobs like Fel and Withermancer.")
     private val miniLineWidth = NumberSetting("Mini Boss LW",3.0,0.1,10.0,0.1, description = "Line width of the esp box for Mini Bosses.")
+
     private val espStyle = StringSelectorSetting("Esp style","3D", arrayListOf("3D", "2D"), description = "Esp render style to be used.")
+
     private val showStarMobs = BooleanSetting("Star Mobs", true, description = "Render star mob ESP.")
     private val showFelHead = BooleanSetting("Fel Head", true, description = "Render a box around Fel heads. This box can not be seen through walls.")
     private val showBat = BooleanSetting("Bat ESP", true, description = "Render the bat ESP")
-    private val colorShadowAssassin = ColorSetting("SA Color", Color(255, 0, 255), false, description = "ESP color for Shadow Assassins.")
-    private val colorMini = ColorSetting("Mini Boss Color", Color(255, 255, 0), false, description = "ESP color for all Mini Bosses except Shadow Assassins.")
+
     private val colorStar = ColorSetting("Star Mob Color", Color(255, 0, 0), false, description = "ESP color for star mobs.")
+    private val colorMini = ColorSetting("Mini Boss Color", Color(255, 255, 0), false, description = "ESP color for all Mini Bosses except Shadow Assassins.")
+
+    private val colorShadowAssassin = ColorSetting("SA Color", Color(255, 0, 255), false, description = "ESP color for Shadow Assassins.")
     private val colorFel = ColorSetting("Fel Color", Color(0, 255, 255), false, description = "ESP color for star Fel.")
     private val colorFelHead = ColorSetting("Fel Head Color", Color(0, 0, 255), false, description = "ESP color for Fel heads on the floor.")
     private val colorWithermancer = ColorSetting("Withermancer Color", Color(255, 255, 0), false, description = "ESP color for star Withermancer.")
@@ -47,16 +51,20 @@ object DungeonESP: Module(
     init {
         this.addSettings(
             boxWidth,
-            deaultLineWidth,
+            defaultLineWidth,
             specialLineWidth,
             miniLineWidth,
+
             espStyle,
+
             showStarMobs,
             showFelHead,
             showBat,
-            colorShadowAssassin,
-            colorMini,
+
             colorStar,
+            colorMini,
+            colorShadowAssassin,
+
             colorFel,
             colorFelHead,
             colorWithermancer,
@@ -123,9 +131,9 @@ object DungeonESP: Module(
         if (showBat.enabled && !entity.isInvisible) {
             if (espStyle.selected == "2D") {
                 //modMessage("2D")
-                draw2DBoxByEntity(entity, colorKey.value, entity.width.toDouble(), entity.height.toDouble(), partialTicks, deaultLineWidth.value, true)
+                draw2DBoxByEntity(entity, colorKey.value, entity.width.toDouble(), entity.height.toDouble(), partialTicks, defaultLineWidth.value, true)
             } else {
-                drawBoxByEntity(entity, colorBat.value, entity.width, entity.height, partialTicks, deaultLineWidth.value.toFloat(), true)
+                drawBoxByEntity(entity, colorBat.value, entity.width, entity.height, partialTicks, defaultLineWidth.value.toFloat(), true)
             }
         }
     }
@@ -144,7 +152,7 @@ object DungeonESP: Module(
         }
         val lineWidth = when {
             entityName.contains("Fel") || entityName.contains("Withermancer") -> specialLineWidth.value
-            else -> deaultLineWidth.value
+            else -> defaultLineWidth.value
         }
         val size = when {
             entityName.contains("Fel") -> 3.0

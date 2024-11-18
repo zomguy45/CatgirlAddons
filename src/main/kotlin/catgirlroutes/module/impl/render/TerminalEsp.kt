@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -25,12 +26,10 @@ object TerminalEsp : Module (
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (mc.theWorld != null) {
-            val terminals = mc.theWorld.loadedEntityList.filterIsInstance<EntityArmorStand>()
-            for (terminal in terminals) {
-                if (arrayOf("Inactive Terminal", "Inactive Device", "Not Activated").contains(terminal.name)) {
-                    drawBoxByEntity(terminal, color.value, terminal.width.toDouble(), terminal.height.toDouble(), 0f)
-                }
+        mc.theWorld?. let { world ->
+            world.loadedEntityList.filterIsInstance<EntityArmorStand>().forEach { terminal ->
+                if (!DungeonUtils.termInactiveTitles.contains(terminal.name)) return@forEach
+                drawBoxByEntity(terminal, color.value, terminal.width.toDouble(), terminal.height.toDouble(), 0f)
             }
         }
     }

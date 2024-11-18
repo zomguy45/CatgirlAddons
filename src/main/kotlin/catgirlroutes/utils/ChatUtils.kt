@@ -81,7 +81,7 @@ object ChatUtils {
      * @param reformat Replace the "&" in formatting strings with "§".
      * @see chatMessage
      */
-    fun modMessage(message: Any?, prefix: String = "§5[§dCatgirlAddons§5] §8»§r ", chatStyle: ChatStyle? = null) {
+    fun modMessage(message: Any?, prefix: String = "${CatgirlRoutes.CHAT_PREFIX} §8»§r ", chatStyle: ChatStyle? = null) {
         val chatComponent = ChatComponentText("$prefix$message")
         chatStyle?.let { chatComponent.setChatStyle(it) } // Set chat style using setChatStyle method
         runOnMCThread { mc.thePlayer?.addChatMessage(chatComponent) }
@@ -119,6 +119,15 @@ object ChatUtils {
      */
     fun chatMessage(iChatComponent: IChatComponent) {
         mc.thePlayer?.addChatMessage(iChatComponent)
+    }
+
+    /**
+     * Print a message in chat if devMode is enabled
+     * @see chatMessage
+     */
+    fun devMessage(message: Any?) {
+        if (!ClickGui.devMode.enabled) return;
+        modMessage(message, prefix = "§5[§dCga§cDev§5] §8»§r")
     }
 
     /**

@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.SkyblockJoinIslandEvent
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.utils.Utils.postAndCatch
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
@@ -28,7 +29,7 @@ object LocationManager {
         Executor(500) {
             if (!inSkyblock)
                 inSkyblock = onHypixel && mc.theWorld?.scoreboard?.getObjectiveInDisplaySlot(1)
-                    ?.let { cleanSB(it.displayName).contains("SKYBLOCK") } == true
+                    ?.let { cleanSB(it.displayName).contains("SKYBLOCK") } == true || ClickGui.forceSkyblock.enabled
 
             if (currentArea.isArea(Island.Kuudra) && kuudraTier == 0)
                 sidebarLines.find { cleanLine(it).contains("Kuudra's Hollow (") }?.let {

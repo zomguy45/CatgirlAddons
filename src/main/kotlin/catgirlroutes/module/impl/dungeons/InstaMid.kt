@@ -20,7 +20,7 @@ import kotlin.math.pow
 object InstaMid : Module(
     "Insta mid",
     category = Category.DUNGEON,
-    description = "A module that instantly teleports you to necrons platform."
+    description = "A module that instantly teleports you to Necron's platform."
 ){
     private var preparing = false
     private var active = false
@@ -28,15 +28,16 @@ object InstaMid : Module(
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
-        if (!active) return
-        if (event.packet !is C03PacketPlayer && event.packet !is C0CPacketInput) return
+        if (!active || (event.packet !is C03PacketPlayer && event.packet !is C0CPacketInput)) return
         event.isCanceled = true
+
         riding = mc.thePlayer.isRiding
-        if (riding) preparing = false
-        if (!riding && !preparing) {
+        if (riding) {
+            preparing = false
+        } else if (!preparing) {
             active = false
             preparing = true
-            mc.netHandler.networkManager.sendPacket(
+            mc.netHandler.networkManager.sendPacket(  // todo: use PacketUtils
                 C03PacketPlayer.C06PacketPlayerPosLook(
                     54.0,
                     65.0,
@@ -52,11 +53,7 @@ object InstaMid : Module(
 
     @SubscribeEvent
     fun onPacketReceive(event: ReceivePacketEvent) {
-        if (!this.enabled) return
-        if (event.packet !is S1BPacketEntityAttach) return
-        if (!isOnPlatform()) return
-        if (event.packet.entityId != mc.thePlayer.entityId) return
-        if (event.packet.vehicleEntityId < 0) return
+        if (!this.enabled || event.packet !is S1BPacketEntityAttach || !isOnPlatform() || event.packet.entityId != mc.thePlayer.entityId || event.packet.vehicleEntityId < 0) return
         preparing = true
         active = true
         modMessage("Attempting to instamid")
@@ -64,7 +61,7 @@ object InstaMid : Module(
     }
 
     @SubscribeEvent
-    fun onOverlay(event: RenderGameOverlayEvent.Post) {
+    fun onOverlay(event: RenderGameOverlayEvent.Post) { // // todo: make this a gui hud type shit so you can move it or smt ?maybe?
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !riding || mc.ingameGUI == null) return
         val sr = ScaledResolution(mc)
         val text = "Instamid active"
@@ -77,8 +74,6 @@ object InstaMid : Module(
     }
 
     private fun isOnPlatform(): Boolean {
-        if (mc.thePlayer.posY > 100) return false
-        if (mc.thePlayer.posY < 64) return false
-        return abs(mc.thePlayer.posX - 54.5).pow(2) + abs(mc.thePlayer.posZ - 76.5).pow(2) < 56.25
+        return mc.thePlayer.posY in 64.0..100.0 && abs(mc.thePlayer.posX - 54.5).pow(2) + abs(mc.thePlayer.posZ - 76.5).pow(2) < 56.25
     }
 }

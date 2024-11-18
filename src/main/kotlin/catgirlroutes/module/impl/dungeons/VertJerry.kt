@@ -15,9 +15,7 @@ object VertJerry : Module(
 ){
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {
-        if (!LocationManager.inSkyblock) return
-        if (event.packet !is S12PacketEntityVelocity || !this.enabled) return
-        if (event.packet.entityID != mc.thePlayer.entityId) return
+        if (!LocationManager.inSkyblock || event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
         if (event.packet.motionY == 4800) {
             event.isCanceled = true
             mc.thePlayer.setVelocity(mc.thePlayer.motionX, 0.6, mc.thePlayer.motionZ)

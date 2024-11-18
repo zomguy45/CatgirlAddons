@@ -10,32 +10,32 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.cos
 import kotlin.math.sin
 
-object Hclip : Module(
-    "Hclip",
+object HClip : Module(
+    "HClip",
     category = Category.MISC,
-    description = "Boosts you forward when keybind is pressed"
+    description = "Boosts you forward when key bind is pressed"
 ){
-    private var pendingHclip = false
-    private var yawtouse: Float? = null
+    private var pendingHClip = false
+    private var yawToUse: Float? = null
 
     override fun onKeyBind() {
         modMessage("Hclipping!")
         if (!this.enabled) return
-        hclip()
+        hClip()
     }
 
-    fun hclip(yaw: Float = mc.thePlayer.rotationYaw) {
+    fun hClip(yaw: Float = mc.thePlayer.rotationYaw) { // todo: move to ClipUtils
         stopMovement()
-        yawtouse = yaw
+        yawToUse = yaw
         mc.thePlayer.setVelocity(0.0, mc.thePlayer.motionY, 0.0)
-        pendingHclip = true
+        pendingHClip = true
     }
 
     @SubscribeEvent
     fun onMovementUpdate(event: MovementUpdateEvent.Pre) {
-        if (pendingHclip) {
+        if (pendingHClip) {
             val speed = mc.thePlayer.capabilities.walkSpeed * 2.806
-            val radians = yawtouse!! * Math.PI / 180
+            val radians = yawToUse!! * Math.PI / 180 // todo: MathUtils?
             val x = -sin(radians) * speed
             val z = cos(radians) * speed
 
@@ -43,7 +43,7 @@ object Hclip : Module(
             mc.thePlayer.motionZ = z
             restartMovement()
 
-            pendingHclip = false
+            pendingHClip = false
         }
     }
 }

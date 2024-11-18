@@ -8,7 +8,9 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.init.Blocks
@@ -39,23 +41,6 @@ object SecretChime : Module(
 
     private var lastPlayed = System.currentTimeMillis()
 
-    private var drops = listOf(
-        "Healing VIII Splash Potion", //"§5Health Potion VIII Splash Potion"
-        "Healing Potion 8 Splash Potion",
-        "Healing Potion VIII Splash Potion",
-        "Decoy", //"§aDecoy"
-        "Inflatable Jerry", //  "§fInflatable Jerry"
-        "Spirit Leap", // "§9Spirit Leap"
-        "Trap", // "§aTrap"
-        "Training Weights", // "§aTraining Weights"
-        "Defuse Kit", // "§aDefuse Kit"
-        "Dungeon Chest Key", // "§9Dungeon Chest Key"
-        "Treasure Talisman", // Name: "§9Treasure Talisman"
-        "Revive Stone",
-    )
-
-
-
     /*
     List of good sound effects:
 
@@ -66,7 +51,6 @@ object SecretChime : Module(
     mob.guardian.land.hit - 2
 
      */
-
 
     init {
         val soundOptions = arrayListOf(
@@ -100,16 +84,16 @@ object SecretChime : Module(
         try { // for some reason getBlockState can throw null pointer exception
             val block = mc.theWorld?.getBlockState(blockPos)?.block ?: return
 
-            if (block == Blocks.chest || block == Blocks.lever ||
+            if (block == Blocks.chest || block == Blocks.lever || // todo: replace with DungeonUtils.isSecret
                 block == Blocks.trapped_chest
-            ){
+            ) {
                 playSecretSound()
-                modMessage("clicked secret!!!")
-            }else if (block == Blocks.skull) {
+                devMessage("clicked secret!!!")
+            } else if (block == Blocks.skull) {
                 val tileEntity: TileEntitySkull = mc.theWorld.getTileEntity(blockPos) as TileEntitySkull
                 if (tileEntity.playerProfile.id.toString() == "e0f3e929-869e-3dca-9504-54c666ee6f23") {
                     playSecretSound()
-                    modMessage("clicked secret!!!")
+                    devMessage("clicked secret!!!")
                 }
             }
         } catch (_: Exception) { }
@@ -120,11 +104,11 @@ object SecretChime : Module(
      */
     @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
     fun onSoundPlay(event: PlaySoundSourceEvent) {
-        if ( !inDungeons) return
+        if (!inDungeons) return
         when(event.name) {
             "mob.bat.death"-> {
                 playSecretSound()
-                modMessage("bat ded!!!")
+                devMessage("bat ded!!!")
             }
         }
     }
@@ -139,12 +123,9 @@ object SecretChime : Module(
         if(mc.thePlayer.getDistanceToEntity(event.entity) > 6) return
         // Check the item name to filter for secrets.
         if (event.entity.entityItem.displayName.run isSecret@ {
-                for(drop in drops){
-                    if (this.contains(drop)) return@isSecret true
-                }
-                return@isSecret false
+                DungeonUtils.dungeonItemDrops.any { this.contains(it) }
             }) {
-            modMessage("picked up item!!!")
+            devMessage("picked up item!!!")
             playSecretSound(getSound(true))
         }
     }

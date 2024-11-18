@@ -6,7 +6,7 @@ import catgirlroutes.module.Module
 import net.minecraftforge.client.event.sound.PlaySoundSourceEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-object CatMode: Module(
+object CatMode: Module( // todo: add cat model mode from skytils april fools!!!?!
     "Cat mode",
     category = Category.MISC,
     description = "MEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOW"

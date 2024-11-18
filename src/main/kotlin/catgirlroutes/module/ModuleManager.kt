@@ -1,6 +1,6 @@
 package catgirlroutes.module
 
-import Hclip
+import HClip
 import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
@@ -49,7 +49,7 @@ object ModuleManager {
 
         //Misc
         GhostBlocks,
-        Hclip,
+        HClip,
         PearlClip,
         AutoSprint,
         F7sim,

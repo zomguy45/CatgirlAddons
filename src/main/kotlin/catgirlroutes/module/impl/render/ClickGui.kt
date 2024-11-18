@@ -29,9 +29,16 @@ object ClickGui: Module(
     val blur: BooleanSetting = BooleanSetting("Blur", false, description = "Toggles the background blur for the gui.")
     val color = ColorSetting("Color", Color(255,200,0), false, description = "Color theme in the gui.")
     val colorSettingMode = StringSelectorSetting("Color Mode", "HSB", arrayListOf("HSB", "RGB"), description = "Mode for all color settings in the gui. Changes the way colors are put in.")
+
     val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", description = "Name that will be rendered in the gui.")
     val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), description = "Chat prefix selection for mod messages.")
     val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40, description = "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.")
+
+    val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, description = "Toggles developer mode");
+    val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, description = "Makes the mod think that you're on Hypixel");
+    val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, description = "Makes the mod think that you're in Skyblock");
+    val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, description = "Makes the mod think that you're in Dungeon")
+
     val showUsageInfo = BooleanSetting("Usage Info", true, visibility = Visibility.ADVANCED_ONLY, description = "Show info on how to use the GUI.")
 
     val panelX: MutableMap<Category, NumberSetting> = mutableMapOf()
@@ -61,9 +68,16 @@ object ClickGui: Module(
             blur,
             color,
             colorSettingMode,
+
             clientName,
             prefixStyle,
             customPrefix,
+
+            devMode,
+            forceHypixel,
+            forceSkyblock,
+            forceDungeon,
+
             showUsageInfo,
             advancedRelX,
             advancedRelY

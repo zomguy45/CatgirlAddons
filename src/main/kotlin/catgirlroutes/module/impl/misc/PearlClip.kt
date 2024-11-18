@@ -20,32 +20,32 @@ object PearlClip : Module(
     category = Category.MISC,
     description = "Clips you down selected blocks using an ender pearl."
 ){
-    private val pearlclipdistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
+    private val pearlClipDistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
     init {
         this.addSettings(
-            PearlClip.pearlclipdistance
+            PearlClip.pearlClipDistance
         )
     }
     private var active = false
     override fun onKeyBind() {
-        if (!this.enabled) return
         modMessage("Pearl clipping!")
-        pearlClip((pearlclipdistance.value * -1))
+        pearlClip((pearlClipDistance.value * -1))
     }
 
-    private var clipdepth: Double? = 0.0
+    private var clipDepth: Double? = 0.0
 
-    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) {
-        clipdepth = depth
-        if (depth == 0.0) clipdepth = findDistanceToAirBlocks()
-        if (clipdepth == null) return
-        val swapresult = swapFromName("ender pearl")
-        if (!swapresult) return
-        active = true
-        set(0F, 90F)
-        scheduleTask(1) {
-            airClick()
-            resetRotations()
+    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
+        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
+        if (clipDepth == null) return
+
+        val swapResult = swapFromName("ender pearl")
+        if (swapResult) {
+            active = true
+            set(0F, 90F)
+            scheduleTask(1) {
+                airClick()
+                resetRotations()
+            }
         }
     }
 
@@ -54,7 +54,7 @@ object PearlClip : Module(
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {
-            relativeClip(0.0, clipdepth!!, 0.0)
+            relativeClip(0.0, clipDepth!!, 0.0)
         }
     }
 }

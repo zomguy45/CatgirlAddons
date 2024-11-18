@@ -10,7 +10,7 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
-object BossESP : Module(
+object BossESP : Module( // todo: add esp modes, line width
     name = "Boss ESp",
     category = Category.RENDER,
     description = "ESP for the Withers."
@@ -25,11 +25,9 @@ object BossESP : Module(
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (mc.theWorld != null) {
-            val withers = mc.theWorld.loadedEntityList.filterIsInstance<EntityWither>()
-            for (wither in withers) {
-                if (wither.isInvisible) return
-                if (wither.renderSizeModifier != 1f) return
+        mc.theWorld?.let { world ->
+            world.loadedEntityList.filterIsInstance<EntityWither>().forEach { wither ->
+                if (wither.isInvisible || wither.renderSizeModifier != 1f) return@forEach
                 drawBoxByEntity(wither, color.value, wither.width.toDouble(), wither.height.toDouble(), 0f, 4.0, true)
             }
         }
