@@ -84,9 +84,9 @@ object AutoRoutes : Module(
             when(preset.selected) {
                 "Trans" -> WorldRenderUtils.renderTransFlag(x, y, z, node.width, node.height)
                 "Normal" -> WorldRenderUtils.drawP3box(
-                    x - node.width / 2,
+                    x - node.width / 2 + 0.5,
                     y,
-                    z - node.width / 2,
+                    z - node.width / 2 + 0.5,
                     node.width.toDouble(),
                     node.height.toDouble(),
                     node.width.toDouble(),
