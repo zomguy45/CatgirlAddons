@@ -25,7 +25,7 @@ object HClip : Module(
         hClip()
     }
 
-    fun hClip(yaw: Float = mc.thePlayer.rotationYaw) { // todo: move to ClipUtils
+    fun hClip(yaw: Float = mc.thePlayer.rotationYaw) {
         stopMovement()
         if (mc.thePlayer.onGround) jump()
         yawToUse = yaw

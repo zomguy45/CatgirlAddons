@@ -137,10 +137,15 @@ object Utils {
 
     fun rotationNumber(rotation: Rotations): Int {
         return when (rotation) {
-            Rotations.SOUTH -> 0
-            Rotations.WEST -> 1
-            Rotations.NORTH -> 2
-            Rotations.EAST -> 3
+            Rotations.WEST -> -1
+            Rotations.NORTH -> 0
+            Rotations.EAST -> 1
+            Rotations.SOUTH -> 2
+
+            //WEST = -1 | -90
+            //NORTH = 0 | 0
+            //EAST = 1 | 90
+            //SOUTH = 2 | 180
             else -> throw IllegalStateException("Unable to get integer facing of $this")
         }
     }

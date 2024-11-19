@@ -257,8 +257,8 @@ object DungeonUtils {
 
     fun FullRoom.getRelativeCoords(pos: Vec3) = pos.subtractVec(x = this.clayPos.x, z = this.clayPos.z).rotateToNorth(this.room.rotation)
     fun FullRoom.getRealCoords(pos: Vec3) = pos.rotateAroundNorth(this.room.rotation).addVec(x = this.clayPos.x, z = this.clayPos.z)
-    fun FullRoom.getRelativeYaw(yaw: Float) = yaw + ((rotationNumber(this.room.rotation) - 2) * 90)
-    fun FullRoom.getRealYaw(yaw: Float) = yaw - ((rotationNumber(this.room.rotation) - 2) * 90)
+    fun FullRoom.getRelativeYaw(yaw: Float) = yaw - (rotationNumber(this.room.rotation) * 90)
+    fun FullRoom.getRealYaw(yaw: Float) = yaw + (rotationNumber(this.room.rotation) * 90)
 
     fun FullRoom.getRelativeCoords(pos: BlockPos) = getRelativeCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
     fun FullRoom.getRealCoords(pos: BlockPos) = getRealCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()

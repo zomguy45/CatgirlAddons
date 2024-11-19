@@ -8,7 +8,9 @@ import catgirlroutes.commands.NodeManager.saveNodes
 import catgirlroutes.module.impl.dungeons.AutoRoutes
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.Utils
+import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
+import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -90,13 +92,15 @@ class AutoRoutesCommands : CommandBase() {
                 }
 
                 val room = DungeonUtils.currentRoom ?: return
+                val room2 = currentFullRoom ?: return
                 val x = floor(mc.thePlayer.posX)
                 val y = floor(mc.thePlayer.posY)
                 val z = floor(mc.thePlayer.posZ)
                 val location = room.getRelativeCoords(Vec3(x, y, z))
-                val lookblock = room.getRelativeCoords(mc.thePlayer.rayTrace(40.0, 1F).hitVec)
+                val yaw = room2.getRelativeYaw(mc.thePlayer.rotationYaw)
+                val pitch = mc.thePlayer.rotationPitch
 
-                val node = Node(type, location, height, width, lookblock, depth, arguments, delay, currentRoomName)
+                val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, currentRoomName)
 
                 allnodes.add(node)
 
@@ -202,7 +206,8 @@ data class Node(
     var location: Vec3,
     var height: Float,
     var width: Float,
-    var lookBlock: Vec3,
+    var yaw: Float,
+    var pitch: Float,
     var depth: Float?,
     var arguments: List<String>?,
     var delay: Int?,
