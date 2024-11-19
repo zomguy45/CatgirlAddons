@@ -3,7 +3,6 @@ package catgirlroutes.module
 import HClip
 import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
-import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.render.BossESP
@@ -65,7 +64,8 @@ object ModuleManager {
         InstaMid,
         LavaClip,
         StormClip,
-        ScanTest
+        ScanTest,
+        AutoLeap,
     )
 
     /**

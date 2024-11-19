@@ -109,7 +109,7 @@ object Zpew : Module(
 
         val held =  mc.thePlayer.heldItem.skyblockID
         if (held !== "ASPECT_OF_THE_VOID") return
-        if (!isSneaking) return
+        if (!isSneaking) return 
 
         doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }

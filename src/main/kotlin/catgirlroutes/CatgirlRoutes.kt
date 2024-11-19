@@ -3,6 +3,7 @@ package catgirlroutes
 import catgirlroutes.commands.*
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.module.ModuleManager
+import catgirlroutes.module.impl.dungeons.AutoLeap
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -71,6 +72,7 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
+            AutoLeap,
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
