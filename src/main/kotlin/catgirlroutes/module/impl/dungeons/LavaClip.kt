@@ -36,9 +36,9 @@ object LavaClip : Module(
     private var adjustedDistance: Double? = lavaclipDistance.value * -1
 
     fun lavaClipToggle(distance: Double = 0.0, onlyToggle: Boolean = false) {
-        lavaClipping = !lavaClipping;
-        veloCancelled = !lavaClipping && !onlyToggle;
-        if (!veloCancelled) adjustedDistance = distance;
+        lavaClipping = !lavaClipping
+        veloCancelled = !lavaClipping && !onlyToggle
+        if (!veloCancelled) adjustedDistance = distance
     }
 
     @SubscribeEvent
