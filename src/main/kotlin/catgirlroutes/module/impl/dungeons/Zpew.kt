@@ -10,8 +10,11 @@ import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.EtherWarpHelper.getEtherPos
+import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
@@ -23,31 +26,20 @@ object Zpew : Module(
 ) {
     private var lastYaw = 0f
     private var lastPitch = 0f
+    private var isSneaking = false
     val recentlySentC06s = mutableListOf<SentC06>()
     val recentFails = mutableListOf<Long>()
 
     override fun onKeyBind() {
-        if (!this.enabled || onHypixel || mc.thePlayer == null) return
-        val etherBlock = getEtherPos(
-            Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
-            mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch
-        )
-        if (!etherBlock.succeeded || etherBlock.pos == null) return
-
-        val pos: BlockPos = etherBlock.pos;
-        val x: Double = Math.floor(pos.x.toDouble()) + 0.5;
-        val y: Double = pos.y + 1.05;
-        val z: Double = Math.floor(pos.z.toDouble()) + 0.5;
-        
-        mc.thePlayer.setPosition(x, y, z)
+        doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }
 
     fun doZeroPingEtherWarp(yaw: Float, pitch: Float) {
         val etherBlock = getEtherPos(
             Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
             mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch
+            mc.thePlayer.rotationPitch,
+            57.0
         )
         if (!etherBlock.succeeded || etherBlock.pos == null) return
 
@@ -59,10 +51,10 @@ object Zpew : Module(
         recentlySentC06s.add(SentC06(pitch, yaw, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
-            //mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
-            //mc.thePlayer.setPosition(x, y, z)
+            mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
+            mc.thePlayer.setPosition(x, y, z)
+            mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
         }
-
   }
 
     fun isWithinTolerance(n1: Float, n2: Float, tolerance: Double = 1e-4): Boolean {
@@ -71,9 +63,11 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
+        if (mc.thePlayer == null ||!this.enabled || mc.theWorld == null) return
         if (event.packet !is S08PacketPlayerPosLook) return
 
-        val sentC06 = recentlySentC06s.removeAt(0)
+        if (recentlySentC06s.isEmpty()) return
+        val sentC06 = recentlySentC06s.removeFirst()
 
         val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
@@ -88,7 +82,7 @@ object Zpew : Module(
                 sentC06.z == newZ
 
         if (isCorrect) {
-            //event.isCanceled = true
+            event.isCanceled = true
             modMessage("Correct")
             return
         }
@@ -103,6 +97,21 @@ object Zpew : Module(
         if (event.packet !is C03PacketPlayer) return
         lastYaw = event.packet.yaw
         lastPitch = event.packet.pitch
+    }
+
+    @SubscribeEvent
+    fun onC08(event: PacketSentEvent) {
+        if (mc.thePlayer == null) return
+        if (event.packet !is C08PacketPlayerBlockPlacement) return
+        if (!this.enabled) return
+        val dir = event.packet.placedBlockDirection
+        if (dir !== 255) return
+
+        val held =  mc.thePlayer.heldItem.skyblockID
+        if (held !== "ASPECT_OF_THE_VOID") return
+        if (!isSneaking) return
+
+        doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }
 }
 
