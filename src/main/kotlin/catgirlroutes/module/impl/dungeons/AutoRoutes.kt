@@ -10,13 +10,13 @@ import catgirlroutes.module.impl.misc.PearlClip
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.RotationUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -167,6 +167,19 @@ object AutoRoutes : Module(
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
                 FakeRotater.rotate(yaw, node.pitch)
+                scheduleTask(0) {
+                    MovementUtils.setKey("shift", false)
+                }
+            }
+            "aotv" -> {
+                swapFromName("aspect of the void")
+                MovementUtils.setKey("shift", false)
+                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
+            }
+            "hype" -> {
+                swapFromName("hyperion")
+                MovementUtils.setKey("shift", false)
+                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
             }
             "walk" -> {
                 modMessage("Walking!")
@@ -188,7 +201,8 @@ object AutoRoutes : Module(
             }
             "pearl" -> {
                 swapFromName("ender pearl")
-                FakeRotater.rotate(yaw, node.pitch)
+                MovementUtils.setKey("shift", false)
+                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
             }
             "pearlclip" -> {
                 modMessage("Pearl clipping!")

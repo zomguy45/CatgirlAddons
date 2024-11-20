@@ -67,7 +67,7 @@ class AutoRoutesCommands : CommandBase() {
                 var delay: Int? = null
                 val arguments = mutableListOf<String>()
 
-                if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align").contains((type))) {
+                if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align", "aotv", "hype").contains((type))) {
                     ChatUtils.modMessage("Invalid node type!")
                     ChatUtils.modMessage("Types: warp, walk, look, stop, boom, pearlclip, jump, align")
                     return
@@ -89,6 +89,10 @@ class AutoRoutesCommands : CommandBase() {
 
                 when (type) {
                     "pearlclip" -> {
+                        if (args.size < 2) {
+                            ChatUtils.modMessage("Usage: /node §5<§dtype§5> [§dheight§5] [§dwidth§5] [§ddepth§5]")
+                            return
+                        }
                         depth = args[2].toFloat()
                     }
                 }

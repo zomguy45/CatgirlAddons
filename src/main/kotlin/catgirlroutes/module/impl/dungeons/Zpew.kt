@@ -9,7 +9,6 @@ import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.LocationManager.inSkyblock
 import me.odinmain.utils.skyblock.EtherWarpHelper
-import me.odinmain.utils.skyblock.modMessage
 import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
@@ -27,20 +26,18 @@ object Zpew : Module(
     private var lastYaw = 0f
     private var lastPitch = 0f
     private var isSneaking = false
-    val recentlySentC06s = mutableListOf<SentC06>()
-    val recentFails = mutableListOf<Long>()
+    private val recentlySentC06s = mutableListOf<SentC06>()
+    private val recentFails = mutableListOf<Long>()
 
     override fun onKeyBind() {
         doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }
 
     /**
-     * FIXME Read before using:
-     *  - how it should work https://iwannabebee.wants.solutions/javaw_58CbrTiHk5.mp4
-     *  - how it works https://iwannabebee.wants.solutions/java_R26rIUoQQN.mp4
+     * TODO failsafes and onground shit
      */
 
-    fun doZeroPingEtherWarp(yaw: Float, pitch: Float) {
+    private fun doZeroPingEtherWarp(yaw: Float, pitch: Float) {
         val etherBlock = EtherWarpHelper.getEtherPos(
             Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
             mc.thePlayer.rotationYaw,
@@ -64,7 +61,7 @@ object Zpew : Module(
         recentlySentC06s.add(SentC06(pitch, yawToUse, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
-            modMessage("Test")
+            devMessage("Test")
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
@@ -90,27 +87,27 @@ object Zpew : Module(
         val newY = event.packet.y
         val newZ = event.packet.z
 
-        modMessage(newPitch)
-        modMessage(newYaw)
-        modMessage(newX)
-        modMessage(newY)
-        modMessage(newZ)
+        devMessage(newPitch)
+        devMessage(newYaw)
+        devMessage(newX)
+        devMessage(newY)
+        devMessage(newZ)
 
-        modMessage(sentC06)
+        devMessage(sentC06)
 
-        val isCorrect = isWithinTolerance(sentC06.pitch, newPitch) &&
-                isWithinTolerance(sentC06.yaw, newYaw) &&
+        val isCorrect = (isWithinTolerance(sentC06.pitch, newPitch) || newPitch == 0f)&&
+                (isWithinTolerance(sentC06.yaw, newYaw) || newYaw == 0f) &&
                 sentC06.x == newX &&
                 sentC06.y == newY &&
                 sentC06.z == newZ
 
         if (isCorrect) {
             event.isCanceled = true
-            modMessage("Correct")
+            devMessage("Correct")
             return
         }
 
-        modMessage("Failed")
+        devMessage("Failed")
 
         recentFails.add(System.currentTimeMillis())
 
@@ -120,13 +117,15 @@ object Zpew : Module(
     @SubscribeEvent
     fun onC03(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer.C05PacketPlayerLook) return
-        lastYaw = event.packet.yaw
-        lastPitch = event.packet.pitch
+        if (event.packet.rotating) {
+            lastYaw = event.packet.yaw
+            lastPitch = event.packet.pitch
+        }
     }
 
     @SubscribeEvent
     fun onC08(event: PacketSentEvent) {
-        if (mc.thePlayer == null || !this.enabled) return
+        if (mc.thePlayer == null) return
         if (event.packet !is C08PacketPlayerBlockPlacement) return
 
         val dir = event.packet.placedBlockDirection
@@ -136,7 +135,7 @@ object Zpew : Module(
         if (held != "ASPECT_OF_THE_VOID") return
         if (!isSneaking) return 
 
-        doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+        doZeroPingEtherWarp(lastYaw, lastPitch)
     }
 
     @SubscribeEvent
