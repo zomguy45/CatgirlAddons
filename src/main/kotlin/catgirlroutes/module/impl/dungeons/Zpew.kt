@@ -26,7 +26,7 @@ object Zpew : Module(
     private var lastYaw = 0f
     private var lastPitch = 0f
     private var isSneaking = false
-    private val recentlySentC06s = mutableListOf<SentC06>()
+    val recentlySentC06s = mutableListOf<SentC06>()
     private val recentFails = mutableListOf<Long>()
 
     override fun onKeyBind() {

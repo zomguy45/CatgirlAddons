@@ -5,8 +5,10 @@ import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ChatUtils.sendChat
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.LocationManager.inSkyblock
 import me.odinmain.utils.skyblock.EtherWarpHelper
@@ -24,18 +26,30 @@ object ZpewRecode : Module(
     name = "ZpewRecode",
     category = Category.DUNGEON
 ) {
-    var updatePosition = true
+    private const val FAILWATCHPERIOD: Int = 20;
+    private const val MAXFAILSPERFAILPERIOD: Int = 3;
+    private const val MAXQUEUEDPACKETS: Int = 3;
+
+    private var updatePosition = true
     private val recentlySentC06s = mutableListOf<SentC06>()
-    val recentFails = mutableListOf<Long>()
+    private val recentFails = mutableListOf<Long>()
 
-    var lastPitch: Float = 0f
-    var lastYaw: Float = 0f
-    var lastX: Double = 0.0
-    var lastY: Double = 0.0
-    var lastZ: Double = 0.0
-    var isSneaking: Boolean = false
+    private var lastPitch: Float = 0f
+    private var lastYaw: Float = 0f
+    private var lastX: Double = 0.0
+    private var lastY: Double = 0.0
+    private var lastZ: Double = 0.0
+    private var isSneaking: Boolean = false
 
-    fun doZeroPingEtherWarp() {
+    private fun checkAllowedFails() : Boolean {
+        if (recentlySentC06s.size >= MAXQUEUEDPACKETS) return false;
+
+        while (recentFails.size != 0 && System.currentTimeMillis() - recentFails[0] > FAILWATCHPERIOD * 1000) recentFails.removeFirst();
+
+        return recentFails.size < MAXFAILSPERFAILPERIOD;
+    }
+
+    private fun doZeroPingEtherWarp() {
         val etherBlock = EtherWarpHelper.getEtherPos(
             Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
             mc.thePlayer.rotationYaw,
@@ -43,21 +57,25 @@ object ZpewRecode : Module(
             57.0
         )
         if (!etherBlock.succeeded || etherBlock.pos == null) return
+
         val pos: BlockPos = etherBlock.pos!!;
         val x: Double = pos.x.toDouble() + 0.5;
         val y: Double = pos.y.toDouble() + 1.05;
         val z: Double = pos.z.toDouble() + 0.5;
+
         var yaw = lastYaw
         val pitch = lastPitch
+
         yaw %= 360
         if (yaw < 0) yaw += 360
         if (yaw > 360) yaw -= 360
+
         lastX = x
         lastY = y
         lastZ = z
         updatePosition = false
 
-        recentlySentC06s.add(SentC06(pitch, yaw, x, y, z, System.currentTimeMillis()))
+        recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
@@ -73,7 +91,7 @@ object ZpewRecode : Module(
 
     @SubscribeEvent
     fun onC08(event: PacketSentEvent) {
-        if (mc.thePlayer == null || !this.enabled) return
+        if (mc.thePlayer == null) return
         if (event.packet !is C08PacketPlayerBlockPlacement) return
 
         val dir = event.packet.placedBlockDirection
@@ -82,6 +100,13 @@ object ZpewRecode : Module(
         val held =  mc.thePlayer.heldItem.skyblockID
         if (held != "ASPECT_OF_THE_VOID") return
         if (!isSneaking) return
+
+        if(!checkAllowedFails()) {
+            chatMessage("§cZero ping etherwarp teleport aborted.");
+            chatMessage("§c${recentFails.size} fails last ${FAILWATCHPERIOD}s");
+            chatMessage("§c${recentlySentC06s.size} C06's queued currently");
+            return
+        }
 
         doZeroPingEtherWarp()
     }
@@ -123,39 +148,41 @@ object ZpewRecode : Module(
         val sentC06 = recentlySentC06s[0]
         recentlySentC06s.removeFirst()
 
-        val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
+        val newPitch = event.packet.pitch
         val newX = event.packet.x
         val newY = event.packet.y
         val newZ = event.packet.z
 
-        devMessage(newPitch)
-        devMessage(newYaw)
-        devMessage(newX)
-        devMessage(newY)
-        devMessage(newZ)
+        devMessage("newYaw: $newYaw")
+        devMessage("newPitch: $newPitch")
+        devMessage("newX: $newX")
+        devMessage("newY: $newY")
+        devMessage("newZ: $newZ")
 
         devMessage(sentC06)
 
         val isCorrect = (
-                (isWithinTolerance(newPitch, sentC06.pitch) || newPitch == 0f) &&
                 (isWithinTolerance(newYaw, sentC06.yaw) || newYaw == 0f) &&
+                (isWithinTolerance(newPitch, sentC06.pitch) || newPitch == 0f) &&
                 newX == sentC06.x &&
                 newY == sentC06.y &&
                 newZ == sentC06.z
                 )
 
         if (isCorrect) {
-            modMessage("Correct")
+            devMessage("Correct")
             event.isCanceled = true
-        } else {
-            modMessage("Failed")
+            return
         }
+        devMessage("Failed");
+        recentFails.add(System.currentTimeMillis());
+        while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst();
     }
 
     data class SentC06(
-        val pitch: Float,
         val yaw: Float,
+        val pitch: Float,
         val x: Double,
         val y: Double,
         val z: Double,
