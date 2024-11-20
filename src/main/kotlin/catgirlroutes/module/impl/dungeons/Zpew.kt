@@ -9,6 +9,7 @@ import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.LocationManager.inSkyblock
 import me.odinmain.utils.skyblock.EtherWarpHelper
+import me.odinmain.utils.skyblock.modMessage
 import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
@@ -54,9 +55,16 @@ object Zpew : Module(
         val y: Double = pos.y.toDouble() + 1.05;
         val z: Double = pos.z.toDouble() + 0.5;
 
-        recentlySentC06s.add(SentC06(pitch, yaw, x, y, z, System.currentTimeMillis()))
+        var yawToUse = yaw
+
+        yawToUse %= 360
+        if (yawToUse < 360) yawToUse += 360
+        if (yawToUse > 360) yawToUse -= 360
+
+        recentlySentC06s.add(SentC06(pitch, yawToUse, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
+            modMessage("Test")
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
@@ -69,17 +77,26 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
-        if (mc.thePlayer == null || mc.theWorld == null) return
+        if (mc.thePlayer == null || mc.theWorld == null || !this.enabled) return
         if (event.packet !is S08PacketPlayerPosLook) return
 
         if (recentlySentC06s.isEmpty()) return
-        val sentC06 = recentlySentC06s.removeFirst()
+        val sentC06 = recentlySentC06s[0]
+        recentlySentC06s.removeFirst()
 
         val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
         val newX = event.packet.x
         val newY = event.packet.y
         val newZ = event.packet.z
+
+        modMessage(newPitch)
+        modMessage(newYaw)
+        modMessage(newX)
+        modMessage(newY)
+        modMessage(newZ)
+
+        modMessage(sentC06)
 
         val isCorrect = isWithinTolerance(sentC06.pitch, newPitch) &&
                 isWithinTolerance(sentC06.yaw, newYaw) &&
@@ -89,9 +106,11 @@ object Zpew : Module(
 
         if (isCorrect) {
             event.isCanceled = true
-            devMessage("Correct")
+            modMessage("Correct")
             return
         }
+
+        modMessage("Failed")
 
         recentFails.add(System.currentTimeMillis())
 
@@ -100,14 +119,14 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onC03(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer) return
+        if (event.packet !is C03PacketPlayer.C05PacketPlayerLook) return
         lastYaw = event.packet.yaw
         lastPitch = event.packet.pitch
     }
 
     @SubscribeEvent
     fun onC08(event: PacketSentEvent) {
-        if (mc.thePlayer == null) return
+        if (mc.thePlayer == null || !this.enabled) return
         if (event.packet !is C08PacketPlayerBlockPlacement) return
 
         val dir = event.packet.placedBlockDirection
