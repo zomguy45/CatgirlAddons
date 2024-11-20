@@ -50,11 +50,16 @@ class AutoRoutesCommands : CommandBase() {
         if (!AutoRoutes.enabled) return;
         if (args.isEmpty()) {
             ChatUtils.modMessage("No argument specified!")
-            ChatUtils.modMessage("Arguments: warp, walk, look, stop, boom, pearlclip, pearl, jump, align")
+            ChatUtils.modMessage("Arguments: add, pearlclip, edit, remove, undo, clear, clearroom, load, save")
             return
         }
         when (args[0]) {
             "add" -> {
+                if (args.size < 2) {
+                    ChatUtils.modMessage("Usage: /node add §5<§dtype§5> [§dwidth§5] [§dheight§5] [§ddepth§5]")
+                    ChatUtils.modMessage("Types: warp, walk, look, stop, boom, pearlclip, jump, align")
+                    return
+                }
                 val type = args[1].lowercase()
                 var depth: Float? = null
                 var height = 1F
@@ -63,7 +68,8 @@ class AutoRoutesCommands : CommandBase() {
                 val arguments = mutableListOf<String>()
 
                 if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align", "aotv", "hype").contains((type))) {
-                    ChatUtils.modMessage("Invalid node!")
+                    ChatUtils.modMessage("Invalid node type!")
+                    ChatUtils.modMessage("Types: warp, walk, look, stop, boom, pearlclip, jump, align")
                     return
                 }
 

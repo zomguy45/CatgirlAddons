@@ -1,17 +1,20 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.CatgirlRoutes.Companion.onHypixel
-
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.EtherWarpHelper.getEtherPos
+import catgirlroutes.utils.LocationManager.inSkyblock
+import me.odinmain.utils.skyblock.EtherWarpHelper
+import me.odinmain.utils.skyblock.modMessage
+import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
@@ -23,46 +26,49 @@ object Zpew : Module(
 ) {
     private var lastYaw = 0f
     private var lastPitch = 0f
+    private var isSneaking = false
     val recentlySentC06s = mutableListOf<SentC06>()
     val recentFails = mutableListOf<Long>()
 
     override fun onKeyBind() {
-        if (!this.enabled || onHypixel || mc.thePlayer == null) return
-        val etherBlock = getEtherPos(
-            Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
-            mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch
-        )
-        if (!etherBlock.succeeded || etherBlock.pos == null) return
-
-        val pos: BlockPos = etherBlock.pos;
-        val x: Double = Math.floor(pos.x.toDouble()) + 0.5;
-        val y: Double = pos.y + 1.05;
-        val z: Double = Math.floor(pos.z.toDouble()) + 0.5;
-        
-        mc.thePlayer.setPosition(x, y, z)
+        doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }
 
+    /**
+     * FIXME Read before using:
+     *  - how it should work https://iwannabebee.wants.solutions/javaw_58CbrTiHk5.mp4
+     *  - how it works https://iwannabebee.wants.solutions/java_R26rIUoQQN.mp4
+     */
+
     fun doZeroPingEtherWarp(yaw: Float, pitch: Float) {
-        val etherBlock = getEtherPos(
+        val etherBlock = EtherWarpHelper.getEtherPos(
             Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
             mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch
+            mc.thePlayer.rotationPitch,
+            57.0
         )
+
         if (!etherBlock.succeeded || etherBlock.pos == null) return
 
-        val pos: BlockPos = etherBlock.pos;
+        val pos: BlockPos = etherBlock.pos!!;
         val x: Double = pos.x.toDouble() + 0.5;
         val y: Double = pos.y.toDouble() + 1.05;
         val z: Double = pos.z.toDouble() + 0.5;
 
-        recentlySentC06s.add(SentC06(pitch, yaw, x, y, z, System.currentTimeMillis()))
+        var yawToUse = yaw
+
+        yawToUse %= 360
+        if (yawToUse < 360) yawToUse += 360
+        if (yawToUse > 360) yawToUse -= 360
+
+        recentlySentC06s.add(SentC06(pitch, yawToUse, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
-            //mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
-            //mc.thePlayer.setPosition(x, y, z)
+            modMessage("Test")
+            mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
+            mc.thePlayer.setPosition(x, y, z)
+            mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
         }
-
   }
 
     fun isWithinTolerance(n1: Float, n2: Float, tolerance: Double = 1e-4): Boolean {
@@ -71,15 +77,26 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
+        if (mc.thePlayer == null || mc.theWorld == null || !this.enabled) return
         if (event.packet !is S08PacketPlayerPosLook) return
 
-        val sentC06 = recentlySentC06s.removeAt(0)
+        if (recentlySentC06s.isEmpty()) return
+        val sentC06 = recentlySentC06s[0]
+        recentlySentC06s.removeFirst()
 
         val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
         val newX = event.packet.x
         val newY = event.packet.y
         val newZ = event.packet.z
+
+        modMessage(newPitch)
+        modMessage(newYaw)
+        modMessage(newX)
+        modMessage(newY)
+        modMessage(newZ)
+
+        modMessage(sentC06)
 
         val isCorrect = isWithinTolerance(sentC06.pitch, newPitch) &&
                 isWithinTolerance(sentC06.yaw, newYaw) &&
@@ -88,10 +105,12 @@ object Zpew : Module(
                 sentC06.z == newZ
 
         if (isCorrect) {
-            //event.isCanceled = true
+            event.isCanceled = true
             modMessage("Correct")
             return
         }
+
+        modMessage("Failed")
 
         recentFails.add(System.currentTimeMillis())
 
@@ -100,9 +119,31 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onC03(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer) return
+        if (event.packet !is C03PacketPlayer.C05PacketPlayerLook) return
         lastYaw = event.packet.yaw
         lastPitch = event.packet.pitch
+    }
+
+    @SubscribeEvent
+    fun onC08(event: PacketSentEvent) {
+        if (mc.thePlayer == null || !this.enabled) return
+        if (event.packet !is C08PacketPlayerBlockPlacement) return
+
+        val dir = event.packet.placedBlockDirection
+        if (dir != 255) return
+
+        val held =  mc.thePlayer.heldItem.skyblockID
+        if (held != "ASPECT_OF_THE_VOID") return
+        if (!isSneaking) return 
+
+        doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+    }
+
+    @SubscribeEvent
+    fun onC0B(event: PacketSentEvent) {
+        if (event.packet !is C0BPacketEntityAction || !inSkyblock) return
+        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true;
+        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false;
     }
 }
 

@@ -14,7 +14,7 @@ object F7sim : Module(
 ){
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (onHypixel || mc.thePlayer == null) return
+        if (onHypixel || mc.thePlayer == null || !this.enabled) return
 
         mc.thePlayer.getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.movementSpeed).baseValue = 0.50000000745
         mc.thePlayer.capabilities?.setPlayerWalkSpeed(0.5f)

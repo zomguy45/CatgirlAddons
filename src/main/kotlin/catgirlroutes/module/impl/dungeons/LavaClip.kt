@@ -26,41 +26,38 @@ object LavaClip : Module(
         )
     }
 
-    private var lavaclipping = false
-    private var velocancelled = true
+    private var lavaClipping = false
+    private var veloCancelled = true
 
     override fun onKeyBind() {
-        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1)
+        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1) // todo: do something about this.enabled idk?!
     }
 
     private var adjustedDistance: Double? = lavaclipDistance.value * -1
 
     fun lavaClipToggle(distance: Double = 0.0, onlyToggle: Boolean = false) {
-        if (!lavaclipping || onlyToggle) {
-            lavaclipping = true
-            velocancelled = false
-            adjustedDistance = distance
-        } else {
-            lavaclipping = false
-            velocancelled = true
-        }
+        lavaClipping = !lavaClipping
+        veloCancelled = !lavaClipping && !onlyToggle
+        if (!veloCancelled) adjustedDistance = distance
     }
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!mc.thePlayer.isInLava || !lavaclipping) return
-        lavaclipping = false
+        if (!mc.thePlayer.isInLava || !lavaClipping) return
+
+        lavaClipping = false
         if (adjustedDistance == 0.0) adjustedDistance = findDistanceToAirBlocks()
-        if (adjustedDistance == null) {
-            velocancelled = true
-            return
+
+        adjustedDistance?.let {
+            relativeClip(0.0, adjustedDistance!!, 0.0)
+        } ?: run {
+            veloCancelled = true
         }
-        relativeClip(0.0, adjustedDistance!!, 0.0)
     }
 
     @SubscribeEvent
-    fun onOverlay(event: RenderGameOverlayEvent.Post) {
-        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaclipping || mc.ingameGUI == null) return
+    fun onOverlay(event: RenderGameOverlayEvent.Post) {  // todo: make this a gui hud type shit so you can move it or smt ?maybe?
+        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaClipping || mc.ingameGUI == null) return
         val sr = ScaledResolution(mc)
         var text = "Lava clipping $adjustedDistance"
         if (adjustedDistance == 0.0) text = "Lava clipping"
@@ -74,12 +71,11 @@ object LavaClip : Module(
 
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {
-        if (velocancelled) return
-        if (event.packet !is S12PacketEntityVelocity) return
-        if (event.packet.entityID != mc.thePlayer.entityId) return
+        if (veloCancelled || event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
+
         if (event.packet.motionY == 28000) {
             event.isCanceled = true
-            velocancelled = true
+            veloCancelled = true
         }
     }
 }
