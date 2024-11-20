@@ -1,15 +1,14 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.CatgirlRoutes.Companion.onHypixel
-
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.EtherWarpHelper.getEtherPos
+import catgirlroutes.utils.LocationManager.inSkyblock
+import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
@@ -34,16 +33,23 @@ object Zpew : Module(
         doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
     }
 
+    /**
+     * FIXME Read before using:
+     *  - how it should work https://iwannabebee.wants.solutions/javaw_58CbrTiHk5.mp4
+     *  - how it works https://iwannabebee.wants.solutions/java_R26rIUoQQN.mp4
+     */
+
     fun doZeroPingEtherWarp(yaw: Float, pitch: Float) {
-        val etherBlock = getEtherPos(
+        val etherBlock = EtherWarpHelper.getEtherPos(
             Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
             mc.thePlayer.rotationYaw,
             mc.thePlayer.rotationPitch,
             57.0
         )
+
         if (!etherBlock.succeeded || etherBlock.pos == null) return
 
-        val pos: BlockPos = etherBlock.pos;
+        val pos: BlockPos = etherBlock.pos!!;
         val x: Double = pos.x.toDouble() + 0.5;
         val y: Double = pos.y.toDouble() + 1.05;
         val z: Double = pos.z.toDouble() + 0.5;
@@ -63,7 +69,7 @@ object Zpew : Module(
 
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
-        if (mc.thePlayer == null ||!this.enabled || mc.theWorld == null) return
+        if (mc.thePlayer == null || mc.theWorld == null) return
         if (event.packet !is S08PacketPlayerPosLook) return
 
         if (recentlySentC06s.isEmpty()) return
@@ -83,7 +89,7 @@ object Zpew : Module(
 
         if (isCorrect) {
             event.isCanceled = true
-            modMessage("Correct")
+            devMessage("Correct")
             return
         }
 
@@ -103,15 +109,22 @@ object Zpew : Module(
     fun onC08(event: PacketSentEvent) {
         if (mc.thePlayer == null) return
         if (event.packet !is C08PacketPlayerBlockPlacement) return
-        if (!this.enabled) return
+
         val dir = event.packet.placedBlockDirection
-        if (dir !== 255) return
+        if (dir != 255) return
 
         val held =  mc.thePlayer.heldItem.skyblockID
-        if (held !== "ASPECT_OF_THE_VOID") return
+        if (held != "ASPECT_OF_THE_VOID") return
         if (!isSneaking) return 
 
         doZeroPingEtherWarp(mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch)
+    }
+
+    @SubscribeEvent
+    fun onC0B(event: PacketSentEvent) {
+        if (event.packet !is C0BPacketEntityAction || !inSkyblock) return
+        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true;
+        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false;
     }
 }
 
