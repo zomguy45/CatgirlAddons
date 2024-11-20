@@ -4,6 +4,7 @@ import catgirlroutes.commands.*
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.module.impl.dungeons.AutoLeap
+import catgirlroutes.module.impl.dungeons.ZpewRecode
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -12,6 +13,7 @@ import catgirlroutes.utils.dungeon.ScanUtils
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import catgirlroutes.utils.rotation.ServerRotateUtils
+import io.netty.handler.codec.compression.ZlibWrapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -72,6 +74,7 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
+            ZpewRecode
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

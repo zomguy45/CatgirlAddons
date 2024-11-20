@@ -16,6 +16,7 @@ import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -24,65 +25,41 @@ object ZpewRecode : Module(
     category = Category.DUNGEON
 ) {
     var updatePosition = true
-    val recentlySentC06s = mutableListOf<SentC06>()
+    private val recentlySentC06s = mutableListOf<SentC06>()
     val recentFails = mutableListOf<Long>()
 
-    data class playerInfo(
-        var pitch: Float = 0f,
-        var yaw: Float = 0f,
-        var x: Double = 0.0,
-        var y: Double = 0.0,
-        var z: Double = 0.0,
-        var sneaking: Boolean = false
-        )
-
-    data class SentC06(
-        val pitch: Float,
-        val yaw: Float,
-        val x: Double,
-        val y: Double,
-        val z: Double,
-        val sentAt: Long
-    )
-
-    fun etherBlock(): Vec3? {
-        val playerInfo = playerInfo()
-        val ether = EtherWarpHelper.getEtherPos(
-            Vec3(playerInfo.x, playerInfo.y, playerInfo.z),
-            playerInfo.yaw,
-            playerInfo.pitch,
-            60.0
-        )
-        return if (ether.succeeded && ether.pos != null) {
-            Vec3(ether.pos!!.x.toDouble(), ether.pos!!.y.toDouble(), ether.pos!!.z.toDouble())
-        } else {
-            null
-        }
-    }
+    var lastPitch: Float = 0f
+    var lastYaw: Float = 0f
+    var lastX: Double = 0.0
+    var lastY: Double = 0.0
+    var lastZ: Double = 0.0
+    var isSneaking: Boolean = false
 
     fun doZeroPingEtherWarp() {
-        devMessage("1")
-        var x = etherBlock()!!.xCoord
-        var y = etherBlock()!!.yCoord
-        var z = etherBlock()!!.zCoord
-        devMessage("2")
-        x += 0.5
-        y += 1.05
-        z += 0.5
-        devMessage("3")
-        val yaw = playerInfo().yaw
-        val pitch = playerInfo().pitch
-        devMessage("4")
-        playerInfo().x = x
-        playerInfo().y = y
-        playerInfo().z = z
-        devMessage("5")
+        val etherBlock = EtherWarpHelper.getEtherPos(
+            Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
+            mc.thePlayer.rotationYaw,
+            mc.thePlayer.rotationPitch,
+            57.0
+        )
+        if (!etherBlock.succeeded || etherBlock.pos == null) return
+        val pos: BlockPos = etherBlock.pos!!;
+        val x: Double = pos.x.toDouble() + 0.5;
+        val y: Double = pos.y.toDouble() + 1.05;
+        val z: Double = pos.z.toDouble() + 0.5;
+        var yaw = lastYaw
+        val pitch = lastPitch
+        yaw %= 360
+        if (yaw < 0) yaw += 360
+        if (yaw > 360) yaw -= 360
+        lastX = x
+        lastY = y
+        lastZ = z
         updatePosition = false
 
         recentlySentC06s.add(SentC06(pitch, yaw, x, y, z, System.currentTimeMillis()))
 
         scheduleTask(0) {
-            devMessage("6")
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
@@ -98,24 +75,20 @@ object ZpewRecode : Module(
     fun onC08(event: PacketSentEvent) {
         if (mc.thePlayer == null || !this.enabled) return
         if (event.packet !is C08PacketPlayerBlockPlacement) return
-        modMessage("7")
+
         val dir = event.packet.placedBlockDirection
         if (dir != 255) return
-        modMessage("8")
+
         val held =  mc.thePlayer.heldItem.skyblockID
         if (held != "ASPECT_OF_THE_VOID") return
-        modMessage("9")
-        if (!playerInfo().sneaking) return
-        modMessage("10")
-        modMessage("DEBUG")
+        if (!isSneaking) return
 
         doZeroPingEtherWarp()
     }
 
     @SubscribeEvent
-    fun onC03(event: ReceivePacketEvent) {
+    fun onC03(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer) return
-
         if (!updatePosition) return
         val x = event.packet.positionX
         val y = event.packet.positionY
@@ -124,33 +97,31 @@ object ZpewRecode : Module(
         val pitch = event.packet.pitch
 
         if (event.packet.isMoving) {
-            playerInfo().x = x
-            playerInfo().y = y
-            playerInfo().z = z
+            lastX = x
+            lastY = y
+            lastZ = z
         }
 
         if (event.packet.rotating) {
-            playerInfo().yaw = yaw
-            playerInfo().pitch = pitch
+            lastYaw = yaw
+            lastPitch = pitch
         }
     }
 
     @SubscribeEvent
     fun onC0B(event: PacketSentEvent) {
         if (event.packet !is C0BPacketEntityAction || !inSkyblock) return
-        devMessage("C0B")
-        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) playerInfo().sneaking = true;
-        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) playerInfo().sneaking = false;
+        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true;
+        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false;
     }
 
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
-        modMessage("NIGGER")
         if (recentlySentC06s.isEmpty()) return
 
-        val sentC06 = Zpew.recentlySentC06s[0]
-        Zpew.recentlySentC06s.removeFirst()
+        val sentC06 = recentlySentC06s[0]
+        recentlySentC06s.removeFirst()
 
         val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
@@ -158,8 +129,16 @@ object ZpewRecode : Module(
         val newY = event.packet.y
         val newZ = event.packet.z
 
+        devMessage(newPitch)
+        devMessage(newYaw)
+        devMessage(newX)
+        devMessage(newY)
+        devMessage(newZ)
+
+        devMessage(sentC06)
+
         val isCorrect = (
-                (isWithinTolerance(newPitch, sentC06.pitch)|| newPitch == 0f) &&
+                (isWithinTolerance(newPitch, sentC06.pitch) || newPitch == 0f) &&
                 (isWithinTolerance(newYaw, sentC06.yaw) || newYaw == 0f) &&
                 newX == sentC06.x &&
                 newY == sentC06.y &&
@@ -173,5 +152,14 @@ object ZpewRecode : Module(
             modMessage("Failed")
         }
     }
+
+    data class SentC06(
+        val pitch: Float,
+        val yaw: Float,
+        val x: Double,
+        val y: Double,
+        val z: Double,
+        val sentAt: Long
+    )
 }
 
