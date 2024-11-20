@@ -66,6 +66,7 @@ object ModuleManager {
         StormClip,
         ScanTest,
         AutoLeap,
+        ZpewRecode,
     )
 
     /**
