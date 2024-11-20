@@ -14,6 +14,7 @@ open class Rotater {
         var yaw: Float = 0f
         var fakeRotating: Boolean = false
         var fakeClicking: Boolean = false
+        var sneak: Boolean = false
 
         @SubscribeEvent
         fun onMotionUpdatePre(event: PreMotionUpdateEvent) {
@@ -37,6 +38,7 @@ open class Rotater {
 
 object FakeRotater : Rotater(), IRotater {
     override fun rotate(yaw: Float, pitch: Float) {
+        Companion.sneak = sneak
         Companion.yaw = yaw
         Companion.pitch = pitch
         fakeRotating = true
@@ -50,5 +52,5 @@ object FakeRotater : Rotater(), IRotater {
 }
 
 interface IRotater {
-    fun rotate(yaw: Float, pitch: Float)
+    fun rotate(yaw: Float, pitch: Float,)
 }
