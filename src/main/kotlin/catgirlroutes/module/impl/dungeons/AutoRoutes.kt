@@ -6,7 +6,7 @@ import catgirlroutes.commands.NodeManager
 import catgirlroutes.commands.nodeeditmode
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.misc.PearlClip
+import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask

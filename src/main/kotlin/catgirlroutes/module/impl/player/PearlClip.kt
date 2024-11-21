@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc
+package catgirlroutes.module.impl.player
 
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
@@ -17,7 +17,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object PearlClip : Module(
     "Pearl Clip",
-    category = Category.MISC,
+    category = Category.PLAYER,
     description = "Clips you down selected blocks using an ender pearl."
 ){
     private val pearlClipDistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")

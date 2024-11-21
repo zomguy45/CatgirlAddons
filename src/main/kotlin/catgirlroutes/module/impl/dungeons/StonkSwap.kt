@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc
+package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category

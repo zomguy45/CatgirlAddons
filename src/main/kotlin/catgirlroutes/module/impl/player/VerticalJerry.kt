@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.dungeons
+package catgirlroutes.module.impl.player
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.ReceivePacketEvent
@@ -8,10 +8,10 @@ import catgirlroutes.utils.LocationManager
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-object VertJerry : Module(
-    "Vert Jerry",
-    category = Category.DUNGEON,
-    description = "Cancels horizontal kb from Jerry-chine Gun"
+object VerticalJerry : Module(
+    "Vertical Jerry",
+    category = Category.PLAYER,
+    description = "Cancels horizontal velocity from Jerry-chine Gun"
 ){
     @SubscribeEvent
     fun onPacket(event: ReceivePacketEvent) {

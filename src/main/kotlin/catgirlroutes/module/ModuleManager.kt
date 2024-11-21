@@ -1,10 +1,13 @@
 package catgirlroutes.module
 
-import HClip
 import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
+import catgirlroutes.module.impl.player.AutoSprint
+import catgirlroutes.module.impl.player.PearlClip
+import catgirlroutes.module.impl.player.HClip
+import catgirlroutes.module.impl.player.VerticalJerry
 import catgirlroutes.module.impl.render.BossESP
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.DungeonESP
@@ -40,33 +43,36 @@ object ModuleManager {
      * All modules have to be added to this list to function!
      */
     val modules: ArrayList<Module> = arrayListOf(
-        //Render
+        // Dungeons
+        AutoP3,
+        AutoRoutes,
+        GhostBlocks,
+        InstaMid,
+        LavaClip,
+        SecretChime,
+        ScanTest,
+        StonkSwap,
+        StormClip,
+        AutoLeap,
+
+        // Misc
+        F7sim,
+        CatMode,
+        Zpew,
+        ZpewRecode,
+
+        // Player
+        AutoSprint,
+        HClip,
+        PearlClip,
+        VerticalJerry,
+
+        // Render
         ClickGui,
         DungeonESP,
         BossESP,
         TerminalEsp,
 
-        //Misc
-        GhostBlocks,
-        HClip,
-        PearlClip,
-        AutoSprint,
-        F7sim,
-        StonkSwap,
-        CatMode,
-        Zpew,
-
-        //Dungeons
-        AutoP3,
-        VertJerry,
-        SecretChime,
-        AutoRoutes,
-        InstaMid,
-        LavaClip,
-        StormClip,
-        ScanTest,
-        AutoLeap,
-        ZpewRecode,
     )
 
     /**
