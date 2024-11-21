@@ -9,6 +9,7 @@ import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.LocationManager.inSkyblock
+import catgirlroutes.utils.rotation.ServerRotateUtils
 import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -34,12 +35,22 @@ object ZpewRecode : Module(
     var lastY: Double = 0.0
     var lastZ: Double = 0.0
     var isSneaking: Boolean = false
+    var toggled = false
+
+    override fun onKeyBind() {
+        toggled = !toggled
+        modMessage(toggled)
+        if (toggled) ServerRotateUtils.set(0f, 0f)
+        else ServerRotateUtils.resetRotations()
+        devMessage(lastYaw)
+        devMessage(lastPitch)
+    }
 
     fun doZeroPingEtherWarp() {
         val etherBlock = EtherWarpHelper.getEtherPos(
-            Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
-            mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch,
+            Vec3(lastX, lastY, lastZ),
+            lastYaw,
+            lastPitch,
             57.0
         )
         if (!etherBlock.succeeded || etherBlock.pos == null) return
@@ -61,8 +72,8 @@ object ZpewRecode : Module(
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
-            mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
+            mc.thePlayer.setPosition(x, y, z)
             updatePosition = true
         }
     }
@@ -120,8 +131,7 @@ object ZpewRecode : Module(
         if (event.packet !is S08PacketPlayerPosLook) return
         if (recentlySentC06s.isEmpty()) return
 
-        val sentC06 = recentlySentC06s[0]
-        recentlySentC06s.removeFirst()
+        val sentC06 = recentlySentC06s.removeFirst()
 
         val newPitch = event.packet.pitch
         val newYaw = event.packet.yaw
@@ -150,6 +160,7 @@ object ZpewRecode : Module(
             event.isCanceled = true
         } else {
             modMessage("Failed")
+            recentlySentC06s.clear()
         }
     }
 
