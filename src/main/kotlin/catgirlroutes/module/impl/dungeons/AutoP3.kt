@@ -1,6 +1,5 @@
 package catgirlroutes.module.impl.dungeons
 
-import HClip.hClip
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Ring
 import catgirlroutes.commands.RingManager.loadRings
@@ -11,6 +10,7 @@ import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
+import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
