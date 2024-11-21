@@ -66,7 +66,7 @@ class ModuleConfig(path: File) {
                     // If the module was not found check whether it can be a keybind
                     val module = this!!
                     if (module.enabled != configModule.enabled) module.toggle()
-                    module.keyCode = configModule.keyCode
+//                    module.keyCode = configModule.keyCode
                     for (configSetting in configModule.settings) {
                         // It seems like when the config parsing failed it can result in this being null. The compiler does not know this.
                         // This check ensures that the rest of the config will still get processed in that case, avoiding the loss of data.
@@ -81,6 +81,7 @@ class ModuleConfig(path: File) {
                             is StringSelectorSetting -> setting.selected = (configSetting as StringSetting).text
                             is SelectorSetting -> setting.selected = (configSetting as StringSetting).text
                             is StringSetting -> setting.text = (configSetting as StringSetting).text
+                            is KeyBindSetting -> setting.value = (configSetting as KeyBindSetting).value
                         }
                     }
                 }

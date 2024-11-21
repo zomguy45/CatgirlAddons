@@ -8,18 +8,18 @@ import org.lwjgl.input.Mouse
 // odon clint inspiration
 class KeyBindSetting(
     name: String,
-    visibility: Visibility = Visibility.VISIBLE,
+    override val default: Keybinding,
     description: String? = null,
-    override val default: Keybinding
+    visibility: Visibility = Visibility.VISIBLE,
 ) : Setting<Keybinding>(name, visibility, description) {
 
-    override var value: Keybinding = default;
+    constructor(name: String, key: Int, description: String? = null, visibility: Visibility = Visibility.VISIBLE) : this(name, Keybinding(key), description, visibility)
 
-    /**
-     * Action to do, when keybinding is pressed
-     *
-     * Note: Action is always invoked, even if module isn't enabled.
-     */
+    override var value: Keybinding = default
+        set(value) {
+            field = processInput(value)
+        }
+
     fun onPress(block: () -> Unit): KeyBindSetting {
         value.onPress = block
         return this

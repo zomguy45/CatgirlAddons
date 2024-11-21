@@ -11,7 +11,7 @@ import catgirlroutes.module.settings.Visibility
  *
  * @author Aton
  */
-class SelectorSetting<T>(
+class SelectorSetting<T>( // TODO: make it use array of strings instead of enums
     name: String,
     override val default: T,
     val options: Array<out T>,

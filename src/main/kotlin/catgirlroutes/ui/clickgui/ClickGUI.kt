@@ -258,7 +258,7 @@ class ClickGUI : GuiScreen() {
         }
 
         /** Exits the menu when the toggle key is pressed */
-        if (keyCode == ClickGui.keyCode && System.currentTimeMillis() - openedTime > 200) {
+        if (keyCode == ClickGui.settings.last().value && System.currentTimeMillis() - openedTime > 200) {
             mc.displayGuiScreen(null as GuiScreen?)
             if (mc.currentScreen == null) {
                 mc.setIngameFocus()

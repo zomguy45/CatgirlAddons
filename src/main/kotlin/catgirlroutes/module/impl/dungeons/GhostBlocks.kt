@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.KeyBindSetting
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
@@ -19,6 +20,7 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
     description = "Creates ghost blocks where you are looking when the key bind is pressed."
 ){
     private val swingHand = BooleanSetting("Swing Hand", true, description = "Swings the player's hand.")
+//    private val gkey: KeyBindSetting = KeyBindSetting("GKey", Keyboard.KEY_NONE)
 
     init {
         this.addSettings(swingHand)
@@ -28,20 +30,20 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
 
     private val ignoredBlockTypes: List<Block> = listOf(Blocks.skull, Blocks.chest, Blocks.lever) // todo: use DungeonUtils.isSecret maybeidk
 
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START) return
-
-        if (this.keyCode > 0 && !Keyboard.isKeyDown(this.keyCode)) return
-        if (this.keyCode < 0 && !Mouse.isButtonDown(this.keyCode + 100)) return
-
-        val blockPos = mc.objectMouseOver.blockPos
-        val block = mc.theWorld.getBlockState(blockPos).block
-
-        if (ignoredBlockTypes.contains(block)) return
-        if (swingHand.value) mc.thePlayer.swingItem()
-        toAir(blockPos)
-    }
+//    @SubscribeEvent
+//    fun onTick(event: TickEvent.ClientTickEvent) {
+//        if (event.phase != TickEvent.Phase.START) return
+//
+//        if (this.keyCode > 0 && !Keyboard.isKeyDown(this.keyCode)) return
+//        if (this.keyCode < 0 && !Mouse.isButtonDown(this.keyCode + 100)) return
+//
+//        val blockPos = mc.objectMouseOver.blockPos
+//        val block = mc.theWorld.getBlockState(blockPos).block
+//
+//        if (ignoredBlockTypes.contains(block)) return
+//        if (swingHand.value) mc.thePlayer.swingItem()
+//        toAir(blockPos)
+//    }
 
     private fun toAir(blockPos: BlockPos?): Boolean {
         if (blockPos != null) {

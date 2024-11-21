@@ -13,6 +13,7 @@ import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.MathHelper
+import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
 import java.awt.Color
 
@@ -67,9 +68,10 @@ class AdvancedMenu(val module: Module) {
                 is StringSetting    -> elements.add(AdvancedElementTextField(this, module, setting))
                 is ColorSetting     -> elements.add(AdvancedElementColor    (this, module, setting))
                 is ActionSetting    -> elements.add(AdvancedElementAction   (this, module, setting))
+                is KeyBindSetting   -> elements.add(AdvancedElementKeyBind(this, module, setting))
             }
         }
-        elements.add(AdvancedElementKeyBind(this, module))
+//        elements.add(AdvancedElementKeyBind(this, module, KeyBindSetting("KeyBind", Keyboard.KEY_NONE)))
     }
 
     /**

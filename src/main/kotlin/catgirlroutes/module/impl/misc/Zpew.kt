@@ -6,10 +6,8 @@ import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -32,29 +30,27 @@ import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-object ZpewRecode : Module(
-    name = "ZpewRecode",
+object Zpew : Module(
+    name = "Zpew",
     category = Category.MISC
 ) {
     private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
-    private val sound: StringSelectorSetting
-    private val customSound: StringSetting = StringSetting("Custom Sound", "note.pling", description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.")
 
-    private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1)
+    enum class SoundOptions(override val displayName: String) : Options {
+        NOTE_PLING("note.pling"),
+        MOB_BLAZE_HIT("mob.blaze.hit"),
+        FIRE_IGNITE("fire.ignite"),
+        RANDOM_ORB("random.orb"),
+        RANDOM_BREAK("random.break"),
+        MOB_GUARDIAN_LAND_HIT("mob.guardian.land.hit"),
+        CUSTOM("Custom");
+    }
+    private val soundSelector = SelectorSetting("Custom Sound", SoundOptions.NOTE_PLING, SoundOptions.entries.toTypedArray(), description = "Sound Selection").withDependency { dingdingding.enabled }
+    private val customSound: StringSetting = StringSetting("Custom Sound", SoundOptions.NOTE_PLING.displayName, description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding.enabled }
+    private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding.enabled }
 
     init {
-        val soundOptions = arrayListOf(
-            "note.pling",
-            "mob.blaze.hit",
-            "fire.ignite",
-            "random.orb",
-            "random.break",
-            "mob.guardian.land.hit",
-            "Custom"
-        )
-        sound = StringSelectorSetting("Sound", "note.pling", soundOptions, description = "Sound selection.")
-
-        addSettings(dingdingding, sound, customSound, pitch)
+        addSettings(dingdingding, soundSelector, customSound, pitch)
     }
 
     private const val FAILWATCHPERIOD: Int = 20
@@ -90,7 +86,7 @@ object ZpewRecode : Module(
             lastPitch,
             57.0
         )
-        if (!etherBlock.succeeded || etherBlock.pos == null) return
+        if (!etherBlock.succeeded) return
 
         val pos: BlockPos = etherBlock.pos!!
         val x: Double = pos.x.toDouble() + 0.5
@@ -111,7 +107,7 @@ object ZpewRecode : Module(
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
 
-        if (dingdingding.enabled) playLoudSound(getSound(), 100f, ZpewRecode.pitch.value.toFloat())
+        if (dingdingding.enabled) playLoudSound(getSound(), 100f, Zpew.pitch.value.toFloat())
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
@@ -208,13 +204,15 @@ object ZpewRecode : Module(
             event.isCanceled = true
             return
         }
-        debugMessage("newYaw: $newYaw") // probably should add debugmode or something and send debug messages instead
+
+        debugMessage("newYaw: $newYaw")
         debugMessage("newPitch: $newPitch")
         debugMessage("newX: $newX")
         debugMessage("newY: $newY")
         debugMessage("newZ: $newZ")
         debugMessage(sentC06)
         debugMessage("Failed")
+
         recentFails.add(System.currentTimeMillis())
         while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst()
     }
@@ -231,8 +229,8 @@ object ZpewRecode : Module(
      * Returns the sound from the selector setting, or the custom sound when the last element is selected
      */
     private fun getSound(): String {
-        return if (sound.index < sound.options.size - 1)
-            sound.selected
+        return if (soundSelector.index < soundSelector.options.size - 1)
+            soundSelector.selected
         else
             customSound.text
     }

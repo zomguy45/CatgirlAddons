@@ -104,7 +104,7 @@ abstract class Setting<T>(
         Almost like with a lambda function in the constructor (which would not be a good choice here).
          </br>
         */
-        fun <K: Setting<*>> K.withDependency(dependency: () -> Boolean): K {
+        fun <K: Setting<*>> K.withDependency(dependency: () -> Boolean): K { // todo: make in work with advanced menu maybe (or I'm doing something wrong idk)
             visibilityDependency = dependency
             return this
         }

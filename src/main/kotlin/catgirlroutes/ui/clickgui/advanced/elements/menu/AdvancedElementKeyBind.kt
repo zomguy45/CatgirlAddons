@@ -2,6 +2,7 @@ package catgirlroutes.ui.clickgui.advanced.elements.menu
 
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.DummySetting
+import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.clickgui.advanced.AdvancedMenu
 import catgirlroutes.ui.clickgui.advanced.elements.AdvancedElement
 import catgirlroutes.ui.clickgui.advanced.elements.AdvancedElementType
@@ -14,8 +15,8 @@ import org.lwjgl.input.Mouse
  *
  * @author Aton
  */
-class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module) :
-    AdvancedElement<DummySetting>(parent, module, DummySetting("KeyBind"), AdvancedElementType.KEY_BIND) {
+class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module, setting: KeyBindSetting) :
+    AdvancedElement<KeyBindSetting>(parent, module, setting, AdvancedElementType.KEY_BIND) {
 
     private val keyBlackList = intArrayOf()
 
@@ -25,10 +26,10 @@ class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module) :
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Int {
         val displayName = "Key Bind"
 
-        val keyName = if (module.keyCode > 0)
-            Keyboard.getKeyName(module.keyCode) ?: "Err"
-        else if (module.keyCode < 0)
-            Mouse.getButtonName(module.keyCode + 100)
+        val keyName = if (setting.value.key > 0)
+            Keyboard.getKeyName(setting.value.key) ?: "Err"
+        else if (setting.value.key < 0)
+            Mouse.getButtonName(setting.value.key + 100)
         else
             ".."
         val displayValue = "[$keyName]"
@@ -48,7 +49,7 @@ class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module) :
             listening = !listening
             return true
         } else if (listening) {
-            module.keyCode = -100 + mouseButton
+            setting.value.key = -100 + mouseButton
             listening = false
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton)
@@ -60,12 +61,12 @@ class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module) :
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (listening) {
             if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_BACK) {
-                module.keyCode = Keyboard.KEY_NONE
+                setting.value.key = Keyboard.KEY_NONE
                 listening = false
             } else if (keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
                 listening = false
             } else if (!keyBlackList.contains(keyCode)) {
-                module.keyCode = keyCode
+                setting.value.key = keyCode
                 listening = false
             }
             return true

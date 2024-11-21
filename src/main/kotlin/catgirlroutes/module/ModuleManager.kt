@@ -4,7 +4,7 @@ import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
-import catgirlroutes.module.impl.misc.ZpewRecode
+import catgirlroutes.module.impl.misc.Zpew
 import catgirlroutes.module.impl.player.AutoSprint
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.impl.player.HClip
@@ -14,6 +14,7 @@ import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.DungeonESP
 import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
+import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
 import catgirlroutes.utils.AutoRouteUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -56,7 +57,7 @@ object ModuleManager {
         StonkSwap,
         StormClip,
         AutoLeap,
-        ZpewRecode,
+        Zpew,
 
         // Misc
         F7sim,
@@ -77,6 +78,14 @@ object ModuleManager {
 
     )
 
+    init {
+        for (module in modules) {
+            module.keybinding.let {
+                module.register(KeyBindSetting("Key Bind", it, description = "Toggles the module"))
+            }
+        }
+    }
+
     /**
      * Loads in all modules and their elements.
      *
@@ -89,7 +98,9 @@ object ModuleManager {
      * This step is required before the config is loaded.
      */
     fun loadModules() {
-        modules.forEach { it.loadModule() }
+        modules.forEach {
+            it.loadModule()
+        }
     }
 
     /**
@@ -109,7 +120,14 @@ object ModuleManager {
      */
     @SubscribeEvent
     fun activateModuleKeyBinds(event: PreKeyInputEvent) {
-        modules.stream().filter { module -> module.keyCode == event.key }.forEach { module -> module.onKeyBind() }
+//        modules.stream().filter { module -> module.keyCode == event.key }.forEach { module -> module.onKeyBind() }
+        for (module in modules) {
+            for (setting in module.settings) {
+                if (setting is KeyBindSetting && setting.value.key == event.key) {
+                    setting.value.onPress?.invoke();
+                }
+            }
+        }
     }
 
     /**
@@ -119,7 +137,14 @@ object ModuleManager {
      */
     @SubscribeEvent
     fun activateModuleMouseBinds(event: PreMouseInputEvent) {
-        modules.stream().filter { module -> module.keyCode + 100 == event.button }.forEach { module -> module.onKeyBind() }
+//        modules.stream().filter { module -> module.keyCode + 100 == event.button }.forEach { module -> module.onKeyBind() }
+        for (module in modules) {
+            for (setting in module.settings) {
+                if (setting is KeyBindSetting && setting.value.key + 100 == event.button) {
+                    setting.value.onPress?.invoke();
+                }
+            }
+        }
     }
 
     fun getModuleByName(name: String): Module? {

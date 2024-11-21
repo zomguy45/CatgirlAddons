@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting
+import catgirlroutes.module.settings.impl.Keybinding
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.ChatUtils
 import com.google.gson.annotations.Expose
@@ -100,15 +101,12 @@ abstract class Module(
     @SerializedName("name")
     val name: String
 
-    /**
-     * Key code of the corresponding key bind.
-     * Mouse binds will be negative: -100 + mouse button.
-     * This is the same way as minecraft treats mouse binds.
-     */
-    @Expose
-    @SerializedName("key")
-    var keyCode: Int
     val category: Category
+
+    /**
+     * Main keybinding of the module
+     */
+    val keybinding: Keybinding = keyCode.let { Keybinding(it).apply { onPress = ::onKeyBind } }
 
     /**
      * Do NOT set this value directly, use [toggle()][toggle] instead!
@@ -130,7 +128,6 @@ abstract class Module(
 
     init {
         this.name = name
-        this.keyCode = keyCode
         this.category = category
         this.settings = settings
         this.description = description
