@@ -58,8 +58,6 @@ object ModuleManager {
         // Misc
         F7sim,
         CatMode,
-        Zpew,
-        ZpewRecode,
 
         // Player
         AutoSprint,
