@@ -32,11 +32,11 @@ object ZpewRecode : Module(
     name = "ZpewRecode",
     category = Category.DUNGEON
 ) {
-    private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false);
-    private val sound: StringSelectorSetting;
-    private val customSound: StringSetting = StringSetting("Custom Sound", "note.pling", description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.");
+    private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
+    private val sound: StringSelectorSetting
+    private val customSound: StringSetting = StringSetting("Custom Sound", "note.pling", description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.")
 
-    private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1);
+    private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1)
 
     init {
         val soundOptions = arrayListOf(
@@ -47,20 +47,20 @@ object ZpewRecode : Module(
             "random.break",
             "mob.guardian.land.hit",
             "Custom"
-        );
-        sound = StringSelectorSetting("Sound", "note.pling", soundOptions, description = "Sound selection.");
+        )
+        sound = StringSelectorSetting("Sound", "note.pling", soundOptions, description = "Sound selection.")
 
-        addSettings(dingdingding, sound, customSound, pitch);
+        addSettings(dingdingding, sound, customSound, pitch)
     }
 
-    private const val FAILWATCHPERIOD: Int = 20;
-    private const val MAXFAILSPERFAILPERIOD: Int = 3;
-    private const val MAXQUEUEDPACKETS: Int = 3;
+    private const val FAILWATCHPERIOD: Int = 20
+    private const val MAXFAILSPERFAILPERIOD: Int = 3
+    private const val MAXQUEUEDPACKETS: Int = 3
 
     private var updatePosition = true
     private val recentlySentC06s = mutableListOf<SentC06>()
     private val recentFails = mutableListOf<Long>()
-    private val blackListedBlocks = arrayListOf(Blocks.chest, Blocks.trapped_chest, Blocks.enchanting_table, Blocks.hopper, Blocks.furnace, Blocks.crafting_table);
+    private val blackListedBlocks = arrayListOf(Blocks.chest, Blocks.trapped_chest, Blocks.enchanting_table, Blocks.hopper, Blocks.furnace, Blocks.crafting_table)
 
     private var lastPitch: Float = 0f
     private var lastYaw: Float = 0f
@@ -70,11 +70,11 @@ object ZpewRecode : Module(
     private var isSneaking: Boolean = false
 
     private fun checkAllowedFails(): Boolean {
-        if (recentlySentC06s.size >= MAXQUEUEDPACKETS) return false;
+        if (recentlySentC06s.size >= MAXQUEUEDPACKETS) return false
 
-        while (recentFails.size != 0 && System.currentTimeMillis() - recentFails[0] > FAILWATCHPERIOD * 1000) recentFails.removeFirst();
+        while (recentFails.size != 0 && System.currentTimeMillis() - recentFails[0] > FAILWATCHPERIOD * 1000) recentFails.removeFirst()
 
-        return recentFails.size < MAXFAILSPERFAILPERIOD;
+        return recentFails.size < MAXFAILSPERFAILPERIOD
     }
 
     private fun doZeroPingEtherWarp() {
@@ -86,10 +86,10 @@ object ZpewRecode : Module(
         )
         if (!etherBlock.succeeded || etherBlock.pos == null) return
 
-        val pos: BlockPos = etherBlock.pos!!;
-        val x: Double = pos.x.toDouble() + 0.5;
-        val y: Double = pos.y.toDouble() + 1.05;
-        val z: Double = pos.z.toDouble() + 0.5;
+        val pos: BlockPos = etherBlock.pos!!
+        val x: Double = pos.x.toDouble() + 0.5
+        val y: Double = pos.y.toDouble() + 1.05
+        val z: Double = pos.z.toDouble() + 0.5
 
         var yaw = lastYaw
         val pitch = lastPitch
@@ -105,7 +105,7 @@ object ZpewRecode : Module(
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
 
-        if (this.dingdingding.enabled) playLoudSound(getSound(), 100f, this.pitch.value.toFloat());
+        if (this.dingdingding.enabled) playLoudSound(getSound(), 100f, this.pitch.value.toFloat())
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
@@ -136,9 +136,9 @@ object ZpewRecode : Module(
         if (!isSneaking || mc.thePlayer.heldItem.skyblockID != "ASPECT_OF_THE_VOID" || getBlockPlayerIsLookingAt() in blackListedBlocks) return
 
         if(!checkAllowedFails()) {
-            chatMessage("§cZero ping etherwarp teleport aborted.");
-            chatMessage("§c${recentFails.size} fails last ${FAILWATCHPERIOD}s");
-            chatMessage("§c${recentlySentC06s.size} C06's queued currently");
+            chatMessage("§cZero ping etherwarp teleport aborted.")
+            chatMessage("§c${recentFails.size} fails last ${FAILWATCHPERIOD}s")
+            chatMessage("§c${recentlySentC06s.size} C06's queued currently")
             return
         }
 
@@ -170,8 +170,8 @@ object ZpewRecode : Module(
     @SubscribeEvent
     fun onC0B(event: PacketSentEvent) {
         if (event.packet !is C0BPacketEntityAction || !inSkyblock) return
-        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true;
-        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false;
+        if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true
+        if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false
     }
 
     @SubscribeEvent
@@ -209,17 +209,17 @@ object ZpewRecode : Module(
             event.isCanceled = true
             return
         }
-        devMessage("Failed");
-        recentFails.add(System.currentTimeMillis());
-        while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst();
+        devMessage("Failed")
+        recentFails.add(System.currentTimeMillis())
+        while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst()
     }
 
     @SubscribeEvent
     fun onS29(event: PacketReceivedEvent) {
         if (event.packet !is S29PacketSoundEffect) return
-        val packet: S29PacketSoundEffect = event.packet as S29PacketSoundEffect; // I don't think it should be like that in kt lol
-        if (packet.soundName != "mob.enderdragon.hit" || packet.volume != 1f || packet.pitch != 0.53968257f || !checkAllowedFails()) return;
-        event.isCanceled = true;
+        val packet: S29PacketSoundEffect = event.packet as S29PacketSoundEffect // I don't think it should be like that in kt lol
+        if (packet.soundName != "mob.enderdragon.hit" || packet.volume != 1f || packet.pitch != 0.53968257f || !checkAllowedFails()) return
+        event.isCanceled = true
     }
 
     /**
