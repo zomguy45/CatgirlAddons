@@ -5,8 +5,8 @@ import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.misc.ZpewRecode
-import catgirlroutes.module.impl.misc.ZpewRecode.recentlySentC06s
+import catgirlroutes.module.impl.misc.Zpew
+import catgirlroutes.module.impl.misc.Zpew.recentlySentC06s
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import kotlinx.coroutines.processNextEventInCurrentThread
