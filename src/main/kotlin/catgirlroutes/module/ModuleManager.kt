@@ -4,6 +4,7 @@ import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
+import catgirlroutes.module.impl.misc.ZpewRecode
 import catgirlroutes.module.impl.player.AutoSprint
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.impl.player.HClip
@@ -54,6 +55,7 @@ object ModuleManager {
         StonkSwap,
         StormClip,
         AutoLeap,
+        ZpewRecode,
 
         // Misc
         F7sim,

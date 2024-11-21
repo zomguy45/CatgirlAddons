@@ -82,9 +82,9 @@ object ZpewRecode : Module(
 
     private fun doZeroPingEtherWarp() {
         val etherBlock = EtherWarpHelper.getEtherPos(
-            Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ),
-            mc.thePlayer.rotationYaw,
-            mc.thePlayer.rotationPitch,
+            Vec3(lastX, lastY, lastZ),
+            lastYaw,
+            lastPitch,
             57.0
         )
         if (!etherBlock.succeeded || etherBlock.pos == null) return
@@ -200,8 +200,8 @@ object ZpewRecode : Module(
         debugMessage(sentC06)
 
         val isCorrect = (
-                (isWithinTolerance(newYaw, sentC06.yaw) || newYaw == 0f) &&
-                (isWithinTolerance(newPitch, sentC06.pitch) || newPitch == 0f) &&
+                (isWithinTolerance(sentC06.yaw, newYaw) || newYaw == 0f) &&
+                (isWithinTolerance(sentC06.pitch, newPitch) || newPitch == 0f) &&
                 newX == sentC06.x &&
                 newY == sentC06.y &&
                 newZ == sentC06.z
