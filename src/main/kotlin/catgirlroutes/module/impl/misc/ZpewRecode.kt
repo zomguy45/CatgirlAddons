@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.CatgirlRoutes.Companion.onHypixel
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
@@ -14,6 +15,8 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import me.odinmain.events.impl.PacketReceivedEvent
 import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.skyblockID
@@ -59,7 +62,7 @@ object ZpewRecode : Module(
     private const val MAXQUEUEDPACKETS: Int = 3
 
     private var updatePosition = true
-    private val recentlySentC06s = mutableListOf<SentC06>()
+    val recentlySentC06s = mutableListOf<SentC06>()
     private val recentFails = mutableListOf<Long>()
     private val blackListedBlocks = arrayListOf(Blocks.chest, Blocks.trapped_chest, Blocks.enchanting_table, Blocks.hopper, Blocks.furnace, Blocks.crafting_table)
 
@@ -180,6 +183,7 @@ object ZpewRecode : Module(
     @SubscribeEvent
     fun onS08(event: ReceivePacketEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
+        if (inBoss || !onHypixel) return
         if (recentlySentC06s.isEmpty()) return
 
         val sentC06 = recentlySentC06s[0]
@@ -190,14 +194,6 @@ object ZpewRecode : Module(
         val newX = event.packet.x
         val newY = event.packet.y
         val newZ = event.packet.z
-
-        debugMessage("newYaw: $newYaw") // probably should add debugmode or something and send debug messages instead
-        debugMessage("newPitch: $newPitch")
-        debugMessage("newX: $newX")
-        debugMessage("newY: $newY")
-        debugMessage("newZ: $newZ")
-
-        debugMessage(sentC06)
 
         val isCorrect = (
                 (isWithinTolerance(sentC06.yaw, newYaw) || newYaw == 0f) &&
@@ -212,6 +208,12 @@ object ZpewRecode : Module(
             event.isCanceled = true
             return
         }
+        debugMessage("newYaw: $newYaw") // probably should add debugmode or something and send debug messages instead
+        debugMessage("newPitch: $newPitch")
+        debugMessage("newX: $newX")
+        debugMessage("newY: $newY")
+        debugMessage("newZ: $newZ")
+        debugMessage(sentC06)
         debugMessage("Failed")
         recentFails.add(System.currentTimeMillis())
         while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst()

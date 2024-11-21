@@ -15,6 +15,7 @@ import catgirlroutes.module.impl.render.DungeonESP
 import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.ui.hud.EditHudGUI
+import catgirlroutes.utils.AutoRouteUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 
@@ -60,6 +61,7 @@ object ModuleManager {
         // Misc
         F7sim,
         CatMode,
+        //AutoRouteUtils,
 
         // Player
         AutoSprint,
