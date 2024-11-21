@@ -1,4 +1,4 @@
-
+package catgirlroutes.module.impl.player
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.MovementUpdateEvent
 import catgirlroutes.module.Category
@@ -13,7 +13,7 @@ import kotlin.math.sin
 
 object HClip : Module(
     "HClip",
-    category = Category.MISC,
+    category = Category.PLAYER,
     description = "Boosts you forward when key bind is pressed"
 ){
     private var pendingHClip = false

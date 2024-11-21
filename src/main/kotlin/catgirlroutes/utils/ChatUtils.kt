@@ -70,6 +70,17 @@ object ChatUtils {
     }
 
     /**
+     * Gets selected mod prefix in [ClickGui]
+     */
+    private fun getPrefix(): String {
+        return when (ClickGui.prefixStyle.index) {
+            0 -> CatgirlRoutes.CHAT_PREFIX;
+            1 -> CatgirlRoutes.SHORT_PREFIX
+            else -> reformatString( ClickGui.customPrefix.text)
+        }
+    }
+
+    /**
      * Remove control codes from the [receiver][String] with the [vanilla function][StringUtils.stripControlCodes] for it.
      */
     fun String.stripControlCodes(): String {
@@ -81,8 +92,8 @@ object ChatUtils {
      * @param reformat Replace the "&" in formatting strings with "§".
      * @see chatMessage
      */
-    fun modMessage(message: Any?, prefix: String = "${CatgirlRoutes.CHAT_PREFIX} §8»§r ", chatStyle: ChatStyle? = null) {
-        val chatComponent = ChatComponentText("$prefix$message")
+    fun modMessage(message: Any?, prefix: String = getPrefix(), chatStyle: ChatStyle? = null) {
+        val chatComponent = ChatComponentText("$prefix §8»§r $message")
         chatStyle?.let { chatComponent.setChatStyle(it) } // Set chat style using setChatStyle method
         runOnMCThread { mc.thePlayer?.addChatMessage(chatComponent) }
     }
@@ -92,13 +103,7 @@ object ChatUtils {
      * @see chatMessage
      */
     fun modMessage(iChatComponent: IChatComponent) = chatMessage(
-        ChatComponentText(
-            when (ClickGui.prefixStyle.index) {
-                0 -> CatgirlRoutes.CHAT_PREFIX;
-                1 -> CatgirlRoutes.SHORT_PREFIX
-                else -> reformatString( ClickGui.customPrefix.text)
-            } + " "
-        ).appendSibling(iChatComponent)
+        ChatComponentText(getPrefix() + " ").appendSibling(iChatComponent)
     )
 
     /**
@@ -127,7 +132,16 @@ object ChatUtils {
      */
     fun devMessage(message: Any?) {
         if (!ClickGui.devMode.enabled) return;
-        modMessage(message, prefix = "§5[§dCga§cDev§5] §8»§r")
+        modMessage(message, prefix = "§5[§dCga§cDev§5]")
+    }
+
+    /**
+     * Print a message in chat if debugMode is enabled
+     * @see chatMessage
+     */
+    fun debugMessage(message: Any?) {
+        if (!ClickGui.debugMode.enabled) return;
+        modMessage(message, prefix = "§5[§dCga§fDebug§5]")
     }
 
     /**

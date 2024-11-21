@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.dungeons
+package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.PacketSentEvent
@@ -20,7 +20,7 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object Zpew : Module(
-    name = "Zpew",
+    name = "Zpew DO NOT USE",
     category = Category.MISC
 ) {
     private var lastYaw = 0f
@@ -133,7 +133,7 @@ object Zpew : Module(
 
         val held =  mc.thePlayer.heldItem.skyblockID
         if (held != "ASPECT_OF_THE_VOID") return
-        if (!isSneaking) return 
+        if (!isSneaking) return
 
         doZeroPingEtherWarp(lastYaw, lastPitch)
     }

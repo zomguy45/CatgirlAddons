@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc
+package catgirlroutes.module.impl.player
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
@@ -13,7 +13,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
  */
 object AutoSprint : Module(
     "Auto Sprint",
-    category = Category.MISC,
+    category = Category.PLAYER,
     description = "A simple auto sprint module."
 ){
     @SubscribeEvent

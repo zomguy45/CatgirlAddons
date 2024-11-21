@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.misc
+package catgirlroutes.module.impl.dungeons
 
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
@@ -15,7 +15,7 @@ import org.lwjgl.input.Mouse
 
 object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls maybeidk
     "Ghost Blocks",
-    category = Category.MISC,
+    category = Category.DUNGEON,
     description = "Creates ghost blocks where you are looking when the key bind is pressed."
 ){
     private val swingHand = BooleanSetting("Swing Hand", true, description = "Swings the player's hand.")

@@ -1,4 +1,4 @@
-package catgirlroutes.module.impl.dungeons
+package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.PacketSentEvent
@@ -10,9 +10,10 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.chatMessage
-import catgirlroutes.utils.ChatUtils.devMessage
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.LocationManager.inSkyblock
+import catgirlroutes.utils.Island
+import catgirlroutes.utils.LocationManager
 import me.odinmain.events.impl.PacketReceivedEvent
 import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.skyblockID
@@ -30,7 +31,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object ZpewRecode : Module(
     name = "ZpewRecode",
-    category = Category.DUNGEON
+    category = Category.MISC
 ) {
     private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
     private val sound: StringSelectorSetting
@@ -70,6 +71,8 @@ object ZpewRecode : Module(
     private var isSneaking: Boolean = false
 
     private fun checkAllowedFails(): Boolean {
+        if(LocationManager.currentArea.isArea(Island.SinglePlayer)) return true;
+
         if (recentlySentC06s.size >= MAXQUEUEDPACKETS) return false
 
         while (recentFails.size != 0 && System.currentTimeMillis() - recentFails[0] > FAILWATCHPERIOD * 1000) recentFails.removeFirst()
@@ -105,7 +108,7 @@ object ZpewRecode : Module(
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
 
-        if (this.dingdingding.enabled) playLoudSound(getSound(), 100f, this.pitch.value.toFloat())
+        if (dingdingding.enabled) playLoudSound(getSound(), 100f, ZpewRecode.pitch.value.toFloat())
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
@@ -169,7 +172,7 @@ object ZpewRecode : Module(
 
     @SubscribeEvent
     fun onC0B(event: PacketSentEvent) {
-        if (event.packet !is C0BPacketEntityAction || !inSkyblock) return
+        if (event.packet !is C0BPacketEntityAction) return
         if (event.packet.action == C0BPacketEntityAction.Action.START_SNEAKING) isSneaking = true
         if (event.packet.action == C0BPacketEntityAction.Action.STOP_SNEAKING) isSneaking = false
     }
@@ -188,13 +191,13 @@ object ZpewRecode : Module(
         val newY = event.packet.y
         val newZ = event.packet.z
 
-        devMessage("newYaw: $newYaw") // probably should add debugmode or something and send debug messages instead
-        devMessage("newPitch: $newPitch")
-        devMessage("newX: $newX")
-        devMessage("newY: $newY")
-        devMessage("newZ: $newZ")
+        debugMessage("newYaw: $newYaw") // probably should add debugmode or something and send debug messages instead
+        debugMessage("newPitch: $newPitch")
+        debugMessage("newX: $newX")
+        debugMessage("newY: $newY")
+        debugMessage("newZ: $newZ")
 
-        devMessage(sentC06)
+        debugMessage(sentC06)
 
         val isCorrect = (
                 (isWithinTolerance(newYaw, sentC06.yaw) || newYaw == 0f) &&
@@ -205,11 +208,11 @@ object ZpewRecode : Module(
                 )
 
         if (isCorrect) {
-            devMessage("Correct")
+            debugMessage("Correct")
             event.isCanceled = true
             return
         }
-        devMessage("Failed")
+        debugMessage("Failed")
         recentFails.add(System.currentTimeMillis())
         while (recentlySentC06s.size > 0) recentlySentC06s.removeFirst()
     }
@@ -226,10 +229,10 @@ object ZpewRecode : Module(
      * Returns the sound from the selector setting, or the custom sound when the last element is selected
      */
     private fun getSound(): String {
-        return if (this.sound.index < this.sound.options.size - 1)
-            this.sound.selected
+        return if (sound.index < sound.options.size - 1)
+            sound.selected
         else
-            this.customSound.text
+            customSound.text
     }
 
     private var shouldBypassVolume: Boolean = false // todo: move to PlayerUtils I think
