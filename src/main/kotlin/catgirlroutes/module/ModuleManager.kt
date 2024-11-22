@@ -54,7 +54,6 @@ object ModuleManager {
         LavaClip,
         SecretChime,
         ScanTest,
-        StonkSwap,
         StormClip,
         AutoLeap,
         Zpew,

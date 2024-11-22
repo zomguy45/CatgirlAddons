@@ -75,13 +75,13 @@ class ModuleConfig(path: File) {
                         if (configSetting == null) continue
                         val setting = module.getSettingByName(configSetting.name) ?: continue
                         when (setting) {
-                            is BooleanSetting -> setting.enabled = (configSetting as BooleanSetting).enabled
-                            is NumberSetting -> setting.value = (configSetting as NumberSetting).value
-                            is ColorSetting -> setting.value = Color((configSetting as NumberSetting).value.toInt(), true)
-                            is StringSelectorSetting -> setting.selected = (configSetting as StringSetting).text
-                            is SelectorSetting -> setting.selected = (configSetting as StringSetting).text
-                            is StringSetting -> setting.text = (configSetting as StringSetting).text
-                            is KeyBindSetting -> setting.value = (configSetting as KeyBindSetting).value
+                            is BooleanSetting ->            if (configSetting is BooleanSetting) setting.enabled = configSetting.enabled
+                            is NumberSetting ->             if (configSetting is NumberSetting) setting.value = configSetting.value
+                            is ColorSetting ->              if (configSetting is NumberSetting) setting.value = Color(configSetting.value.toInt(), true)
+                            is StringSelectorSetting ->     if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is SelectorSetting ->           if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is StringSetting ->             if (configSetting is StringSetting) setting.text = configSetting.text
+                            is KeyBindSetting ->            if (configSetting is KeyBindSetting) setting.value = configSetting.value
                         }
                     }
                 }

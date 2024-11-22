@@ -13,8 +13,8 @@ import catgirlroutes.module.settings.Visibility
 class BooleanSetting (
     name: String,
     override val default: Boolean = false,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
+    visibility: Visibility = Visibility.VISIBLE,
 ): Setting<Boolean>(name, visibility, description) {
 
     override var value: Boolean = default

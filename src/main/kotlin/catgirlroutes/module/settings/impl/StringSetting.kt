@@ -13,8 +13,8 @@ class StringSetting(
     name: String,
     override val default: String = "",
     val length: Int = 30,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
+    visibility: Visibility = Visibility.VISIBLE,
 ) : Setting<String>(name, visibility, description) {
 
     override var value: String = default
