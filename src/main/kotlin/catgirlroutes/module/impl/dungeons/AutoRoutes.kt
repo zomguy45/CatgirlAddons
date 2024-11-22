@@ -270,7 +270,8 @@ object AutoRoutes : Module(
         NodeManager.nodes.forEach { n ->
             val realLocation = room.getRealCoords(node.location)
             if (realLocation.xCoord == pos.x.toDouble() && realLocation.yCoord == pos.y.toDouble() + 1.0 && realLocation.zCoord == pos.z.toDouble()) {
-                nextYaw = node.yaw
+                val room2 = currentFullRoom ?: return nextNode(null, null, null, null, null, false)
+                nextYaw = room2.getRealYaw(node.yaw)
                 nextPitch = node.pitch
                 hasNode = true
             }
