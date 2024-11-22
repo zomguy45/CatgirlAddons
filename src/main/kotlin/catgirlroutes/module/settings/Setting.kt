@@ -21,8 +21,8 @@ import kotlin.reflect.full.hasAnnotation
  */
 abstract class Setting<T>(
     val name: String,
-    val visibility: Visibility = Visibility.VISIBLE,
     var description: String? = null,
+    val visibility: Visibility = Visibility.VISIBLE,
 ) : ReadWriteProperty<Module, T>, PropertyDelegateProvider<Module, ReadWriteProperty<Module,T>> {
     protected var visibilityDependency: () -> Boolean = { true }
 
@@ -104,7 +104,7 @@ abstract class Setting<T>(
         Almost like with a lambda function in the constructor (which would not be a good choice here).
          </br>
         */
-        fun <K: Setting<*>> K.withDependency(dependency: () -> Boolean): K { // todo: make in work with advanced menu maybe (or I'm doing something wrong idk)
+        fun <K: Setting<*>> K.withDependency(dependency: () -> Boolean): K {
             visibilityDependency = dependency
             return this
         }

@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import org.lwjgl.input.Keyboard
@@ -27,18 +28,19 @@ object ClickGui: Module(
 
     val design: StringSelectorSetting
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
-    val color = ColorSetting("Color", Color(255,200,0), false, description = "Color theme in the gui.")
-    val colorSettingMode = StringSelectorSetting("Color Mode", "HSB", arrayListOf("HSB", "RGB"), description = "Mode for all color settings in the gui. Changes the way colors are put in.")
+    val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.")
+    val colorSettingMode = StringSelectorSetting("Color Mode", "HSB", arrayListOf("HSB", "RGB"), "Mode for all color settings in the gui. Changes the way colors are put in.")
 
     val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", description = "Name that will be rendered in the gui.")
-    val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), description = "Chat prefix selection for mod messages.")
+    val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
     val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.")
 
-    val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode", Visibility.ADVANCED_ONLY)
-    val debugMode: BooleanSetting = BooleanSetting("Debug Mode", false, "Toggles debug mode", Visibility.ADVANCED_ONLY)
-    val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel", Visibility.ADVANCED_ONLY)
-    val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock", Visibility.ADVANCED_ONLY)
-    val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon", Visibility.ADVANCED_ONLY)
+    val devSettings: BooleanSetting = BooleanSetting("Dev Settings", false, "Expands Developer settings", Visibility.CLICK_GUI_ONLY)
+    val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency { devSettings.enabled }
+    val debugMode: BooleanSetting = BooleanSetting("Debug Mode", false, "Toggles debug mode").withDependency { devSettings.enabled }
+    val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel").withDependency { devSettings.enabled }
+    val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock").withDependency { devSettings.enabled }
+    val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency { devSettings.enabled }
 
     val showUsageInfo = BooleanSetting("Usage Info", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
 
@@ -49,8 +51,8 @@ object ClickGui: Module(
     private const val pwidth = 120.0
     private const val pheight = 15.0
 
-    val panelWidth: NumberSetting  = NumberSetting("Panel width", default = pwidth, visibility = Visibility.HIDDEN)
-    val panelHeight: NumberSetting = NumberSetting("Panel height", default = pheight, visibility = Visibility.HIDDEN)
+    val panelWidth: NumberSetting  = NumberSetting("Panel width", pwidth, visibility = Visibility.HIDDEN)
+    val panelHeight: NumberSetting = NumberSetting("Panel height", pheight, visibility = Visibility.HIDDEN)
 
     const val advancedRelWidth = 0.5
     const val advancedRelHeight = 0.5
@@ -62,7 +64,7 @@ object ClickGui: Module(
         val options = java.util.ArrayList<String>()
         options.add("JellyLike")
         options.add("New")
-        design = StringSelectorSetting("Design","JellyLike", options, description = "Design theme of the gui.")
+        design = StringSelectorSetting("Design","JellyLike", options, "Design theme of the gui.")
 
         addSettings(
             design,
@@ -74,6 +76,7 @@ object ClickGui: Module(
             prefixStyle,
             customPrefix,
 
+            devSettings,
             devMode,
             debugMode,
             forceHypixel,
@@ -95,7 +98,7 @@ object ClickGui: Module(
             panelHeight
         )
 
-        for(category in Category.values()) {
+        for(category in Category.entries) {
             addSettings(
                 panelX[category]!!,
                 panelY[category]!!,
@@ -107,17 +110,17 @@ object ClickGui: Module(
     /**
      * Adds if missing and sets the default click gui positions for the category panels.
      */
-    fun resetPositions() {
+    private fun resetPositions() {
         panelWidth.value = pwidth
         panelHeight.value = pheight
 
         var px = 10.0
         val py = 10.0
         val pxplus = panelWidth.value + 10
-        for(category in Category.values()) {
-            panelX.getOrPut(category) { NumberSetting(category.name + ",x", default = px, visibility = Visibility.HIDDEN) }.value = px
-            panelY.getOrPut(category) { NumberSetting(category.name + ",y", default = py, visibility = Visibility.HIDDEN) }.value = py
-            panelExtended.getOrPut(category) { BooleanSetting(category.name + ",extended", default = true, visibility = Visibility.HIDDEN) }.enabled = true
+        for(category in Category.entries) {
+            panelX.getOrPut(category) { NumberSetting(category.name + ",x", px, visibility = Visibility.HIDDEN) }.value = px
+            panelY.getOrPut(category) { NumberSetting(category.name + ",y", py, visibility = Visibility.HIDDEN) }.value = py
+            panelExtended.getOrPut(category) { BooleanSetting(category.name + ",extended", true, visibility = Visibility.HIDDEN) }.enabled = true
             px += pxplus
         }
 

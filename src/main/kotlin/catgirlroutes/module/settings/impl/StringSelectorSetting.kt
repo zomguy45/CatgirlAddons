@@ -9,9 +9,9 @@ class StringSelectorSetting(
     name: String,
     private val defaultSelected: String,
     var options: ArrayList<String>,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-) : Setting<Int>(name, visibility, description){
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<Int>(name, description, visibility){
 
     override val default: Int = optionIndex(defaultSelected)
     override var value: Int

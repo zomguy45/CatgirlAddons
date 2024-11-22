@@ -11,10 +11,10 @@ import catgirlroutes.module.settings.Visibility
  */
 class ActionSetting(
     name: String,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-    override val default: () -> Unit = {}
-) : Setting<() -> Unit>(name, visibility, description) {
+    override val default: () -> Unit = {},
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<() -> Unit>(name, description, visibility) {
 
     override var value: () -> Unit = default
 

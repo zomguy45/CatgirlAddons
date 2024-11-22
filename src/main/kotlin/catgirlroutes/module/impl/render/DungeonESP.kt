@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.render
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
@@ -27,26 +28,27 @@ object DungeonESP: Module(
     category = Category.RENDER,
     description = "Esp for anything in dungeons."
 ){
-    private val boxWidth = NumberSetting("Box Width",0.9,0.1,2.0,0.05, description = "Width of the esp box in units of blocks.")
-    private val defaultLineWidth = NumberSetting("Default LW",1.0,0.1,10.0,0.1, description = "Default line width of the esp box.")
-    private val specialLineWidth = NumberSetting("Special Mob LW",2.0,0.1,10.0,0.1, description = "Line width of the esp box for special mobs like Fel and Withermancer.")
-    private val miniLineWidth = NumberSetting("Mini Boss LW",3.0,0.1,10.0,0.1, description = "Line width of the esp box for Mini Bosses.")
+    private val boxWidth = NumberSetting("Box Width",0.9,0.1,2.0,0.05, "Width of the esp box in units of blocks.")
+    private val defaultLineWidth = NumberSetting("Default LW",1.0,0.1,10.0,0.1, "Default line width of the esp box.")
+    private val specialLineWidth = NumberSetting("Special Mob LW",2.0,0.1,10.0,0.1, "Line width of the esp box for special mobs like Fel and Withermancer.")
+    private val miniLineWidth = NumberSetting("Mini Boss LW",3.0,0.1,10.0,0.1, "Line width of the esp box for Mini Bosses.")
 
-    private val espStyle = StringSelectorSetting("Esp style","3D", arrayListOf("3D", "2D"), description = "Esp render style to be used.")
+    private val espStyle = StringSelectorSetting("Esp style","3D", arrayListOf("3D", "2D"), "Esp render style to be used.")
 
-    private val showStarMobs = BooleanSetting("Star Mobs", true, description = "Render star mob ESP.")
-    private val showFelHead = BooleanSetting("Fel Head", true, description = "Render a box around Fel heads. This box can not be seen through walls.")
-    private val showBat = BooleanSetting("Bat ESP", true, description = "Render the bat ESP")
+    private val showStarMobs = BooleanSetting("Star Mobs", false, "Render star mob ESP.")
+    private val showFelHead = BooleanSetting("Fel Head", false,"Render a box around Fel heads. This box can not be seen through walls.")
+    private val showBat = BooleanSetting("Bat ESP", false, "Render the bat ESP")
+    private val showKey = BooleanSetting("Key ESP", false, "Render key ESP")
 
-    private val colorStar = ColorSetting("Star Mob Color", Color(255, 0, 0), false, description = "ESP color for star mobs.")
-    private val colorMini = ColorSetting("Mini Boss Color", Color(255, 255, 0), false, description = "ESP color for all Mini Bosses except Shadow Assassins.")
+    private val colorStar = ColorSetting("Star Mob Color", Color(255, 0, 0), false, "ESP color for star mobs.").withDependency { showStarMobs.enabled }
+    private val colorMini = ColorSetting("Mini Boss Color", Color(255, 255, 0), false, "ESP color for all Mini Bosses except Shadow Assassins.").withDependency { showStarMobs.enabled }
+    private val colorShadowAssassin = ColorSetting("SA Color", Color(255, 0, 255), false, "ESP color for Shadow Assassins.").withDependency { showStarMobs.enabled }
+    private val colorFel = ColorSetting("Fel Color", Color(0, 255, 255), false, "ESP color for star Fel.").withDependency { showStarMobs.enabled }
+    private val colorWithermancer = ColorSetting("Withermancer Color", Color(255, 255, 0), false, "ESP color for star Withermancer.").withDependency { showStarMobs.enabled }
 
-    private val colorShadowAssassin = ColorSetting("SA Color", Color(255, 0, 255), false, description = "ESP color for Shadow Assassins.")
-    private val colorFel = ColorSetting("Fel Color", Color(0, 255, 255), false, description = "ESP color for star Fel.")
-    private val colorFelHead = ColorSetting("Fel Head Color", Color(0, 0, 255), false, description = "ESP color for Fel heads on the floor.")
-    private val colorWithermancer = ColorSetting("Withermancer Color", Color(255, 255, 0), false, description = "ESP color for star Withermancer.")
-    private val colorBat = ColorSetting("Bat Color", Color(0, 255, 0), false, description = "ESP color for bats.")
-    private val colorKey = ColorSetting("Key Color", Color(0, 0, 0), false, description = "ESP color for wither and blood key.")
+    private val colorFelHead = ColorSetting("Fel Head Color", Color(0, 0, 255), false, "ESP color for Fel heads on the floor.").withDependency { showFelHead.enabled }
+    private val colorBat = ColorSetting("Bat Color", Color(0, 255, 0), false, "ESP color for bats.").withDependency { showBat.enabled }
+    private val colorKey = ColorSetting("Key Color", Color(0, 0, 0), false, "ESP color for wither and blood key.").withDependency { showKey.enabled }
 
     init {
         this.addSettings(
@@ -60,14 +62,15 @@ object DungeonESP: Module(
             showStarMobs,
             showFelHead,
             showBat,
+            showKey,
 
             colorStar,
             colorMini,
             colorShadowAssassin,
-
             colorFel,
-            colorFelHead,
             colorWithermancer,
+
+            colorFelHead,
             colorBat,
             colorKey,
         )
@@ -92,7 +95,7 @@ object DungeonESP: Module(
         if (showStarMobs.enabled && entityName.contains("✯") && !isExcludedMob(entityName)) {
             val correspondingMob = getCorrespondingMob(entity) ?: return
             drawMobBox(correspondingMob, entityName, partialTicks)
-        } else if (entityName == "Wither Key" || entityName == "Blood Key") {
+        } else if (showKey.enabled && (entityName == "Wither Key" || entityName == "Blood Key")) {
             if (espStyle.selected == "2D") {
                 draw2DBoxByEntity(entity, colorKey.value, boxWidth.value, 1.0, partialTicks, miniLineWidth.value, true)
             } else {
@@ -104,7 +107,7 @@ object DungeonESP: Module(
     private fun handleEnderman(entity: EntityEnderman, partialTicks: Float) {
         if (showFelHead.enabled) {
             if (espStyle.selected == "2D") {
-                draw2DBoxByEntity(entity, colorKey.value, boxWidth.value, 1.0, partialTicks, specialLineWidth.value, false)
+                draw2DBoxByEntity(entity, colorFelHead.value, boxWidth.value, 1.0, partialTicks, specialLineWidth.value, false)
             } else {
                 drawBoxByEntity(entity, colorFelHead.value, boxWidth.value, 1.0, partialTicks, specialLineWidth.value, false)
             }

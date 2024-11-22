@@ -15,7 +15,7 @@ class StringSetting(
     val length: Int = 30,
     description: String? = null,
     visibility: Visibility = Visibility.VISIBLE,
-) : Setting<String>(name, visibility, description) {
+) : Setting<String>(name, description, visibility) {
 
     override var value: String = default
         set(newStr) {

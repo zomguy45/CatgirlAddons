@@ -17,9 +17,9 @@ class NumberSetting(
     val min: Double = -10000.0,
     val max: Double = 10000.0,
     val increment: Double = 1.0,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-) : Setting<Double>(name, visibility, description) {
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<Double>(name, description, visibility) {
 
     override var value: Double = default
         set(newVal) {

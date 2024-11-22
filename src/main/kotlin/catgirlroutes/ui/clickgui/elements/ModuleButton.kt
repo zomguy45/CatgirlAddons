@@ -36,7 +36,6 @@ class ModuleButton(val module: Module, val panel: Panel) {
     init {
         /** Register the corresponding gui element for all non-hidden settings in the module */
         updateElements()
-//        menuElements.add(ElementKeyBind(this, module))
     }
 
     /**

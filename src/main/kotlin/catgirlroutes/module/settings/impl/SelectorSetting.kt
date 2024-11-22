@@ -15,9 +15,9 @@ class SelectorSetting<T>( // TODO: make it use array of strings instead of enums
     name: String,
     override val default: T,
     val options: Array<out T>,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-) : Setting<T>(name, visibility, description) where T : Options, T: Enum<T> {
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<T>(name, description, visibility) where T : Options, T: Enum<T> {
 
     override var value: T = default
         set(input) {
@@ -56,11 +56,11 @@ class SelectorSetting<T>( // TODO: make it use array of strings instead of enums
  * If you want to limit the options to be a subset of the available constants, use the main constructor and specify those explicitly.
  */
 inline fun <reified L> SelectorSetting(name: String,
-                                           default: L,
-                                           visibility: Visibility = Visibility.VISIBLE,
-                                           description: String? = null
+                                       default: L,
+                                       description: String? = null,
+                                       visibility: Visibility = Visibility.VISIBLE,
 ) : SelectorSetting<L> where L : Options, L: Enum<L> =
-    SelectorSetting(name, default, enumValues(), visibility, description)
+    SelectorSetting(name, default, enumValues(), description, visibility)
 
 interface Options {
     val displayName: String

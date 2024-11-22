@@ -16,9 +16,9 @@ class ColorSetting(
     name: String,
     override val default: Color,
     var allowAlpha: Boolean = true,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-) : Setting<Color>(name, visibility, description){
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<Color>(name, description, visibility){
 
     override var value: Color = default
         set(value) {

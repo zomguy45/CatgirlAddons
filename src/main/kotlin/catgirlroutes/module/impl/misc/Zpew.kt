@@ -45,7 +45,7 @@ object Zpew : Module(
         MOB_GUARDIAN_LAND_HIT("mob.guardian.land.hit"),
         CUSTOM("Custom");
     }
-    private val soundSelector = SelectorSetting("Custom Sound", SoundOptions.NOTE_PLING, SoundOptions.entries.toTypedArray(), description = "Sound Selection").withDependency { dingdingding.enabled }
+    private val soundSelector = SelectorSetting("Custom Sound", SoundOptions.NOTE_PLING, SoundOptions.entries.toTypedArray(), "Sound Selection").withDependency { dingdingding.enabled }
     private val customSound: StringSetting = StringSetting("Custom Sound", SoundOptions.NOTE_PLING.displayName, description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding.enabled }
     private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding.enabled }
 

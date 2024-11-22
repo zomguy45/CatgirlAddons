@@ -36,8 +36,8 @@ object SecretChime : Module(
     private val customSound = StringSetting("Custom Sound", "mob.blaze.hit", description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.")
     private val dropSound: StringSelectorSetting
     private val customDropSound = StringSetting("Custom Drop Sound", "mob.blaze.hit", description = "Name of a custom sound to play for item pickups. This is used when Custom is selected in the DropSound setting.")
-    private val volume = NumberSetting("Volume", 1.0, 0.0, 1.0, 0.01, description = "Volume of the sound.")
-    private val pitch = NumberSetting("Pitch", 2.0, 0.0, 2.0, 0.01, description = "Pitch of the sound.")
+    private val volume = NumberSetting("Volume", 1.0, 0.0, 1.0, 0.01, "Volume of the sound.")
+    private val pitch = NumberSetting("Pitch", 2.0, 0.0, 2.0, 0.01, "Pitch of the sound.")
 
     private var lastPlayed = System.currentTimeMillis()
 
@@ -61,8 +61,8 @@ object SecretChime : Module(
             "mob.guardian.land.hit",
             "Custom"
         )
-        sound = StringSelectorSetting("Sound", "mob.blaze.hit", soundOptions, description = "Sound selection.")
-        dropSound = StringSelectorSetting("Drop Sound", "mob.blaze.hit", soundOptions, description = "Sound selection for item pickups.")
+        sound = StringSelectorSetting("Sound", "mob.blaze.hit", soundOptions, "Sound selection.")
+        dropSound = StringSelectorSetting("Drop Sound", "mob.blaze.hit", soundOptions, "Sound selection for item pickups.")
 
         this.addSettings(
             sound,

@@ -15,7 +15,7 @@ class BooleanSetting (
     override val default: Boolean = false,
     description: String? = null,
     visibility: Visibility = Visibility.VISIBLE,
-): Setting<Boolean>(name, visibility, description) {
+): Setting<Boolean>(name, description, visibility) {
 
     override var value: Boolean = default
         set(value) {

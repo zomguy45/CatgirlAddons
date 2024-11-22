@@ -16,9 +16,9 @@ import catgirlroutes.module.settings.Visibility
  */
 class DummySetting(
     name: String,
-    visibility: Visibility = Visibility.VISIBLE,
     description: String? = null,
-) : Setting<Any?>(name, visibility, description) {
+    visibility: Visibility = Visibility.VISIBLE,
+) : Setting<Any?>(name, description, visibility) {
     /**
      * Always is null.
      * Not intended to be used.

@@ -75,13 +75,13 @@ class ModuleConfig(path: File) {
                         if (configSetting == null) continue
                         val setting = module.getSettingByName(configSetting.name) ?: continue
                         when (setting) {
-                            is BooleanSetting ->            if (configSetting is BooleanSetting) setting.enabled = configSetting.enabled
-                            is NumberSetting ->             if (configSetting is NumberSetting) setting.value = configSetting.value
-                            is ColorSetting ->              if (configSetting is NumberSetting) setting.value = Color(configSetting.value.toInt(), true)
-                            is StringSelectorSetting ->     if (configSetting is StringSetting) setting.selected = configSetting.text
-                            is SelectorSetting ->           if (configSetting is StringSetting) setting.selected = configSetting.text
-                            is StringSetting ->             if (configSetting is StringSetting) setting.text = configSetting.text
-                            is KeyBindSetting -> if (configSetting is NumberSetting) { setting.value = Keybinding(configSetting.value.toInt()).apply { onPress = setting.value.onPress } } // fuck me I'm a nigger
+                            is BooleanSetting ->    if (configSetting is BooleanSetting) setting.enabled = configSetting.enabled
+                            is NumberSetting ->     if (configSetting is NumberSetting) setting.value = configSetting.value
+                            is ColorSetting ->      if (configSetting is NumberSetting) setting.value = Color(configSetting.value.toInt(), true)
+                            is StringSelectorSetting -> if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is SelectorSetting ->   if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is StringSetting ->     if (configSetting is StringSetting) setting.text = configSetting.text
+                            is KeyBindSetting ->    if (configSetting is NumberSetting) { setting.value = Keybinding(configSetting.value.toInt()).apply { onPress = setting.value.onPress } } // fuck me I'm a nigger
                         }
                     }
                 }

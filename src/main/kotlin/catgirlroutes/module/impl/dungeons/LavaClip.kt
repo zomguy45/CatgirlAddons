@@ -19,7 +19,8 @@ object LavaClip : Module(
     category = Category.MISC,
     description = "Clips you x blocks down when jumping into lava."
 ){
-    private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, description = "Distance to clip down")
+    private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to clip down")
+
     init {
         this.addSettings(
             lavaclipDistance
@@ -30,7 +31,7 @@ object LavaClip : Module(
     private var veloCancelled = true
 
     override fun onKeyBind() {
-        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1) // todo: do something about this.enabled idk?!
+        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1)
     }
 
     private var adjustedDistance: Double? = lavaclipDistance.value * -1
@@ -56,7 +57,7 @@ object LavaClip : Module(
     }
 
     @SubscribeEvent
-    fun onOverlay(event: RenderGameOverlayEvent.Post) {  // todo: make this a gui hud type shit so you can move it or smt ?maybe?
+    fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaClipping || mc.ingameGUI == null) return
         val sr = ScaledResolution(mc)
         var text = "Lava clipping $adjustedDistance"
