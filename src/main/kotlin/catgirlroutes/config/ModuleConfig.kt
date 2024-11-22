@@ -81,7 +81,7 @@ class ModuleConfig(path: File) {
                             is StringSelectorSetting ->     if (configSetting is StringSetting) setting.selected = configSetting.text
                             is SelectorSetting ->           if (configSetting is StringSetting) setting.selected = configSetting.text
                             is StringSetting ->             if (configSetting is StringSetting) setting.text = configSetting.text
-                            is KeyBindSetting ->            if (configSetting is KeyBindSetting) setting.value = configSetting.value
+                            is KeyBindSetting -> if (configSetting is NumberSetting) { setting.value = Keybinding(configSetting.value.toInt()).apply { onPress = setting.value.onPress } } // fuck me I'm a nigger
                         }
                     }
                 }
