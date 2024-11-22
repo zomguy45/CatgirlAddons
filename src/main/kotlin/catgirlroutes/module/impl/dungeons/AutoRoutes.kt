@@ -4,10 +4,12 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.Node
 import catgirlroutes.commands.NodeManager
 import catgirlroutes.commands.nodeeditmode
+import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
@@ -24,9 +26,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import me.odinmain.events.impl.DungeonEvents
 import me.odinmain.events.impl.SecretPickupEvent
+import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
+import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.util.BlockPos
+import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -153,6 +159,16 @@ object AutoRoutes : Module(
     }
 
     private suspend fun executeAction(node: Node) {
+        // Check next block for a node and return the x y z yaw pitch
+
+        val newNode = getNextNode(node)
+        devMessage(newNode.x)
+        devMessage(newNode.y)
+        devMessage(newNode.z)
+        devMessage(newNode.yaw)
+        devMessage(newNode.pitch)
+        devMessage(newNode.hasNode)
+
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         delay(actionDelay.toLong())
         val room2 = currentFullRoom ?: return
@@ -222,4 +238,53 @@ object AutoRoutes : Module(
             }
         }
     }
+
+    private var lastX: Double = 0.0
+    private var lastY: Double = 0.0
+    private var lastZ: Double = 0.0
+
+    @SubscribeEvent
+    fun onC03(event: PacketSentEvent) {
+        if (event.packet !is C03PacketPlayer) return
+        val x = event.packet.positionX
+        val y = event.packet.positionY
+        val z = event.packet.positionZ
+
+        if (event.packet.isMoving) {
+            lastX = x
+            lastY = y
+            lastZ = z
+        }
+    }
+    // Todo: Test this shit
+    private fun getNextNode(node: Node): nextNode {
+        val room = currentRoom ?: return nextNode(null, null, null, null, null, false)
+        val cYaw = node.yaw
+        val cPitch = node.pitch
+        val nextBlock = EtherWarpHelper.getEtherPos(Vec3(lastX, lastY, lastZ), cYaw, cPitch)
+        if (!nextBlock.succeeded) return nextNode(null, null, null, null, null, false)
+        val pos: BlockPos = nextBlock.pos!!
+        var nextYaw = 9999f
+        var nextPitch = 9999f
+        var hasNode = false
+        NodeManager.nodes.forEach { n ->
+            val realLocation = room.getRealCoords(node.location)
+            if (realLocation.xCoord == pos.x.toDouble() && realLocation.yCoord == pos.y.toDouble() + 1.0 && realLocation.zCoord == pos.z.toDouble()) {
+                nextYaw = node.yaw
+                nextPitch = node.pitch
+                hasNode = true
+            }
+        }
+        if(!hasNode) return nextNode(null, null, null, null, null, false)
+        return nextNode(pos.x, pos.y + 1, pos.z, nextYaw, nextPitch, true)
+    }
+
+    data class nextNode(
+        var x: Int?,
+        var y: Int?,
+        var z: Int?,
+        val yaw: Float?,
+        val pitch: Float?,
+        val hasNode: Boolean
+    )
 }
