@@ -11,7 +11,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
 object BossESP : Module( // todo: add esp modes, line width
-    name = "Boss ESp",
+    name = "Boss ESP",
     category = Category.RENDER,
     description = "ESP for the Withers."
 ) {
