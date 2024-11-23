@@ -1,9 +1,9 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.Node
-import catgirlroutes.commands.NodeManager
-import catgirlroutes.commands.nodeeditmode
+import catgirlroutes.commands.impl.Node
+import catgirlroutes.commands.impl.NodeManager
+import catgirlroutes.commands.impl.nodeEditMode
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -72,7 +72,7 @@ object AutoRoutes : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!inDungeons || !this.enabled || nodeeditmode || event.phase != TickEvent.Phase.START) return
+        if (!inDungeons || !this.enabled || nodeEditMode || event.phase != TickEvent.Phase.START) return
         NodeManager.nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true

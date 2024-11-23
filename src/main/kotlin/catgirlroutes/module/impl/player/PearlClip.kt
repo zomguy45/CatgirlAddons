@@ -30,15 +30,15 @@ object PearlClip : Module(
 
     private var active = false
     override fun onKeyBind() {
-        if (!this.enabled) return // todo: do something about it idk?!
+        if (!this.enabled) return
         modMessage("Pearl clipping!")
         pearlClip((pearlClipDistance.value * -1))
     }
 
     private var clipDepth: Double? = 0.0
 
-    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
-        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
+    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) {
+        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth
         if (clipDepth == null) return
 
         val swapResult = swapFromName("ender pearl")

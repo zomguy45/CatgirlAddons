@@ -1,6 +1,7 @@
 package catgirlroutes
 
 import catgirlroutes.commands.*
+import catgirlroutes.commands.impl.*
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
@@ -40,24 +41,11 @@ class CatgirlRoutes {
     fun onInit(event: FMLInitializationEvent) {
         ModuleManager.loadModules()
 
-        listOf(
-            CatgirlAddonsCommands(),
-            DevCommands(),
-
-            //AutoP3
-            AutoP3Commands(),
-
-            //Features
-            PearlClipCommand(),
-            LavaClipCommand(),
-
-            //AutoRoutes
-            AutoRoutesCommands(),
-
-            //ESP
-        ).forEach {
-            ClientCommandHandler.instance.registerCommand((it))
-        }
+        registerCommands(
+            catgirlAddonsCommands, devCommands,
+            pearlClip, lavaClip,
+            autoP3Commands, autoRoutesCommands
+        )
 
         listOf(
             this,

@@ -183,7 +183,7 @@ object Utils {
         return null
     }
 
-    fun renderText(
+    fun renderText( // render utils probably?
         text: String,
         x: Int,
         y: Int,
@@ -194,7 +194,9 @@ object Utils {
         GlStateManager.disableLighting()
         GlStateManager.disableDepth()
         GlStateManager.disableBlend()
+
         GlStateManager.scale(scale, scale, scale)
+
         var yOffset = y - mc.fontRendererObj.FONT_HEIGHT
         text.split("\n").forEach {
             yOffset += (mc.fontRendererObj.FONT_HEIGHT * scale).toInt()
@@ -206,7 +208,10 @@ object Utils {
                 true
             )
         }
+
         GlStateManager.popMatrix()
+        GlStateManager.enableDepth()
+        GlStateManager.enableBlend()
     }
     /**
      * Profiles the specified function with the specified string as profile section name.

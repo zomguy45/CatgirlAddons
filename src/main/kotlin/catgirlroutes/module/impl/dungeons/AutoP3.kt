@@ -1,11 +1,11 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.Ring
-import catgirlroutes.commands.RingManager.loadRings
-import catgirlroutes.commands.RingManager.rings
-import catgirlroutes.commands.ringeditmode
-import catgirlroutes.commands.ringsActive
+import catgirlroutes.commands.impl.Ring
+import catgirlroutes.commands.impl.RingManager.loadRings
+import catgirlroutes.commands.impl.RingManager.rings
+import catgirlroutes.commands.impl.ringEditMode
+import catgirlroutes.commands.impl.ringsActive
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -73,7 +73,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled || ringeditmode) return
+        if (!ringsActive || !this.enabled || ringEditMode) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true

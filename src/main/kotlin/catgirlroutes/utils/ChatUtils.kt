@@ -72,7 +72,7 @@ object ChatUtils {
     /**
      * Gets selected mod prefix in [ClickGui]
      */
-    private fun getPrefix(): String {
+    fun getPrefix(): String {
         return when (ClickGui.prefixStyle.index) {
             0 -> CatgirlRoutes.CHAT_PREFIX;
             1 -> CatgirlRoutes.SHORT_PREFIX
