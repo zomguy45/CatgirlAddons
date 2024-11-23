@@ -27,6 +27,7 @@ import me.odinmain.events.impl.SecretPickupEvent
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
+import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -58,14 +59,27 @@ object AutoRoutes : Module(
     fun onSecret(event: SecretPickupEvent) {
         modMessage("secret!?!?!?!??!?!?!!??!")
         secretPickedUp = true
-        scheduleTask (1) {secretPickedUp = false}
+        scheduleTask (2) {secretPickedUp = false}
+    }
+
+    @SubscribeEvent
+    fun onMouse(event: MouseEvent) {
+        if (!event.buttonstate) return
+        if (event.button != 0) return
+
+        cooldownMap.forEach { (key, _) ->
+            cooldownMap[key] = false
+        }
+
+        secretPickedUp = true
+        scheduleTask (2) {secretPickedUp = false}
     }
 
     private val cooldownMap = mutableMapOf<String, Boolean>()
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
+    fun onMotion(event: TickEvent.ClientTickEvent) {
         if (!inDungeons || !this.enabled || nodeeditmode || event.phase != TickEvent.Phase.START) return
         NodeManager.nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
@@ -167,9 +181,6 @@ object AutoRoutes : Module(
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
                 FakeRotater.rotate(yaw, node.pitch)
-                scheduleTask(0) {
-                    MovementUtils.setKey("shift", false)
-                }
             }
             "aotv" -> {
                 swapFromName("aspect of the void")

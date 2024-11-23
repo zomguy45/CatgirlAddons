@@ -13,7 +13,6 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
-import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import me.odinmain.events.impl.PacketReceivedEvent
 import me.odinmain.utils.skyblock.EtherWarpHelper
@@ -103,6 +102,7 @@ object Zpew : Module(
         lastX = x
         lastY = y
         lastZ = z
+        
         updatePosition = false
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
