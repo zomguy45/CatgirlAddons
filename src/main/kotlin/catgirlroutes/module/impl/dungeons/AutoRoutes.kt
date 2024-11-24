@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.dungeons
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.impl.Node
 import catgirlroutes.commands.impl.NodeManager
+import catgirlroutes.commands.impl.NodeManager.nodes
 import catgirlroutes.commands.impl.nodeEditMode
 import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
@@ -21,6 +22,9 @@ import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.RotationUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -80,8 +84,8 @@ object AutoRoutes : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!inDungeons || !this.enabled || nodeEditMode || event.phase != TickEvent.Phase.START) return
-        NodeManager.nodes.forEach { node ->
+        if (!inDungeons || nodeEditMode || event.phase != TickEvent.Phase.START) return
+        nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inNode(node)) {
@@ -100,7 +104,7 @@ object AutoRoutes : Module(
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (!inDungeons) return
-        NodeManager.nodes.forEach { node ->
+        nodes.forEach { node ->
             val room = currentRoom ?: return
             val realLocation = room.getRealCoords(node.location)
             val x: Double = realLocation.xCoord + 0.5
@@ -111,19 +115,9 @@ object AutoRoutes : Module(
             val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
-                "Trans" -> WorldRenderUtils.renderTransFlag(x, y, z, node.width, node.height)
-                "Normal" -> WorldRenderUtils.drawP3box(
-                    x - node.width / 2 + 0.5,
-                    y,
-                    z - node.width / 2 + 0.5,
-                    node.width.toDouble(),
-                    node.height.toDouble(),
-                    node.width.toDouble(),
-                    color,
-                    4F,
-                    false
-                )
-                "LGBTQIA+" -> WorldRenderUtils.renderGayFlag(x, y, z, node.width, node.height)
+                "Trans" -> renderTransFlag(x, y, z, node.width, node.height)
+                "Normal" -> drawP3box(x - node.width / 2 + 0.5, y, z - node.width / 2 + 0.5, node.width.toDouble(), node.height.toDouble(), node.width.toDouble(), color, 4F, false)
+                "LGBTQIA+" -> renderGayFlag(x, y, z, node.width, node.height)
             }
         }
     }
@@ -284,7 +278,7 @@ object AutoRoutes : Module(
         var nextYaw = 9999f
         var nextPitch = 9999f
         var hasNode = false
-        NodeManager.nodes.forEach { n ->
+        nodes.forEach { _ ->
             val realLocation = room.getRealCoords(node.location)
             if (realLocation.xCoord == pos.x.toDouble() && realLocation.yCoord == pos.y.toDouble() + 1.0 && realLocation.zCoord == pos.z.toDouble()) {
                 val room2 = currentFullRoom ?: return nextNode(null, null, null, null, null, false)

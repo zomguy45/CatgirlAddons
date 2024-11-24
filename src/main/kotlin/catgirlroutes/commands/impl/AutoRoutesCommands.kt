@@ -63,23 +63,42 @@ val autoRoutesCommands = commodore("node") {
     literal("help").runs {
         modMessage("""
             List of AutoRoutes commands:
-              §7/node add §5<§dtype§5> [§ddepth§5] [§dargs..?§5]
-              §7/node edit
-              §7/node remove §5<§drange§5>§r
-              §7/node undo
-              §7/node clear
-              §7/node clearroom
-              §7/node load
-              §7/node save
-              §7/node help
+              §7/node add §5<§dtype§5> [§ddepth§5] [§dargs..§5] §8: (§7/node add §rfor info)
+              §7/node edit §8: §rmakes nodes inactive
+              §7/node remove §5[§drange§5]§r §8: §rremoves nodes in range (default value - 2)
+              §7/node undo §8: §rremoves last placed node
+              §7/node clear §8: §rclears ALL nodes
+              §7/node clearroom §8: §rclears nodes in current room
+              §7/node load §8: §rloads routes
+              §7/node save §8: §rsaves routes
+              §7/node help §8: §rshows this message
         """.trimIndent())
     }
 
     literal("add") {
         runs {
             modMessage("""
-                Usage: §7/node add §5<§dtype§5> [§dargs..?§5] 
-                  §7List of args: w_, h_, delay_, look, walk, await, stop
+                Usage: §7/node add §5<§dtype§5> [§dargs..§5] 
+                  List of node types: §7warp, walk, look, stop, boom, pearlclip, pearl, jump, align, aotv, hype
+                    §7- warp §8: §retherwarp
+                    §7- walk §8: §rmakes the player walk
+                    §7- look §8: §rturns player's head
+                    §7- stop §8: §rstops the player from moving
+                    §7- boom §8: §ruses boom tnt
+                    §7- pearlclip §8: §rpearl clips (needs depth to be specified)
+                    §7- pearl §8: §ruses ender pearl
+                    §7- jump §8: §rmakes the player jump
+                    §7- align §8: §raligns the player with the centre of a block
+                    §7- aotv §8: §ruses AOTV
+                    §7- hype §8: §ruses hyperion
+                  List of args: §7w_, h_, delay_, look, walk, await, stop
+                    §7- w §8: §rnode width (w1 - default)
+                    §7- h §8: §rnode height (h1 - default)
+                    §7- delay §8: §rnode action delay (delay0 - default)
+                    §7- look §8: §rturns player's head
+                    §7- walk §8: §rmakes the player walk
+                    §7- await §8: §rawait for secret
+                    §7- stop §8: §rsets your velocity to 0
             """.trimIndent())
         }
 
@@ -139,7 +158,7 @@ val autoRoutesCommands = commodore("node") {
 
     literal("edit").runs {
         nodeEditMode = !nodeEditMode
-        modMessage("EditMode " + if (nodeEditMode) "§aenabled" else "§cdisabled" + "§r!")
+        modMessage("EditMode ${if (nodeEditMode) "§aenabled" else "§cdisabled"}§r!")
     }
 
     literal("remove").runs { range: Double? ->

@@ -5,7 +5,6 @@ import catgirlroutes.commands.impl.Ring
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.commands.impl.ringsActive
 import catgirlroutes.events.ReceivePacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -30,6 +29,7 @@ import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
@@ -80,7 +80,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled || ringEditMode) return
+        if (ringEditMode) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -102,7 +102,6 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!ringsActive) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
@@ -121,7 +120,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (ringsActive && ringEditMode) {
+        if (ringEditMode) {
             val sr = ScaledResolution(mc)
             val t = "Edit Mode"
             renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)

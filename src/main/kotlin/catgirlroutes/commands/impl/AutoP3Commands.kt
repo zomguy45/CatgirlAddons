@@ -5,6 +5,7 @@ import catgirlroutes.commands.*
 import catgirlroutes.commands.impl.RingManager.allRings
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.saveRings
+import catgirlroutes.module.impl.dungeons.AutoP3
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -52,33 +53,49 @@ data class Ring(
 )
 
 var route: String = selectedRoute.value
-var ringsActive: Boolean = false
 var ringEditMode: Boolean = false
 
 
 val autoP3Commands = commodore("p3") {
 
-    literal("help").runs { // todo: add description
+    literal("help").runs {
         modMessage("""
             List of AutoP3 commands:
-              §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5]
-              §7/p3 edit
-              §7/p3 toggle
-              §7/p3 remove §5<§drange§5>§r
-              §7/p3 undo
-              §7/p3 clearroute
-              §7/p3 clear
-              §7/p3 load §5[§droute§5]§r
-              §7/p3 save
-              §7/p3 help
+              §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5] §8: §radds a ring (§7/p3 add §rfor info)
+              §7/p3 edit §8: §rmakes rings inactive
+              §7/p3 toggle §8: §rtoggles the module
+              §7/p3 remove §5<§drange§5>§r §8: §rremoves rings in range (default value - 2)
+              §7/p3 undo §8: §rremoves last placed node
+              §7/p3 clearroute §8: §rclears current route
+              §7/p3 clear §8: §rclears ALL routes
+              §7/p3 load §5[§droute§5]§r §8: §rloads selected route
+              §7/p3 save §8: §rsaves current route
+              §7/p3 help §8: §rshows this message
         """.trimIndent())
     }
 
     literal("add") {
         runs {
             modMessage("""
-                Usage: §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5] 
-                  §7List of args: w_, h_, delay_, look, walk, term, stop
+                Usage: §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5]
+                  List of types:§7 walk, look, stop, bonzo, boom, hclip, block, edge, vclip, jump, align
+                    §7- walk §8: §rmakes the player walk
+                    §7- look §8: §rturns player's head
+                    §7- stop §8: §rstops the player from moving
+                    §7- bonzo §8: §ruses bonzo staff
+                    §7- boom §8: §ruses boom tnt
+                    §7- edge §8: §rjumps from block's edge
+                    §7- vclip §8: §ruses lava clip (needs depth to be specified)
+                    §7- jump §8: §rmakes the player jump
+                    §7- align §8: §raligns the player with the centre of a block 
+                  List of args: §7w_, h_, delay_, look, walk, term, stop
+                    §7- w §8: §rring width (w1 - default)
+                    §7- h §8: §rring height (h1 - default)
+                    §7- delay §8: §rring action delay (delay0 - default)
+                    §7- look §8: §rturns player's head
+                    §7- walk §8: §rmakes the player walk
+                    §7- term §8: §ractivates the node when terminal opens
+                    §7- stop §8: §rsets your velocity to 0
             """.trimIndent())
         }
 
@@ -90,10 +107,10 @@ val autoP3Commands = commodore("p3") {
             val arguments = mutableListOf<String>()
             var lookBlock: Vec3? = null
 
-            if (!arrayListOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "term", "align").contains(type)) {
+            if (!arrayListOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align").contains(type)) {
                 modMessage("""
                     §cInvalid ring type!
-                      Types: §7walk, look, stop, bonzo, boom, hclip, block, edge, vclip, jump, term, align
+                      §rTypes: §7walk, look, stop, bonzo, boom, hclip, block, edge, vclip, jump, term, align
                 """.trimIndent())
                 return@runs
             }
@@ -134,17 +151,16 @@ val autoP3Commands = commodore("p3") {
             saveRings()
             loadRings()
 
-        }.suggests("type", listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "term", "align"))
+        }.suggests("type", listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align"))
     }
 
     literal("edit").runs {
         ringEditMode = !ringEditMode
-        modMessage("EditMode " + if (ringEditMode) "§aenabled§r!" else "§cdisabled§r!")
+        modMessage("EditMode ${if (ringEditMode) "§aenabled" else "§cdisabled"}")
     }
 
     literal("toggle").runs {
-        ringsActive = !ringsActive
-        modMessage("Rings " + if (ringsActive) "§aenabled§r!" else "§cdisabled§r!§r!")
+        AutoP3.onKeyBind()
     }
 
     literal("remove").runs { range: Double? ->
