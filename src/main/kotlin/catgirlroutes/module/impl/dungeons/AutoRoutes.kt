@@ -8,12 +8,15 @@ import catgirlroutes.events.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.player.PearlClip
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
+import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
@@ -30,13 +33,16 @@ import me.odinmain.utils.skyblock.EtherWarpHelper
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import java.awt.Color
+import java.awt.Color.WHITE
+import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.floor
 
@@ -46,10 +52,12 @@ object AutoRoutes : Module(
     description = "A module that allows you to place down nodes that execute various actions."
 ){
     private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
-            preset
+            preset,
+            colour
         )
     }
 
@@ -58,7 +66,7 @@ object AutoRoutes : Module(
         NodeManager.loadNodes()
     }
 
-    var secretPickedUp = false
+    private var secretPickedUp = false
 
     @SubscribeEvent
     fun onSecret(event: SecretPickupEvent) {
@@ -91,7 +99,7 @@ object AutoRoutes : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!inDungeons || !this.enabled) return
+        if (!inDungeons) return
         NodeManager.nodes.forEach { node ->
             val room = currentRoom ?: return
             val realLocation = room.getRealCoords(node.location)
@@ -100,7 +108,7 @@ object AutoRoutes : Module(
             val z: Double = realLocation.zCoord + 0.5
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${node.type}"] == true
-            val color = if (cooldown) Color.WHITE else Color.black
+            val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
                 "Trans" -> WorldRenderUtils.renderTransFlag(x, y, z, node.width, node.height)
@@ -117,6 +125,15 @@ object AutoRoutes : Module(
                 )
                 "LGBTQIA+" -> WorldRenderUtils.renderGayFlag(x, y, z, node.width, node.height)
             }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
+        if (nodeEditMode && inDungeons) {
+            val sr = ScaledResolution(mc)
+            val t = "Edit Mode"
+            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
         }
     }
 

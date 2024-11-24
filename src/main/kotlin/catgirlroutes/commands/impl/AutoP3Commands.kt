@@ -58,24 +58,17 @@ var ringEditMode: Boolean = false
 
 val autoP3Commands = commodore("p3") {
 
-    runs {
-        modMessage("""
-            §cInvalid usage!
-              §7Run /p3 help for help.
-        """.trimIndent())
-    }
-
-    literal("help").runs {
+    literal("help").runs { // todo: add description
         modMessage("""
             List of AutoP3 commands:
-              §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..?§5]
+              §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5]
               §7/p3 edit
               §7/p3 toggle
               §7/p3 remove §5<§drange§5>§r
               §7/p3 undo
               §7/p3 clearroute
               §7/p3 clear
-              §7/p3 load §5[§droute?§5]§r
+              §7/p3 load §5[§droute§5]§r
               §7/p3 save
               §7/p3 help
         """.trimIndent())
@@ -146,12 +139,12 @@ val autoP3Commands = commodore("p3") {
 
     literal("edit").runs {
         ringEditMode = !ringEditMode
-        modMessage("EditMode " + if (ringEditMode) "§aenabled" else "§cdisabled" + "§r!")
+        modMessage("EditMode " + if (ringEditMode) "§aenabled§r!" else "§cdisabled§r!")
     }
 
     literal("toggle").runs {
         ringsActive = !ringsActive
-        modMessage("Rings " + if (ringsActive) "§aenabled" else "§cdisabled" + "§r!")
+        modMessage("Rings " + if (ringsActive) "§aenabled§r!" else "§cdisabled§r!§r!")
     }
 
     literal("remove").runs { range: Double? ->

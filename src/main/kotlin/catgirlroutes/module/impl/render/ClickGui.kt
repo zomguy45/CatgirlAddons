@@ -35,7 +35,7 @@ object ClickGui: Module(
     val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
     val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.")
 
-    val devSettings: BooleanSetting = BooleanSetting("Dev Settings", false, "Expands Developer settings", Visibility.CLICK_GUI_ONLY)
+    private val devSettings: BooleanSetting = BooleanSetting("Dev Settings", false, "Expands Developer settings", Visibility.CLICK_GUI_ONLY)
     val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency { devSettings.enabled }
     val debugMode: BooleanSetting = BooleanSetting("Debug Mode", false, "Toggles debug mode").withDependency { devSettings.enabled }
     val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel").withDependency { devSettings.enabled }

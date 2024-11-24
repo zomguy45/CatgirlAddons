@@ -59,13 +59,6 @@ data class Node(
 var nodeEditMode: Boolean = false
 
 val autoRoutesCommands = commodore("node") {
-    
-    runs {
-        modMessage("""
-            §cInvalid usage!
-              §7Run /node help for help.
-        """.trimIndent())
-    }
 
     literal("help").runs {
         modMessage("""

@@ -3,6 +3,7 @@ package catgirlroutes.commands.impl
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.utils.ChatUtils
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
@@ -12,6 +13,15 @@ import me.odinmain.utils.toVec3
 
 
 val devCommands = commodore("dev") {
+
+    literal("help").run { // todo: add description
+        modMessage("""
+            List of commands:
+              §7/relativecoords
+              §7/relativeyaw
+              §7/realyaw
+        """.trimIndent())
+    }
 
     literal("relativecoords").runs {
         val block = mc.objectMouseOver?.blockPos ?: return@runs

@@ -11,6 +11,8 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -25,6 +27,7 @@ import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.Utils.leftClick
+import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
@@ -35,7 +38,9 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -52,11 +57,13 @@ object AutoP3 : Module(
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
     private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
             selectedRoute,
-            preset
+            preset,
+            colour
         )
     }
 
@@ -95,20 +102,29 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled) return
+        if (!ringsActive) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
             val z: Double = ring.location.zCoord
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
-            val color = if (cooldown) WHITE else black
+            val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
                 "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
                 "Normal" -> drawP3box(x - ring.width / 2, y, z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
+        if (ringsActive && ringEditMode) {
+            val sr = ScaledResolution(mc)
+            val t = "Edit Mode"
+            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
         }
     }
 
@@ -159,7 +175,7 @@ object AutoP3 : Module(
             }
             "boom" -> {
                 modMessage("Bomb denmark!")
-                swapFromName("infinityboom tnt")
+                if (!swapFromName("infinityboom tnt")) swapFromName("superboom tnt")
                 scheduleTask(1) {leftClick()}
             }
             "hclip" -> {

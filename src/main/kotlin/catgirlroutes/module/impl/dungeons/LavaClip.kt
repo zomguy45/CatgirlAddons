@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object LavaClip : Module(
     "Lava Clip",
-    category = Category.MISC,
+    category = Category.DUNGEON,
     description = "Clips you x blocks down when jumping into lava."
 ){
     private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to clip down")

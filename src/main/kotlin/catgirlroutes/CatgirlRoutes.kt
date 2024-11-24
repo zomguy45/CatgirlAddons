@@ -59,6 +59,7 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
+            MovementUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

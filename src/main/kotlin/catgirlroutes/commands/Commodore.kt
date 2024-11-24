@@ -8,35 +8,13 @@ import net.minecraft.command.ICommandSender
 import net.minecraft.util.BlockPos
 import net.minecraftforge.client.ClientCommandHandler
 
-val commodoreHandler = LegacyCommodore { root, cause ->
-    val builder = StringBuilder("§cInvalid command.\n§7  Did you mean to run:§r\n").apply {
-        println(cause)
-        buildTree(cause)
+val commodoreHandler = LegacyCommodore { root, _ ->
+    val builder = StringBuilder("§cInvalid usage.\n  §7Run ").apply {
         findCorrespondingNode(root, "help")?.let {
-            append("\n  §7Run /${getArgumentsRequired(it).joinToString(" ")} for more help.")
+            append("/${getArgumentsRequired(it).joinToString(" ")}") ?: append("/cga help")
         }
     }
     modMessage(builder.toString())
-}
-
-private fun StringBuilder.buildTree(node: Node) {
-    node.children?.let {
-        for (child in it) {
-            buildTree(child)
-        }
-    }
-    node.executables?.let {
-        for (child in it) {
-            append("  /${getArgumentsRequired(node).joinToString(" ")}")
-            for (parser in child.parsers) {
-                append(" <${parser.id}${if(parser.isOptional) "?" else ""}>")
-            }
-            append("\n")
-        }
-    }
-    if (node.executables == null && node.children == null) {
-        append("  /${getArgumentsRequired(node).joinToString(" ")}\n")
-    }
 }
 
 fun commodore(vararg string: String, block: Node.() -> Unit): CommandBase {
@@ -46,15 +24,6 @@ fun commodore(vararg string: String, block: Node.() -> Unit): CommandBase {
 
         init {
             root.block()
-            if (findCorrespondingNode(root, "help") == null) { // creates a (barebones) help node for the command
-                root.literal("help").runs {
-                    val builder = StringBuilder("List of commands for /${root.name}:\n").also {
-                        it.buildTree(root)
-                        it.setLength(it.length - 1)
-                    }
-                    modMessage(builder.toString())
-                }
-            }
             root.build()
             commodoreHandler.register(root)
         }

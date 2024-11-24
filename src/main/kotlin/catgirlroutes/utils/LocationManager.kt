@@ -75,7 +75,7 @@ object LocationManager {
     fun onConnect(event: FMLNetworkEvent.ClientConnectedToServerEvent) {
         onHypixel = mc.runCatching {
             !event.isLocal && ((thePlayer?.clientBrand?.lowercase()?.contains("hypixel")
-                ?: currentServerData?.serverIP?.lowercase()?.contains("hypixel")) == true)
+                ?: currentServerData?.serverIP?.lowercase()?.contains("hypixel")) == true) || ClickGui.forceHypixel.enabled
         }.getOrDefault(false)
     }
 
@@ -96,7 +96,7 @@ object LocationManager {
                     it?.displayName?.unformattedText?.startsWith("Dungeon: ") == true
         }?.displayName?.formattedText
 
-        return Island.values().firstOrNull { area?.contains(it.displayName, true) == true } ?: Island.Unknown
+        return Island.entries.firstOrNull { area?.contains(it.displayName, true) == true } ?: Island.Unknown
     }
 
     fun getFloor(): Floor? {
