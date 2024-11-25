@@ -5,12 +5,14 @@ import catgirlroutes.commands.impl.NodeManager.allNodes
 import catgirlroutes.commands.impl.NodeManager.loadNodes
 import catgirlroutes.commands.impl.NodeManager.saveNodes
 import catgirlroutes.commands.commodore
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.distanceToPlayer
 import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
+import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -53,10 +55,12 @@ data class Node(
     var depth: Float?,
     var arguments: List<String>?,
     var delay: Int?,
+    var command: String?,
     var room: String,
 )
 
 var nodeEditMode: Boolean = false
+var nodeTypes: List<String> = listOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align", "command", "aotv", "hype")
 
 val autoRoutesCommands = commodore("node") {
 
@@ -64,7 +68,7 @@ val autoRoutesCommands = commodore("node") {
         modMessage("""
             List of AutoRoutes commands:
               §7/node add §5<§dtype§5> [§ddepth§5] [§dargs..§5] §8: (§7/node add §rfor info)
-              §7/node edit §8: §rmakes nodes inactive
+              §7/node edit (em) §8: §rmakes nodes inactive
               §7/node remove §5[§drange§5]§r §8: §rremoves nodes in range (default value - 2)
               §7/node undo §8: §rremoves last placed node
               §7/node clear §8: §rclears ALL nodes
@@ -79,16 +83,17 @@ val autoRoutesCommands = commodore("node") {
         runs {
             modMessage("""
                 Usage: §7/node add §5<§dtype§5> [§dargs..§5] 
-                  List of node types: §7warp, walk, look, stop, boom, pearlclip, pearl, jump, align, aotv, hype
+                  List of node types: §7${nodeTypes.joinToString()}
                     §7- warp §8: §retherwarp
                     §7- walk §8: §rmakes the player walk
                     §7- look §8: §rturns player's head
                     §7- stop §8: §rstops the player from moving
                     §7- boom §8: §ruses boom tnt
-                    §7- pearlclip §8: §rpearl clips (needs depth to be specified)
+                    §7- pearlclip §8: §rpearl clips with a specified depth
                     §7- pearl §8: §ruses ender pearl
                     §7- jump §8: §rmakes the player jump
                     §7- align §8: §raligns the player with the centre of a block
+                    §7- command §8: §rexecutes a specified command
                     §7- aotv §8: §ruses AOTV
                     §7- hype §8: §ruses hyperion
                   List of args: §7w_, h_, delay_, look, walk, await, stop
@@ -102,23 +107,37 @@ val autoRoutesCommands = commodore("node") {
             """.trimIndent())
         }
 
-        runs { type: String, w: String?, h: String?, dep: String?, del: String?, a1: String?, a2: String?, a3: String?, a4: String? ->
+        runs { type: String, text: GreedyString? ->
             var depth: Float? = null
             var height = 1F
             var width = 1F
             var delay: Int? = null
+            var command: String? = null
             val arguments = mutableListOf<String>()
 
-            if (!arrayListOf("warp", "walk", "look", "stop", "boom", "pearlclip", "pearl", "jump", "align", "aotv", "hype").contains(type)) {
-                modMessage("""
+            if (!nodeTypes.contains(type)) {
+                return@runs modMessage("""
                     §cInvalid node type!
-                      Types: §7warp, walk, look, stop, boom, pearlclip, pearl, jump, align, aotv, hype
+                      Types: §7${nodeTypes.joinToString()}
                 """.trimIndent())
-                return@runs
             }
 
-            val args: List<String> = listOfNotNull(w, h, dep, del, a1, a2, a3, a4)
+            /**
+             * regex shit is for commands (/node add command <"cmd"> [args])
+             */
+            val args = text?.string?.let { Regex("\"[^\"]*\"|\\S+").findAll(it).map { m -> m.value }.toList() } ?: emptyList()
+            debugMessage(args)
 
+            when (type) {
+                "pearlclip" -> {
+                    depth = args.firstOrNull { it.toFloatOrNull() != null }?.toFloat()
+                        ?: return@runs modMessage("Usage: §7/node add §dpearlclip §5<§ddepth§5> [§dargs..§5]")
+                }
+                "command" -> {
+                    command = args.firstOrNull { it.startsWith('"') && it.endsWith('"') }?.replace("\"", "")
+                        ?: return@runs modMessage("Usage: §7/node add §dcommand §5<§d\"cmd\"§5> [§dargs..§5]")
+                }
+            }
 
             args.forEach { arg ->
                 when {
@@ -126,13 +145,6 @@ val autoRoutesCommands = commodore("node") {
                     arg.startsWith("h") -> height = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("delay") -> { delay = arg.substring(5).toIntOrNull() ?: return@runs modMessage("§cInvalid delay!") }
                     arg in listOf("stop", "look", "walk", "await") -> arguments.add(arg)
-                }
-            }
-
-            when (type) {
-                "pearlclip" -> {
-                    depth = args.firstOrNull { it.toFloatOrNull() != null }?.toFloat()
-                        ?: return@runs modMessage("Usage: §7/node add §dpearlclip §5<§ddepth§5> [§dargs..§5]")
                 }
             }
 
@@ -145,18 +157,23 @@ val autoRoutesCommands = commodore("node") {
             val yaw = room2.getRelativeYaw(mc.thePlayer.rotationYaw)
             val pitch = mc.thePlayer.rotationPitch
 
-            val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, currentRoomName)
+            val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, currentRoomName)
 
             allNodes.add(node)
 
             modMessage("${type.capitalize()} placed!")
             saveNodes()
             loadNodes()
-        }
+        }.suggests("type", nodeTypes)
     }
 
 
     literal("edit").runs {
+        nodeEditMode = !nodeEditMode
+        modMessage("EditMode ${if (nodeEditMode) "§aenabled" else "§cdisabled"}§r!")
+    }
+
+    literal("em").runs {
         nodeEditMode = !nodeEditMode
         modMessage("EditMode ${if (nodeEditMode) "§aenabled" else "§cdisabled"}§r!")
     }

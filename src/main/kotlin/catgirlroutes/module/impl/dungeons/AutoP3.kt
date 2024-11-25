@@ -11,9 +11,8 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.module.settings.impl.*
+import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.edge
@@ -31,6 +30,7 @@ import catgirlroutes.utils.Utils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
@@ -55,14 +55,20 @@ object AutoP3 : Module(
     category = Category.DUNGEON,
     description = "A module that allows you to place down rings that execute various actions."
 ){
+    private val inF7Only = BooleanSetting("In F7 only", true)
+    private val editTitle = BooleanSetting("EditMode title", false)
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
     private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
+            inF7Only,
+            editTitle,
             selectedRoute,
             preset,
+            layers,
             colour
         )
     }
@@ -80,7 +86,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (ringEditMode) return
+        if (ringEditMode || (inF7Only.enabled && floorNumber != 7)) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -102,6 +108,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
+        if (inF7Only.enabled && floorNumber != 7) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
@@ -111,25 +118,24 @@ object AutoP3 : Module(
             val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
-                "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal" -> drawP3box(x - ring.width / 2, y, z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
-                "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
+                "Trans"     -> renderTransFlag(x, y, z, ring.width, ring.height)
+                "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
+                "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
         }
     }
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (ringEditMode) {
-            val sr = ScaledResolution(mc)
-            val t = "Edit Mode"
-            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
-        }
+        if ((!editTitle.enabled && !ringEditMode) || (inF7Only.enabled && floorNumber != 7)) return
+        val sr = ScaledResolution(mc)
+        val t = "Edit Mode"
+        renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
     }
 
     @SubscribeEvent
     fun onTerm(event: ReceivePacketEvent) {
-        if (!termListener) return
+        if (!termListener || (inF7Only.enabled && floorNumber != 7)) return
         if (event.packet !is S2DPacketOpenWindow) return
         if (event.packet.windowTitle?.unformattedText in DungeonUtils.termGuiTitles) {
             modMessage("Term found")
@@ -210,6 +216,10 @@ object AutoP3 : Module(
             "edge" -> {
                 modMessage("Edging!")
                 edge()
+            }
+            "command" -> {
+                modMessage("Sexecuting!")
+                commandAny(ring.command!!)
             }
         }
     }

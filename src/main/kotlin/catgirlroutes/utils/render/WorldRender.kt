@@ -298,6 +298,26 @@ object WorldRenderUtils {
         GlStateManager.disableBlend()
     }
 
+    fun drawP3boxWithLayers(
+        x: Double,
+        y: Double,
+        z: Double,
+        width: Float,
+        height: Float,
+        colour: Color,
+        layers: Int = 3
+    ) {
+        if (layers < 3) return
+
+        val gap = height / (layers - 1)
+        for (i in 1 until layers - 1) {
+            drawSquareTwo(x, y + (gap * i), z, width, width, colour, 4f, false)
+        }
+
+        drawSquareTwo(x, y + 0.01, z, width, width, colour, 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, colour, 4f, false)
+    }
+
 
     fun renderTransFlag(
         x: Double,

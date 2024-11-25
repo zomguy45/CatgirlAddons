@@ -10,8 +10,11 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -23,6 +26,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater
@@ -55,12 +59,16 @@ object AutoRoutes : Module(
     category = Category.DUNGEON,
     description = "A module that allows you to place down nodes that execute various actions."
 ){
+    private val editTitle = BooleanSetting("EditMode title", false)
     private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
     private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
+            editTitle,
             preset,
+            layers,
             colour
         )
     }
@@ -115,16 +123,16 @@ object AutoRoutes : Module(
             val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
-                "Trans" -> renderTransFlag(x, y, z, node.width, node.height)
-                "Normal" -> drawP3box(x - node.width / 2 + 0.5, y, z - node.width / 2 + 0.5, node.width.toDouble(), node.height.toDouble(), node.width.toDouble(), color, 4F, false)
-                "LGBTQIA+" -> renderGayFlag(x, y, z, node.width, node.height)
+                "Trans"     -> renderTransFlag(x, y, z, node.width, node.height)
+                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.value.toInt())
+                "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
             }
         }
     }
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (nodeEditMode && inDungeons) {
+        if (editTitle.enabled && nodeEditMode && inDungeons) {
             val sr = ScaledResolution(mc)
             val t = "Edit Mode"
             renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
@@ -246,6 +254,10 @@ object AutoRoutes : Module(
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+            }
+            "command" -> {
+                modMessage("Sexecuting!")
+                commandAny(node.command!!)
             }
         }
     }

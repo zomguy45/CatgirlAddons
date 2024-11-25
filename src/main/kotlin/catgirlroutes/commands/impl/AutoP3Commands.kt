@@ -7,9 +7,11 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.saveRings
 import catgirlroutes.module.impl.dungeons.AutoP3
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.distanceToPlayer
+import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
@@ -49,11 +51,13 @@ data class Ring(
     var depth: Float?,
     var arguments: List<String>?,
     var delay: Int?,
+    var command: String?,
     var route: String,
 )
 
 var route: String = selectedRoute.value
 var ringEditMode: Boolean = false
+var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command")
 
 
 val autoP3Commands = commodore("p3") {
@@ -62,7 +66,7 @@ val autoP3Commands = commodore("p3") {
         modMessage("""
             List of AutoP3 commands:
               §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5] §8: §radds a ring (§7/p3 add §rfor info)
-              §7/p3 edit §8: §rmakes rings inactive
+              §7/p3 edit (em) §8: §rmakes rings inactive
               §7/p3 toggle §8: §rtoggles the module
               §7/p3 remove §5<§drange§5>§r §8: §rremoves rings in range (default value - 2)
               §7/p3 undo §8: §rremoves last placed node
@@ -78,16 +82,17 @@ val autoP3Commands = commodore("p3") {
         runs {
             modMessage("""
                 Usage: §7/p3 add §5<§dtype§5> [§ddepth§5] [§dargs..§5]
-                  List of types:§7 walk, look, stop, bonzo, boom, hclip, block, edge, vclip, jump, align
+                  List of types: §7${ringTypes.joinToString()} 
                     §7- walk §8: §rmakes the player walk
                     §7- look §8: §rturns player's head
                     §7- stop §8: §rstops the player from moving
                     §7- bonzo §8: §ruses bonzo staff
                     §7- boom §8: §ruses boom tnt
                     §7- edge §8: §rjumps from block's edge
-                    §7- vclip §8: §ruses lava clip (needs depth to be specified)
+                    §7- vclip §8: §rlava clips with a specified depth
                     §7- jump §8: §rmakes the player jump
-                    §7- align §8: §raligns the player with the centre of a block 
+                    §7- align §8: §raligns the player with the centre of a block
+                    §7- command §8: §rexecutes a specified command
                   List of args: §7w_, h_, delay_, look, walk, term, stop
                     §7- w §8: §rring width (w1 - default)
                     §7- h §8: §rring height (h1 - default)
@@ -99,23 +104,41 @@ val autoP3Commands = commodore("p3") {
             """.trimIndent())
         }
 
-        runs { type: String, w: String?, h: String?, dep: String?, del: String?, a1: String?, a2: String?, a3: String?, a4: String? ->
+        runs { type: String, text: GreedyString? ->
             var depth: Float? = null
             var height = 1F
             var width = 1F
             var delay: Int? = null
             val arguments = mutableListOf<String>()
             var lookBlock: Vec3? = null
+            var command: String? = null
 
-            if (!arrayListOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align").contains(type)) {
-                modMessage("""
+            if (!ringTypes.contains(type)) {
+                return@runs modMessage("""
                     §cInvalid ring type!
-                      §rTypes: §7walk, look, stop, bonzo, boom, hclip, block, edge, vclip, jump, term, align
+                      §rTypes: §7${ringTypes.joinToString()}
                 """.trimIndent())
-                return@runs
             }
 
-            val args: List<String> = listOfNotNull(w, h, dep, del, a1, a2, a3, a4)
+            /**
+             * regex shit is for commands (/p3 add command <"cmd"> [args])
+             */
+            val args = text?.string?.let { Regex("\"[^\"]*\"|\\S+").findAll(it).map { m -> m.value }.toList() } ?: emptyList()
+            debugMessage(args)
+
+            when (type) {
+                "block" -> {
+                    lookBlock = mc.thePlayer.rayTrace(40.0, 1F).hitVec
+                }
+                "vclip" -> {
+                    depth = args.firstOrNull { it.toFloatOrNull() != null }?.toFloat()
+                        ?: return@runs modMessage("Usage: §7/p3 add §dvclip §5<§ddepth§5> [§dargs..§5]")
+                }
+                "command" -> {
+                    command = args.firstOrNull { it.startsWith('"') && it.endsWith('"') }?.replace("\"", "")
+                        ?: return@runs modMessage("Usage: §7/p3 add §dcommand §5<§d\"cmd\"§5> [§dargs..§5]")
+                }
+            }
 
             args.forEach { arg ->
                 when {
@@ -126,16 +149,6 @@ val autoP3Commands = commodore("p3") {
                 }
             }
 
-            when (type) {
-                "block" -> {
-                    lookBlock = mc.thePlayer.rayTrace(40.0, 1F).hitVec
-                }
-                "vclip" -> {
-                    depth = args.firstOrNull { it.toFloatOrNull() != null }?.toFloat()
-                        ?: return@runs modMessage("Usage: §7/p3 add §dvclip §5<§ddepth§5> [§dargs..§5]")
-                }
-            }
-
             val x = Math.round(mc.thePlayer.posX * 2) / 2.0
             val y = Math.round(mc.thePlayer.posY * 2) / 2.0
             val z = Math.round(mc.thePlayer.posZ * 2) / 2.0
@@ -143,7 +156,7 @@ val autoP3Commands = commodore("p3") {
             val yaw = mc.thePlayer.rotationYaw
             val pitch = mc.thePlayer.rotationPitch
 
-            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, route)
+            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, route)
 
             allRings.add(ring)
 
@@ -151,10 +164,15 @@ val autoP3Commands = commodore("p3") {
             saveRings()
             loadRings()
 
-        }.suggests("type", listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align"))
+        }.suggests("type", ringTypes)
     }
 
     literal("edit").runs {
+        ringEditMode = !ringEditMode
+        modMessage("EditMode ${if (ringEditMode) "§aenabled" else "§cdisabled"}")
+    }
+
+    literal("em").runs {
         ringEditMode = !ringEditMode
         modMessage("EditMode ${if (ringEditMode) "§aenabled" else "§cdisabled"}")
     }
@@ -221,8 +239,9 @@ val autoP3Commands = commodore("p3") {
         loadRings()
     }
 
-    literal("load").runs { routeNum: String? ->
-        route = routeNum ?: selectedRoute.value
+    literal("load").runs { routeName: String? ->
+        route = routeName ?: selectedRoute.value
+        selectedRoute.text = route
         modMessage("Loaded $route")
         loadRings()
     }
