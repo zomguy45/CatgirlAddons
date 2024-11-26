@@ -11,11 +11,13 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.EtherWarpHelper
+//import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.etherwarpshittemp.RaytraceUtils
+import me.odinmain.utils.skyblock.EtherWarpHelper
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -78,15 +80,30 @@ object Zpew : Module(
     }
 
     private fun doZeroPingEtherWarp() {
-        val etherBlock = EtherWarpHelper.getEtherPos(
+//        val etherBlock = EtherWarpHelper.getEtherPos( // odin
+//            Vec3(lastX, lastY, lastZ),
+//            lastYaw,
+//            lastPitch,
+//            57.0
+//        )
+
+        val etherBlock = catgirlroutes.utils.EtherWarpHelper.getEtherPos( // 1 to 1 skid
             Vec3(lastX, lastY, lastZ),
             lastYaw,
             lastPitch,
             57.0
         )
+
         if (!etherBlock.succeeded) return
 
-        val pos: BlockPos = etherBlock.pos!!
+        val pos = etherBlock.pos!!
+
+//        val (succeeded, etherBlock) = RaytraceUtils.getEtherwarpBlockSuccess(lastPitch, lastYaw, Vec3(lastX, lastY, lastZ), 57.0) // from creampirog
+//
+//        if (!succeeded) return
+//
+//        val pos = BlockPos(etherBlock)
+
         val x: Double = pos.x.toDouble() + 0.5
         val y: Double = pos.y.toDouble() + 1.05
         val z: Double = pos.z.toDouble() + 0.5

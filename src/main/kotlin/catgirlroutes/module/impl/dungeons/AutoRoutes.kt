@@ -20,7 +20,6 @@ import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.renderText
@@ -38,6 +37,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.odinmain.utils.skyblock.EtherWarpHelper
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.util.BlockPos
