@@ -66,6 +66,7 @@ object AutoP3 : Module(
     init {
         this.addSettings(
             selectedRoute,
+            boomType,
             inF7Only,
             editTitle,
             preset,
