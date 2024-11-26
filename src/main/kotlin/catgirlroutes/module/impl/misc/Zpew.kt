@@ -2,8 +2,8 @@ package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.onHypixel
-import catgirlroutes.events.PacketSentEvent
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
@@ -11,13 +11,11 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
-import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
+import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import me.odinmain.events.impl.PacketReceivedEvent
-import me.odinmain.utils.skyblock.EtherWarpHelper
-import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -177,7 +175,7 @@ object Zpew : Module(
     }
 
     @SubscribeEvent
-    fun onS08(event: ReceivePacketEvent) {
+    fun onS08(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
         if (inBoss || !onHypixel) return
         if (recentlySentC06s.isEmpty()) return
@@ -218,7 +216,7 @@ object Zpew : Module(
     }
 
     @SubscribeEvent
-    fun onS29(event: PacketReceivedEvent) {
+    fun onS29(event: PacketReceiveEvent) {
         if (event.packet !is S29PacketSoundEffect) return
         val packet: S29PacketSoundEffect = event.packet as S29PacketSoundEffect // I don't think it should be like that in kt lol
         if (packet.soundName != "mob.enderdragon.hit" || packet.volume != 1f || packet.pitch != 0.53968257f || !checkAllowedFails()) return

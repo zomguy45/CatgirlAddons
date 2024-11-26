@@ -1,9 +1,8 @@
 package catgirlroutes.module.impl.dungeons;
 
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Utils.relativeClip
@@ -28,7 +27,7 @@ object StormClip : Module(
         clipped = false
     }
     @SubscribeEvent
-    fun onPacket(event: ReceivePacketEvent) {
+    fun onPacket(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook || clipped) return
         if (event.packet.x == 73.5 && event.packet.y == 221.5 && event.packet.z == 14.5) {
             clipped = true

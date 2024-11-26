@@ -1,4 +1,4 @@
-package catgirlroutes.events
+package catgirlroutes.events.impl
 
 import catgirlroutes.utils.Island
 import net.minecraftforge.fml.common.eventhandler.Event

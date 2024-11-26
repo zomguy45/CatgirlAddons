@@ -9,7 +9,7 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.distanceToPlayer
-import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import com.github.stivais.commodore.utils.GreedyString
@@ -149,7 +149,7 @@ val autoRoutesCommands = commodore("node") {
             }
 
             val room = DungeonUtils.currentRoom ?: return@runs
-            val room2 = currentFullRoom ?: return@runs
+            val room2 = currentRoom ?: return@runs
             val x = floor(mc.thePlayer.posX)
             val y = floor(mc.thePlayer.posY)
             val z = floor(mc.thePlayer.posZ)

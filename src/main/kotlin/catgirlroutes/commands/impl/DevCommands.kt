@@ -4,7 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils
@@ -35,7 +35,7 @@ val devCommands = commodore("dev") {
     }
 
     literal("relativeyaw").runs {
-        val room = currentFullRoom ?: return@runs
+        val room = currentRoom ?: return@runs
         ChatUtils.chatMessage(
             """
             ---------
@@ -46,7 +46,7 @@ val devCommands = commodore("dev") {
     }
 
     literal("realyaw").runs {
-        val room = currentFullRoom ?: return@runs
+        val room = currentRoom ?: return@runs
         ChatUtils.chatMessage(
             """
             ---------

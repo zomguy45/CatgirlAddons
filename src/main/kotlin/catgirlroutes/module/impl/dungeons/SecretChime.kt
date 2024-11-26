@@ -1,15 +1,14 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.DungeonSecretEvent
-import catgirlroutes.events.EntityRemovedEvent
+import catgirlroutes.events.impl.DungeonSecretEvent
+import catgirlroutes.events.impl.EntityRemovedEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.devMessage
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import net.minecraft.entity.item.EntityItem
@@ -25,7 +24,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
  * Module to play a sound when a secret is collected.
  * @author Aton
  */
-object SecretChime : Module(
+object SecretChime : Module( // todo: use secretevent
     "Secret Chime",
     category = Category.DUNGEON,
     description = "Plays a sound whenever you click a secret. Also plays this sound for aura clicks. \n" +

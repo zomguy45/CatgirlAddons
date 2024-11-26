@@ -1,4 +1,4 @@
-package catgirlroutes.events
+package catgirlroutes.events.impl
 
 import net.minecraft.client.gui.inventory.GuiContainer
 import net.minecraft.entity.Entity
@@ -10,7 +10,7 @@ import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 
-open class ClickEvent : Event() {
+open class ClickEvent : Event() { // todo: clean this bad boy
     @Cancelable
     class LeftClickEvent : ClickEvent()
 
@@ -76,9 +76,6 @@ open class MotionUpdateEvent(
     ) : MotionUpdateEvent(x, y, z, motionX, motionY, motionZ, yaw, pitch, onGround)
 }
 
-@Cancelable
-class ReceivePacketEvent(val packet: Packet<*>) : Event()
-
 class EntityRemovedEvent(val entity: Entity) : Event()
 
 class DungeonSecretEvent : Event()
@@ -90,3 +87,6 @@ class TeleportEventPre(val packet: S08PacketPlayerPosLook) : Event()
 
 @Cancelable
 class PacketSentEvent(val packet: Packet<*>) : Event()
+
+@Cancelable
+class PacketReceiveEvent(val packet: Packet<*>) : Event()

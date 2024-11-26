@@ -5,7 +5,7 @@ import catgirlroutes.commands.impl.Ring
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
@@ -27,9 +27,9 @@ import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.Utils.swapFromName
-import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
-import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
@@ -43,6 +43,7 @@ import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color.WHITE
 import java.awt.Color.black
@@ -56,20 +57,20 @@ object AutoP3 : Module(
     description = "A module that allows you to place down rings that execute various actions."
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
-    private val inF7Only = BooleanSetting("In F7 only", true)
+    private val inBossOnly = BooleanSetting("Boss only", true)
     private val editTitle = BooleanSetting("EditMode title", false)
-    private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
-    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
-    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
+    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
+    private val style = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
+    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { style.selected == "Normal" }
 
     init {
         this.addSettings(
             selectedRoute,
-            boomType,
-            inF7Only,
+            inBossOnly,
             editTitle,
-            preset,
+            boomType,
+            style,
             layers,
             colour
         )
@@ -88,7 +89,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (ringEditMode || (inF7Only.enabled && floorNumber != 7)) return
+        if (ringEditMode || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -110,7 +111,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (inF7Only.enabled && floorNumber != 7) return
+        if (inBossOnly.enabled && floorNumber != 7 && !inBoss) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
@@ -119,7 +120,7 @@ object AutoP3 : Module(
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
             val color = if (cooldown) WHITE else colour.value
 
-            when(preset.selected) {
+            when(style.selected) {
                 "Trans"     -> renderTransFlag(x, y, z, ring.width, ring.height)
                 "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
@@ -130,17 +131,18 @@ object AutoP3 : Module(
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
         if (!editTitle.enabled) return
-        if (!ringEditMode || (inF7Only.enabled && floorNumber != 7)) return
+        if (!ringEditMode || (inBossOnly.enabled && floorNumber != 7)) return
         val sr = ScaledResolution(mc)
         val t = "Edit Mode"
         renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
     }
 
-    @SubscribeEvent
-    fun onTerm(event: ReceivePacketEvent) {
-        if (!termListener || (inF7Only.enabled && floorNumber != 7)) return
+    @SubscribeEvent(priority = EventPriority.HIGHEST) // idk if you actually need this. but jic for inv walk
+    fun onTerm(event: PacketReceiveEvent) {
+        if (!termListener || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
         if (event.packet !is S2DPacketOpenWindow) return
-        if (event.packet.windowTitle?.unformattedText in DungeonUtils.termGuiTitles) {
+        val windowTitle = event.packet.windowTitle
+        if (windowTitle != null && termGuiTitles.any { windowTitle.unformattedText.startsWith(it) }) {
             modMessage("Term found")
             termFound = true
             termListener = false
@@ -184,6 +186,7 @@ object AutoP3 : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
+                modMessage(boomType.selected)
                 scheduleTask(1) {leftClick()}
             }
             "hclip" -> {

@@ -3,6 +3,7 @@ package catgirlroutes
 import catgirlroutes.commands.*
 import catgirlroutes.commands.impl.*
 import catgirlroutes.config.ModuleConfig
+import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
@@ -18,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiScreen
-import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.Mod
@@ -59,7 +59,8 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
-            MovementUtils
+            MovementUtils,
+            EventDispatcher
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

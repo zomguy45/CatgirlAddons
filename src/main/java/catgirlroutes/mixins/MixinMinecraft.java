@@ -1,7 +1,7 @@
 package catgirlroutes.mixins;
 
-import catgirlroutes.events.PreKeyInputEvent;
-import catgirlroutes.events.PreMouseInputEvent;
+import catgirlroutes.events.impl.PreKeyInputEvent;
+import catgirlroutes.events.impl.PreMouseInputEvent;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.common.MinecraftForge;
 import org.lwjgl.input.Keyboard;

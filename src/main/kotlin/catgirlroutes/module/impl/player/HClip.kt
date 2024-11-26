@@ -1,6 +1,6 @@
 package catgirlroutes.module.impl.player
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.MovementUpdateEvent
+import catgirlroutes.events.impl.MovementUpdateEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage

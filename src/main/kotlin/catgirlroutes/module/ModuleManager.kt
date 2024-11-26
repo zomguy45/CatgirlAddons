@@ -1,7 +1,7 @@
 package catgirlroutes.module
 
-import catgirlroutes.events.PreKeyInputEvent
-import catgirlroutes.events.PreMouseInputEvent
+import catgirlroutes.events.impl.PreKeyInputEvent
+import catgirlroutes.events.impl.PreMouseInputEvent
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.misc.Zpew
@@ -16,7 +16,6 @@ import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
-import catgirlroutes.utils.AutoRouteUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 

@@ -1,6 +1,6 @@
 package catgirlroutes.mixins.entity;
 
-import catgirlroutes.events.MotionUpdateEvent;
+import catgirlroutes.events.impl.MotionUpdateEvent;
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.entity.EntityPlayerSP;
 import net.minecraft.entity.player.EntityPlayer;

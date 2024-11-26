@@ -12,7 +12,7 @@ public abstract class MovementUpdateEvent extends MixinAbstractClientPlayer {
 
     @Inject(method = "onUpdateWalkingPlayer", at = @At("HEAD"))
     private void onUpdateWalkingPlayerPre(CallbackInfo ci) {
-        MinecraftForge.EVENT_BUS.post(new catgirlroutes.events.MovementUpdateEvent.Pre());
+        MinecraftForge.EVENT_BUS.post(new catgirlroutes.events.impl.MovementUpdateEvent.Pre());
     }
 
     @Inject(method = "onUpdateWalkingPlayer", at = @At("RETURN"))

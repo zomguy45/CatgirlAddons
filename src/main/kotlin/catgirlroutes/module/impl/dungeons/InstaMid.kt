@@ -1,8 +1,8 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.PacketSentEvent
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -48,7 +48,7 @@ object InstaMid : Module(
     }
 
     @SubscribeEvent
-    fun onPacketReceive(event: ReceivePacketEvent) {
+    fun onPacketReceive(event: PacketReceiveEvent) {
         if (!this.enabled || event.packet !is S1BPacketEntityAttach || !isOnPlatform() || event.packet.entityId != mc.thePlayer.entityId || event.packet.vehicleEntityId < 0) return
         preparing = true
         active = true

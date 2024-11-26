@@ -1,6 +1,6 @@
 package catgirlroutes.mixins;
 
-import catgirlroutes.events.EntityRemovedEvent;
+import catgirlroutes.events.impl.EntityRemovedEvent;
 import net.minecraft.entity.Entity;
 import net.minecraft.world.World;
 import net.minecraftforge.common.MinecraftForge;

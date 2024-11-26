@@ -2,8 +2,8 @@ package catgirlroutes.utils.dungeon
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.scope
-import catgirlroutes.events.DungeonEvents.RoomEnterEvent
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.Utils.posX
@@ -12,7 +12,7 @@ import catgirlroutes.utils.Utils.romanToInt
 import catgirlroutes.utils.Utils.runOnMCThread
 import catgirlroutes.utils.dungeon.DungeonUtils.getDungeonPuzzles
 import catgirlroutes.utils.dungeon.DungeonUtils.getDungeonTeammates
-import catgirlroutes.utils.dungeon.tiles.FullRoom
+import catgirlroutes.utils.dungeon.tiles.Room
 import catgirlroutes.utils.getTabList
 import catgirlroutes.utils.hasBonusPaulScore
 import kotlinx.coroutines.Dispatchers
@@ -31,12 +31,12 @@ class Dungeon(val floor: Floor) {
 
     var paul = false
     val inBoss: Boolean get() = getBoss()
-    var dungeonTeammates: ArrayList<DungeonPlayer> = ArrayList<DungeonPlayer>(5)
-    var dungeonTeammatesNoSelf: ArrayList<DungeonPlayer> = ArrayList<DungeonPlayer>(4)
-    var leapTeammates: ArrayList<DungeonPlayer> = ArrayList<DungeonPlayer>(4)
+    var dungeonTeammates: ArrayList<DungeonPlayer> = ArrayList(5)
+    var dungeonTeammatesNoSelf: ArrayList<DungeonPlayer> = ArrayList(4)
+    var leapTeammates: ArrayList<DungeonPlayer> = ArrayList(4)
     var dungeonStats = DungeonStats()
-    val currentFullRoom: FullRoom? get() = ScanUtils.currentFullRoom
-    val passedRooms: MutableSet<FullRoom> get() = ScanUtils.passedRooms
+    val currentRoom: Room? get() = ScanUtils.currentRoom
+    val passedRooms: MutableSet<Room> get() = ScanUtils.passedRooms
     var puzzles = listOf<Puzzle>()
 
     private fun getBoss(): Boolean {
@@ -56,11 +56,12 @@ class Dungeon(val floor: Floor) {
     }
 
     fun enterDungeonRoom(event: RoomEnterEvent) {
-        val room = event.fullRoom?.takeUnless { room -> passedRooms.any { it.room.data.name == room.room.data.name } } ?: return
-        dungeonStats.knownSecrets = dungeonStats.knownSecrets?.plus(room.room.data.secrets) ?: room.room.data.secrets
+        val room = event.room?.takeUnless { room -> passedRooms.any { it.data.name == room.data.name } } ?: return
+        val roomSecrets = room.data.secrets
+        dungeonStats.knownSecrets = dungeonStats.knownSecrets?.plus(roomSecrets) ?: roomSecrets
     }
 
-    fun onPacket(event: ReceivePacketEvent) {
+    fun onPacket(event: PacketReceiveEvent) {
         when (event.packet) {
             is S38PacketPlayerListItem -> handleTabListPacket(event.packet)
             is S3EPacketTeams -> handleScoreboardPacket(event.packet)
@@ -94,7 +95,7 @@ class Dungeon(val floor: Floor) {
     }
 
     private fun handleHeaderFooterPacket(packet: S47PacketPlayerListHeaderFooter) {
-        Blessing.values().forEach { blessing ->
+        Blessing.entries.forEach { blessing ->
             blessing.regex.find(packet.footer.unformattedText.noControlCodes)?.let { match -> blessing.current = romanToInt(match.groupValues[1]) }
         }
     }

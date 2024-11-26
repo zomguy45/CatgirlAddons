@@ -1,8 +1,8 @@
 package catgirlroutes.utils.dungeon
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.DungeonEvents.RoomEnterEvent
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Island
@@ -17,7 +17,7 @@ import catgirlroutes.utils.Utils.rotateAroundNorth
 import catgirlroutes.utils.Utils.rotateToNorth
 import catgirlroutes.utils.Utils.rotationNumber
 import catgirlroutes.utils.Utils.subtractVec
-import catgirlroutes.utils.dungeon.tiles.FullRoom
+import catgirlroutes.utils.dungeon.tiles.Room
 import net.minecraft.block.BlockSkull
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
@@ -88,7 +88,7 @@ object DungeonUtils {
         get() = getItemSlot("Haunt", true) != null
 
     val currentRoomName: String
-        get() = currentDungeon?.currentFullRoom?.room?.data?.name ?: "Unknown"
+        get() = currentDungeon?.currentRoom?.data?.name ?: "Unknown"
 
     val dungeonTeammates: List<DungeonPlayer>
         get() = currentDungeon?.dungeonTeammates.orEmpty()
@@ -108,10 +108,10 @@ object DungeonUtils {
     val mimicKilled: Boolean
         get() = currentDungeon?.dungeonStats?.mimicKilled == true
 
-    val currentFullRoom: FullRoom?
-        get() = currentDungeon?.currentFullRoom
+    val currentRoom: Room?
+        get() = currentDungeon?.currentRoom
 
-    val passedRooms: Set<FullRoom>
+    val passedRooms: Set<Room>
         get() = currentDungeon?.passedRooms.orEmpty()
 
     val isPaul: Boolean
@@ -173,7 +173,7 @@ object DungeonUtils {
     }
 
     @SubscribeEvent
-    fun onPacket(event: ReceivePacketEvent) {
+    fun onPacket(event: PacketReceiveEvent) {
         if (inDungeons) currentDungeon?.onPacket(event)
     }
 
@@ -222,7 +222,7 @@ object DungeonUtils {
             val (_, name, clazz, _) = tablistRegex.find(displayName)?.destructured ?: continue
 
             previousTeammates.find { it.name == name }?.let { player -> player.isDead = clazz == "DEAD" } ?:
-            previousTeammates.add(DungeonPlayer(name, DungeonClass.values().find { it.name == clazz } ?: continue, mc.netHandler?.getPlayerInfo(name)?.locationSkin ?: continue, mc.theWorld?.getPlayerEntityByName(name), false))
+            previousTeammates.add(DungeonPlayer(name, DungeonClass.entries.find { it.name == clazz } ?: continue, mc.netHandler?.getPlayerInfo(name)?.locationSkin ?: continue, mc.theWorld?.getPlayerEntityByName(name), false))
         }
         return previousTeammates
     }
@@ -255,15 +255,15 @@ object DungeonUtils {
         return BlockPos(this.xCoord + add, this.yCoord + add, this.zCoord + add)
     }
 
-    fun FullRoom.getRelativeCoords(pos: Vec3) = pos.subtractVec(x = this.clayPos.x, z = this.clayPos.z).rotateToNorth(this.room.rotation)
-    fun FullRoom.getRealCoords(pos: Vec3) = pos.rotateAroundNorth(this.room.rotation).addVec(x = this.clayPos.x, z = this.clayPos.z)
-    fun FullRoom.getRelativeYaw(yaw: Float) = yaw - (rotationNumber(this.room.rotation) * 90)
-    fun FullRoom.getRealYaw(yaw: Float) = yaw + (rotationNumber(this.room.rotation) * 90)
+    fun Room.getRelativeCoords(pos: Vec3) = pos.subtractVec(x = this.clayPos.x, z = this.clayPos.z).rotateToNorth(this.rotation)
+    fun Room.getRealCoords(pos: Vec3) = pos.rotateAroundNorth(this.rotation).addVec(x = this.clayPos.x, z = this.clayPos.z)
+    fun Room.getRelativeYaw(yaw: Float) = yaw - (rotationNumber(this.rotation) * 90)
+    fun Room.getRealYaw(yaw: Float) = yaw + (rotationNumber(this.rotation) * 90)
 
-    fun FullRoom.getRelativeCoords(pos: BlockPos) = getRelativeCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
-    fun FullRoom.getRealCoords(pos: BlockPos) = getRealCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
-    fun FullRoom.getRelativeCoords(x: Int, y: Int, z: Int) = getRelativeCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
-    fun FullRoom.getRealCoords(x: Int, y: Int, z: Int) = getRealCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
+    fun Room.getRelativeCoords(pos: BlockPos) = getRelativeCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
+    fun Room.getRealCoords(pos: BlockPos) = getRealCoords(Vec3(pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble())).toBlockPos()
+    fun Room.getRelativeCoords(x: Int, y: Int, z: Int) = getRelativeCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
+    fun Room.getRealCoords(x: Int, y: Int, z: Int) = getRealCoords(BlockPos(x.toDouble(), y.toDouble(), z.toDouble()))
 
     val dungeonItemDrops = listOf(
         "Health Potion VIII Splash Potion", "Healing Potion 8 Splash Potion", "Healing Potion VIII Splash Potion", "Healing VIII Splash Potion", "Healing 8 Splash Potion",

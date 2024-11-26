@@ -122,6 +122,3 @@ object EtherWarpHelper {
         "minecraft:vine",
     )
 }
-
-
-

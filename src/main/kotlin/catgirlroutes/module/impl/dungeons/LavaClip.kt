@@ -1,7 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
@@ -71,7 +71,7 @@ object LavaClip : Module(
     }
 
     @SubscribeEvent
-    fun onPacket(event: ReceivePacketEvent) {
+    fun onPacket(event: PacketReceiveEvent) {
         if (veloCancelled || event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
 
         if (event.packet.motionY == 28000) {

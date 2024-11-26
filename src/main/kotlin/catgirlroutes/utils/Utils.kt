@@ -3,7 +3,7 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
-//import gg.essential.universal.ChatColor.Companion.FORMATTING_CODE_PATTERN
+import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.block.BlockAir
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.settings.KeyBinding
@@ -14,7 +14,6 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
-import kotlin.math.atan2
 import kotlin.math.round
 import kotlin.math.sqrt
 
@@ -31,6 +30,17 @@ object Utils {
 
     fun Any?.equalsOneOf(vararg options: Any?): Boolean {
         return options.any { this == it }
+    }
+
+    fun String.containsOneOf(options: Collection<String>, ignoreCase: Boolean = false): Boolean {
+        return options.any { this.contains(it, ignoreCase) }
+    }
+
+    /**
+     * Checks if the first value in the pair equals the first argument and the second value in the pair equals the second argument.
+     */
+    fun Pair<Any?, Any?>?.equal(first: Any?, second: Any?): Boolean {
+        return this?.first == first && this?.second == second
     }
 
     fun rightClick() {
@@ -84,6 +94,9 @@ object Utils {
 
     val ItemStack?.unformattedName: String
         get() = this?.displayName?.noControlCodes ?: ""
+
+    val ItemStack?.skyblockID: String
+        get() = this?.extraAttributes?.getString("id") ?: ""
 
     fun runOnMCThread(run: () -> Unit) {
         if (!mc.isCallingFromMinecraftThread) mc.addScheduledTask(run) else run()

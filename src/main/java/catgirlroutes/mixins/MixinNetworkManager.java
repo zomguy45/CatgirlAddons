@@ -1,8 +1,8 @@
 package catgirlroutes.mixins;
 
-import catgirlroutes.events.PacketSentEvent;
-import catgirlroutes.events.ReceiveChatPacketEvent;
-import catgirlroutes.events.TeleportEventPre;
+import catgirlroutes.events.impl.PacketSentEvent;
+import catgirlroutes.events.impl.ReceiveChatPacketEvent;
+import catgirlroutes.events.impl.TeleportEventPre;
 import io.netty.channel.ChannelHandlerContext;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.Packet;
@@ -13,7 +13,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import catgirlroutes.events.ReceivePacketEvent;
+import catgirlroutes.events.impl.PacketReceiveEvent;
 
 @Mixin(value = {NetworkManager.class}, priority = 800)
 public class MixinNetworkManager {
@@ -28,7 +28,7 @@ public class MixinNetworkManager {
         if (packet instanceof S02PacketChat) {
             MinecraftForge.EVENT_BUS.post(new ReceiveChatPacketEvent((S02PacketChat) packet));
         }
-        if (MinecraftForge.EVENT_BUS.post(new ReceivePacketEvent(packet)))
+        if (MinecraftForge.EVENT_BUS.post(new PacketReceiveEvent(packet)))
             shouldCancel = true;
         if (shouldCancel)
             ci.cancel();

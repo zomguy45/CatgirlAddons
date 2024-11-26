@@ -1,6 +1,6 @@
 package catgirlroutes.module.impl.player
 
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
@@ -54,7 +54,7 @@ object PearlClip : Module(
     }
 
     @SubscribeEvent
-    fun onPacket(event: ReceivePacketEvent) {
+    fun onPacket(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {

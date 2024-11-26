@@ -1,7 +1,7 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.SkyblockJoinIslandEvent
+import catgirlroutes.events.impl.SkyblockJoinIslandEvent
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.utils.Utils.postAndCatch
 import catgirlroutes.utils.clock.Executor

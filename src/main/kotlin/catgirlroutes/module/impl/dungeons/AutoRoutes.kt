@@ -5,7 +5,9 @@ import catgirlroutes.commands.impl.Node
 import catgirlroutes.commands.impl.NodeManager
 import catgirlroutes.commands.impl.NodeManager.nodes
 import catgirlroutes.commands.impl.nodeEditMode
-import catgirlroutes.events.PacketSentEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.RoomEnterEvent
+import catgirlroutes.events.impl.SecretPickupEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.player.PearlClip
@@ -18,14 +20,15 @@ import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.Utils.swapFromName
-import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
-import catgirlroutes.utils.render.WorldRenderUtils
-import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
@@ -35,12 +38,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.odinmain.events.impl.DungeonEvents
-import me.odinmain.events.impl.SecretPickupEvent
-import me.odinmain.utils.skyblock.EtherWarpHelper
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.util.BlockPos
@@ -74,7 +71,7 @@ object AutoRoutes : Module(
     }
 
     @SubscribeEvent
-    fun onEnterRoom(event: DungeonEvents.RoomEnterEvent) {
+    fun onEnterRoom(event: RoomEnterEvent) {
         NodeManager.loadNodes()
     }
 
@@ -190,7 +187,7 @@ object AutoRoutes : Module(
 
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         delay(actionDelay.toLong())
-        val room2 = currentFullRoom ?: return
+        val room2 = currentRoom ?: return
         val yaw = room2.getRealYaw(node.yaw)
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
@@ -293,7 +290,7 @@ object AutoRoutes : Module(
         nodes.forEach { _ ->
             val realLocation = room.getRealCoords(node.location)
             if (realLocation.xCoord == pos.x.toDouble() && realLocation.yCoord == pos.y.toDouble() + 1.0 && realLocation.zCoord == pos.z.toDouble()) {
-                val room2 = currentFullRoom ?: return nextNode(null, null, null, null, null, false)
+                val room2 = currentRoom ?: return nextNode(null, null, null, null, null, false)
                 nextYaw = room2.getRealYaw(node.yaw)
                 nextPitch = node.pitch
                 hasNode = true

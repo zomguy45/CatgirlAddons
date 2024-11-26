@@ -1,7 +1,7 @@
 package catgirlroutes.utils.rotation
 
-import catgirlroutes.events.MotionUpdateEvent
-import catgirlroutes.events.MotionUpdateEvent.PreMotionUpdateEvent
+import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.MotionUpdateEvent.PreMotionUpdateEvent
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.airClick
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent

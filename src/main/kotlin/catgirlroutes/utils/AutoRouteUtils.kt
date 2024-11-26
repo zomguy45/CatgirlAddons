@@ -1,19 +1,14 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.PacketSentEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.misc.Zpew
-import catgirlroutes.module.impl.misc.Zpew.recentlySentC06s
-import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
-import kotlinx.coroutines.processNextEventInCurrentThread
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import org.lwjgl.Sys
 
 object AutoRouteUtils : Module(
     name = "CancelRotate",
