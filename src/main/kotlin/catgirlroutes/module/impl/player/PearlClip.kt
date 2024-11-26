@@ -14,6 +14,7 @@ import catgirlroutes.utils.Utils.relativeClip
 import catgirlroutes.utils.Utils.swapFromName
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import kotlin.math.abs
 
 object PearlClip : Module(
     "Pearl Clip",
@@ -32,7 +33,7 @@ object PearlClip : Module(
     override fun onKeyBind() {
         if (!this.enabled) return
         modMessage("Pearl clipping!")
-        pearlClip((pearlClipDistance.value * -1))
+        pearlClip((pearlClipDistance.value))
     }
 
     private var clipDepth: Double? = 0.0
@@ -57,7 +58,7 @@ object PearlClip : Module(
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {
-            relativeClip(0.0, clipDepth!!, 0.0)
+            relativeClip(0.0, -abs(clipDepth!!), 0.0)
         }
     }
 }

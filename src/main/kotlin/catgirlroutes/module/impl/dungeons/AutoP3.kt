@@ -55,18 +55,19 @@ object AutoP3 : Module(
     category = Category.DUNGEON,
     description = "A module that allows you to place down rings that execute various actions."
 ){
+    val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
+    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
     private val inF7Only = BooleanSetting("In F7 only", true)
     private val editTitle = BooleanSetting("EditMode title", false)
-    val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
     private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
     private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
     private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
+            selectedRoute,
             inF7Only,
             editTitle,
-            selectedRoute,
             preset,
             layers,
             colour
@@ -127,7 +128,8 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if ((!editTitle.enabled && !ringEditMode) || (inF7Only.enabled && floorNumber != 7)) return
+        if (!editTitle.enabled) return
+        if (!ringEditMode || (inF7Only.enabled && floorNumber != 7)) return
         val sr = ScaledResolution(mc)
         val t = "Edit Mode"
         renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
@@ -180,7 +182,7 @@ object AutoP3 : Module(
             }
             "boom" -> {
                 modMessage("Bomb denmark!")
-                if (!swapFromName("infinityboom tnt")) swapFromName("superboom tnt")
+                if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 scheduleTask(1) {leftClick()}
             }
             "hclip" -> {
