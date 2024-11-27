@@ -1,9 +1,8 @@
 package catgirlroutes.utils.rotation
 
-import catgirlroutes.events.MotionUpdateEvent
-import catgirlroutes.events.MotionUpdateEvent.PreMotionUpdateEvent
+import catgirlroutes.events.impl.MotionUpdateEvent
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Utils.airClick
+import catgirlroutes.utils.PlayerUtils.airClick
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 
@@ -17,7 +16,7 @@ open class Rotater {
         var sneak: Boolean = false
 
         @SubscribeEvent
-        fun onMotionUpdatePre(event: PreMotionUpdateEvent) {
+        fun onMotionUpdatePre(event: MotionUpdateEvent.Pre) {
             if (fakeRotating) {
                 event.yaw = yaw
                 event.pitch = pitch
@@ -27,7 +26,7 @@ open class Rotater {
             }
         }
         @SubscribeEvent
-        fun onMotionUpdatePost(event: MotionUpdateEvent.PostMotionUpdateEvent) {
+        fun onMotionUpdatePost(event: MotionUpdateEvent.Post) {
             if (fakeClicking) {
                 airClick()
                 fakeClicking = false

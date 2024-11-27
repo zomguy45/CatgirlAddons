@@ -12,6 +12,7 @@
   ],
   "client": [
     "MixinFontRenderer",
+    "MixinGuiContainer",
     "MixinMinecraft",
     "MixinNetworkManager",
     "accessors.IEntityPlayerSPAccessor",

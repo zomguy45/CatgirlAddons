@@ -4,6 +4,8 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.onHypixel
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.utils.Island
+import catgirlroutes.utils.LocationManager
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 
@@ -14,7 +16,7 @@ object F7sim : Module(
 ){
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (onHypixel || mc.thePlayer == null || !this.enabled) return
+        if (!LocationManager.currentArea.isArea(Island.SinglePlayer)) return
 
         mc.thePlayer.getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.movementSpeed).baseValue = 0.50000000745
         mc.thePlayer.capabilities?.setPlayerWalkSpeed(0.5f)

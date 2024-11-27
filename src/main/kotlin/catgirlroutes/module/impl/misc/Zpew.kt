@@ -2,8 +2,8 @@ package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.onHypixel
-import catgirlroutes.events.PacketSentEvent
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
@@ -11,12 +11,14 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+//import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.PlayerUtils.playLoudSound
+import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import me.odinmain.events.impl.PacketReceivedEvent
+import catgirlroutes.utils.etherwarpshittemp.RaytraceUtils
 import me.odinmain.utils.skyblock.EtherWarpHelper
-import me.odinmain.utils.skyblock.skyblockID
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -79,15 +81,30 @@ object Zpew : Module(
     }
 
     private fun doZeroPingEtherWarp() {
-        val etherBlock = EtherWarpHelper.getEtherPos(
+//        val etherBlock = EtherWarpHelper.getEtherPos( // odin
+//            Vec3(lastX, lastY, lastZ),
+//            lastYaw,
+//            lastPitch,
+//            57.0
+//        )
+
+        val etherBlock = catgirlroutes.utils.EtherWarpHelper.getEtherPos( // 1 to 1 skid
             Vec3(lastX, lastY, lastZ),
             lastYaw,
             lastPitch,
             57.0
         )
+
         if (!etherBlock.succeeded) return
 
-        val pos: BlockPos = etherBlock.pos!!
+        val pos = etherBlock.pos!!
+
+//        val (succeeded, etherBlock) = RaytraceUtils.getEtherwarpBlockSuccess(lastPitch, lastYaw, Vec3(lastX, lastY, lastZ), 57.0) // from creampirog
+//
+//        if (!succeeded) return
+//
+//        val pos = BlockPos(etherBlock)
+
         val x: Double = pos.x.toDouble() + 0.5
         val y: Double = pos.y.toDouble() + 1.05
         val z: Double = pos.z.toDouble() + 0.5
@@ -102,7 +119,6 @@ object Zpew : Module(
         lastX = x
         lastY = y
         lastZ = z
-        
         updatePosition = false
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
@@ -177,7 +193,7 @@ object Zpew : Module(
     }
 
     @SubscribeEvent
-    fun onS08(event: ReceivePacketEvent) {
+    fun onS08(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
         if (inBoss || !onHypixel) return
         if (recentlySentC06s.isEmpty()) return
@@ -218,7 +234,7 @@ object Zpew : Module(
     }
 
     @SubscribeEvent
-    fun onS29(event: PacketReceivedEvent) {
+    fun onS29(event: PacketReceiveEvent) {
         if (event.packet !is S29PacketSoundEffect) return
         val packet: S29PacketSoundEffect = event.packet as S29PacketSoundEffect // I don't think it should be like that in kt lol
         if (packet.soundName != "mob.enderdragon.hit" || packet.volume != 1f || packet.pitch != 0.53968257f || !checkAllowedFails()) return
@@ -233,14 +249,6 @@ object Zpew : Module(
             soundSelector.selected
         else
             customSound.text
-    }
-
-    private var shouldBypassVolume: Boolean = false // todo: move to PlayerUtils I think
-
-    private fun playLoudSound(sound: String?, volume: Float, pitch: Float) {
-        shouldBypassVolume = true
-        mc.thePlayer?.playSound(sound, volume, pitch)
-        shouldBypassVolume = false
     }
 
     data class SentC06(

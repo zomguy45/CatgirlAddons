@@ -1,7 +1,7 @@
 package catgirlroutes.utils.rotation
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.PacketSentEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.utils.PacketUtils
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraftforge.event.world.WorldEvent

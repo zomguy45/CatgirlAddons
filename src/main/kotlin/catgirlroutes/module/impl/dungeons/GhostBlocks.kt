@@ -8,8 +8,8 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.Utils.leftClick
-import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
 import net.minecraft.block.Block

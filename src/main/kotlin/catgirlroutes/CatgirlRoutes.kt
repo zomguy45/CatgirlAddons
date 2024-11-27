@@ -1,7 +1,9 @@
 package catgirlroutes
 
 import catgirlroutes.commands.*
+import catgirlroutes.commands.impl.*
 import catgirlroutes.config.ModuleConfig
+import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
@@ -17,7 +19,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiScreen
-import net.minecraftforge.client.ClientCommandHandler
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.Mod
@@ -40,24 +41,11 @@ class CatgirlRoutes {
     fun onInit(event: FMLInitializationEvent) {
         ModuleManager.loadModules()
 
-        listOf(
-            CatgirlAddonsCommands(),
-            DevCommands(),
-
-            //AutoP3
-            AutoP3Commands(),
-
-            //Features
-            PearlClipCommand(),
-            LavaClipCommand(),
-
-            //AutoRoutes
-            AutoRoutesCommands(),
-
-            //ESP
-        ).forEach {
-            ClientCommandHandler.instance.registerCommand((it))
-        }
+        registerCommands(
+            catgirlAddonsCommands, devCommands,
+            pearlClip, lavaClip,
+            autoP3Commands, autoRoutesCommands
+        )
 
         listOf(
             this,
@@ -71,6 +59,9 @@ class CatgirlRoutes {
             AutoRouteUtils,
             FakeRotater,
             Rotater,
+            MovementUtils,
+            EventDispatcher,
+            VecUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

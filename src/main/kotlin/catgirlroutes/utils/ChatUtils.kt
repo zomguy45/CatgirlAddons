@@ -72,7 +72,7 @@ object ChatUtils {
     /**
      * Gets selected mod prefix in [ClickGui]
      */
-    private fun getPrefix(): String {
+    fun getPrefix(): String {
         return when (ClickGui.prefixStyle.index) {
             0 -> CatgirlRoutes.CHAT_PREFIX;
             1 -> CatgirlRoutes.SHORT_PREFIX
@@ -156,12 +156,25 @@ object ChatUtils {
     }
 
     /**
-     * Runs the specified command. Per default sends it to the server  but has client side option.
+     * Runs the specified command. Per default sends it to the server but has client side option.
      * The input is assumed to **not** include the slash "/" that signals a command.
      */
     fun command(text: String, clientSide: Boolean = true) {
         if (clientSide && mc.thePlayer != null) ClientCommandHandler.instance.executeCommand(mc.thePlayer, "/$text")
         else mc.thePlayer?.sendChatMessage("/$text")
+    }
+
+    /**
+     * Runs the specified command. It doesn't matter if it's client or server sided command. It would send it anyway
+     * ClientCommandHandler.instance.executeCommand(mc.thePlayer, text) == 0 will NOT give any feedback in chat if the command isn't client sided
+     */
+    fun commandAny(text: String) {
+        mc.thePlayer?.let {
+            val command = text.removePrefix("/")
+            if (ClientCommandHandler.instance.executeCommand(it, "/$command") == 0) {
+                it.sendChatMessage("/$command")
+            }
+        }
     }
 
     /**

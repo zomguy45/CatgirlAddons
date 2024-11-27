@@ -1,6 +1,12 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.utils.VecUtils.get
+import catgirlroutes.utils.VecUtils.getLook
+import catgirlroutes.utils.VecUtils.getPositionEyes
+import catgirlroutes.utils.VecUtils.multiply
+import catgirlroutes.utils.VecUtils.renderVec
+import catgirlroutes.utils.VecUtils.toBlockPos
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import kotlin.math.*
@@ -122,6 +128,3 @@ object EtherWarpHelper {
         "minecraft:vine",
     )
 }
-
-
-

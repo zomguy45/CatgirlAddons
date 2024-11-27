@@ -57,6 +57,7 @@ object ModuleManager {
         AutoLeap,
         Zpew,
         AutoPot,
+        Puzzles,
 
         // Misc
         F7sim,

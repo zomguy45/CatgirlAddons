@@ -1,43 +1,54 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.Node
-import catgirlroutes.commands.NodeManager
-import catgirlroutes.commands.nodeeditmode
-import catgirlroutes.events.PacketSentEvent
+import catgirlroutes.commands.impl.Node
+import catgirlroutes.commands.impl.NodeManager
+import catgirlroutes.commands.impl.NodeManager.nodes
+import catgirlroutes.commands.impl.nodeEditMode
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.RoomEnterEvent
+import catgirlroutes.events.impl.SecretPickupEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.player.PearlClip
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
-import catgirlroutes.utils.Utils
-import catgirlroutes.utils.Utils.swapFromName
-import catgirlroutes.utils.dungeon.DungeonUtils.currentFullRoom
+import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
-import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
+import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
+import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.RotationUtils
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.odinmain.events.impl.DungeonEvents
-import me.odinmain.events.impl.SecretPickupEvent
 import me.odinmain.utils.skyblock.EtherWarpHelper
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.currentRoom
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.inDungeons
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.MouseEvent
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import java.awt.Color
+import java.awt.Color.WHITE
+import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.floor
 
@@ -46,20 +57,26 @@ object AutoRoutes : Module(
     category = Category.DUNGEON,
     description = "A module that allows you to place down nodes that execute various actions."
 ){
+    private val editTitle = BooleanSetting("EditMode title", false)
     private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
+    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { preset.selected == "Normal" }
 
     init {
         this.addSettings(
-            preset
+            editTitle,
+            preset,
+            layers,
+            colour
         )
     }
 
     @SubscribeEvent
-    fun onEnterRoom(event: DungeonEvents.RoomEnterEvent) {
+    fun onEnterRoom(event: RoomEnterEvent) {
         NodeManager.loadNodes()
     }
 
-    var secretPickedUp = false
+    private var secretPickedUp = false
 
     @SubscribeEvent
     fun onSecret(event: SecretPickupEvent) {
@@ -86,8 +103,8 @@ object AutoRoutes : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!inDungeons || !this.enabled || nodeeditmode || event.phase != TickEvent.Phase.START) return
-        NodeManager.nodes.forEach { node ->
+        if (!inDungeons || nodeEditMode || event.phase != TickEvent.Phase.START) return
+        nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inNode(node)) {
@@ -105,8 +122,8 @@ object AutoRoutes : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!inDungeons || !this.enabled) return
-        NodeManager.nodes.forEach { node ->
+        if (!inDungeons) return
+        nodes.forEach { node ->
             val room = currentRoom ?: return
             val realLocation = room.getRealCoords(node.location)
             val x: Double = realLocation.xCoord + 0.5
@@ -114,23 +131,22 @@ object AutoRoutes : Module(
             val z: Double = realLocation.zCoord + 0.5
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${node.type}"] == true
-            val color = if (cooldown) Color.WHITE else Color.black
+            val color = if (cooldown) WHITE else colour.value
 
             when(preset.selected) {
-                "Trans" -> WorldRenderUtils.renderTransFlag(x, y, z, node.width, node.height)
-                "Normal" -> WorldRenderUtils.drawP3box(
-                    x - node.width / 2 + 0.5,
-                    y,
-                    z - node.width / 2 + 0.5,
-                    node.width.toDouble(),
-                    node.height.toDouble(),
-                    node.width.toDouble(),
-                    color,
-                    4F,
-                    false
-                )
-                "LGBTQIA+" -> WorldRenderUtils.renderGayFlag(x, y, z, node.width, node.height)
+                "Trans"     -> renderTransFlag(x, y, z, node.width, node.height)
+                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.value.toInt())
+                "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
             }
+        }
+    }
+
+    @SubscribeEvent
+    fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
+        if (editTitle.enabled && nodeEditMode && inDungeons) {
+            val sr = ScaledResolution(mc)
+            val t = "Edit Mode"
+            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
         }
     }
 
@@ -185,7 +201,7 @@ object AutoRoutes : Module(
 
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         delay(actionDelay.toLong())
-        val room2 = currentFullRoom ?: return
+        val room2 = currentRoom ?: return
         val yaw = room2.getRealYaw(node.yaw)
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
@@ -227,7 +243,7 @@ object AutoRoutes : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
-                scheduleTask(1) { Utils.leftClick() }
+                scheduleTask(1) { leftClick() }
             }
             "pearl" -> {
                 swapFromName("ender pearl")
@@ -249,6 +265,10 @@ object AutoRoutes : Module(
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+            }
+            "command" -> {
+                modMessage("Sexecuting!")
+                commandAny(node.command!!)
             }
         }
     }
@@ -281,10 +301,10 @@ object AutoRoutes : Module(
         var nextYaw = 9999f
         var nextPitch = 9999f
         var hasNode = false
-        NodeManager.nodes.forEach { n ->
+        nodes.forEach { _ ->
             val realLocation = room.getRealCoords(node.location)
             if (realLocation.xCoord == pos.x.toDouble() && realLocation.yCoord == pos.y.toDouble() + 1.0 && realLocation.zCoord == pos.z.toDouble()) {
-                val room2 = currentFullRoom ?: return nextNode(null, null, null, null, null, false)
+                val room2 = currentRoom ?: return nextNode(null, null, null, null, null, false)
                 nextYaw = room2.getRealYaw(node.yaw)
                 nextPitch = node.pitch
                 hasNode = true

@@ -1,10 +1,10 @@
-package catgirlroutes.events
+package catgirlroutes.events.impl
 
 import net.minecraftforge.fml.common.eventhandler.Cancelable
 import net.minecraftforge.fml.common.eventhandler.Event
 
 @Cancelable
-open class PositionUpdateEvent constructor(
+open class PositionUpdateEvent(
     var x: Double,
     var y: Double,
     var z: Double,

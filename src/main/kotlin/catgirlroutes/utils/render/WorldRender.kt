@@ -298,34 +298,54 @@ object WorldRenderUtils {
         GlStateManager.disableBlend()
     }
 
+    fun drawP3boxWithLayers(
+        x: Double,
+        y: Double,
+        z: Double,
+        width: Float,
+        height: Float,
+        colour: Color,
+        layers: Int = 3
+    ) {
+        if (layers < 3) return
+
+        val gap = height / (layers - 1)
+        for (i in 1 until layers - 1) {
+            drawSquareTwo(x, y + (gap * i), z, width, width, colour, 4f, false)
+        }
+
+        drawSquareTwo(x, y + 0.01, z, width, width, colour, 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, colour, 4f, false)
+    }
+
 
     fun renderTransFlag(
         x: Double,
         y: Double,
         z: Double,
-        Width: Float,
-        Height: Float,
+        width: Float,
+        height: Float,
     ){
-        drawSquareTwo(x, y + 0.01, z, Width, Width, cyan, 4f, false)
-        drawSquareTwo(x, y + Height * 0.25, z, Width, Width, pink, 4f, false)
-        drawSquareTwo(x, y + Height * 0.5, z, Width, Width, white, 4f, false)
-        drawSquareTwo(x, y + Height * 0.75, z, Width, Width, pink, 4f, false)
-        drawSquareTwo(x, y + Height, z, Width, Width, cyan, 4f, false)
+        drawSquareTwo(x, y + 0.01, z, width, width, cyan, 4f, false)
+        drawSquareTwo(x, y + height * 0.25, z, width, width, pink, 4f, false)
+        drawSquareTwo(x, y + height * 0.5, z, width, width, white, 4f, false)
+        drawSquareTwo(x, y + height * 0.75, z, width, width, pink, 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, cyan, 4f, false)
     }
 
     fun renderGayFlag(
         x: Double,
         y: Double,
         z: Double,
-        Width: Float,
-        Height: Float,
+        width: Float,
+        height: Float,
     ){
-        drawSquareTwo(x, y + 0.01, z, Width, Width, red, 4f, false)
-        drawSquareTwo(x, y + Height * 0.2, z, Width, Width, orange, 4f, false)
-        drawSquareTwo(x, y + Height * 0.4, z, Width, Width, yellow, 4f, false)
-        drawSquareTwo(x, y + Height * 0.6, z, Width, Width, green, 4f, false)
-        drawSquareTwo(x, y + Height * 0.8, z, Width, Width, blue, 4f, false)
-        drawSquareTwo(x, y + Height, z, Width, Width, pink, 4f, false)
+        drawSquareTwo(x, y + 0.01, z, width, width, red, 4f, false)
+        drawSquareTwo(x, y + height * 0.2, z, width, width, orange, 4f, false)
+        drawSquareTwo(x, y + height * 0.4, z, width, width, yellow, 4f, false)
+        drawSquareTwo(x, y + height * 0.6, z, width, width, green, 4f, false)
+        drawSquareTwo(x, y + height * 0.8, z, width, width, blue, 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, pink, 4f, false)
     }
 
 

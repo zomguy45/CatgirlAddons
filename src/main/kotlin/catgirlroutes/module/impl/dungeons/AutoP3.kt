@@ -1,18 +1,18 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.Ring
-import catgirlroutes.commands.RingManager.loadRings
-import catgirlroutes.commands.RingManager.rings
-import catgirlroutes.commands.ringeditmode
-import catgirlroutes.commands.ringsActive
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.commands.impl.Ring
+import catgirlroutes.commands.impl.RingManager.loadRings
+import catgirlroutes.commands.impl.RingManager.rings
+import catgirlroutes.commands.impl.ringEditMode
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
-import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.*
+import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.edge
@@ -22,12 +22,15 @@ import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.rotation.ServerRotateUtils.set
-import catgirlroutes.utils.Utils.airClick
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
-import catgirlroutes.utils.Utils.leftClick
-import catgirlroutes.utils.Utils.swapFromName
-import catgirlroutes.utils.dungeon.DungeonUtils
-import catgirlroutes.utils.render.WorldRenderUtils.drawP3box
+import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.PlayerUtils.airClick
+import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles
+import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
@@ -35,9 +38,12 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color.WHITE
 import java.awt.Color.black
@@ -51,12 +57,22 @@ object AutoP3 : Module(
     description = "A module that allows you to place down rings that execute various actions."
 ){
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    private val preset = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val inBossOnly = BooleanSetting("Boss only", true)
+    private val editTitle = BooleanSetting("EditMode title", false)
+    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
+    private val style = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
+    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { style.selected == "Normal" }
 
     init {
         this.addSettings(
             selectedRoute,
-            preset
+            inBossOnly,
+            editTitle,
+            boomType,
+            style,
+            layers,
+            colour
         )
     }
 
@@ -73,7 +89,7 @@ object AutoP3 : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled || ringeditmode) return
+        if (ringEditMode || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -95,28 +111,38 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!ringsActive || !this.enabled) return
+        if (inBossOnly.enabled && floorNumber != 7 && !inBoss) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
             val z: Double = ring.location.zCoord
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
-            val color = if (cooldown) WHITE else black
+            val color = if (cooldown) WHITE else colour.value
 
-            when(preset.selected) {
-                "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal" -> drawP3box(x - ring.width / 2, y, z - ring.width / 2, ring.width.toDouble(), ring.height.toDouble(), ring.width.toDouble(), color, 4F, false)
-                "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
+            when(style.selected) {
+                "Trans"     -> renderTransFlag(x, y, z, ring.width, ring.height)
+                "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
+                "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
         }
     }
 
     @SubscribeEvent
-    fun onTerm(event: ReceivePacketEvent) {
-        if (!termListener) return
+    fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
+        if (!editTitle.enabled) return
+        if (!ringEditMode || (inBossOnly.enabled && floorNumber != 7)) return
+        val sr = ScaledResolution(mc)
+        val t = "Edit Mode"
+        renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST) // idk if you actually need this. but jic for inv walk
+    fun onTerm(event: PacketReceiveEvent) {
+        if (!termListener || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
         if (event.packet !is S2DPacketOpenWindow) return
-        if (event.packet.windowTitle?.unformattedText in DungeonUtils.termGuiTitles) {
+        val windowTitle = event.packet.windowTitle
+        if (windowTitle != null && termGuiTitles.any { windowTitle.unformattedText.startsWith(it) }) {
             modMessage("Term found")
             termFound = true
             termListener = false
@@ -159,7 +185,8 @@ object AutoP3 : Module(
             }
             "boom" -> {
                 modMessage("Bomb denmark!")
-                swapFromName("infinityboom tnt")
+                if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
+                modMessage(boomType.selected)
                 scheduleTask(1) {leftClick()}
             }
             "hclip" -> {
@@ -195,6 +222,10 @@ object AutoP3 : Module(
             "edge" -> {
                 modMessage("Edging!")
                 edge()
+            }
+            "command" -> {
+                modMessage("Sexecuting!")
+                commandAny(ring.command!!)
             }
         }
     }

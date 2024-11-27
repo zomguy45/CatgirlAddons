@@ -1,7 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.ReceivePacketEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import me.odinmain.utils.sidebarLines
@@ -10,8 +10,6 @@ import me.odinmain.utils.skyblock.unformattedName
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
-import net.minecraft.scoreboard.Score
-import net.minecraft.scoreboard.ScoreObjective
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object AutoLeap : Module(
@@ -32,13 +30,13 @@ object AutoLeap : Module(
         playerList.clear()
         while (i < 5){
             i += 1
-            playerList.add(sidebarLines.get(i))
+            playerList.add(sidebarLines[i])
             modMessage(sidebarLines.get(i))
         }
     }
 
     @SubscribeEvent
-    fun onS2F(event: ReceivePacketEvent) {
+    fun onS2F(event: PacketReceiveEvent) {
         if (event.packet !is S2FPacketSetSlot) return
         if (!awaitingLeap) return
         val item = event.packet.func_149174_e()
@@ -50,7 +48,7 @@ object AutoLeap : Module(
     }
 
     @SubscribeEvent
-    fun onS2d(event: ReceivePacketEvent) {
+    fun onS2d(event: PacketReceiveEvent) {
         if (event.packet !is S2DPacketOpenWindow) return
         cwid = event.packet.windowId
     }
