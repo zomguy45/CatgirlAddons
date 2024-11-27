@@ -6,12 +6,12 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import catgirlroutes.utils.Utils.airClick
 import catgirlroutes.utils.Utils.findDistanceToAirBlocks
 import catgirlroutes.utils.Utils.relativeClip
 import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
+import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -30,7 +30,7 @@ object PearlClip : Module(
 
     private var active = false
     override fun onKeyBind() {
-        if (!this.enabled) return // todo: do something about it idk?!
+        if (!this.enabled) return
         modMessage("Pearl clipping!")
         pearlClip((pearlClipDistance.value * -1))
     }

@@ -3,6 +3,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.MovementUpdateEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.restartMovement
@@ -16,6 +17,12 @@ object HClip : Module(
     category = Category.PLAYER,
     description = "Boosts you forward when key bind is pressed"
 ){
+    private val shouldJump = BooleanSetting("Auto jump", false, "Makes hclip automatically jump if on ground.")
+
+    init {
+        shouldJump
+    }
+
     private var pendingHClip = false
     private var yawToUse: Float? = null
 
@@ -27,7 +34,7 @@ object HClip : Module(
 
     fun hClip(yaw: Float = mc.thePlayer.rotationYaw) {
         stopMovement()
-        if (mc.thePlayer.onGround) jump()
+        if (mc.thePlayer.onGround && shouldJump.value) jump()
         yawToUse = yaw
         mc.thePlayer.setVelocity(0.0, mc.thePlayer.motionY, 0.0)
         pendingHClip = true

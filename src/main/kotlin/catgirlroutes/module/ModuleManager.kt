@@ -2,12 +2,12 @@ package catgirlroutes.module
 
 import catgirlroutes.events.PreKeyInputEvent
 import catgirlroutes.events.PreMouseInputEvent
+import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.misc.*
-import catgirlroutes.module.impl.misc.Zpew
 import catgirlroutes.module.impl.player.AutoSprint
-import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.impl.player.HClip
+import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.module.impl.player.VerticalJerry
 import catgirlroutes.module.impl.render.BossESP
 import catgirlroutes.module.impl.render.ClickGui
@@ -16,7 +16,6 @@ import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
-import catgirlroutes.utils.AutoRouteUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 
@@ -57,6 +56,7 @@ object ModuleManager {
         StormClip,
         AutoLeap,
         Zpew,
+        AutoPot,
 
         // Misc
         F7sim,
