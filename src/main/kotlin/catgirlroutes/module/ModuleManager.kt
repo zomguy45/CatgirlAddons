@@ -1,9 +1,10 @@
 package catgirlroutes.module
 
-import catgirlroutes.events.PreKeyInputEvent
-import catgirlroutes.events.PreMouseInputEvent
+import catgirlroutes.events.impl.PreKeyInputEvent
+import catgirlroutes.events.impl.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.AutoSprint
 import catgirlroutes.module.impl.player.HClip
