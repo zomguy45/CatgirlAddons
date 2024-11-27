@@ -10,11 +10,11 @@ object CatMode: Module( // todo: add cat model mode from skytils april fools!!!?
     "Cat mode",
     category = Category.MISC,
     description = "MEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOW"
-){
+) {
 
     @SubscribeEvent
     fun onSound(event: PlaySoundSourceEvent) {
-        if (event.name == "mob.cat.meow" || !this.enabled) return
+        if (event.name == "mob.cat.meow") return
         if (event.isCancelable) {
             event.isCanceled = true
         }

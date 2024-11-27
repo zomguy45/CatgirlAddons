@@ -5,7 +5,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.Utils.relativeClip
+import catgirlroutes.utils.PlayerUtils.relativeClip
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent

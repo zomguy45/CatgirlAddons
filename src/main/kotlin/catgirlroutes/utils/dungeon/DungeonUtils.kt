@@ -10,9 +10,9 @@ import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.LocationManager.currentDungeon
 import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.getItemSlot
+import catgirlroutes.utils.PlayerUtils.getItemSlot
+import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.Utils.noControlCodes
-import catgirlroutes.utils.Utils.posY
 import catgirlroutes.utils.Utils.rotateAroundNorth
 import catgirlroutes.utils.Utils.rotateToNorth
 import catgirlroutes.utils.Utils.rotationNumber

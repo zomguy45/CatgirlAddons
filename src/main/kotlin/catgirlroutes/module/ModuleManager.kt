@@ -3,6 +3,7 @@ package catgirlroutes.module
 import catgirlroutes.events.impl.PreKeyInputEvent
 import catgirlroutes.events.impl.PreMouseInputEvent
 import catgirlroutes.module.impl.dungeons.*
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.misc.Zpew
 import catgirlroutes.module.impl.player.AutoSprint
@@ -56,6 +57,7 @@ object ModuleManager {
         StormClip,
         AutoLeap,
         Zpew,
+        Puzzles,
 
         // Misc
         F7sim,

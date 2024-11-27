@@ -6,6 +6,8 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.M7Phases
 import catgirlroutes.utils.render.WorldRenderUtils.draw2DBoxByEntity
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
 import net.minecraft.entity.boss.EntityWither
@@ -32,14 +34,15 @@ object BossESP : Module( // todo: outline
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        mc.theWorld?.let { world ->
-            world.loadedEntityList.filterIsInstance<EntityWither>().forEach { wither ->
-                if (wither.isInvisible || wither.renderSizeModifier != 1f) return@forEach
+        if (DungeonUtils.getF7Phase() == M7Phases.Unknown) return
+        mc.theWorld.loadedEntityList
+            .filterIsInstance<EntityWither>()
+            .filter { !it.isInvisible && it.renderSizeModifier == 1f }
+            .forEach {
                 when (style.selected) {
-                    "Box" -> drawBoxByEntity(wither, color.value, wither.width.toDouble(), wither.height.toDouble(), event.partialTicks, lineWidth.value, true)
-                    "2D" -> draw2DBoxByEntity(wither, color.value, wither.width.toDouble(), wither.height.toDouble(), event.partialTicks, lineWidth.value, true)
+                    "Box" -> drawBoxByEntity(it, color.value, it.width.toDouble(), it.height.toDouble(), event.partialTicks, lineWidth.value, true)
+                    "2D" -> draw2DBoxByEntity(it, color.value, it.width.toDouble(), it.height.toDouble(), event.partialTicks, lineWidth.value, true)
                 }
             }
-        }
     }
 }

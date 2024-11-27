@@ -22,11 +22,11 @@ import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.rotation.ServerRotateUtils.set
-import catgirlroutes.utils.Utils.airClick
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
-import catgirlroutes.utils.Utils.leftClick
 import catgirlroutes.utils.Utils.renderText
-import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.PlayerUtils.airClick
+import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles

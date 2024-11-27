@@ -46,7 +46,7 @@ public abstract class MixinEntityPlayerSP extends EntityPlayer {
 
         this.oldOnGround = this.onGround;
 
-        MotionUpdateEvent.PreMotionUpdateEvent motionUpdateEvent = new MotionUpdateEvent.PreMotionUpdateEvent(this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround);
+        MotionUpdateEvent.Pre motionUpdateEvent = new MotionUpdateEvent.Pre(this.posX, this.posY, this.posZ, this.motionX, this.motionY, this.motionZ, this.rotationYaw, this.rotationPitch, this.onGround);
 
         if (MinecraftForge.EVENT_BUS.post(motionUpdateEvent)) ci.cancel();
 
@@ -79,7 +79,7 @@ public abstract class MixinEntityPlayerSP extends EntityPlayer {
 
         this.onGround = this.oldOnGround;
 
-        MotionUpdateEvent.PostMotionUpdateEvent motionUpdateEvent = new MotionUpdateEvent.PostMotionUpdateEvent(posX, posY, posZ, motionX, motionY, motionZ, rotationYaw, rotationPitch, onGround);
+        MotionUpdateEvent.Post motionUpdateEvent = new MotionUpdateEvent.Post(posX, posY, posZ, motionX, motionY, motionZ, rotationYaw, rotationPitch, onGround);
 
         if (MinecraftForge.EVENT_BUS.post(motionUpdateEvent)) ci.cancel();
 

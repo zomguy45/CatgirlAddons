@@ -6,8 +6,8 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.noControlCodes
-import catgirlroutes.utils.Utils.posX
-import catgirlroutes.utils.Utils.posZ
+import catgirlroutes.utils.PlayerUtils.posX
+import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.Utils.romanToInt
 import catgirlroutes.utils.Utils.runOnMCThread
 import catgirlroutes.utils.dungeon.DungeonUtils.getDungeonPuzzles

@@ -14,6 +14,7 @@ import catgirlroutes.utils.ClientListener.scheduleTask
 //import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.PlayerUtils.playLoudSound
 import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.etherwarpshittemp.RaytraceUtils
@@ -248,14 +249,6 @@ object Zpew : Module(
             soundSelector.selected
         else
             customSound.text
-    }
-
-    private var shouldBypassVolume: Boolean = false // todo: move to PlayerUtils I think
-
-    private fun playLoudSound(sound: String?, volume: Float, pitch: Float) {
-        shouldBypassVolume = true
-        mc.thePlayer?.playSound(sound, volume, pitch)
-        shouldBypassVolume = false
     }
 
     data class SentC06(

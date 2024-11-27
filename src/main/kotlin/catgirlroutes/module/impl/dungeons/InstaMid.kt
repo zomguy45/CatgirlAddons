@@ -58,7 +58,7 @@ object InstaMid : Module(
     }
 
     @SubscribeEvent
-    fun onOverlay(event: RenderGameOverlayEvent.Post) { // // todo: make this a gui hud type shit so you can move it or smt ?maybe?
+    fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !riding || mc.ingameGUI == null) return
         val sr = ScaledResolution(mc)
         val text = "Instamid active"

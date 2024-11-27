@@ -18,11 +18,6 @@ import kotlin.math.round
 import kotlin.math.sqrt
 
 object Utils {
-    fun relativeClip(x: Double, y: Double, z: Double) {
-        modMessage("clipping2")
-        mc.thePlayer.setPosition(mc.thePlayer.posX + x,mc.thePlayer.posY + y,mc.thePlayer.posZ + z)
-    }
-
     private val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
 
     val String?.noControlCodes: String
@@ -43,14 +38,6 @@ object Utils {
         return this?.first == first && this?.second == second
     }
 
-    fun rightClick() {
-        KeyBinding.onTick(mc.gameSettings.keyBindUseItem.keyCode)
-    }
-
-    fun leftClick() {
-        KeyBinding.onTick(mc.gameSettings.keyBindAttack.keyCode)
-    }
-
     fun Event.postAndCatch(): Boolean {
         return runCatching {
             MinecraftForge.EVENT_BUS.post(this)
@@ -63,33 +50,11 @@ object Utils {
             modMessage(" Caught an ${it::class.simpleName ?: "error"} at ${this::class.simpleName}. §cPlease click this message to copy and send it in the Odin discord!")}.getOrDefault(isCanceled)
     }
 
-    fun getItemSlot(item: String, ignoreCase: Boolean = true): Int? =
-        mc.thePlayer?.inventory?.mainInventory?.indexOfFirst { it?.unformattedName?.contains(item, ignoreCase) == true }.takeIf { it != -1 }
-
     fun distanceToPlayer(x: Double, y: Double, z: Double): Double {
         return sqrt((mc.renderManager.viewerPosX - x) * (mc.renderManager.viewerPosX - x) +
                 (mc.renderManager.viewerPosY - y) * (mc.renderManager.viewerPosY - y) +
                 (mc.renderManager.viewerPosZ - z) * (mc.renderManager.viewerPosZ - z)
         )
-    }
-
-    fun swapFromName(name: String): Boolean {
-        for (i in 0..8) {
-            val stack: ItemStack? = mc.thePlayer.inventory.getStackInSlot(i)
-            val itemName = stack?.displayName
-            if (itemName != null) {
-                if (itemName.contains(name, ignoreCase = true)) {
-                    mc.thePlayer.inventory.currentItem = i
-                    return true
-                }
-            }
-        }
-        modMessage("$name not found.")
-        return false
-    }
-
-    fun airClick() {
-        PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(mc.thePlayer.heldItem))
     }
 
     val ItemStack?.unformattedName: String
@@ -112,10 +77,6 @@ object Utils {
         }
         return result + (romanMap[s.last()] ?: 0)
     }
-
-    inline val posX get() = mc.thePlayer.posX
-    inline val posY get() = mc.thePlayer.posY
-    inline val posZ get() = mc.thePlayer.posZ
 
     /**
      * Adds the given coordinates to the Vec3.
@@ -171,29 +132,6 @@ object Utils {
             Rotations.EAST -> Vec3(this.zCoord, this.yCoord, -this.xCoord)
             else -> this
         }
-    }
-
-    fun findDistanceToAirBlocks(): Double? {
-        val player = mc.thePlayer
-        val world = mc.theWorld
-
-        if (player == null || world == null) return null
-
-        val startPos = BlockPos(player.posX, player.posY, player.posZ)
-        var airCount = 0
-
-        for ((distance, y) in (startPos.y downTo 0).withIndex()) {
-            val pos = BlockPos(startPos.x, y, startPos.z)
-            val block = world.getBlockState(pos).block
-
-            if (block is BlockAir) {
-                airCount++
-                if (airCount == 2) return (distance * -1).toDouble() - 1.0
-            } else {
-                airCount = 0
-            }
-        }
-        return null
     }
 
     fun renderText( // render utils probably?

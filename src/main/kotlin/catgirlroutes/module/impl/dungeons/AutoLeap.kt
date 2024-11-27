@@ -30,7 +30,7 @@ object AutoLeap : Module(
         playerList.clear()
         while (i < 5){
             i += 1
-            playerList.add(sidebarLines.get(i))
+            playerList.add(sidebarLines[i])
             modMessage(sidebarLines.get(i))
         }
     }

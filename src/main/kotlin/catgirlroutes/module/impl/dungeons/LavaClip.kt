@@ -5,8 +5,8 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.utils.Utils.findDistanceToAirBlocks
-import catgirlroutes.utils.Utils.relativeClip
+import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
+import catgirlroutes.utils.PlayerUtils.relativeClip
 import catgirlroutes.utils.Utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S12PacketEntityVelocity
@@ -50,7 +50,7 @@ object LavaClip : Module(
         if (adjustedDistance == 0.0) adjustedDistance = findDistanceToAirBlocks()
 
         adjustedDistance?.let {
-            relativeClip(0.0, adjustedDistance!!, 0.0)
+            relativeClip(0.0, it, 0.0)
         } ?: run {
             veloCancelled = true
         }
@@ -59,15 +59,13 @@ object LavaClip : Module(
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaClipping || mc.ingameGUI == null) return
+
+        val text = if (adjustedDistance == 0.0) "Lava clipping" else "Lava clipping $adjustedDistance"
+
         val sr = ScaledResolution(mc)
-        var text = "Lava clipping $adjustedDistance"
-        if (adjustedDistance == 0.0) text = "Lava clipping"
-        val width = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
-        renderText(
-            text = text,
-            x = width,
-            y = sr.scaledHeight / 2 + 10
-        )
+        val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
+        val y = sr.scaledHeight / 2 + 10
+        renderText(text, x, y)
     }
 
     @SubscribeEvent

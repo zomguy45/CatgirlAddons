@@ -5,6 +5,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.M7Phases
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -26,11 +27,12 @@ object TerminalEsp : Module (
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        mc.theWorld?. let { world ->
-            world.loadedEntityList.filterIsInstance<EntityArmorStand>().forEach { terminal ->
-                if (!DungeonUtils.termInactiveTitles.contains(terminal.name)) return@forEach
-                drawBoxByEntity(terminal, color.value, terminal.width.toDouble(), terminal.height.toDouble(), 0f)
+        if (DungeonUtils.getF7Phase() != M7Phases.P3) return
+        mc.theWorld.loadedEntityList
+            .filterIsInstance<EntityArmorStand>()
+            .filter { DungeonUtils.termInactiveTitles.contains(it.name) }
+            .forEach {
+                drawBoxByEntity(it, color.value, it.width.toDouble(), it.height.toDouble(), 0f)
             }
-        }
     }
 }

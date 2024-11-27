@@ -1,5 +1,6 @@
 package catgirlroutes.mixins;
 
+import catgirlroutes.events.impl.ClickEvent;
 import catgirlroutes.events.impl.PreKeyInputEvent;
 import catgirlroutes.events.impl.PreMouseInputEvent;
 import net.minecraft.client.Minecraft;
@@ -27,5 +28,20 @@ public class MixinMinecraft {
         if (Mouse.getEventButtonState()) {
             MinecraftForge.EVENT_BUS.post(new PreMouseInputEvent(k));
         }
+    }
+
+    @Inject(method = "rightClickMouse", at = @At("HEAD"), cancellable = true)
+    private void rightClickMouse(CallbackInfo ci) {
+        if (MinecraftForge.EVENT_BUS.post(new ClickEvent.RightClick())) ci.cancel();
+    }
+
+    @Inject(method = "clickMouse", at = @At("HEAD"), cancellable = true)
+    private void clickMouse(CallbackInfo ci) {
+        if (MinecraftForge.EVENT_BUS.post(new ClickEvent.LeftClick())) ci.cancel();
+    }
+
+    @Inject(method = "middleClickMouse", at = @At("HEAD"), cancellable = true)
+    private void middleClickMouse(CallbackInfo ci) {
+        if (MinecraftForge.EVENT_BUS.post(new ClickEvent.MiddleClick())) ci.cancel();
     }
 }

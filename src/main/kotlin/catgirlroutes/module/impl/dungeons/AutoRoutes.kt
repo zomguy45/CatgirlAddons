@@ -21,9 +21,9 @@ import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
-import catgirlroutes.utils.Utils
+import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.Utils.renderText
-import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
@@ -229,7 +229,7 @@ object AutoRoutes : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
-                scheduleTask(1) { Utils.leftClick() }
+                scheduleTask(1) { leftClick() }
             }
             "pearl" -> {
                 swapFromName("ender pearl")

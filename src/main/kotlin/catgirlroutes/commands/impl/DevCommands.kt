@@ -2,6 +2,7 @@ package catgirlroutes.commands.impl
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.IceFillSolver
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
@@ -52,6 +53,15 @@ val devCommands = commodore("dev") {
             ---------
             Player Yaw: ${mc.thePlayer.rotationYaw}
             Relative Yaw: ${room.getRealYaw(mc.thePlayer.rotationYaw)}
+            --------
+            """.trimIndent())
+    }
+
+    literal("icefill").runs {
+        ChatUtils.chatMessage(
+            """
+            ---------
+            IceFill solution: ${IceFillSolver.currentPatterns}
             --------
             """.trimIndent())
     }

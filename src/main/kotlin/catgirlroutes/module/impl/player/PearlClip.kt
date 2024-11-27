@@ -8,10 +8,10 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
 import catgirlroutes.utils.rotation.ServerRotateUtils.set
-import catgirlroutes.utils.Utils.airClick
-import catgirlroutes.utils.Utils.findDistanceToAirBlocks
-import catgirlroutes.utils.Utils.relativeClip
-import catgirlroutes.utils.Utils.swapFromName
+import catgirlroutes.utils.PlayerUtils.airClick
+import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
+import catgirlroutes.utils.PlayerUtils.relativeClip
+import catgirlroutes.utils.PlayerUtils.swapFromName
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
