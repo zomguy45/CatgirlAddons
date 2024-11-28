@@ -81,19 +81,19 @@ object Zpew : Module(
     }
 
     private fun doZeroPingEtherWarp() {
-//        val etherBlock = EtherWarpHelper.getEtherPos( // odin
-//            Vec3(lastX, lastY, lastZ),
-//            lastYaw,
-//            lastPitch,
-//            57.0
-//        )
-
-        val etherBlock = catgirlroutes.utils.EtherWarpHelper.getEtherPos( // 1 to 1 skid
+        val etherBlock = EtherWarpHelper.getEtherPos( // odin
             Vec3(lastX, lastY, lastZ),
             lastYaw,
             lastPitch,
             57.0
         )
+
+//        val etherBlock = catgirlroutes.utils.EtherWarpHelper.getEtherPos( // 1 to 1 skid
+//            Vec3(lastX, lastY, lastZ),
+//            lastYaw,
+//            lastPitch,
+//            57.0
+//        )
 
         if (!etherBlock.succeeded) return
 
