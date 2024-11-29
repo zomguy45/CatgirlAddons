@@ -78,7 +78,7 @@ object DungeonESP: Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!this.enabled || inDungeons) return
+        if (!this.enabled || !inDungeons) return
         mc.theWorld.loadedEntityList.stream()
             .forEach { entity ->
                 val entityName = entity.customNameTag?.let { StringUtils.stripControlCodes(it) } ?: return@forEach
