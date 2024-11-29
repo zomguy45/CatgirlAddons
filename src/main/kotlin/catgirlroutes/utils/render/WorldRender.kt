@@ -1,6 +1,7 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.utils.WorldToScreen
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
@@ -10,6 +11,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
+import org.lwjgl.util.vector.Vector3f
 import java.awt.Color
 import java.awt.Color.*
 
@@ -140,7 +142,7 @@ object WorldRenderUtils {
         drawCustomSizedBoxAt(x, y, z, width.toDouble(), height.toDouble(), width.toDouble(), color, lineWidth, phase)
     }
 
-    fun draw2DBoxByEntity(entity: Entity, color: Color, width: Double, height: Double, partialTicks: Float = 0f, lineWidth: Double = 2.0, phase: Boolean = false, xOffset: Double = 0.0, yOffset: Double = 0.0, zOffset: Double = 0.0) {
+    fun draw2DBoxByEntity(entity: Entity, color: Color, width: Double, height: Double, partialTicks: Float = 0f, lineWidth: Double = 2.0, phase: Boolean = false, xOffset: Double = 0.0, yOffset: Double = 0.0, zOffset: Double = 0.0) { // todo remove it I think
         val x = entity.posX + ((entity.posX-entity.lastTickPosX)*partialTicks) + xOffset - width / 2.0
         val y = entity.posY + ((entity.posY-entity.lastTickPosY)*partialTicks) + yOffset
         val z = entity.posZ + ((entity.posZ-entity.lastTickPosZ)*partialTicks) + zOffset - width / 2.0
@@ -169,6 +171,92 @@ object WorldRenderUtils {
 
         GlStateManager.popMatrix()
     }
+
+    fun draw2DBoxByEntity(entity: Entity, color: Color, partialTicks: Float = 0f, lineWidth: Float = 2.0f, phase: Boolean = false) {
+        val mvMatrix = WorldToScreen.getMatrix(GL11.GL_MODELVIEW_MATRIX)
+        val projectionMatrix = WorldToScreen.getMatrix(GL11.GL_PROJECTION_MATRIX)
+
+        GlStateManager.pushAttrib()
+        GlStateManager.enableBlend()
+        GlStateManager.disableTexture2D()
+        if (phase) GlStateManager.disableDepth()
+
+        GL11.glMatrixMode(GL11.GL_PROJECTION)
+        GL11.glPushMatrix()
+        GL11.glLoadIdentity()
+        GL11.glOrtho(0.0, mc.displayWidth.toDouble(), mc.displayHeight.toDouble(), 0.0, -1.0, 1.0)
+
+        GL11.glMatrixMode(GL11.GL_MODELVIEW)
+        GL11.glPushMatrix()
+        GL11.glLoadIdentity()
+
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
+        GlStateManager.disableTexture2D()
+        GlStateManager.depthMask(true)
+        GL11.glLineWidth(lineWidth)
+
+        val bb = entity.entityBoundingBox
+            .offset(-entity.posX, -entity.posY, -entity.posZ)
+            .offset(
+                entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks,
+                entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks,
+                entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks
+            )
+            .offset(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+
+        GlStateManager.color(
+            color.red.toFloat() / 255f,
+            color.green.toFloat() / 255f,
+            color.blue.toFloat() / 255f,
+            color.alpha.toFloat() / 255f
+        )
+
+        val boxVertices = arrayOf(
+            doubleArrayOf(bb.minX, bb.minY, bb.minZ),
+            doubleArrayOf(bb.minX, bb.maxY, bb.minZ),
+            doubleArrayOf(bb.maxX, bb.maxY, bb.minZ),
+            doubleArrayOf(bb.maxX, bb.minY, bb.minZ),
+            doubleArrayOf(bb.minX, bb.minY, bb.maxZ),
+            doubleArrayOf(bb.minX, bb.maxY, bb.maxZ),
+            doubleArrayOf(bb.maxX, bb.maxY, bb.maxZ),
+            doubleArrayOf(bb.maxX, bb.minY, bb.maxZ)
+        )
+
+        var minX = Float.MAX_VALUE
+        var minY = Float.MAX_VALUE
+        var maxX = -1.0f
+        var maxY = -1.0f
+
+        for (boxVertex in boxVertices) {
+            val screenPos = WorldToScreen.worldToScreen(
+                Vector3f(boxVertex[0].toFloat(), boxVertex[1].toFloat(), boxVertex[2].toFloat()),
+                mvMatrix, projectionMatrix, mc.displayWidth, mc.displayHeight
+            )
+            if (screenPos != null) {
+                minX = minOf(screenPos.x, minX)
+                minY = minOf(screenPos.y, minY)
+                maxX = maxOf(screenPos.x, maxX)
+                maxY = maxOf(screenPos.y, maxY)
+            }
+        }
+
+        if (minX > 0.0f || minY > 0.0f || maxX <= mc.displayWidth || maxY <= mc.displayWidth) {
+            GL11.glBegin(GL11.GL_LINE_LOOP)
+            GL11.glVertex2f(minX, minY)
+            GL11.glVertex2f(minX, maxY)
+            GL11.glVertex2f(maxX, maxY)
+            GL11.glVertex2f(maxX, minY)
+            GL11.glEnd()
+        }
+
+        GlStateManager.enableDepth()
+        GL11.glMatrixMode(GL11.GL_PROJECTION)
+        GL11.glPopMatrix()
+        GL11.glMatrixMode(GL11.GL_MODELVIEW)
+        GL11.glPopMatrix()
+        GlStateManager.popAttrib()
+    }
+
 
     fun drawCustomSizedBoxAt(x: Double, y: Double, z: Double, xWidth: Double, yHeight: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true) {
         GlStateManager.disableLighting()
