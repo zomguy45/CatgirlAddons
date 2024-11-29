@@ -1,7 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes
-import catgirlroutes.events.ReceiveChatPacketEvent
+import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting

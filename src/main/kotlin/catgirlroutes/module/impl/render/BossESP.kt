@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.RenderEntityModelEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting
@@ -8,6 +9,7 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.M7Phases
+import catgirlroutes.utils.render.OutlineUtils
 import catgirlroutes.utils.render.WorldRenderUtils.draw2DBoxByEntity
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
 import net.minecraft.entity.boss.EntityWither
@@ -32,6 +34,8 @@ object BossESP : Module( // todo: outline
         )
     }
 
+    private var wither: EntityWither? = null;
+
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         if (DungeonUtils.getF7Phase() == M7Phases.Unknown) return
@@ -39,10 +43,18 @@ object BossESP : Module( // todo: outline
             .filterIsInstance<EntityWither>()
             .filter { !it.isInvisible && it.renderSizeModifier == 1f }
             .forEach {
+                wither = it
                 when (style.selected) {
                     "Box" -> drawBoxByEntity(it, color.value, it.width.toDouble(), it.height.toDouble(), event.partialTicks, lineWidth.value, true)
-                    "2D" -> draw2DBoxByEntity(it, color.value, it.width.toDouble(), it.height.toDouble(), event.partialTicks, lineWidth.value, true)
+                    "2D" -> draw2DBoxByEntity(it, color.value, event.partialTicks, lineWidth.value.toFloat(), true)
                 }
             }
+    }
+
+    @SubscribeEvent
+    fun onRenderEntityModel (event: RenderEntityModelEvent) {
+        if (style.selected == "Outline" && event.entity == wither) {
+            OutlineUtils.outlineESP(event, lineWidth.value.toFloat(), color.value)
+        }
     }
 }

@@ -18,6 +18,7 @@
     "accessors.IEntityPlayerSPAccessor",
     "entity.MixinAbstractClientPlayer",
     "entity.MixinEntityPlayerSP",
+    "entity.MixinRenderLivingEntity",
     "entity.MovementUpdateEvent"
   ]
 }

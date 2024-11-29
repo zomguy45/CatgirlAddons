@@ -20,7 +20,7 @@ object HClip : Module(
     private val shouldJump = BooleanSetting("Auto jump", false, "Makes hclip automatically jump if on ground.")
 
     init {
-        shouldJump
+        addSettings(shouldJump)
     }
 
     private var pendingHClip = false

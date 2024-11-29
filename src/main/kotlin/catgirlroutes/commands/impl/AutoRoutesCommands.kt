@@ -11,14 +11,13 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.distanceToPlayer
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
+import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
+import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRealCoords
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.ChatComponentText
@@ -148,13 +147,12 @@ val autoRoutesCommands = commodore("node") {
                 }
             }
 
-            val room = DungeonUtils.currentRoom ?: return@runs
-            val room2 = currentRoom ?: return@runs
+            val room = currentRoom ?: return@runs
             val x = floor(mc.thePlayer.posX)
             val y = floor(mc.thePlayer.posY)
             val z = floor(mc.thePlayer.posZ)
             val location = room.getRelativeCoords(Vec3(x, y, z))
-            val yaw = room2.getRelativeYaw(mc.thePlayer.rotationYaw)
+            val yaw = room.getRelativeYaw(mc.thePlayer.rotationYaw)
             val pitch = mc.thePlayer.rotationPitch
 
             val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, currentRoomName)
@@ -179,7 +177,7 @@ val autoRoutesCommands = commodore("node") {
     }
 
     literal("remove").runs { range: Double? ->
-        allNodes = allNodes.filter { node -> node.room != currentRoomName || (DungeonUtils.currentRoom
+        allNodes = allNodes.filter { node -> node.room != currentRoomName || (currentRoom
             ?.let { room ->
                 val realLocation = room.getRealCoords(node.location)
                 distanceToPlayer(realLocation.xCoord, realLocation.yCoord, realLocation.zCoord) >= (range ?: 2.0) } ?: false)
