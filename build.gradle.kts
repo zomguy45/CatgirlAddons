@@ -203,4 +203,32 @@ tasks.shadowJar {
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
 }
 
+tasks.register<JavaExec>("obfuscate") {
+    group = "build"
+    description = "Obfuscates the mod using ProGuard without relying on rt.jar"
+
+    val proguardJar = file("libs/proguard.jar") // Path to ProGuard jar
+    val inputJar = file("${layout.buildDirectory.get()}/libs/$modID-${project.version}.jar") // Non-obfuscated JAR
+    val outputJar = file("${layout.buildDirectory.get()}/libs/$modID-obfuscated.jar") // Obfuscated JAR
+    val rulesFile = file("proguard-rules.pro") // Path to ProGuard rules file
+
+    // Set the main class for ProGuard
+    mainClass.set("proguard.ProGuard")
+
+    // Set the classpath to the ProGuard JAR file
+    classpath = files(proguardJar)
+
+    // Arguments to pass to the ProGuard main class
+    args(
+        "-injars", inputJar.absolutePath,
+        "-outjars", outputJar.absolutePath,
+        "-libraryjars", "${System.getProperty("java.home")}/lib/rt.jar",
+        "-include", rulesFile.absolutePath
+    )
+}
+
+tasks.named("build") {
+    dependsOn("obfuscate")
+}
+
 tasks.assemble.get().dependsOn(tasks.remapJar)
