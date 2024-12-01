@@ -227,6 +227,10 @@ tasks.register<JavaExec>("obfuscate") {
     )
 }
 
+tasks.remapJar {
+    finalizedBy("obfuscate") // Ensure obfuscation happens after remapJar
+}
+
 tasks.named("build") {
     dependsOn("obfuscate")
 }
