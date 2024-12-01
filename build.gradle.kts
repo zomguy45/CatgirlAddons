@@ -228,8 +228,8 @@ tasks.remapJar {
     finalizedBy("obfuscate") // Ensure obfuscation happens after remapJar
 }
 
-tasks.named("build") {
-    dependsOn("obfuscate")
-}
+//tasks.named("build") {
+//    dependsOn("obfuscate")
+//}
 
 tasks.assemble.get().dependsOn(tasks.remapJar)
