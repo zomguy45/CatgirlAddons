@@ -203,30 +203,30 @@ tasks.shadowJar {
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
 }
 
-tasks.register<JavaExec>("obfuscate") {
-    group = "build"
-    description = "Obfuscates the mod using ProGuard"
-
-    val proguardJar = file("libs/proguard.jar")
-    val inputJar = file("${layout.buildDirectory.get()}/libs/$modID-${project.version}.jar")
-    val outputJar = file("${layout.buildDirectory.get()}/libs/$modID-obfuscated.jar")
-    val rulesFile = file("proguard-rules.pro")
-    val jrtFsJar = file("${System.getProperty("java.home")}/lib/jrt-fs.jar")
-
-    mainClass.set("proguard.ProGuard")
-    classpath = files(proguardJar)
-
-    args(
-        "-injars", inputJar.absolutePath,
-        "-outjars", outputJar.absolutePath,
-        "-libraryjars", jrtFsJar.absolutePath,
-        "-include", rulesFile.absolutePath
-    )
-}
-
-tasks.remapJar {
-    finalizedBy("obfuscate") // Ensure obfuscation happens after remapJar
-}
+//tasks.register<JavaExec>("obfuscate") {
+//    group = "build"
+//    description = "Obfuscates the mod using ProGuard"
+//
+//    val proguardJar = file("libs/proguard.jar")
+//    val inputJar = file("${layout.buildDirectory.get()}/libs/$modID-${project.version}.jar")
+//    val outputJar = file("${layout.buildDirectory.get()}/libs/$modID-obfuscated.jar")
+//    val rulesFile = file("proguard-rules.pro")
+//    val jrtFsJar = file("${System.getProperty("java.home")}/lib/jrt-fs.jar")
+//
+//    mainClass.set("proguard.ProGuard")
+//    classpath = files(proguardJar)
+//
+//    args(
+//        "-injars", inputJar.absolutePath,
+//        "-outjars", outputJar.absolutePath,
+//        "-libraryjars", jrtFsJar.absolutePath,
+//        "-include", rulesFile.absolutePath
+//    )
+//}
+//
+//tasks.remapJar {
+//    finalizedBy("obfuscate") // Ensure obfuscation happens after remapJar
+//}
 
 //tasks.named("build") {
 //    dependsOn("obfuscate")
