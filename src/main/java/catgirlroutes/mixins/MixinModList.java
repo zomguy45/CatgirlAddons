@@ -1,6 +1,5 @@
 package catgirlroutes.mixins;
 
-import catgirlroutes.CatgirlRoutes;
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.fml.common.ModContainer;
 import net.minecraftforge.fml.common.network.handshake.FMLHandshakeMessage;
@@ -21,7 +20,7 @@ public class MixinModList {
     @Inject(method = "<init>(Ljava/util/List;)V", at = @At("RETURN"))
     private void removeMod(List<ModContainer> modList, CallbackInfo ci) {
         if (!Minecraft.getMinecraft().isIntegratedServerRunning()) {
-            modTags.remove(CatgirlRoutes.MOD_ID);
+            this.modTags.keySet().removeIf(c -> !c.matches("FML|Forge|mcp"));
         }
     }
 }

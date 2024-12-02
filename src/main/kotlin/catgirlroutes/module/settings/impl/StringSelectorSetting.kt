@@ -4,7 +4,6 @@ import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.Visibility
 import net.minecraft.util.MathHelper
 
-@Deprecated("Outdated use the enum selector setting instead.")
 class StringSelectorSetting(
     name: String,
     private val defaultSelected: String,
