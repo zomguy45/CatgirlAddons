@@ -6,6 +6,7 @@ import catgirlroutes.commands.impl.NodeManager
 import catgirlroutes.commands.impl.NodeManager.nodes
 import catgirlroutes.commands.impl.nodeEditMode
 import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.PacketSentEventReturn
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.events.impl.SecretPickupEvent
 import catgirlroutes.module.Category
@@ -17,13 +18,13 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.commandAny
-import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
+import catgirlroutes.utils.PlayerUtils
 import catgirlroutes.utils.PlayerUtils.leftClick
-import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
@@ -33,10 +34,8 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.RotationUtils
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import catgirlroutes.utils.rotation.RotationUtils.snapTo
+import kotlinx.coroutines.*
 import me.odinmain.utils.skyblock.EtherWarpHelper
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -76,13 +75,21 @@ object AutoRoutes : Module(
         NodeManager.loadNodes()
     }
 
-    private var secretPickedUp = false
+    private var secretPickedUpDeferred: CompletableDeferred<Unit>? = null
+
+    suspend fun awaitSecret() {
+        val deferred = CompletableDeferred<Unit>()
+        secretPickedUpDeferred = deferred
+        deferred.await()
+    }
 
     @SubscribeEvent
     fun onSecret(event: SecretPickupEvent) {
-        modMessage("secret!?!?!?!??!?!?!!??!")
-        secretPickedUp = true
-        scheduleTask (2) {secretPickedUp = false}
+        modMessage("secret!?!?!?!??!?!?!!??!?")
+        scheduleTask(1) {
+            secretPickedUpDeferred?.complete(Unit)
+            secretPickedUpDeferred = null
+        }
     }
 
     @SubscribeEvent
@@ -94,8 +101,10 @@ object AutoRoutes : Module(
             cooldownMap[key] = false
         }
 
-        secretPickedUp = true
-        scheduleTask (2) {secretPickedUp = false}
+        scheduleTask(1) {
+            secretPickedUpDeferred?.complete(Unit)
+            secretPickedUpDeferred = null
+        }
     }
 
     private val cooldownMap = mutableMapOf<String, Boolean>()
@@ -108,7 +117,6 @@ object AutoRoutes : Module(
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inNode(node)) {
-                if (node.arguments?.contains("await") == true && !secretPickedUp) return
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -166,7 +174,7 @@ object AutoRoutes : Module(
     }
      */
     private fun inNode(node: Node): Boolean {
-        val viewerPos = mc.renderManager
+        //val viewerPos = mc.renderManager
         val room = currentRoom ?: return false
         val realLocation = room.getRealCoords(node.location)
 
@@ -179,53 +187,49 @@ object AutoRoutes : Module(
         val maxZ = realLocation.zCoord + node.width
 
         // Check if the viewer's position is within these bounds
-        val viewerX = viewerPos.viewerPosX
-        val viewerY = viewerPos.viewerPosY
-        val viewerZ = viewerPos.viewerPosZ
-
+        val viewerX = mc.thePlayer.posX
+        val viewerY = mc.thePlayer.posY
+        val viewerZ = mc.thePlayer.posZ
         return viewerX in minX..maxX &&
                 viewerY in minY..maxY &&
                 viewerZ in minZ..maxZ
     }
 
+    private var shouldClick = false
+
+    @SubscribeEvent
+    fun onPacket(event: PacketSentEventReturn) {
+        if (event.packet !is C03PacketPlayer || !shouldClick) return
+        shouldClick = false
+        PlayerUtils.airClick()
+    }
+
     private suspend fun executeAction(node: Node) {
-        // Check next block for a node and return the x y z yaw pitch
-
-        val newNode = getNextNode(node)
-        devMessage(newNode.x)
-        devMessage(newNode.y)
-        devMessage(newNode.z)
-        devMessage(newNode.yaw)
-        devMessage(newNode.pitch)
-        devMessage(newNode.hasNode)
-
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
-        delay(actionDelay.toLong())
         val room2 = currentRoom ?: return
         val yaw = room2.getRealYaw(node.yaw)
+        if (node.type == "warp" || node.type == "aotv" || node.type == "hype") snapTo(yaw, node.pitch)
+        if (node.arguments?.contains("await") == true) awaitSecret()
+        delay(actionDelay.toLong())
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
             if ("walk" in it) MovementUtils.setKey("w", true)
-            if ("look" in it) RotationUtils.snapTo(yaw, node.pitch)
+            if ("look" in it) snapTo(yaw, node.pitch)
         }
         when(node.type) {
             "warp" -> {
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
-                FakeRotater.rotate(yaw, node.pitch)
-                scheduleTask(0) {
-                    MovementUtils.setKey("shift", false)
-                }
+                shouldClick = true
             }
             "aotv" -> {
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", false)
-                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
+                scheduleTask(0) {shouldClick = true}
             }
             "hype" -> {
                 swapFromName("hyperion")
-                MovementUtils.setKey("shift", false)
-                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
+                scheduleTask(0) {shouldClick = true}
             }
             "walk" -> {
                 modMessage("Walking!")

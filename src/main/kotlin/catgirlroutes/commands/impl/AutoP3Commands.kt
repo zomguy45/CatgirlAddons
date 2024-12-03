@@ -7,6 +7,7 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.saveRings
 import catgirlroutes.module.impl.dungeons.AutoP3
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
+import catgirlroutes.module.impl.dungeons.Blink
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -52,12 +53,13 @@ data class Ring(
     var arguments: List<String>?,
     var delay: Int?,
     var command: String?,
+    var packets: MutableList<Blink.BlinkC06>,
     var route: String,
 )
 
 var route: String = selectedRoute.value
 var ringEditMode: Boolean = false
-var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command")
+var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink")
 
 
 val autoP3Commands = commodore("p3") {
@@ -112,6 +114,7 @@ val autoP3Commands = commodore("p3") {
             val arguments = mutableListOf<String>()
             var lookBlock: Vec3? = null
             var command: String? = null
+            val packets = mutableListOf<Blink.BlinkC06>()
 
             if (!ringTypes.contains(type)) {
                 return@runs modMessage("""
@@ -156,7 +159,7 @@ val autoP3Commands = commodore("p3") {
             val yaw = mc.thePlayer.rotationYaw
             val pitch = mc.thePlayer.rotationPitch
 
-            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, route)
+            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, packets, route)
 
             allRings.add(ring)
 

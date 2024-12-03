@@ -8,10 +8,10 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.LocationManager.currentDungeon
-import catgirlroutes.utils.Utils.addVec
-import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.PlayerUtils.getItemSlot
 import catgirlroutes.utils.PlayerUtils.posY
+import catgirlroutes.utils.Utils.addVec
+import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.Utils.rotateAroundNorth
 import catgirlroutes.utils.Utils.rotateToNorth
@@ -227,8 +227,8 @@ object DungeonUtils {
         return previousTeammates
     }
 
-    const val WITHER_ESSENCE_ID = "26bb1a8d-7c66-31c6-82d5-a9c04c94fb02"
-    private const val REDSTONE_KEY = "edb0155f-379c-395a-9c7d-1b6005987ac8"
+    const val WITHER_ESSENCE_ID = "e0f3e929-869e-3dca-9504-54c666ee6f23"
+    private const val REDSTONE_KEY = "fed95410-aba1-39df-9b95-1d4f361eb66e"
 
     /**
      * Determines whether a given block state and position represent a secret location.

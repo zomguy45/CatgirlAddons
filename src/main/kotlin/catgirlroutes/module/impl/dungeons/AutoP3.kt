@@ -8,6 +8,7 @@ import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.dungeons.Blink.packetArray
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
@@ -20,31 +21,34 @@ import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
-import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.rotation.ServerRotateUtils.set
-import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
-import catgirlroutes.utils.Utils.renderText
-import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.airClick
+import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles
+import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
+import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
+import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
+import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import java.awt.Color
 import java.awt.Color.WHITE
 import java.awt.Color.black
 import kotlin.math.abs
@@ -76,15 +80,15 @@ object AutoP3 : Module(
         )
     }
 
-    private var termFound = false
-    private var termListener = false
+    var termFound = false
+    var termListener = false
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         loadRings()
     }
 
-    private val cooldownMap = mutableMapOf<String, Boolean>()
+    val cooldownMap = mutableMapOf<String, Boolean>()
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
@@ -125,6 +129,17 @@ object AutoP3 : Module(
                 "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
+            if (ring.type == "blink" && ring.packets.size != 0) {
+                for (i in 0 until ring.packets.size - 1) {
+                    val p1 = ring.packets[i]
+                    val p2 = ring.packets[i + 1]
+                    WorldRenderUtils.drawLine(
+                        p1.x, p1.y + 0.1, p1.z,
+                        p2.x, p2.y + 0.1, p2.z,
+                        Color.PINK, 4.0f, false
+                    )
+                }
+            }
         }
     }
 
@@ -149,7 +164,7 @@ object AutoP3 : Module(
         }
     }
 
-    private fun inRing(ring: Ring): Boolean {
+    fun inRing(ring: Ring): Boolean {
         val viewerPos = mc.renderManager
         val distanceX = abs(viewerPos.viewerPosX - ring.location.xCoord)
         val distanceY = abs(viewerPos.viewerPosY - ring.location.yCoord)
@@ -226,6 +241,15 @@ object AutoP3 : Module(
             "command" -> {
                 modMessage("Sexecuting!")
                 commandAny(ring.command!!)
+            }
+            "blink" -> {
+                if (ring.packets.size == 0) return
+                if (packetArray.size > ring.packets.size) {
+                    ring.packets.forEach{ packet ->
+                        mc.netHandler.networkManager.sendPacket(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, packet.yaw, packet.pitch, packet.onGround))
+                    }
+                    mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
+                }
             }
         }
     }

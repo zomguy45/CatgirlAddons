@@ -1,23 +1,23 @@
 package catgirlroutes.module.impl.misc
 
+//import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.onHypixel
-import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.*
+import catgirlroutes.utils.AutoRouteUtils.skipNextNoS08
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-//import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.PlayerUtils.playLoudSound
 import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import catgirlroutes.utils.etherwarpshittemp.RaytraceUtils
 import me.odinmain.utils.skyblock.EtherWarpHelper
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
@@ -27,7 +27,6 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.client.C0BPacketEntityAction
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S29PacketSoundEffect
-import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -56,7 +55,7 @@ object Zpew : Module(
 
     private const val FAILWATCHPERIOD: Int = 20
     private const val MAXFAILSPERFAILPERIOD: Int = 3
-    private const val MAXQUEUEDPACKETS: Int = 3
+    private const val MAXQUEUEDPACKETS: Int = 5
 
     private var updatePosition = true
     val recentlySentC06s = mutableListOf<SentC06>()
@@ -125,6 +124,7 @@ object Zpew : Module(
 
         if (dingdingding.enabled) playLoudSound(getSound(), 100f, Zpew.pitch.value.toFloat())
 
+        skipNextNoS08 = true
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)
@@ -221,12 +221,15 @@ object Zpew : Module(
             return
         }
 
-        debugMessage("newYaw: $newYaw")
-        debugMessage("newPitch: $newPitch")
-        debugMessage("newX: $newX")
-        debugMessage("newY: $newY")
-        debugMessage("newZ: $newZ")
-        debugMessage(sentC06)
+        //debugMessage("newYaw: $newYaw")
+        //debugMessage("newPitch: $newPitch")
+        //debugMessage("newX: $newX")
+        //debugMessage("newY: $newY")
+        //debugMessage("newZ: $newZ")
+        debugMessage("receivedS08($newX, $newY, $newZ)")
+        debugMessage("sentC06(${sentC06.x}, ${sentC06.y}, ${sentC06.z})")
+        debugMessage(recentlySentC06s)
+        //debugMessage(sentC06)
         debugMessage("Failed")
 
         recentFails.add(System.currentTimeMillis())

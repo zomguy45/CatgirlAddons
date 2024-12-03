@@ -1,14 +1,15 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Utils.Vec2
 import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
-import catgirlroutes.utils.dungeon.tiles.Rotations
 import catgirlroutes.utils.dungeon.IceFillFloors
+import catgirlroutes.utils.dungeon.tiles.Rotations
 import catgirlroutes.utils.isAir
 import catgirlroutes.utils.render.WorldRenderUtils
 import com.google.gson.GsonBuilder
@@ -20,6 +21,7 @@ import net.minecraft.util.Vec3i
 import java.awt.Color
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
+import kotlin.math.floor
 
 object IceFillSolver {
     var currentPatterns: ArrayList<Vec3> = ArrayList()
@@ -39,6 +41,8 @@ object IceFillSolver {
         }
     }
 
+    private var awaitingClip = false
+
     fun onRenderWorld(color: Color) {
         if (currentPatterns.isEmpty() || DungeonUtils.currentRoomName != "Ice Fill") return
         for (i in 0 until currentPatterns.size - 1) {
@@ -50,12 +54,24 @@ object IceFillSolver {
                 p2.xCoord, p2.yCoord, p2.zCoord,
                 color, 4.0f, false
             )
+            val x = floor(mc.thePlayer.posX) + 0.5
+            val y = floor(mc.thePlayer.posY) + 0.1
+            val z = floor(mc.thePlayer.posZ) + 0.5
+            if (x == p1.xCoord && y == p1.yCoord && z == p1.zCoord && !awaitingClip && p1.yCoord == p2.yCoord) {
+
+                awaitingClip = true
+                scheduleTask(5) {
+                    if(mc.thePlayer.isCollidedVertically) mc.thePlayer.setPosition(p2.xCoord, p2.yCoord - 0.1, p2.zCoord)
+                    awaitingClip = false
+                }
+                modMessage("Next pos: ${p2.xCoord} ${p2.yCoord} ${p2.zCoord}")
+            }
         }
     }
 
     fun onRoomEnter(event: RoomEnterEvent) {
         if (event.room?.data?.name != "Ice Fill" || currentPatterns.isNotEmpty()) return
-
+        awaitingClip = false
         scanAllFloors(event.room.getRealCoords(15, 70, 7).toVec3(), event.room.rotation)
     }
 

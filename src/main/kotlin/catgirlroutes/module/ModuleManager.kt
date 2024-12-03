@@ -59,6 +59,7 @@ object ModuleManager {
         Zpew,
         AutoPot,
         Puzzles,
+        Blink,
 
         // Misc
         F7sim,

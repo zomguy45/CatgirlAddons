@@ -1,72 +1,74 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
-import catgirlroutes.module.Category
-import catgirlroutes.module.Module
-import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.PlayerUtils.airClick
 import net.minecraft.network.play.client.C03PacketPlayer
-import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
+import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
-object AutoRouteUtils : Module(
-    name = "CancelRotate",
-    category = Category.MISC
-) {
+object AutoRouteUtils {
 
-    private var cancelling = false
-    /*var yawOne = 0f
-    var pitchOne = 0f
+    var rotating: Boolean = false
+    var sending: Boolean = false
+    var clicking: Boolean = false
+    var skipNext: Boolean = false
+    var skipNextNoS08: Boolean = false
+    var y: Float = 0F
+    var p: Float = 0F
+    private var lastS08: PacketReceiveEvent? = null
 
-    override fun onKeyBind() {
-        cancelRotate(0f, 0f)
-        devMessage("1")
-    }*/
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer || !cancelling) return
-        /*if(!recentlySentC06s.isEmpty()) {
-            val sentC06 = recentlySentC06s[0]
-            if (sentC06.yaw !== yawOne || sentC06.pitch !== pitchOne) {
-                devMessage("NIGGER")
+        if (event.packet !is C03PacketPlayer) return
+        if (event.packet is C06PacketPlayerPosLook && (skipNext || skipNextNoS08)) {
+            skipNext = false
+            if (lastS08 != null) {
+                if (!lastS08!!.isCanceled) {
+                    skipNextNoS08 = false
+                    return
+                }
+            }
+            if (skipNextNoS08) {
+                skipNextNoS08 = false
                 return
             }
-        }*/
-        if (!event.isCanceled) event.isCanceled = true
-        modMessage(event.isCanceled.toString())
-        cancelling = false
+        }
+        if (!rotating || sending) return
+
+        event.isCanceled = true
+
+        sending = true
+
+        if (event.packet is C05PacketPlayerLook) {
+            mc.netHandler.addToSendQueue(C05PacketPlayerLook(y, p, event.packet.isOnGround))
+        } else if (event.packet is C06PacketPlayerPosLook || event.packet is C04PacketPlayerPosition) {
+            mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(event.packet.positionX, event.packet.positionY, event.packet.positionZ, y, p, event.packet.isOnGround))
+        }
+
+        sending = false
+
+        if (clicking) {
+            clicking = false
+            airClick()
+            y = mc.thePlayer.rotationYaw
+            p = mc.thePlayer.rotationPitch
+        } else rotating = false
     }
 
-    fun cancelRotate(yaw: Float, pitch: Float) {
-        val player = mc.thePlayer as? IEntityPlayerSPAccessor ?: return
-        val x: Double = mc.thePlayer.posX - player.lastReportedPosX
-        val y: Double = mc.thePlayer.posY - player.lastReportedPosY
-        val z: Double = mc.thePlayer.posZ - player.lastReportedPosZ
-        val moving = x * x + y * y + z * z > 9.0E-40 || player.positionUpdateTicks >= 20
-        if (cancelling) return
-        val packet = if (moving) {
-            modMessage("C06")
-            C06PacketPlayerPosLook(
-                mc.thePlayer.posX,
-                mc.thePlayer.posY,
-                mc.thePlayer.posZ,
-                yaw,
-                pitch,
-                mc.thePlayer.onGround
-            )
-        } else {
-            modMessage("C05")
-            C03PacketPlayer.C05PacketPlayerLook(
-                yaw,
-                pitch,
-                mc.thePlayer.onGround
-            )
-        }
-        PacketUtils.sendPacket(packet)
-        /*yawOne = yaw
-        pitchOne = pitch*/
+    @SubscribeEvent
+    fun onPacketS08(event: PacketReceiveEvent) {
+        if (event.packet !is S08PacketPlayerPosLook) return
+        lastS08 = event
+        skipNext = true
+    }
 
-        cancelling = true
+    fun clickAt(yaw: Float, pitch: Float) {
+        y = yaw
+        p = pitch
+        rotating = true
+        clicking = true
     }
 }

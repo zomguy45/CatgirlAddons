@@ -19,5 +19,7 @@ class TeleportEventPre(val packet: S08PacketPlayerPosLook) : Event()
 @Cancelable
 class PacketSentEvent(val packet: Packet<*>) : Event()
 
+class PacketSentEventReturn(val packet: Packet<*>) : Event()
+
 @Cancelable
 class PacketReceiveEvent(val packet: Packet<*>) : Event()

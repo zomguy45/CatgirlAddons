@@ -1,8 +1,12 @@
 package catgirlroutes.utils.rotation
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.PlayerUtils.airClick
+import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 
@@ -14,6 +18,7 @@ open class Rotater {
         var fakeRotating: Boolean = false
         var fakeClicking: Boolean = false
         var sneak: Boolean = false
+        var checkingPacket = false
 
         @SubscribeEvent
         fun onMotionUpdatePre(event: MotionUpdateEvent.Pre) {
@@ -29,8 +34,18 @@ open class Rotater {
         fun onMotionUpdatePost(event: MotionUpdateEvent.Post) {
             if (fakeClicking) {
                 airClick()
+                val player = mc.thePlayer as? IEntityPlayerSPAccessor
+                modMessage("LYaw: ${player!!.lastReportedYaw} LPitch: ${player.lastReportedPitch}")
                 fakeClicking = false
             }
+        }
+
+        @SubscribeEvent
+        fun onPacket(event: PacketSentEvent) {
+            if (event.packet !is C03PacketPlayer || !checkingPacket) return
+            checkingPacket = false
+            modMessage(event.packet.javaClass)
+            modMessage("PYaw: ${event.packet.yaw} PPitch: ${event.packet.pitch}")
         }
     }
 }
@@ -41,6 +56,7 @@ object FakeRotater : Rotater(), IRotater {
         Companion.yaw = yaw
         Companion.pitch = pitch
         fakeRotating = true
+        checkingPacket = true
         modMessage("started")
     }
 
