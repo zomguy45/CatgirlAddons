@@ -43,7 +43,7 @@ object PearlClip : Module(
         if (clipDepth == null) return
 
         val swapResult = swapFromName("ender pearl")
-        if (swapResult) {
+        if (swapResult != "NOT_FOUND") {
             active = true
             set(0F, 90F)
             scheduleTask(1) {

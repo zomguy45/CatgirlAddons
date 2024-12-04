@@ -3,12 +3,12 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.unformattedName
+import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.block.BlockAir
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.BlockPos
-import kotlin.math.sqrt
 
 object PlayerUtils {
 
@@ -26,20 +26,30 @@ object PlayerUtils {
     fun getItemSlot(item: String, ignoreCase: Boolean = true): Int? =
         mc.thePlayer?.inventory?.mainInventory?.indexOfFirst { it?.unformattedName?.contains(item, ignoreCase) == true }.takeIf { it != -1 }
 
-    fun swapFromName(name: String): Boolean {
+    fun swapFromName(name: String): String {
         for (i in 0..8) {
             val stack: ItemStack? = mc.thePlayer.inventory.getStackInSlot(i)
             val itemName = stack?.displayName
             if (itemName != null) {
                 if (itemName.contains(name, ignoreCase = true)) {
-                    mc.thePlayer.inventory.currentItem = i
-                    return true
+                    if (mc.thePlayer.inventory.currentItem != i) {
+                        mc.thePlayer.inventory.currentItem = i
+                        return "SWAPPED"
+                    } else {
+                        return "ALREADY_HELD"
+                    }
                 }
             }
         }
         modMessage("$name not found.")
-        return false
+        return "NOT_FOUND"
     }
+
+    val ItemStack?.skyblockID: String
+        get() = this?.extraAttributes?.getString("id") ?: ""
+
+    fun isHolding(vararg id: String): Boolean =
+        mc.thePlayer?.heldItem?.skyblockID in id
 
     fun rightClick() {
         KeyBinding.onTick(mc.gameSettings.keyBindUseItem.keyCode)
