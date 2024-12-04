@@ -42,7 +42,7 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
             this.prevSlot = mc.thePlayer.inventory.currentItem;
 
             val swapResult = swapFromName("pickaxe")
-            if (!swapResult) {
+            if (swapResult == "NOT_FOUND") {
                 this.running = false
                 return@onPress
             }
