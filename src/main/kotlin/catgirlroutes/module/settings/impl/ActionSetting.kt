@@ -12,8 +12,8 @@ import catgirlroutes.module.settings.Visibility
 class ActionSetting(
     name: String,
     description: String? = null,
-    override val default: () -> Unit = {},
     visibility: Visibility = Visibility.VISIBLE,
+    override val default: () -> Unit = {},
 ) : Setting<() -> Unit>(name, description, visibility) {
 
     override var value: () -> Unit = default
