@@ -56,7 +56,7 @@ object Notifications {
         return when {
             time in 100L..250L -> {
                 val progress = (250L - time) / 150.0
-                Easing.easeOutBack(progress) * (width + 2) //change this for diff animation
+                Easing.easeInQuad(progress) * (width + 2) //change this for diff animation
             }
             time < 100L -> Double.MAX_VALUE // animation out
             else -> 0.0
