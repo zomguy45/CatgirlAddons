@@ -28,7 +28,7 @@ object CatMode: Module( // todo: add cat model mode from skytils april fools!!!?
     private val catSpeed: NumberSetting = NumberSetting("Speed", 1.0, 0.5, 3.0, 0.1).withDependency { fallingCats.enabled }
 
     init {
-        addSettings(this.sound, this.text, this.fallingCats, this.catTexture, this.catSize, this.catSpeed)
+        addSettings(this.sound, this.text, this.fallingCats, this.darken, this.catTexture, this.catSize, this.catSpeed)
     }
 
     private var fallingKittens = FallingKittens()
