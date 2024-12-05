@@ -10,6 +10,7 @@ import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.ScanUtils
+import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import kotlinx.coroutines.CoroutineScope
@@ -58,7 +59,8 @@ class CatgirlRoutes {
             Rotater,
             MovementUtils,
             EventDispatcher,
-            VecUtils
+            VecUtils,
+            Notifications
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
