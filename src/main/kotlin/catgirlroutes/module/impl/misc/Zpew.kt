@@ -9,7 +9,6 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.utils.AutoRouteUtils.skipNextNoS08
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -124,7 +123,6 @@ object Zpew : Module(
 
         if (dingdingding.enabled) playLoudSound(getSound(), 100f, Zpew.pitch.value.toFloat())
 
-        skipNextNoS08 = true
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
             mc.thePlayer.setPosition(x, y, z)

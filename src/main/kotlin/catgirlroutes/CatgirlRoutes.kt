@@ -12,7 +12,6 @@ import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.ScanUtils
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
-import catgirlroutes.utils.rotation.ServerRotateUtils
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -54,9 +53,7 @@ class CatgirlRoutes {
             Executor,
             DungeonUtils,
             ScanUtils,
-            ServerRotateUtils,
             ClientListener,
-            AutoRouteUtils,
             FakeRotater,
             Rotater,
             MovementUtils,

@@ -6,12 +6,10 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
 import catgirlroutes.utils.PlayerUtils.relativeClip
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.rotation.ServerRotateUtils.set
+import catgirlroutes.utils.rotation.FakeRotater.rotate
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
@@ -45,10 +43,8 @@ object PearlClip : Module(
         val swapResult = swapFromName("ender pearl")
         if (swapResult != "NOT_FOUND") {
             active = true
-            set(0F, 90F)
-            scheduleTask(1) {
-                airClick()
-                resetRotations()
+            scheduleTask(0) {
+                rotate(0F, 90F)
             }
         }
     }

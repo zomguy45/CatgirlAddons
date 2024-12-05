@@ -31,8 +31,6 @@ import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
-import catgirlroutes.utils.rotation.FakeRotater
-import catgirlroutes.utils.rotation.RotationUtils
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.*
 import net.minecraft.client.gui.ScaledResolution
@@ -188,7 +186,7 @@ object AutoRoutes : Module(
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         val room2 = currentRoom ?: return
         val yaw = room2.getRealYaw(node.yaw)
-        if (node.type == "warp" || node.type == "aotv" || node.type == "hype") snapTo(yaw, node.pitch)
+        if (node.type == "warp" || node.type == "aotv" || node.type == "hype" || node.type == "pearl") snapTo(yaw, node.pitch)
         if (node.arguments?.contains("await") == true) awaitSecret()
         delay(actionDelay.toLong())
         node.arguments?.let {
@@ -201,7 +199,7 @@ object AutoRoutes : Module(
                 val state = swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
                 if (state == "SWAPPED") {
-                    scheduleTask(1) {
+                    scheduleTask(0) {
                         shouldClick = true
                     }
                 } else if (state == "ALREADY_HELD") {
@@ -233,12 +231,12 @@ object AutoRoutes : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
-                scheduleTask(1) { leftClick() }
+                scheduleTask(0) { leftClick() }
             }
             "pearl" -> {
                 swapFromName("ender pearl")
                 MovementUtils.setKey("shift", false)
-                scheduleTask(0) { FakeRotater.rotate(yaw, node.pitch) }
+                scheduleTask(0) {shouldClick = true}
             }
             "pearlclip" -> {
                 modMessage("Pearl clipping!")
@@ -250,7 +248,7 @@ object AutoRoutes : Module(
             }
             "look" -> {
                 modMessage("Looking!")
-                RotationUtils.snapTo(yaw, node.pitch)
+                snapTo(yaw, node.pitch)
             }
             "align" -> {
                 modMessage("Aligning!")

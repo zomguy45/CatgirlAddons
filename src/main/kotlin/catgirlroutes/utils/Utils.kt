@@ -4,14 +4,14 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
 import me.odinmain.utils.skyblock.extraAttributes
-import net.minecraft.block.BlockAir
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.settings.KeyBinding
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.item.ItemStack
-import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
-import net.minecraft.util.*
+import net.minecraft.util.ChatComponentText
+import net.minecraft.util.ChatStyle
+import net.minecraft.util.Vec3
+import net.minecraft.util.Vec3i
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
 import kotlin.math.round
@@ -48,6 +48,10 @@ object Utils {
             style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/od copy ```${it.stackTraceToString().lineSequence().take(10).joinToString("\n")}```") // odon clint
             style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText("§6Click to copy the error to your clipboard."))
             modMessage(" Caught an ${it::class.simpleName ?: "error"} at ${this::class.simpleName}. §cPlease click this message to copy and send it in the Odin discord!")}.getOrDefault(isCanceled)
+    }
+
+    fun removeFormatting(text: String): String {
+        return text.replace("[\u00a7&][0-9a-fk-or]".toRegex(), "")
     }
 
     fun distanceToPlayer(x: Double, y: Double, z: Double): Double {
@@ -178,7 +182,7 @@ object Utils {
     }
 
     /**
-     * Starts a minecraft profiler section with the specified name + "Odin: ".
+     * Starts a minecraft profiler section with the specified name + "Catgirl: ".
      * */
     fun startProfile(name: String) {
         mc.mcProfiler.startSection("Catgirl: $name")

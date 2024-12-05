@@ -15,10 +15,7 @@ import catgirlroutes.utils.clock.Executor.Companion.register
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
-import org.lwjgl.input.Mouse
 
 object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls maybeidk
     "Ghost Blocks",
@@ -42,7 +39,7 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
             this.prevSlot = mc.thePlayer.inventory.currentItem;
 
             val swapResult = swapFromName("pickaxe")
-            if (!swapResult) {
+            if (swapResult == "NOT_FOUND") {
                 this.running = false
                 return@onPress
             }

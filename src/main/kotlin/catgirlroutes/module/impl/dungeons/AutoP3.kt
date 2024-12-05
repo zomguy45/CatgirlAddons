@@ -21,7 +21,6 @@ import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
-import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.renderText
@@ -32,10 +31,9 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
+import catgirlroutes.utils.rotation.FakeRotater.rotate
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
-import catgirlroutes.utils.rotation.ServerRotateUtils.resetRotations
-import catgirlroutes.utils.rotation.ServerRotateUtils.set
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -51,6 +49,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.awt.Color.WHITE
 import java.awt.Color.black
+import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.floor
 
@@ -201,8 +200,8 @@ object AutoP3 : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
-                modMessage(boomType.selected)
-                scheduleTask(1) {leftClick()}
+                //modMessage(boomType.selected)
+                scheduleTask(0) {leftClick()}
             }
             "hclip" -> {
                 modMessage("Hclipping!")
@@ -215,10 +214,8 @@ object AutoP3 : Module(
             "bonzo" -> {
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
-                set(ring.yaw, ring.pitch)
-                scheduleTask(1) {
-                    airClick()
-                    resetRotations()
+                scheduleTask(0) {
+                    rotate(ring.yaw, ring.pitch)
                 }
             }
             "look" -> {
