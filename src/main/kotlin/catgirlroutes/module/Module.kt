@@ -1,12 +1,14 @@
 package catgirlroutes.module
 
 import catgirlroutes.CatgirlRoutes
+import catgirlroutes.module.impl.render.ClickGui.toggleNotification
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.Keybinding
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.ChatUtils
+import catgirlroutes.utils.Notifications
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 import net.minecraftforge.common.MinecraftForge
@@ -233,7 +235,8 @@ abstract class Module(
      */
     open fun onKeyBind() {
         this.toggle()
-        ChatUtils.modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
+        if (toggleNotification.value) Notifications.send("${if (enabled) "§aEnabled" else "§cDisabled"}.", name)
+        else ChatUtils.modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
     }
 
     /**

@@ -77,7 +77,6 @@ object ModuleManager {
         DungeonESP,
         BossESP,
         TerminalEsp,
-
     )
 
     init {

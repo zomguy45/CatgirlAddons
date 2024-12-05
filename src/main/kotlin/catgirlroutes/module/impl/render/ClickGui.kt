@@ -2,9 +2,9 @@ package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes
 import catgirlroutes.CatgirlRoutes.Companion.display
-import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
@@ -30,6 +30,7 @@ object ClickGui: Module(
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
     val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.")
     val colorSettingMode = StringSelectorSetting("Color Mode", "HSB", arrayListOf("HSB", "RGB"), "Mode for all color settings in the gui. Changes the way colors are put in.")
+    val toggleNotification: BooleanSetting = BooleanSetting("Notifications", false,  "Send notifications for toggling modules.")
 
     val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", description = "Name that will be rendered in the gui.")
     val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
@@ -71,6 +72,7 @@ object ClickGui: Module(
             blur,
             color,
             colorSettingMode,
+            toggleNotification,
 
             clientName,
             prefixStyle,

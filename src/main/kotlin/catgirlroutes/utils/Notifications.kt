@@ -6,6 +6,7 @@ import catgirlroutes.ui.notification.NotificationType
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import kotlin.math.pow
 
 /**
  * Usage: Notifications.send()
@@ -62,7 +63,7 @@ object Notifications {
         return when {
             time in 100L..250L -> {
                 val progress = (250L - time) / 150.0
-                Easing.easeOutQuad(progress) * (width + 2) //change this for diff animation
+                Easing.easeOutBack(progress) * (width + 2) //change this for diff animation
             }
             time < 100L -> Double.MAX_VALUE // animation out
             else -> 0.0
@@ -81,6 +82,13 @@ object Notifications {
         fun easeOutQuad(t: Double): Double = t * (2 - t)
         fun easeInQuad(t: Double): Double = t * t
         fun easeInOutQuad(t: Double): Double = if (t < 0.5) 2 * t * t else -1 + (4 - 2 * t) * t
+
+        fun easeOutBack(t: Double): Double {
+            val c1 = 1.70158;
+            val c3 = c1 + 1;
+
+            return 1 + c3 * (t - 1).pow(3) + c1 * (t - 1).pow(2);
+        }
     }
 
     /*
