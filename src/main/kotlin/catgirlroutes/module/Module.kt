@@ -235,7 +235,7 @@ abstract class Module(
      */
     open fun onKeyBind() {
         this.toggle()
-        if (ClickGui.notifications.value) Notifications.send("${if (enabled) "Enabled" else "Disabled"}} $name", "", icon = if (enabled) "check.png" else "x.png")
+        if (ClickGui.notifications.value) Notifications.send("${if (enabled) "Enabled" else "Disabled"} $name", "", icon = if (enabled) "check.png" else "x.png")
         else ChatUtils.modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
     }
 
