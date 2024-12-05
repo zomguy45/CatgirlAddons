@@ -2,6 +2,7 @@ package catgirlroutes.ui.notification
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.opengl.GL11
@@ -21,7 +22,14 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
 
         HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
         HUDRenderUtils.renderRectBorder(x, y, width, height, 1.0, this.type.getColour()) // border
-        HUDRenderUtils.renderRect(x, y, width * (System.currentTimeMillis() - startTime) / this.duration, height, this.type.getColour().darker()) // progress
+        //HUDRenderUtils.renderRect(x, y, width * (System.currentTimeMillis() - startTime) / this.duration, height, this.type.getColour().darker()) // progress
+
+        //easing stuff
+        val elapsed = System.currentTimeMillis() - startTime
+        val rawProgress = (elapsed / duration).coerceIn(0.0, 1.0)
+        val easedProgress = Notifications.Easing.easeOutQuad(rawProgress) //change function from Easing for different animations
+        HUDRenderUtils.renderRect(x, y, width * easedProgress, height, this.type.getColour().darker())
+
 
         mc.fontRendererObj.drawStringWithShadow(this.title, x.toFloat() + 3f, y.toFloat() + 5f, Color(255, 255, 255).rgb) // title
 

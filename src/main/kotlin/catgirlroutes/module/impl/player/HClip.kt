@@ -8,6 +8,7 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.restartMovement
 import catgirlroutes.utils.MovementUtils.stopMovement
+import catgirlroutes.utils.Notifications
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.cos
 import kotlin.math.sin
@@ -18,9 +19,10 @@ object HClip : Module(
     description = "Boosts you forward when key bind is pressed"
 ){
     private val shouldJump = BooleanSetting("Auto jump", false, "Makes hclip automatically jump if on ground.")
+    private val shouldNotify = BooleanSetting("Notifications", false, "Makes hclip send notification on activation.")
 
     init {
-        addSettings(shouldJump)
+        addSettings(shouldJump, shouldNotify)
     }
 
     private var pendingHClip = false
@@ -28,7 +30,7 @@ object HClip : Module(
 
     override fun onKeyBind() {
         if (!this.enabled) return // todo: do something about it idk?!
-        modMessage("Hclipping!")
+        if (shouldNotify.value) Notifications.send("Hclipping", "") else modMessage("Hclipping")
         hClip()
     }
 

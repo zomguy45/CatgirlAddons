@@ -7,6 +7,7 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
@@ -24,6 +25,7 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
 ) {
     private val gKey: BooleanSetting = BooleanSetting("GKey", false)
     private val swingHand = BooleanSetting("Swing Hand", true, "Swings the player's hand.").withDependency { gKey.enabled }
+    private val gKeyDelay = NumberSetting("Delay", 50.0, 50.0, 1000.0, 50.0, "Delay for gkey").withDependency { gKey.enabled }
     private val gKeyKeyBind: KeyBindSetting = KeyBindSetting("GKey Key", Keyboard.KEY_NONE, "Creates ghost blocks where you are looking.").withDependency { gKey.enabled }
 
     private val swapStonk: BooleanSetting = BooleanSetting("Swap Stonk", false);
@@ -52,18 +54,21 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
         }
 
     init {
-        Executor(50) {
-            if (!gKeyKeyBind.value.isDown() || !gKey.enabled || !this.enabled) return@Executor
+        gKeyLoop()
 
+        this.addSettings(this.gKey, this.swingHand, this.gKeyDelay, this.gKeyKeyBind, this.swapStonk, this.swapKeyBind)
+    }
+
+    private fun gKeyLoop() {
+        Executor(gKeyDelay.value.toLong()) {
+            if (!gKeyKeyBind.value.isDown() || !gKey.enabled || !this.enabled || mc.currentScreen != null) return@Executor
             val blockPos = mc.objectMouseOver.blockPos
             val block = mc.theWorld.getBlockState(blockPos).block
 
             if (ignoredBlockTypes.contains(block)) return@Executor
-            if (swingHand.value) mc.thePlayer.swingItem() // I think it'd swing in guis (do not get pringleclient'd)
+            if (swingHand.value) mc.thePlayer.swingItem()
             toAir(blockPos)
         }.register()
-
-        this.addSettings(this.gKey, this.swingHand, this.gKeyKeyBind, this.swapStonk, this.swapKeyBind)
     }
 
     private val ignoredBlockTypes: List<Block> = listOf(Blocks.skull, Blocks.chest, Blocks.lever) // todo: use DungeonUtils.isSecret maybeidk

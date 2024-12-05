@@ -48,6 +48,7 @@ object Notifications {
         }
     }
 
+    /*
     private fun calculateX(time: Long, width: Double): Double {
         return when {
             time in 100L..250L -> (250L - time) / 150.0 * (width + 2) // animation in
@@ -55,8 +56,36 @@ object Notifications {
             else -> 0.0
         }
     }
+     */
 
+    private fun calculateX(time: Long, width: Double): Double {
+        return when {
+            time in 100L..250L -> {
+                val progress = (250L - time) / 150.0
+                Easing.easeOutQuad(progress) * (width + 2) //change this for diff animation
+            }
+            time < 100L -> Double.MAX_VALUE // animation out
+            else -> 0.0
+        }
+    }
+
+    private fun calculateH(time: Long): Double {
+        return if (time < 100L) {
+            val progress = time / 100.0
+            Easing.easeInQuad(progress) //change this for diff animation
+        } else 1.0
+    }
+
+    //add functions for easing here
+    object Easing {
+        fun easeOutQuad(t: Double): Double = t * (2 - t)
+        fun easeInQuad(t: Double): Double = t * t
+        fun easeInOutQuad(t: Double): Double = if (t < 0.5) 2 * t * t else -1 + (4 - 2 * t) * t
+    }
+
+    /*
     private fun calculateH(time: Long): Double {
         return if (time < 100L) time / 100.0 else 1.0 // animation down
     }
+     */
 }
