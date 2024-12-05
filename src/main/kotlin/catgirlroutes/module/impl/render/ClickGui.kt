@@ -27,6 +27,7 @@ object ClickGui: Module(
 ) {
 
     val design: StringSelectorSetting
+    val notifications: BooleanSetting = BooleanSetting("Notifications", true, "Toggles notifications instead of chat messages for various events")
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
     val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.")
     val colorSettingMode = StringSelectorSetting("Color Mode", "HSB", arrayListOf("HSB", "RGB"), "Mode for all color settings in the gui. Changes the way colors are put in.")
@@ -69,6 +70,7 @@ object ClickGui: Module(
 
         addSettings(
             design,
+            notifications,
             blur,
             color,
             colorSettingMode,

@@ -5,6 +5,7 @@ import catgirlroutes.ui.clickgui.elements.Element
 import catgirlroutes.ui.clickgui.elements.ElementType
 import catgirlroutes.ui.clickgui.elements.ModuleButton
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.utils.ChatUtils
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 
@@ -39,8 +40,8 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
      * Used to interact with the element and to register mouse binds.
      */
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton == 0 && isCheckHovered(mouseX, mouseY)) {
-            listening = !listening
+        if (mouseButton == 0 && isCheckHovered(mouseX, mouseY) && !listening) {
+            listening = true
             return true
         } else if (listening) {
             setting.value.key = -100 + mouseButton
