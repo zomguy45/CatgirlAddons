@@ -8,7 +8,6 @@ import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
-import org.lwjgl.opengl.GL11
 import java.awt.Color
 
 class Notification( // todo: add icons for module toggle notifications (maybe?)
@@ -36,7 +35,7 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
         val iconOffset = icon?.let {
             val texture = ResourceLocation(RESOURCE_DOMAIN, it)
             GlStateManager.enableBlend()
-            GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
+            GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
             mc.textureManager.bindTexture(texture)
             Gui.drawModalRectWithCustomSizedTexture(
                 x.toInt() + 3, (y + (height - 40) / 2).toInt(),
@@ -60,7 +59,7 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
             mc.fontRendererObj.drawStringWithShadow(line, textX + 3, textY.toFloat() + (lineSpacing * (index + 1)), Color.WHITE.rgb)
         }
 
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f)
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
         GlStateManager.popMatrix()
     }
 
