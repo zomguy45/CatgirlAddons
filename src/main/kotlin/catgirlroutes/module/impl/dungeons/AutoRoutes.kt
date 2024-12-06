@@ -21,6 +21,7 @@ import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.PlayerUtils
 import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
@@ -187,6 +188,10 @@ object AutoRoutes : Module(
     @SubscribeEvent
     fun onPacket(event: PacketSentEventReturn) {
         if (event.packet !is C03PacketPlayer || !shouldClick) return
+        if (recentlySwapped) {
+            modMessage("you are an even bigger nigger")
+            return
+        }
         shouldClick = false
         PlayerUtils.airClick()
     }

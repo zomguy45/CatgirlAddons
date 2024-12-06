@@ -1,7 +1,7 @@
 package catgirlroutes
 
-import catgirlroutes.commands.*
 import catgirlroutes.commands.impl.*
+import catgirlroutes.commands.registerCommands
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
@@ -10,7 +10,6 @@ import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.ScanUtils
-import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import kotlinx.coroutines.CoroutineScope
@@ -60,7 +59,8 @@ class CatgirlRoutes {
             MovementUtils,
             EventDispatcher,
             VecUtils,
-            Notifications
+            Notifications,
+            PlayerUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

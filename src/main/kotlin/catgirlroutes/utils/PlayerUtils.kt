@@ -9,6 +9,8 @@ import net.minecraft.client.settings.KeyBinding
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.BlockPos
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 
 object PlayerUtils {
 
@@ -26,6 +28,8 @@ object PlayerUtils {
     fun getItemSlot(item: String, ignoreCase: Boolean = true): Int? =
         mc.thePlayer?.inventory?.mainInventory?.indexOfFirst { it?.unformattedName?.contains(item, ignoreCase) == true }.takeIf { it != -1 }
 
+
+    var recentlySwapped = false
     fun swapFromName(name: String): String {
         for (i in 0..8) {
             val stack: ItemStack? = mc.thePlayer.inventory.getStackInSlot(i)
@@ -33,6 +37,11 @@ object PlayerUtils {
             if (itemName != null) {
                 if (itemName.contains(name, ignoreCase = true)) {
                     if (mc.thePlayer.inventory.currentItem != i) {
+                        if (recentlySwapped) {
+                            modMessage("yo somethings wrong $itemName")
+                            return "TOO_FAST"
+                        }
+                        recentlySwapped = true
                         mc.thePlayer.inventory.currentItem = i
                         return "SWAPPED"
                     } else {
@@ -43,6 +52,13 @@ object PlayerUtils {
         }
         modMessage("$name not found.")
         return "NOT_FOUND"
+    }
+
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase == TickEvent.Phase.END) {
+            recentlySwapped = false
+        }
     }
 
     val ItemStack?.skyblockID: String
