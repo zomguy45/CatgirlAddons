@@ -85,7 +85,7 @@ object LocationManager {
      *
      * @author Aton
      */
-    private fun getArea(): Island {
+    fun getArea(): Island {
         if (mc.isSingleplayer) return Island.SinglePlayer
         if (!inSkyblock) return Island.Unknown
         val netHandlerPlayClient: NetHandlerPlayClient = mc.thePlayer?.sendQueue ?: return Island.Unknown

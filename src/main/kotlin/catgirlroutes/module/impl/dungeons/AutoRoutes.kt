@@ -6,7 +6,6 @@ import catgirlroutes.commands.impl.NodeManager
 import catgirlroutes.commands.impl.NodeManager.nodes
 import catgirlroutes.commands.impl.nodeEditMode
 import catgirlroutes.events.impl.PacketSentEventReturn
-import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.events.impl.SecretPickupEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -67,7 +66,8 @@ object AutoRoutes : Module(
     }
 
     @SubscribeEvent
-    fun onEnterRoom(event: RoomEnterEvent) {
+    fun onTick2(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
         NodeManager.loadNodes()
     }
 
@@ -108,7 +108,7 @@ object AutoRoutes : Module(
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (!inDungeons || nodeEditMode || event.phase != TickEvent.Phase.START) return
+        if (nodeEditMode || event.phase != TickEvent.Phase.START || mc.thePlayer == null) return
         nodes.forEach { node ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -126,10 +126,16 @@ object AutoRoutes : Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!inDungeons) return
+        //modMessage(nodes.toString())
         nodes.forEach { node ->
-            val room = currentRoom ?: return
-            val realLocation = room.getRealCoords(node.location)
+            val room = currentRoom
+            var realLocation = node.location
+
+            if (room != null) {
+                //modMessage("yo the room aint null $room")
+                realLocation = room.getRealCoords(node.location)
+            }
+
             val x: Double = realLocation.xCoord + 0.5
             val y: Double = realLocation.yCoord
             val z: Double = realLocation.zCoord + 0.5
@@ -156,8 +162,11 @@ object AutoRoutes : Module(
 
     private fun inNode(node: Node): Boolean {
 
-        val room = currentRoom ?: return false
-        val realLocation = room.getRealCoords(node.location)
+        val room = currentRoom
+        var realLocation = node.location
+        if (room != null) {
+            realLocation = room.getRealCoords(node.location)
+        }
 
         val minX = realLocation.xCoord
         val maxX = realLocation.xCoord + node.width
@@ -184,8 +193,11 @@ object AutoRoutes : Module(
 
     private suspend fun executeAction(node: Node) {
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
-        val room2 = currentRoom ?: return
-        val yaw = room2.getRealYaw(node.yaw)
+        val room2 = currentRoom
+        var yaw = node.yaw
+        if (room2 != null) {
+            yaw = room2.getRealYaw(node.yaw)
+        }
         if (node.type == "warp" || node.type == "aotv" || node.type == "hype" || node.type == "pearl") snapTo(yaw, node.pitch)
         if (node.arguments?.contains("await") == true) awaitSecret()
         delay(actionDelay.toLong())

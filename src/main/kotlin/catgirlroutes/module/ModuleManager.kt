@@ -53,6 +53,7 @@ object ModuleManager {
         InstaMid,
         LavaClip,
         SecretChime,
+        SecretAura,
         ScanTest,
         StormClip,
         AutoLeap,

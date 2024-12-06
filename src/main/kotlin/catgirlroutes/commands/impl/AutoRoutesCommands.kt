@@ -1,13 +1,14 @@
 package catgirlroutes.commands.impl
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.commands.commodore
 import catgirlroutes.commands.impl.NodeManager.allNodes
 import catgirlroutes.commands.impl.NodeManager.loadNodes
 import catgirlroutes.commands.impl.NodeManager.saveNodes
-import catgirlroutes.commands.commodore
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.LocationManager.getArea
 import catgirlroutes.utils.Utils.distanceToPlayer
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
@@ -34,8 +35,11 @@ object NodeManager {
 
     fun loadNodes() {
         if (file.exists()) {
+            val room = currentRoom
+            var name = getArea().toString()
+            if (room != null) name = currentRoomName
             allNodes = gson.fromJson(file.readText(), object : TypeToken<List<Node>>() {}.type)
-            nodes = allNodes.filter { it.room == currentRoomName }.toMutableList()
+            nodes = allNodes.filter { it.room == name }.toMutableList()
         }
     }
 
@@ -147,15 +151,22 @@ val autoRoutesCommands = commodore("node") {
                 }
             }
 
-            val room = currentRoom ?: return@runs
+            val room = currentRoom  //return@runs
+
             val x = floor(mc.thePlayer.posX)
             val y = floor(mc.thePlayer.posY)
             val z = floor(mc.thePlayer.posZ)
-            val location = room.getRelativeCoords(Vec3(x, y, z))
-            val yaw = room.getRelativeYaw(mc.thePlayer.rotationYaw)
+            var location = Vec3(x, y, z)
+            var yaw = mc.thePlayer.rotationYaw
+            var name = getArea().toString()
+            if (room != null) {
+                name = currentRoomName
+                location = room.getRelativeCoords(Vec3(x, y, z))
+                yaw = room.getRelativeYaw(mc.thePlayer.rotationYaw)
+            }
             val pitch = mc.thePlayer.rotationPitch
 
-            val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, currentRoomName)
+            val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, name)
 
             allNodes.add(node)
 
@@ -177,11 +188,19 @@ val autoRoutesCommands = commodore("node") {
     }
 
     literal("remove").runs { range: Double? ->
-        allNodes = allNodes.filter { node -> node.room != currentRoomName || (currentRoom
-            ?.let { room ->
-                val realLocation = room.getRealCoords(node.location)
-                distanceToPlayer(realLocation.xCoord, realLocation.yCoord, realLocation.zCoord) >= (range ?: 2.0) } ?: false)
+
+
+        allNodes = allNodes.filter { node ->
+            val room = currentRoom
+            var name = getArea().toString()
+            var realLocation = node.location
+            if (room != null) {
+                name = currentRoomName
+                realLocation = room.getRealCoords(node.location)
+            }
+            node.room != name || distanceToPlayer(realLocation.xCoord, realLocation.yCoord, realLocation.zCoord) >= (range ?: 2.0)
         }.toMutableList()
+
         modMessage("Removed")
         saveNodes()
         loadNodes()
