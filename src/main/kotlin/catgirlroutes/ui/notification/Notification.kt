@@ -1,11 +1,13 @@
 package catgirlroutes.ui.notification
 
+import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
+import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
-import org.lwjgl.opengl.GL11
+import net.minecraft.util.ResourceLocation
 import java.awt.Color
 
 class Notification( // todo: add icons for module toggle notifications (maybe?)
@@ -13,6 +15,7 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
     val description: String,
     val duration: Double,
     val type: NotificationType,
+    val icon: String? = null
 ) {
     val startTime: Long = System.currentTimeMillis()
     val endTime: Long = startTime + duration.toLong()
@@ -22,7 +25,6 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
 
         HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
         HUDRenderUtils.renderRectBorder(x, y, width, height, 1.0, this.type.getColour()) // border
-        //HUDRenderUtils.renderRect(x, y, width * (System.currentTimeMillis() - startTime) / this.duration, height, this.type.getColour().darker()) // progress
 
         //easing stuff
         val elapsed = System.currentTimeMillis() - startTime
@@ -30,18 +32,34 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
         val easedProgress = Notifications.Easing.easeOutQuad(rawProgress) //change function from Easing for different animations
         HUDRenderUtils.renderRect(x, y, width * easedProgress, height, this.type.getColour().darker())
 
+        val iconOffset = icon?.let {
+            val texture = ResourceLocation(RESOURCE_DOMAIN, it)
+            GlStateManager.enableBlend()
+            GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+            mc.textureManager.bindTexture(texture)
+            Gui.drawModalRectWithCustomSizedTexture(
+                x.toInt() + 3, (y + (height - 40) / 2).toInt(),
+                0f, 0f, 40, 40, 40f, 40f
+            )
+            GlStateManager.disableBlend()
+            43 // offset
+        } ?: 0
 
-        mc.fontRendererObj.drawStringWithShadow(this.title, x.toFloat() + 3f, y.toFloat() + 5f, Color(255, 255, 255).rgb) // title
+        val lines = wrapText(this.description, width - 12 - iconOffset)
+        val lineSpacing = mc.fontRendererObj.FONT_HEIGHT + 2
+        val totalTextHeight = (lines.size + 1) * lineSpacing
+        val textX = x.toFloat() + iconOffset + 3
+        val textY = y + (height - totalTextHeight) / 2
+
+        // title
+        mc.fontRendererObj.drawStringWithShadow(this.title, textX, textY.toFloat(), Color.WHITE.rgb)
 
         // description
-        val lines = wrapText(this.description, width - 12)
-        var lineY = y + 10f + mc.fontRendererObj.FONT_HEIGHT
-        for (line in lines) {
-            mc.fontRendererObj.drawStringWithShadow(line, x.toFloat() + 6f, lineY.toFloat(), Color(255, 255, 255).rgb)
-            lineY += mc.fontRendererObj.FONT_HEIGHT + 2
+        lines.forEachIndexed { index, line ->
+            mc.fontRendererObj.drawStringWithShadow(line, textX + 3, textY.toFloat() + (lineSpacing * (index + 1)), Color.WHITE.rgb)
         }
 
-        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
         GlStateManager.popMatrix()
     }
 

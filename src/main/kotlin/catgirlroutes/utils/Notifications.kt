@@ -14,8 +14,8 @@ import kotlin.math.pow
 object Notifications {
     private val notifications = mutableListOf<Notification>()
 
-    fun send(title: String, description: String, duration: Double = 2000.0, type: NotificationType = NotificationType.INFO) {
-        notifications.add(Notification(title, description, duration, type))
+    fun send(title: String, description: String, duration: Double = 2000.0, type: NotificationType = NotificationType.INFO, icon: String? = null) {
+        notifications.add(Notification(title, description, duration, type, icon))
     }
 
     @SubscribeEvent
@@ -29,41 +29,34 @@ object Notifications {
 
         for (notification in notifications) {
             val width: Double = maxOf(150.0, mc.fontRendererObj.getStringWidth(notification.title) + 10.0)
-
-            val lines = notification.wrapText(notification.description, width - 12)
-            var height: Double = 20.0 + lines.size * (mc.fontRendererObj.FONT_HEIGHT + 2)
+            val lineSpacing = mc.fontRendererObj.FONT_HEIGHT + 2
+            val iconOffset = if (notification.icon != null) 15 else 0
+            val lines = notification.wrapText(notification.description, width - lineSpacing - iconOffset * 1.8) // 1.8 because don't even ask it's 2 am
+            val height: Double = 20.0 + lines.size * lineSpacing
 
             var x: Double = sr.scaledWidth - width - 2
-
             val elapsedTime: Long = System.currentTimeMillis() - notification.startTime
             val remainingTime: Long = notification.endTime - System.currentTimeMillis()
-
             x += calculateX(elapsedTime, width) + calculateX(remainingTime, width)
 
-            notification.draw(x, y - height, width, height)
+            val adjustedX = x - iconOffset
+            val adjustedWidth = width + iconOffset
+            var adjustedHeight = height + iconOffset
+            if (notification.icon != null && (notification.title.isEmpty() || notification.description.isEmpty())) adjustedHeight += lineSpacing
 
-            height *= calculateH(elapsedTime) // probably should change y instead of height but idc
-            height *= calculateH(remainingTime)
+            notification.draw(adjustedX, y - adjustedHeight, adjustedWidth, adjustedHeight)
 
-            y -= height + 3
+            adjustedHeight *= calculateH(elapsedTime) * calculateH(remainingTime)
+
+            y -= adjustedHeight + 3
         }
     }
-
-    /*
-    private fun calculateX(time: Long, width: Double): Double {
-        return when {
-            time in 100L..250L -> (250L - time) / 150.0 * (width + 2) // animation in
-            time < 100L -> Double.MAX_VALUE // animation out
-            else -> 0.0
-        }
-    }
-     */
 
     private fun calculateX(time: Long, width: Double): Double {
         return when {
             time in 100L..250L -> {
                 val progress = (250L - time) / 150.0
-                Easing.easeOutBack(progress) * (width + 2) //change this for diff animation
+                Easing.easeInQuad(progress) * (width + 2) //change this for diff animation
             }
             time < 100L -> Double.MAX_VALUE // animation out
             else -> 0.0
@@ -78,7 +71,7 @@ object Notifications {
     }
 
     //add functions for easing here
-    object Easing {
+    object Easing { // todo: probably make a util
         fun easeOutQuad(t: Double): Double = t * (2 - t)
         fun easeInQuad(t: Double): Double = t * t
         fun easeInOutQuad(t: Double): Double = if (t < 0.5) 2 * t * t else -1 + (4 - 2 * t) * t
@@ -91,9 +84,4 @@ object Notifications {
         }
     }
 
-    /*
-    private fun calculateH(time: Long): Double {
-        return if (time < 100L) time / 100.0 else 1.0 // animation down
-    }
-     */
 }

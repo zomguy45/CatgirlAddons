@@ -1,7 +1,7 @@
 package catgirlroutes.module
 
 import catgirlroutes.CatgirlRoutes
-import catgirlroutes.module.impl.render.ClickGui.toggleNotification
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting
@@ -235,7 +235,7 @@ abstract class Module(
      */
     open fun onKeyBind() {
         this.toggle()
-        if (toggleNotification.value) Notifications.send("${if (enabled) "§aEnabled" else "§cDisabled"}.", name)
+        if (ClickGui.notifications.value) Notifications.send("${if (enabled) "Enabled" else "Disabled"} $name", "", icon = if (enabled) "check.png" else "x.png")
         else ChatUtils.modMessage("$name ${if (enabled) "§aenabled" else "§cdisabled"}.")
     }
 
