@@ -5,6 +5,7 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.unformattedName
 import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.block.BlockAir
+import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.item.ItemStack
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
@@ -73,6 +74,12 @@ object PlayerUtils {
 
     fun leftClick() {
         KeyBinding.onTick(mc.gameSettings.keyBindAttack.keyCode)
+    }
+
+    fun leftClick2() {
+        val clickMouse = Minecraft::class.java.getDeclaredMethod("clickMouse")
+        clickMouse.isAccessible = true
+        clickMouse.invoke(mc)
     }
 
     fun airClick() {
