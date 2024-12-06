@@ -19,8 +19,8 @@ import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
-import catgirlroutes.utils.PlayerUtils
-import catgirlroutes.utils.PlayerUtils.leftClick
+import catgirlroutes.utils.PlayerUtils.airClick
+import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.renderText
@@ -184,16 +184,22 @@ object AutoRoutes : Module(
     }
 
     private var shouldClick = false
+    private var shouldLeftClick = false
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEventReturn) {
-        if (event.packet !is C03PacketPlayer || !shouldClick) return
+        if (event.packet !is C03PacketPlayer) return
         if (recentlySwapped) {
-            modMessage("you are an even bigger nigger")
             return
         }
-        shouldClick = false
-        PlayerUtils.airClick()
+        if (shouldClick) {
+            shouldClick = false
+            airClick()
+        }
+        if (shouldLeftClick) {
+            shouldLeftClick = false
+            leftClick2()
+        }
     }
 
     private suspend fun executeAction(node: Node) {
@@ -248,7 +254,7 @@ object AutoRoutes : Module(
             "boom" -> {
                 modMessage("Bomb denmark!")
                 swapFromName("infinityboom tnt")
-                scheduleTask(0) { leftClick() }
+                scheduleTask(0) { shouldLeftClick = true }
             }
             "pearl" -> {
                 swapFromName("ender pearl")
