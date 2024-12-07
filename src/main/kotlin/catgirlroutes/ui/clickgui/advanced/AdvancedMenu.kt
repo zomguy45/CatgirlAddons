@@ -58,20 +58,27 @@ class AdvancedMenu(val module: Module) {
     private val indent = 5
 
     init {
+        updateElements()
+    }
+
+    fun updateElements() {
         for (setting in module.settings) {
-            if (!setting.visibility.visibleInAdvanced) continue
-            when (setting) {
-                is BooleanSetting   -> elements.add(AdvancedElementCheckBox (this, module, setting))
-                is NumberSetting    -> elements.add(AdvancedElementSlider   (this, module, setting))
-                is StringSelectorSetting  -> elements.add(AdvancedElementStringSelector (this, module, setting))
-                is SelectorSetting  -> elements.add(AdvancedElementSelector (this, module, setting))
-                is StringSetting    -> elements.add(AdvancedElementTextField(this, module, setting))
-                is ColorSetting     -> elements.add(AdvancedElementColor    (this, module, setting))
-                is ActionSetting    -> elements.add(AdvancedElementAction   (this, module, setting))
-                is KeyBindSetting   -> elements.add(AdvancedElementKeyBind(this, module, setting))
+            if (setting.visibility.visibleInAdvanced) run addElement@{ // && setting.shouldBeVisible
+                val newElement = when (setting) {
+                    is BooleanSetting   -> AdvancedElementCheckBox (this, module, setting)
+                    is NumberSetting    -> AdvancedElementSlider   (this, module, setting)
+                    is StringSelectorSetting  -> AdvancedElementStringSelector (this, module, setting)
+                    is SelectorSetting  -> AdvancedElementSelector (this, module, setting)
+                    is StringSetting    -> AdvancedElementTextField(this, module, setting)
+                    is ColorSetting     -> AdvancedElementColor    (this, module, setting)
+                    is ActionSetting    -> AdvancedElementAction   (this, module, setting)
+                    is KeyBindSetting   -> AdvancedElementKeyBind  (this, module, setting)
+//                    is DropDownSetting  -> AdvancedElementDropDown (this, module, setting) // withDependency no wrokie, that's a feature!
+                    else -> return@addElement
+                }
+                elements.add(newElement)
             }
         }
-//        elements.add(AdvancedElementKeyBind(this, module, KeyBindSetting("KeyBind", Keyboard.KEY_NONE)))
     }
 
     /**
@@ -147,7 +154,10 @@ class AdvancedMenu(val module: Module) {
         }
         if (isMouseInBox(mouseX, mouseY)) {
             for (element in elements.reversed()) {
-                if(element.mouseClicked(mouseX, mouseY, mouseButton)) return true
+                if(element.mouseClicked(mouseX, mouseY, mouseButton)) {
+//                    updateElements()
+                    return true
+                }
             }
         }
         return isMouseInBox(mouseX, mouseY)

@@ -60,6 +60,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
                     is ColorSetting ->      ElementColor(this, setting)
                     is ActionSetting ->     ElementAction(this, setting)
                     is KeyBindSetting ->    ElementKeyBind(this, setting)
+                    is DropdownSetting ->   ElementDropdown(this, setting)
                     else -> return@addElement
                 }
                 menuElements.add(position, newElement)
