@@ -9,6 +9,7 @@ import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.LeapUtils
 import catgirlroutes.utils.dungeon.ScanUtils
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
@@ -61,7 +62,8 @@ class CatgirlRoutes {
             VecUtils,
             Notifications,
             PlayerUtils,
-            EntityAura
+            EntityAura,
+            LeapUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
