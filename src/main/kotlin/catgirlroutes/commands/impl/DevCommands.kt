@@ -5,12 +5,16 @@ import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.IceFillSolver
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.EntityAura.entityArray
+import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import me.odinmain.utils.toVec3
+import net.minecraft.entity.passive.EntityVillager
 
 
 val devCommands = commodore("dev") {
@@ -64,5 +68,23 @@ val devCommands = commodore("dev") {
             IceFill solution: ${IceFillSolver.currentPatterns}
             --------
             """.trimIndent())
+    }
+    literal("swaptest").runs {
+        swapFromName("orange")
+        swapFromName("magenta")
+        swapFromName("light blue")
+        swapFromName("yellow")
+        swapFromName("lime")
+        scheduleTask(0) {
+            swapFromName("pink")
+            swapFromName("gray")
+            swapFromName("light gray")
+            swapFromName("cyan")
+        }
+    }
+    literal("entityaura").runs {
+        mc.theWorld.loadedEntityList.forEach{entity ->
+            if (entity is EntityVillager) entityArray.add(entity)
+        }
     }
 }
