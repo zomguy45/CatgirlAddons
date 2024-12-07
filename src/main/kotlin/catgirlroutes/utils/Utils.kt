@@ -61,6 +61,13 @@ object Utils {
         )
     }
 
+    fun distanceToPlayer(x: Int, y: Int, z: Int): Double {
+        return sqrt((mc.renderManager.viewerPosX - x) * (mc.renderManager.viewerPosX - x) +
+                (mc.renderManager.viewerPosY - y) * (mc.renderManager.viewerPosY - y) +
+                (mc.renderManager.viewerPosZ - z) * (mc.renderManager.viewerPosZ - z)
+        )
+    }
+
     val ItemStack?.unformattedName: String
         get() = this?.displayName?.noControlCodes ?: ""
 

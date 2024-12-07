@@ -61,7 +61,8 @@ class CatgirlRoutes {
             VecUtils,
             Notifications,
             PlayerUtils,
-            EntityAura
+            EntityAura,
+            BlockAura,
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
