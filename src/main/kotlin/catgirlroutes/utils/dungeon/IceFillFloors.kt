@@ -44,6 +44,7 @@ object IceFillFloors {
         ),
         arrayOf(
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, -1),
                 Vec3i(0, 0, -2),
@@ -68,6 +69,7 @@ object IceFillFloors {
                 Vec3i(5, 0, 0)
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(1, 0, 0),
                 Vec3i(1, 0, -1),
@@ -94,6 +96,7 @@ object IceFillFloors {
                 Vec3i(5, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, -1),
                 Vec3i(0, 0, -2),
@@ -118,6 +121,7 @@ object IceFillFloors {
                 Vec3i(5, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, -1),
                 Vec3i(0, 0, -2),
@@ -144,6 +148,7 @@ object IceFillFloors {
                 Vec3i(5, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, -1),
                 Vec3i(1, 0, -1),
@@ -166,6 +171,7 @@ object IceFillFloors {
                 Vec3i(5, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(1, 0, 0),
                 Vec3i(1, 0, 1),
@@ -194,6 +200,7 @@ object IceFillFloors {
         ),
         arrayOf(
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(1, 0, 0),
                 Vec3i(2, 0, 0),
@@ -242,6 +249,7 @@ object IceFillFloors {
                 Vec3i(7, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(1, 0, 0),
                 Vec3i(1, 0, -1),
@@ -288,6 +296,7 @@ object IceFillFloors {
                 Vec3i(7, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, 1),
                 Vec3i(1, 0, 1),
@@ -334,6 +343,7 @@ object IceFillFloors {
                 Vec3i(7, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(1, 0, 0),
                 Vec3i(1, 0, -1),
@@ -378,6 +388,7 @@ object IceFillFloors {
                 Vec3i(7, 0, 0),
             ),
             arrayOf(
+                Vec3i(-1, 0, 0),
                 Vec3i(0, 0, 0),
                 Vec3i(0, 0, -1),
                 Vec3i(1, 0, -1),
