@@ -7,6 +7,7 @@ import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.EntityAura
 import catgirlroutes.utils.EntityAura.entityArray
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
@@ -15,8 +16,11 @@ import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils
 import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
 import me.odinmain.utils.toVec3
-import net.minecraft.entity.passive.EntityVillager
+import net.minecraft.entity.item.EntityArmorStand
+import net.minecraft.entity.monster.EntitySlime
+import net.minecraft.entity.passive.EntityHorse
 import net.minecraft.init.Blocks
+import net.minecraft.network.play.client.C02PacketUseEntity
 import net.minecraft.util.BlockPos
 
 
@@ -87,7 +91,7 @@ val devCommands = commodore("dev") {
     }
     literal("entityaura").runs {
         mc.theWorld.loadedEntityList.forEach{entity ->
-            if (entity is EntityVillager) entityArray.add(entity)
+            if (entity is EntityHorse || entity is EntitySlime || entity is EntityArmorStand) entityArray.add(EntityAura.EntityAuraAction(entity, C02PacketUseEntity.Action.INTERACT_AT))
         }
     }
     literal("blockaura").runs {
@@ -97,7 +101,7 @@ val devCommands = commodore("dev") {
         val blocks = BlockPos.getAllInBox(blockPos1, blockPos2)
         for (block in blocks) {
             val blockstate = mc.theWorld.getBlockState(block)
-            if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block) blockArray.add(block)
+            if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) blockArray.add(block)
         }
     }
 }

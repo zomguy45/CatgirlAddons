@@ -26,25 +26,19 @@ object BlockAura {
         blockArray.forEach{block ->
             if (Utils.distanceToPlayer(block.x, block.y, block.z) < 4) {
                 val aabb = aabbConvert(mc.theWorld.getBlockState(block).block.getSelectedBoundingBox(mc.theWorld, block), block)
-                //modMessage(aabb)
                 val eyePos = mc.thePlayer.getPositionEyes(0f)
-                //val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
                 val centerPos = Vec3(block).addVector(
                     (aabb.minX + aabb.maxX) / 2,
                     (aabb.minY + aabb.maxY) / 2,
                     (aabb.minZ + aabb.maxZ) / 2
                 )
-                val movingObjectPosition: MovingObjectPosition? = BlockUtils.collisionRayTrace(
+                modMessage(centerPos)
+                val movingObjectPosition: MovingObjectPosition = BlockUtils.collisionRayTrace(
                     block,
                     aabb,
-                    //AxisAlignedBB(0.0625, 0.0, 0.0625, 0.9375, 0.875, 0.9375),
                     eyePos,
                     centerPos
-                )
-                if (movingObjectPosition == null) {
-                    modMessage("raytrace is null nga")
-                    return@forEach
-                }
+                ) ?: return@forEach
                 mc.netHandler.networkManager.sendPacket(
                     C08PacketPlayerBlockPlacement(
                         block,
@@ -64,7 +58,7 @@ object BlockAura {
         }
     }
 
-    fun aabbConvert(aabb: AxisAlignedBB, block: BlockPos): AxisAlignedBB {
+    private fun aabbConvert(aabb: AxisAlignedBB, block: BlockPos): AxisAlignedBB {
         val minX: Double = aabb.minX - block.x
         val minY: Double = aabb.minY - block.y
         val minZ: Double = aabb.minZ - block.z
