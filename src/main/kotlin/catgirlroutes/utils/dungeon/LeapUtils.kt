@@ -2,6 +2,7 @@ package catgirlroutes.utils.dungeon
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.rightClick
@@ -64,6 +65,7 @@ object LeapUtils {
         if (event.packet !is S2FPacketSetSlot) return
         if (!inQueue() || !menuOpened) return
         devMessage("5")
+
         val slot = event.packet.func_149173_d()
         val itemStack = event.packet.func_149174_e()
 
@@ -78,7 +80,7 @@ object LeapUtils {
         event.isCanceled = true
 
         devMessage(itemStack.displayName)
-        if (itemStack.displayName == currentLeap()) {
+        if (itemStack.displayName.contains(currentLeap())) {
             click(slot)
             reloadGui()
             devMessage("8")
@@ -108,7 +110,7 @@ object LeapUtils {
     }
 
     @SubscribeEvent
-    fun onCloseClient(event: PacketReceiveEvent) {
+    fun onCloseClient(event: PacketSentEvent) {
         if (event.packet !is C0DPacketCloseWindow) return
         cwid = -1
     }

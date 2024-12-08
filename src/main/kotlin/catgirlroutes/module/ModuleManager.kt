@@ -58,6 +58,7 @@ object ModuleManager {
         AutoPot,
         Puzzles,
         Blink,
+        AutoExcavator,
 
         // Misc
         F7sim,
