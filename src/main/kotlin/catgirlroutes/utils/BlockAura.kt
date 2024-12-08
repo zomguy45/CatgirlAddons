@@ -26,9 +26,14 @@ object BlockAura {
         blockArray.forEach{block ->
             if (Utils.distanceToPlayer(block.x, block.y, block.z) < 4) {
                 val aabb = aabbConvert(mc.theWorld.getBlockState(block).block.getSelectedBoundingBox(mc.theWorld, block), block)
-                modMessage(aabb)
+                //modMessage(aabb)
                 val eyePos = mc.thePlayer.getPositionEyes(0f)
-                val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
+                //val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
+                val centerPos = Vec3(block).addVector(
+                    (aabb.minX + aabb.maxX) / 2,
+                    (aabb.minY + aabb.maxY) / 2,
+                    (aabb.minZ + aabb.maxZ) / 2
+                )
                 val movingObjectPosition: MovingObjectPosition? = BlockUtils.collisionRayTrace(
                     block,
                     aabb,
@@ -51,6 +56,7 @@ object BlockAura {
                     )
                 )
                 blockArray.remove(block)
+                blockArray
                 recentClicks.add(movingObjectPosition)
                 scheduleTask(10) {recentClicks.remove(movingObjectPosition)}
                 return
