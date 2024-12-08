@@ -3,6 +3,7 @@ package catgirlroutes.ui.notification
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.Gui
@@ -10,7 +11,7 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
 import java.awt.Color
 
-class Notification( // todo: add icons for module toggle notifications (maybe?)
+class Notification(
     val title: String,
     val description: String,
     val duration: Double,
@@ -46,17 +47,16 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
         } ?: 0
 
         val lines = wrapText(this.description, width - 12 - iconOffset)
-        val lineSpacing = mc.fontRendererObj.FONT_HEIGHT + 2
-        val totalTextHeight = (lines.size + 1) * lineSpacing
-        val textX = x.toFloat() + iconOffset + 3
+        val totalTextHeight = (lines.size + 1) * FontUtil.fontHeight + 2
+        val textX = x + iconOffset + 3
         val textY = y + (height - totalTextHeight) / 2
 
         // title
-        mc.fontRendererObj.drawStringWithShadow(this.title, textX, textY.toFloat(), Color.WHITE.rgb)
+        FontUtil.drawStringWithShadow(this.title, textX, textY, Color.WHITE.rgb)
 
         // description
         lines.forEachIndexed { index, line ->
-            mc.fontRendererObj.drawStringWithShadow(line, textX + 3, textY.toFloat() + (lineSpacing * (index + 1)), Color.WHITE.rgb)
+            FontUtil.drawStringWithShadow(line, textX + 3, textY + ((FontUtil.fontHeight + 2) * (index + 1)), Color.WHITE.rgb)
         }
 
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
@@ -69,7 +69,7 @@ class Notification( // todo: add icons for module toggle notifications (maybe?)
 
         text.split(" ").forEach { word ->
             val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
-            if (mc.fontRendererObj.getStringWidth(testLine) <= maxWidth) {
+            if (FontUtil.getStringWidth(testLine) <= maxWidth) {
                 currentLine = testLine
             } else {
                 lines.add(currentLine)
