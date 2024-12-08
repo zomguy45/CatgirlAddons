@@ -80,7 +80,7 @@ object AutoExcavator : Module(
         if (registryName == "minecraft:stained_glass_pane") {
             if (metadata == 12) {
                 menuTwo.add(slot)
-            } else if (metadata == 13){
+            } else if (metadata == 5) {
                 menuTwo.add(0, slot)
             }
             if (metadata == 4) {
