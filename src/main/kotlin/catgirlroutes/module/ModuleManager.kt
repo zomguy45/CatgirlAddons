@@ -63,6 +63,7 @@ object ModuleManager {
         // Misc
         F7sim,
         CatMode,
+        InventoryButtons,
         //AutoRouteUtils,
 
         // Player
