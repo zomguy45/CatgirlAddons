@@ -1,11 +1,15 @@
 package catgirlroutes.module.impl.misc
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.DropdownSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.dungeon.tiles.Room
@@ -39,4 +43,16 @@ object Test : Module(
         ChatUtils.chatMessage("CLAY: " + room.clayPos);
         ChatUtils.chatMessage("------------");
     }
+
+    @RegisterHudElement
+    object TestHud : HudElement(
+        this,
+        width = mc.fontRendererObj.getStringWidth("Test"),
+        height = mc.fontRendererObj.FONT_HEIGHT + 2
+    ) {
+        override fun renderHud() {
+            FontUtil.drawStringWithShadow("Test", 0.0, 0.0)
+        }
+    }
+
 }
