@@ -67,7 +67,6 @@ object IceFillSolver {
                 scheduleTask(iceFillDelay.value.toInt() - 1) {
                     if(mc.thePlayer.isCollidedVertically) {
                         stopVelo()
-                        airClick()
                         mc.thePlayer.setPosition(p2.xCoord, p2.yCoord - 0.1, p2.zCoord)
                     }
                     awaitingClip = false
