@@ -9,6 +9,7 @@ import catgirlroutes.module.impl.player.*
 import catgirlroutes.module.impl.render.BossESP
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.DungeonESP
+import catgirlroutes.module.impl.render.EditHud
 import catgirlroutes.module.impl.render.ModuleList
 import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
@@ -77,7 +78,8 @@ object ModuleManager {
         DungeonESP,
         BossESP,
         TerminalEsp,
-        ModuleList
+        ModuleList,
+        EditHud
     )
 
     init {
