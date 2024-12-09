@@ -11,6 +11,7 @@ import org.lwjgl.opengl.GL11
 import java.awt.Color
 import java.io.IOException
 
+
 /**
  * The GUI for editing the positions and scale of HUD elements.
  *
@@ -39,13 +40,15 @@ object EditHudGUI : GuiScreen() {
         renderRestButton(mouseX, mouseY, partialTicks)
 
         for (element in hudElements) {
-            element.renderPreview()
+            element.renderPreview(element == draggingElement)
         }
+
+        mouseDrag(mouseX, mouseY)
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
 
-    private fun renderRestButton(mouseX: Int, mouseY: Int, @Suppress("UNUSED_PARAMETER") partialTicks: Float) {
+    private fun renderRestButton(mouseX: Int, mouseY: Int, @Suppress("UNUSED_PARAMETER") partialTicks: Float) { // todo: stop rendering when dragging element
         val resetText = "Rest HUD"
         val scaledResolution = ScaledResolution(mc)
 
@@ -125,12 +128,11 @@ object EditHudGUI : GuiScreen() {
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
-    override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
-        if (clickedMouseButton == 0 && draggingElement != null) {
+    private fun mouseDrag(mouseX: Int, mouseY: Int) {
+        if (draggingElement != null) {
             draggingElement!!.x = mouseX - startOffsetX
             draggingElement!!.y = mouseY - startOffsetY
         }
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
@@ -142,9 +144,14 @@ object EditHudGUI : GuiScreen() {
         CatgirlRoutes.moduleConfig.saveConfig()
     }
 
+    override fun doesGuiPauseGame(): Boolean {
+        return false
+    }
+
     private fun isCursorOnElement(mouseX: Int, mouseY: Int, element: HudElement): Boolean {
-        return mouseX > element.x && mouseX < (element.x + element.width * element.scale.value)
-                && mouseY > element.y&& mouseY< (element.y + element.height * element.scale.value)
+        val scale = element.scale.value
+        return mouseX > (element.x - 2.5 * scale) && mouseX < (element.x + element.width * scale + scale) // to the left by 2.5, to the right by 1
+                && mouseY > (element.y - 2 * scale) && mouseY < (element.y + element.height * scale - 2 * scale) // to minus 2 bottom, plus 2 top
     }
 
     private fun isCursorOnReset(mouseX: Int, mouseY: Int) : Boolean {

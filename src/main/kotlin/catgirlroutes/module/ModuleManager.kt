@@ -7,10 +7,7 @@ import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
-import catgirlroutes.module.impl.render.BossESP
-import catgirlroutes.module.impl.render.ClickGui
-import catgirlroutes.module.impl.render.DungeonESP
-import catgirlroutes.module.impl.render.TerminalEsp
+import catgirlroutes.module.impl.render.*
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
@@ -77,6 +74,7 @@ object ModuleManager {
         DungeonESP,
         BossESP,
         TerminalEsp,
+        EditHud,
     )
 
     init {
