@@ -2,7 +2,6 @@ package catgirlroutes.module
 
 import catgirlroutes.events.impl.PreKeyInputEvent
 import catgirlroutes.events.impl.PreMouseInputEvent
-import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
