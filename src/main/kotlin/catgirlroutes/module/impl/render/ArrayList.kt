@@ -4,10 +4,11 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.ModuleManager.modules
+import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraftforge.client.event.RenderGameOverlayEvent
@@ -35,6 +36,7 @@ object ModuleList : Module(
 
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
+        return
         if (event.type != RenderGameOverlayEvent.ElementType.ALL || !this.enabled) return
         activeModuleList.clear()
         for (module in modules) {
@@ -49,8 +51,6 @@ object ModuleList : Module(
 
         val sr = ScaledResolution(mc)
         var y = 10
-        val boxHeight = activeModuleList.size * 11.0
-        val boxWidth = mc.fontRendererObj.getStringWidth(activeModuleList[0]) + 5.0
         val screenWidth = sr.scaledWidth
 
             for (active in activeModuleList) {
@@ -61,8 +61,36 @@ object ModuleList : Module(
                 HUDRenderUtils.renderRect(x.toDouble() - 4.0, y.toDouble() - 3.0, stringWidth.toDouble() + 6.0, 13.0, Color(0, 0, 0, 128))
             y += 11
         }
-        //HUDRenderUtils.renderRectBorder(screenWidth - boxWidth - 8.0, 8.0, boxWidth.toDouble(), boxHeight.toDouble() + 2.0, 1.5, colorText.value)
-        //HUDRenderUtils.renderRect(screenWidth - boxWidth - 8.0, 8.0, boxWidth.toDouble(), boxHeight.toDouble() + 2.0, Color(0, 0, 0, 150),)
+    }
 
+    @RegisterHudElement
+    object ArrayHud : HudElement(
+        this,
+        ScaledResolution(mc).scaledWidth, //FUCK NIGGERS
+        0
+    ) {
+        override fun renderHud() {
+            activeModuleList.clear()
+            for (module in modules) {
+                for (setting in module.settings) {
+                    if (setting is BooleanSetting && setting.value && setting.name == "Show in List" && module.enabled) {
+                        activeModuleList.add(module.name)
+                    }
+                }
+            }
+            activeModuleList.sortByDescending { mc.fontRendererObj.getStringWidth(it) }
+            if (activeModuleList.isEmpty()) return
+
+            var y = 10
+
+            for (active in activeModuleList) {
+                val stringWidth = mc.fontRendererObj.getStringWidth(active)
+                val x = -stringWidth - 10
+                mc.fontRendererObj.drawStringWithShadow(active, x.toFloat(), y.toFloat(), colorText.value.rgb)
+                HUDRenderUtils.renderRect(-8.0, y.toDouble() - 3.0, 2.0, 13.0, colorText.value)
+                HUDRenderUtils.renderRect(x.toDouble() - 4.0, y.toDouble() - 3.0, stringWidth.toDouble() + 6.0, 13.0, Color(0, 0, 0, 128))
+                y += 11
+            }
+        }
     }
 }
