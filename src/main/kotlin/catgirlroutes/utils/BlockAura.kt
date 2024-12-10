@@ -1,8 +1,6 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import net.minecraft.network.play.client.C07PacketPlayerDigging
@@ -37,7 +35,7 @@ object BlockAura {
                     (aabb.minY + aabb.maxY) / 2,
                     (aabb.minZ + aabb.maxZ) / 2
                 )
-                modMessage(block)
+                //modMessage(block)
                 val movingObjectPosition: MovingObjectPosition = BlockUtils.collisionRayTrace(
                     block,
                     aabb,
@@ -76,7 +74,7 @@ object BlockAura {
                     (aabb.minY + aabb.maxY) / 2,
                     (aabb.minZ + aabb.maxZ) / 2
                 )
-                modMessage(block)
+                //modMessage(block)
                 val movingObjectPosition: MovingObjectPosition = BlockUtils.collisionRayTrace(
                     block,
                     aabb,
@@ -116,12 +114,6 @@ object BlockAura {
         recentClicks.forEach{pos ->
             drawCustomSizedBoxAt(pos.blockPos.x + pos.hitVec.xCoord,pos.blockPos.y + pos.hitVec.yCoord,pos.blockPos.z + pos.hitVec.zCoord, 0.1, 0.1, 0.1, java.awt.Color.BLUE)
         }
-    }
-
-    @SubscribeEvent
-    fun onPacket(event: PacketSentEvent) {
-        if (event.packet !is C07PacketPlayerDigging) return
-        modMessage("${event.packet.position}, ${event.packet.facing}, ${event.packet.status}")
     }
 
     @SubscribeEvent
