@@ -13,6 +13,7 @@ import catgirlroutes.module.impl.render.EditHud
 import catgirlroutes.module.impl.render.ModuleList
 import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -87,6 +88,7 @@ object ModuleManager {
             module.keybinding.let {
                 module.register(KeyBindSetting("Key Bind", it, description = "Toggles the module"))
             }
+            module.addSettings(BooleanSetting("Show in List", true))
         }
     }
 

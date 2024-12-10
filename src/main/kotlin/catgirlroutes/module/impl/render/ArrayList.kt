@@ -4,7 +4,11 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.ModuleManager.modules
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -18,29 +22,47 @@ object ModuleList : Module(
     description = "ArrayList"
 ) {
     val colorText = ColorSetting("String color", Color.PINK, true)
+    //Testing!!! Dont delete!!!
+    val xSetting = NumberSetting("X", 0.0, -20.0, 20.0, 1.0)
+    val ySetting = NumberSetting("Y", 0.0, -20.0, 20.0, 1.0)
+    val widthSetting = NumberSetting("W", 0.0, -20.0, 20.0, 1.0)
+    val heightSetting = NumberSetting("H", 0.0, -20.0, 20.0, 1.0)
+
     init {
-        this.addSettings(colorText)
+        this.addSettings(colorText/*,xSetting,ySetting,widthSetting,heightSetting*/)
     }
     var activeModuleList = mutableListOf<String>()
 
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL || !this.enabled) return
         activeModuleList.clear()
         for (module in modules) {
-            if (module.enabled)
-                //if (module.name == "Array List") return
-                activeModuleList.add(module.name)
+            for (setting in module.settings) {
+                if (setting is BooleanSetting && setting.value && setting.name == "Show in List" && module.enabled) {
+                    activeModuleList.add(module.name)
+                }
+            }
         }
         activeModuleList.sortByDescending { mc.fontRendererObj.getStringWidth(it) }
-        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !this.enabled) return
+        if (activeModuleList.isEmpty()) return
+
         val sr = ScaledResolution(mc)
         var y = 10
+        val boxHeight = activeModuleList.size * 11.0
+        val boxWidth = mc.fontRendererObj.getStringWidth(activeModuleList[0]) + 5.0
         val screenWidth = sr.scaledWidth
+
             for (active in activeModuleList) {
             val stringWidth = mc.fontRendererObj.getStringWidth(active)
             val x = screenWidth - stringWidth - 10
             mc.fontRendererObj.drawStringWithShadow(active, x.toFloat(), y.toFloat(), colorText.value.rgb)
+                HUDRenderUtils.renderRect(screenWidth - 8.0, y.toDouble() - 3.0, 2.0, 13.0, colorText.value)
+                HUDRenderUtils.renderRect(x.toDouble() - 4.0, y.toDouble() - 3.0, stringWidth.toDouble() + 6.0, 13.0, Color(0, 0, 0, 128))
             y += 11
         }
+        //HUDRenderUtils.renderRectBorder(screenWidth - boxWidth - 8.0, 8.0, boxWidth.toDouble(), boxHeight.toDouble() + 2.0, 1.5, colorText.value)
+        //HUDRenderUtils.renderRect(screenWidth - boxWidth - 8.0, 8.0, boxWidth.toDouble(), boxHeight.toDouble() + 2.0, Color(0, 0, 0, 150),)
+
     }
 }
