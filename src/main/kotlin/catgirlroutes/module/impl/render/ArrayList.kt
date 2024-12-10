@@ -87,10 +87,11 @@ object ModuleList : Module(
             var startLine = 0.0
             var startBox = 0.0
             var startText = 0.0
+            var y = 0.0
             if (isTop.value) {
-                y = 10
+                y = 10.0
             } else {
-                y = ScaledResolution(mc).scaledHeight - 10
+                y = ScaledResolution(mc).scaledHeight - 10.0
             }
             for (active in activeModuleList) {
                 if (isLeft.value) {
