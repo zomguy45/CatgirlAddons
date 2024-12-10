@@ -240,6 +240,7 @@ object AutoRoutes : Module(
             }
             "walk" -> {
                 modMessage("Walking!")
+                MovementUtils.setKey("shift", false)
                 MovementUtils.setKey("w", true)
             }
             "jump" -> {

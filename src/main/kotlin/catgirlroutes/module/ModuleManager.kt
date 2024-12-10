@@ -2,16 +2,13 @@ package catgirlroutes.module
 
 import catgirlroutes.events.impl.PreKeyInputEvent
 import catgirlroutes.events.impl.PreMouseInputEvent
+import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.TicTacToeSolver
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
-import catgirlroutes.module.impl.render.BossESP
-import catgirlroutes.module.impl.render.ClickGui
-import catgirlroutes.module.impl.render.DungeonESP
-import catgirlroutes.module.impl.render.EditHud
-import catgirlroutes.module.impl.render.ModuleList
-import catgirlroutes.module.impl.render.TerminalEsp
+import catgirlroutes.module.impl.render.*
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
@@ -61,6 +58,7 @@ object ModuleManager {
         Puzzles,
         Blink,
         AutoExcavator,
+        TicTacToeSolver,
 
         // Misc
         F7sim,

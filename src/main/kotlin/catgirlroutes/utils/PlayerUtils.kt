@@ -12,6 +12,7 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.BlockPos
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import java.lang.reflect.Method
 
 object PlayerUtils {
 
@@ -76,8 +77,12 @@ object PlayerUtils {
         KeyBinding.onTick(mc.gameSettings.keyBindAttack.keyCode)
     }
 
-    fun leftClick2() {
-        val clickMouse = Minecraft::class.java.getDeclaredMethod("clickMouse")
+    fun leftClick2() {;
+        val clickMouse: Method = try {
+            Minecraft::class.java.getDeclaredMethod("clickMouse")
+        } catch (e: NoSuchMethodException) {
+            Minecraft::class.java.getDeclaredMethod("clickMouse")
+        }
         clickMouse.isAccessible = true
         clickMouse.invoke(mc)
     }

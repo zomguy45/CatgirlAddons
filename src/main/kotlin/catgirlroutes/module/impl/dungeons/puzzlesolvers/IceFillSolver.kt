@@ -7,7 +7,6 @@ import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFillDelay
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.stopVelo
-import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.Utils.Vec2
 import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.dungeon.DungeonUtils
