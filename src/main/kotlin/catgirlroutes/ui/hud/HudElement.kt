@@ -1,13 +1,16 @@
 package catgirlroutes.ui.hud
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.render.HUDRenderUtils
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
+import kotlin.math.floor
 
 /**
  * Provides functionality for game overlay elements.
@@ -88,7 +91,7 @@ abstract class HudElement{
      * Can be overridden in implementation.
      */
     open fun scroll(amount: Int) {
-        this.scale.value = this.scale.value + amount * zoomIncrement
+        this.scale.value += amount * zoomIncrement
     }
 
     /**
@@ -116,20 +119,42 @@ abstract class HudElement{
 
     /**
      * Used for moving the hud element.
-     * Draws a rectangle in place of the actual element
+     * Draws a rectangle in place of the actual element // todo: make it so it doesn't render elements from disabled modules (and so you can't interact with them)
      */
-    fun renderPreview() {
+    fun renderPreview(isDragging: Boolean) {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x.toFloat(), y.toFloat(), 0f)
-        GlStateManager.scale(scale.value, scale.value, 1.0)
+        val scaleValue = scale.value
+        GlStateManager.scale(scaleValue, scaleValue, 1.0)
 
-        HUDRenderUtils.renderRect(
-            0.0,
-            0.0,
-            width.toDouble(),
+        // render coords and scale if dragging
+        if (isDragging) {
+            val text = "x: ${x * 2} y: ${y * 2} ${if (scaleValue != 1.0) "${floor(scaleValue * 100) / 100}" else ""}"
+
+            val sr = ScaledResolution(mc)
+
+            val w = mc.fontRendererObj.getStringWidth(text) + 4
+
+            val x2 = 4 + if (sr.scaledWidth * scaleValue < (x + (width + w) * scaleValue) * scaleValue) -w else width
+            val y2 = -1 + if (y - 12 * scaleValue < 5 * scaleValue) height else -12
+            // todo: fix it going big/smol (pushing new matrix no work :sob:)
+            HUDRenderUtils.renderRect((x2 - 2).toDouble(), (y2 - 2).toDouble(), w.toDouble(), 12.0, Color(21, 21, 21, 200))
+            mc.fontRendererObj.drawStringWithShadow(text, x2.toFloat(), y2.toFloat(), Color.WHITE.rgb)
+        } else {
+            HUDRenderUtils.renderRect(-2.0, -2.0, width.toDouble() + 3, height.toDouble(), Color(21, 21, 21, 200)) // bg
+        }
+
+        // border
+        HUDRenderUtils.renderRectBorder(
+            -2.0,
+            -2.0,
+            width.toDouble() + 3,
             height.toDouble(),
-            Color(-0x44eaeaeb, true)
+            0.5,
+            Color(208, 208, 208)
         )
+
+        // todo: preview render (text)
 
         GlStateManager.popMatrix()
     }

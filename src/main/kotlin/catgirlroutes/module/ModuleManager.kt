@@ -2,7 +2,6 @@ package catgirlroutes.module
 
 import catgirlroutes.events.impl.PreKeyInputEvent
 import catgirlroutes.events.impl.PreMouseInputEvent
-import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
@@ -10,6 +9,8 @@ import catgirlroutes.module.impl.player.*
 import catgirlroutes.module.impl.render.BossESP
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.DungeonESP
+import catgirlroutes.module.impl.render.EditHud
+import catgirlroutes.module.impl.render.ModuleList
 import catgirlroutes.module.impl.render.TerminalEsp
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.KeyBindSetting
@@ -63,6 +64,7 @@ object ModuleManager {
         // Misc
         F7sim,
         CatMode,
+        InventoryButtons,
         //AutoRouteUtils,
 
         // Player
@@ -76,6 +78,8 @@ object ModuleManager {
         DungeonESP,
         BossESP,
         TerminalEsp,
+        ModuleList,
+        EditHud
     )
 
     init {

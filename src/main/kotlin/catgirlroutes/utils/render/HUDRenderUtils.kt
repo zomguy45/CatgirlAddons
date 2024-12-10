@@ -7,7 +7,9 @@ import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL14
 import java.awt.Color
+
 
 /**
  * ## A Collection of methods for rendering 2D Objects in orthographic projection for the HUD or for a gui.
@@ -129,5 +131,64 @@ object HUDRenderUtils {
      */
     fun endScissor() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST)
+    }
+
+    fun drawTexturedRect(
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        uMin: Float,
+        uMax: Float,
+        vMin: Float,
+        vMax: Float,
+        filter: Int
+    ) {
+        GlStateManager.enableBlend()
+        GL14.glBlendFuncSeparate(
+            GL11.GL_SRC_ALPHA,
+            GL11.GL_ONE_MINUS_SRC_ALPHA,
+            GL11.GL_ONE,
+            GL11.GL_ONE_MINUS_SRC_ALPHA
+        )
+
+        drawTexturedRectNoBlend(x, y, width, height, uMin, uMax, vMin, vMax, filter)
+
+        GlStateManager.disableBlend()
+    }
+
+    fun drawTexturedRectNoBlend(
+        x: Float,
+        y: Float,
+        width: Float,
+        height: Float,
+        uMin: Float,
+        uMax: Float,
+        vMin: Float,
+        vMax: Float,
+        filter: Int
+    ) {
+        GlStateManager.enableTexture2D()
+
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, filter)
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, filter)
+
+        worldRenderer.begin(7, DefaultVertexFormats.POSITION_TEX)
+        worldRenderer
+            .pos(x.toDouble(), (y + height).toDouble(), 0.0)
+            .tex(uMin.toDouble(), vMax.toDouble()).endVertex()
+        worldRenderer
+            .pos((x + width).toDouble(), (y + height).toDouble(), 0.0)
+            .tex(uMax.toDouble(), vMax.toDouble()).endVertex()
+        worldRenderer
+            .pos((x + width).toDouble(), y.toDouble(), 0.0)
+            .tex(uMax.toDouble(), vMin.toDouble()).endVertex()
+        worldRenderer
+            .pos(x.toDouble(), y.toDouble(), 0.0)
+            .tex(uMin.toDouble(), vMin.toDouble()).endVertex()
+        tessellator.draw()
+
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST)
+        GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST)
     }
 }
