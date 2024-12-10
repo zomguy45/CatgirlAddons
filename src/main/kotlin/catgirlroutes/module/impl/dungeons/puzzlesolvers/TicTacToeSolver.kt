@@ -171,9 +171,7 @@ object TicTacToeSolver : Module(
     @SubscribeEvent(priority = EventPriority.LOWEST)
     fun onTick(event: PositionUpdateEvent.Post) {
         if (bestMove == null || blockArray.contains(bestMove)) return
-        if (System.currentTimeMillis() < nextClick) return
         blockArray.add(bestMove!!)
-        nextClick = System.currentTimeMillis() + cooldown
     }
 
     @SubscribeEvent
