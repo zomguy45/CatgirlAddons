@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.IceFillSolver
 import catgirlroutes.utils.BlockAura.blockArray
+import catgirlroutes.utils.BlockAura.breakArray
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -102,6 +103,16 @@ val devCommands = commodore("dev") {
         for (block in blocks) {
             val blockstate = mc.theWorld.getBlockState(block)
             if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) blockArray.add(block)
+        }
+    }
+    literal("breakaura").runs {
+        val eyePos = mc.thePlayer.getPositionEyes(0f)
+        val blockPos1: BlockPos = BlockPos(eyePos.xCoord - 20, eyePos.yCoord - 20, eyePos.zCoord - 20)
+        val blockPos2: BlockPos = BlockPos(eyePos.xCoord + 20, eyePos.yCoord + 20, eyePos.zCoord + 20)
+        val blocks = BlockPos.getAllInBox(blockPos1, blockPos2)
+        for (block in blocks) {
+            val blockstate = mc.theWorld.getBlockState(block)
+            if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) breakArray.add(block)
         }
     }
 }

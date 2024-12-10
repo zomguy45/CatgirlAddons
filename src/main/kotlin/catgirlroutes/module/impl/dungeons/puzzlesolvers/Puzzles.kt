@@ -21,6 +21,7 @@ object Puzzles : Module ( // todo: auto icefill
     private var iceFill: BooleanSetting = BooleanSetting("Toggle", false).withDependency { iceFillSettings.value }
     var iceFillAuto: BooleanSetting = BooleanSetting("Auto", false).withDependency { iceFillSettings.value }
     var iceFillDelay: NumberSetting = NumberSetting("Auto delay", 2.0, 1.0, 10.0, 1.0).withDependency { iceFillSettings.value }
+
     init {
         addSettings(
             iceFillSettings,

@@ -1,9 +1,11 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
+import net.minecraft.network.play.client.C07PacketPlayerDigging
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
@@ -18,6 +20,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 object BlockAura {
 
     val blockArray = mutableListOf<BlockPos>()
+    val breakArray = mutableListOf<BlockPos>()
     private val recentClicks = mutableListOf<MovingObjectPosition>()
 
     @SubscribeEvent
@@ -52,9 +55,45 @@ object BlockAura {
                     )
                 )
                 blockArray.remove(block)
-                blockArray
                 recentClicks.add(movingObjectPosition)
                 scheduleTask(10) {recentClicks.remove(movingObjectPosition)}
+                return
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onTick2(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || breakArray.isEmpty()) return
+        breakArray.forEach{block ->
+            if (Utils.distanceToPlayer(block.x, block.y, block.z) < 4) {
+                val blockState = mc.theWorld.getBlockState(block)
+                blockState.block.setBlockBoundsBasedOnState(mc.theWorld, block)
+                val aabb = aabbConvert(blockState.block.getSelectedBoundingBox(mc.theWorld, block), block)
+                val eyePos = mc.thePlayer.getPositionEyes(0f)
+                val centerPos = Vec3(block).addVector(
+                    (aabb.minX + aabb.maxX) / 2,
+                    (aabb.minY + aabb.maxY) / 2,
+                    (aabb.minZ + aabb.maxZ) / 2
+                )
+                modMessage(block)
+                val movingObjectPosition: MovingObjectPosition = BlockUtils.collisionRayTrace(
+                    block,
+                    aabb,
+                    eyePos,
+                    centerPos
+                ) ?: return@forEach
+                mc.netHandler.networkManager.sendPacket(
+                    C07PacketPlayerDigging(
+                        C07PacketPlayerDigging.Action.START_DESTROY_BLOCK,
+                        block,
+                        movingObjectPosition.sideHit,
+                    )
+                )
+                breakArray.remove(block)
+                recentClicks.add(movingObjectPosition)
+                scheduleTask(10) {recentClicks.remove(movingObjectPosition)}
+                //PlayerControllerMP
                 return
             }
         }
@@ -77,6 +116,12 @@ object BlockAura {
         recentClicks.forEach{pos ->
             drawCustomSizedBoxAt(pos.blockPos.x + pos.hitVec.xCoord,pos.blockPos.y + pos.hitVec.yCoord,pos.blockPos.z + pos.hitVec.zCoord, 0.1, 0.1, 0.1, java.awt.Color.BLUE)
         }
+    }
+
+    @SubscribeEvent
+    fun onPacket(event: PacketSentEvent) {
+        if (event.packet !is C07PacketPlayerDigging) return
+        modMessage("${event.packet.position}, ${event.packet.facing}, ${event.packet.status}")
     }
 
     @SubscribeEvent

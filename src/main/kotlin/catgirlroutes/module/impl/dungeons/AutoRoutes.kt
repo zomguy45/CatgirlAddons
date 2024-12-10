@@ -20,7 +20,6 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.PlayerUtils.airClick
-import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.renderText
@@ -33,6 +32,7 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.*
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraftforge.client.event.MouseEvent
@@ -42,6 +42,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.awt.Color.black
 import java.awt.Color.white
+import java.lang.reflect.Method
 import kotlin.collections.set
 import kotlin.math.floor
 
@@ -186,6 +187,12 @@ object AutoRoutes : Module(
     private var shouldClick = false
     private var shouldLeftClick = false
 
+    private val clickMouse: Method = try {
+        Minecraft::class.java.getDeclaredMethod("clickMouse")
+    } catch (e: NoSuchMethodException) {
+        Minecraft::class.java.getDeclaredMethod("clickMouse")
+    }
+
     @SubscribeEvent
     fun onPacket(event: PacketSentEventReturn) {
         if (event.packet !is C03PacketPlayer) return
@@ -198,7 +205,7 @@ object AutoRoutes : Module(
         }
         if (shouldLeftClick) {
             shouldLeftClick = false
-            leftClick2()
+            clickMouse
         }
     }
 
@@ -240,6 +247,7 @@ object AutoRoutes : Module(
             }
             "walk" -> {
                 modMessage("Walking!")
+                MovementUtils.setKey("shift", false)
                 MovementUtils.setKey("w", true)
             }
             "jump" -> {

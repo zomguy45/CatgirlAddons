@@ -9,7 +9,6 @@ import catgirlroutes.utils.PlayerUtils.rightClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import me.odinmain.utils.skyblock.modMessage
-import net.minecraft.item.Item
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
