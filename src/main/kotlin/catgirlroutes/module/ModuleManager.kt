@@ -9,11 +9,13 @@ import catgirlroutes.module.impl.dungeons.puzzlesolvers.TicTacToeSolver
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
 import catgirlroutes.module.impl.render.*
+import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import kotlin.reflect.full.hasAnnotation
 
 
 /**
@@ -81,12 +83,18 @@ object ModuleManager {
         EditHud
     )
 
+    /**
+     * Adds "Show in List" [BooleanSetting] unless [Module] class has annotation [NoShowInList]
+     * Also adds "Key Bind" [KeyBindSetting] that adds a key bind to toggle the module
+     */
     init {
         for (module in modules) {
+            if (!module::class.hasAnnotation<NoShowInList>()) {
+                module.addSettings(BooleanSetting("Show in List", true))
+            }
             module.keybinding.let {
                 module.register(KeyBindSetting("Key Bind", it, description = "Toggles the module"))
             }
-            module.addSettings(BooleanSetting("Show in List", true))
         }
     }
 

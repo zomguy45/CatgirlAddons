@@ -3,8 +3,10 @@ package catgirlroutes.module.impl.render
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.ui.hud.EditHudGUI
 
+@NoShowInList
 object EditHud : Module(
     "Edit Hud",
     Category.RENDER,

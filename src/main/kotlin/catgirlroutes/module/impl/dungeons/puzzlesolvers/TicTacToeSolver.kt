@@ -1,7 +1,7 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.impl.PositionUpdateEvent
+import catgirlroutes.events.impl.MotionUpdateEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
@@ -169,9 +169,11 @@ object TicTacToeSolver : Module(
      * Initiates the scan for secrets in range
      */
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    fun onTick(event: PositionUpdateEvent.Post) {
+    fun onTick(event: MotionUpdateEvent.Post) {
         if (bestMove == null || blockArray.contains(bestMove)) return
+        if (System.currentTimeMillis() < nextClick) return
         blockArray.add(bestMove!!)
+        nextClick = System.currentTimeMillis() + cooldown
     }
 
     @SubscribeEvent
