@@ -28,9 +28,11 @@ object ModuleList : Module(
     val ySetting = NumberSetting("Y", 0.0, -20.0, 20.0, 1.0)
     val widthSetting = NumberSetting("W", 0.0, -20.0, 20.0, 1.0)
     val heightSetting = NumberSetting("H", 0.0, -20.0, 20.0, 1.0)
+    val isLeft = BooleanSetting("isLeft", true)
+    val isTop = BooleanSetting("isTop", true)
 
     init {
-        this.addSettings(colorText/*,xSetting,ySetting,widthSetting,heightSetting*/)
+        this.addSettings(colorText, isLeft, isTop/*,xSetting,ySetting,widthSetting,heightSetting*/)
     }
     var activeModuleList = mutableListOf<String>()
 
@@ -66,7 +68,7 @@ object ModuleList : Module(
     @RegisterHudElement
     object ArrayHud : HudElement(
         this,
-        ScaledResolution(mc).scaledWidth, //FUCK NIGGERS
+        0,
         0
     ) {
         override fun renderHud() {
@@ -80,16 +82,28 @@ object ModuleList : Module(
             }
             activeModuleList.sortByDescending { mc.fontRendererObj.getStringWidth(it) }
             if (activeModuleList.isEmpty()) return
-
-            var y = 10
-
+            var startLine = 0.0
+            var startBox = 0.0
+            var startText = 0.0
+            if (isTop.value) {
+                y = 10
+            } else {
+                y = ScaledResolution(mc).scaledHeight - 10
+            }
             for (active in activeModuleList) {
-                val stringWidth = mc.fontRendererObj.getStringWidth(active)
-                val x = -stringWidth - 10
-                mc.fontRendererObj.drawStringWithShadow(active, x.toFloat(), y.toFloat(), colorText.value.rgb)
-                HUDRenderUtils.renderRect(-8.0, y.toDouble() - 3.0, 2.0, 13.0, colorText.value)
-                HUDRenderUtils.renderRect(x.toDouble() - 4.0, y.toDouble() - 3.0, stringWidth.toDouble() + 6.0, 13.0, Color(0, 0, 0, 128))
-                y += 11
+                if (isLeft.value) {
+                    startLine = 10.0
+                    startBox = 12.0
+                    startText = 14.0
+                } else {
+                    startLine = -12.0
+                    startBox = -mc.fontRendererObj.getStringWidth(active) - 16.0
+                    startText = -mc.fontRendererObj.getStringWidth(active) - 14.0
+                }
+                HUDRenderUtils.renderRect(startLine, y - 3.0, 2.0, 13.0, colorText.value)
+                mc.fontRendererObj.drawStringWithShadow(active, (startText).toFloat(), y.toFloat(), colorText.value.rgb)
+                HUDRenderUtils.renderRect(startBox, y - 3.0, mc.fontRendererObj.getStringWidth(active) + 6.0, 13.0, Color(0, 0, 0, 128))
+            y += 11
             }
         }
     }
