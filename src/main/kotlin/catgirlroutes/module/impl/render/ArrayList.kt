@@ -25,10 +25,9 @@ object ModuleList : Module(
     description = "ArrayList"
 ) {
     val colorText = ColorSetting("String color", Color.PINK, true)
-    var niger = NumberSetting("NIGGER", 0.0, 0.0 , 10.0, 1.0)
 
     init {
-        this.addSettings(colorText, niger)
+        this.addSettings(colorText)
     }
     var activeModuleList = mutableListOf<String>()
 
@@ -67,7 +66,7 @@ object ModuleList : Module(
                     startBox = 7.0
                     startText = 9.0
                 } else {
-                    startLine = -2.0 + niger.value
+                    startLine = -7.0
                     startBox = -mc.fontRendererObj.getStringWidth(active) - 1.0
                     startText = -mc.fontRendererObj.getStringWidth(active) + 1.0
                 }
