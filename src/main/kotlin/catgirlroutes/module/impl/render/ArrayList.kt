@@ -40,44 +40,23 @@ object ModuleList : Module(
         override fun renderHud() {
             activeModuleList.clear()
             for (module in modules) {
-                for (setting in module.settings) {
-                    if (setting is BooleanSetting && setting.value && setting.name == "Show in List" && module.enabled) {
-                        activeModuleList.add(module.name)
-                    }
-                }
-            }
-            var isLeft = false
-            if (this.x < ScaledResolution(mc).scaledWidth / 2) {
-                isLeft = true
-            }
-            var isTop = false
-            if (this.y < ScaledResolution(mc).scaledHeight / 2) {
-                isTop = true
+                module.settings.filterIsInstance<BooleanSetting>()
+                    .filter { it.value && it.name == "Show in List" && module.enabled }
+                    .forEach { activeModuleList.add(module.name) }
             }
             activeModuleList.sortByDescending { mc.fontRendererObj.getStringWidth(it) }
+            val isLeft = this.x < ScaledResolution(mc).scaledWidth / 2
+            val isTop = this.y < ScaledResolution(mc).scaledHeight / 2
             if (activeModuleList.isEmpty()) return
-            var startLine = 0.0
-            var startBox = 0.0
-            var startText = 0.0
             var y = 0.0
             for (active in activeModuleList) {
-                if (isLeft) {
-                    startLine = 5.0
-                    startBox = 5.0
-                    startText = 9.0
-                } else {
-                    startLine = 3.0
-                    startBox = -mc.fontRendererObj.getStringWidth(active) - 1.0
-                    startText = -mc.fontRendererObj.getStringWidth(active) + 1.0
-                }
+                val startLine = if (isLeft) 5.0 else 3.0
+                val startBox = if (isLeft) 5.0 else -mc.fontRendererObj.getStringWidth(active) - 1.0
+                val startText = if (isLeft) 9.0 else -mc.fontRendererObj.getStringWidth(active) + 1.0
                 HUDRenderUtils.renderRect(startLine, y - 3.0, 2.0, 13.0, colorText.value)
                 mc.fontRendererObj.drawStringWithShadow(active, (startText).toFloat(), y.toFloat(), colorText.value.rgb)
                 HUDRenderUtils.renderRect(startBox, y - 3.0, mc.fontRendererObj.getStringWidth(active) + 6.0, 13.0, Color(0, 0, 0, 128))
-            y += if (isTop) {
-                11.0
-            } else {
-                -11.0
-            }
+            y += if (isTop) 11.0 else -11.0
             }
         }
     }
