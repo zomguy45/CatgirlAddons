@@ -44,6 +44,7 @@ object AutoExcavator : Module(
     fun onS2D(event: PacketReceiveEvent) {
         if (!this.enabled) return
         if (event.packet !is S2DPacketOpenWindow) return
+        lastClick = System.currentTimeMillis() + 300
         val title = event.packet.windowTitle.unformattedText
         cwid = event.packet.windowId
 
