@@ -63,10 +63,10 @@ object ModuleList : Module(
             for (active in activeModuleList) {
                 if (isLeft) {
                     startLine = 5.0
-                    startBox = 7.0
+                    startBox = 5.0
                     startText = 9.0
                 } else {
-                    startLine = -7.0
+                    startLine = 3.0
                     startBox = -mc.fontRendererObj.getStringWidth(active) - 1.0
                     startText = -mc.fontRendererObj.getStringWidth(active) + 1.0
                 }
