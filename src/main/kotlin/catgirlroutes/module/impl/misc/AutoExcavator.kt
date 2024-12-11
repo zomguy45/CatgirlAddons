@@ -134,12 +134,6 @@ object AutoExcavator : Module(
     }
 
     override fun onKeyBind() {
-        /*mc.theWorld.loadedEntityList
-            .filter {it.posX < 22 && it.posX > 16 && it.posZ < 229 && it.posZ > 220}
-            .forEach {
-                entityArray.add(it)
-                modMessage(it.name)
-            }*/
         rightClick()
     }
 
