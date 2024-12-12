@@ -2,19 +2,19 @@ package catgirlroutes.ui.notification
 
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.ui.clickgui.util.ColorUtil
-import catgirlroutes.ui.clickgui.util.FontUtil
+//import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
+import org.lwjgl.opengl.GL11
 import java.awt.Color
 
 class Notification(
     val title: String,
     val description: String,
-    val duration: Double,
+    private val duration: Double,
     val type: NotificationType,
     val icon: String? = null
 ) {
@@ -23,8 +23,10 @@ class Notification(
 
     fun draw(x: Double, y: Double, width: Double, height: Double) {
         GlStateManager.pushMatrix()
+        GlStateManager.enableBlend()
+        GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
 
-        HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
+//        HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
         HUDRenderUtils.renderRectBorder(x, y, width, height, 1.0, this.type.getColour()) // border
 
         //easing stuff
@@ -47,19 +49,21 @@ class Notification(
         } ?: 0
 
         val lines = wrapText(this.description, width - 12 - iconOffset)
-        val totalTextHeight = (lines.size + 1) * FontUtil.fontHeight + 2
-        val textX = x + iconOffset + 3
+        val lineSpacing = mc.fontRendererObj.FONT_HEIGHT + 2
+        val totalTextHeight = (lines.size + 1) * lineSpacing
+        val textX = x.toFloat() + iconOffset + 3
         val textY = y + (height - totalTextHeight) / 2
 
         // title
-        FontUtil.drawStringWithShadow(this.title, textX, textY, Color.WHITE.rgb)
+        mc.fontRendererObj.drawStringWithShadow(this.title, textX, textY.toFloat(), Color.WHITE.rgb)
 
         // description
         lines.forEachIndexed { index, line ->
-            FontUtil.drawStringWithShadow(line, textX + 3, textY + ((FontUtil.fontHeight + 2) * (index + 1)), Color.WHITE.rgb)
+            mc.fontRendererObj.drawStringWithShadow(line, textX + 3, textY.toFloat() + (lineSpacing * (index + 1)), Color.WHITE.rgb)
         }
 
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
+        GlStateManager.disableBlend()
         GlStateManager.popMatrix()
     }
 
@@ -69,7 +73,7 @@ class Notification(
 
         text.split(" ").forEach { word ->
             val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
-            if (FontUtil.getStringWidth(testLine) <= maxWidth) {
+            if (mc.fontRendererObj.getStringWidth(testLine) <= maxWidth) {
                 currentLine = testLine
             } else {
                 lines.add(currentLine)
