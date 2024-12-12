@@ -78,6 +78,12 @@ val devCommands = commodore("dev") {
             --------
             """.trimIndent())
     }
+
+    literal("icefillreset").runs {
+        IceFillSolver.reset()
+        ChatUtils.chatMessage("Resetting fill")
+    }
+
     literal("swaptest").runs {
         swapFromName("orange")
         swapFromName("magenta")
