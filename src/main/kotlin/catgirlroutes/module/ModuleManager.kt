@@ -4,6 +4,7 @@ import catgirlroutes.events.impl.PreKeyInputEvent
 import catgirlroutes.events.impl.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.AutoWeirdos
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
@@ -60,6 +61,7 @@ object ModuleManager {
         Puzzles,
         Blink,
         AutoExcavator,
+        AutoWeirdos,
 
         // Misc
         F7sim,

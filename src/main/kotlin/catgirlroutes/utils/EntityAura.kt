@@ -23,7 +23,7 @@ object EntityAura {
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || entityArray.isEmpty()) return
         entityArray.forEach{auraAction ->
-            if (distanceToPlayer(auraAction.entity.posX, auraAction.entity.posY, auraAction.entity.posZ) < 4) {
+            if (distanceToPlayer(auraAction.entity.posX, auraAction.entity.posY, auraAction.entity.posZ) < 5) {
                 if (auraAction.action == C02PacketUseEntity.Action.INTERACT) {
                     sendPacket(C02PacketUseEntity(auraAction.entity, C02PacketUseEntity.Action.INTERACT))
                 } else if (auraAction.action == C02PacketUseEntity.Action.INTERACT_AT) {
