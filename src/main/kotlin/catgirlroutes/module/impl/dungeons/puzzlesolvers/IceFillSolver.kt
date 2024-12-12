@@ -101,6 +101,7 @@ object IceFillSolver {
             }
             modMessage("§cFailed to scan floor ${floorIndex + 1}")
         }
+        stupidStairs(rotation)
     }
 
     private fun transform(x: Int, z: Int, rotation: Rotations): Vec2 {
@@ -120,6 +121,37 @@ object IceFillSolver {
 
     fun Vec2.toVec3i(): Vec3i = Vec3i(this.x.toInt(), 0, this.z.toInt())
 
+    private fun stupidStairs(rotation: Rotations) {
+        val updatedPatterns = ArrayList<Vec3>()
+
+        var stupid71 = false
+        var stupid72 = false
+
+        for (point in currentPatterns) {
+            if (point.yCoord == 71.1 && !stupid71) {
+                updatedPatterns.add(adjustStupid(point, rotation, 70.6))
+                stupid71 = true
+            } else if (point.yCoord == 72.1 && !stupid72) {
+                updatedPatterns.add(adjustStupid(point, rotation, 71.6))
+                stupid72 = true
+            }
+
+            updatedPatterns.add(point)
+            if (stupid71 && stupid72) break
+        }
+
+        currentPatterns = updatedPatterns
+    }
+
+    private fun adjustStupid(point: Vec3, rotation: Rotations, adjustedY: Double): Vec3 {
+        return when (rotation) {
+            Rotations.NORTH -> Vec3(point.xCoord, adjustedY, point.zCoord + 0.35)
+            Rotations.SOUTH -> Vec3(point.xCoord, adjustedY, point.zCoord - 0.35)
+            Rotations.EAST -> Vec3(point.xCoord - 0.35, adjustedY, point.zCoord) // might be wrong
+            Rotations.WEST -> Vec3(point.xCoord + 0.35, adjustedY, point.zCoord) // might be wrong
+            else -> point
+        }
+    }
 
     fun reset() {
         currentPatterns = ArrayList()
