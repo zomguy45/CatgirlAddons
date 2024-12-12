@@ -31,7 +31,7 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
-import catgirlroutes.utils.rotation.FakeRotater.rotate
+import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -39,7 +39,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.ScaledResolution
-import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
+import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -215,7 +215,7 @@ object AutoP3 : Module(
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
                 scheduleTask(0) {
-                    rotate(ring.yaw, ring.pitch)
+                    clickAt(ring.yaw, ring.pitch)
                 }
             }
             "look" -> {
@@ -242,10 +242,12 @@ object AutoP3 : Module(
             "blink" -> {
                 if (ring.packets.size == 0) return
                 if (packetArray.size > ring.packets.size) {
-                    ring.packets.forEach{ packet ->
-                        mc.netHandler.networkManager.sendPacket(C06PacketPlayerPosLook(packet.x, packet.y, packet.z, packet.yaw, packet.pitch, packet.onGround))
+                    scheduleTask(0) {
+                        ring.packets.forEach{ packet ->
+                            mc.netHandler.networkManager.sendPacket(C04PacketPlayerPosition(packet.x, packet.y, packet.z, packet.onGround))
+                        }
+                        mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
                     }
-                    mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
                 }
             }
         }

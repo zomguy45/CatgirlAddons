@@ -58,7 +58,7 @@ object IceFillSolver {
                 color, 4.0f, false
             )
             val x = floor(mc.thePlayer.posX) + 0.5
-            val y = floor(mc.thePlayer.posY) + 0.1
+            val y = mc.thePlayer.posY + 0.1
             val z = floor(mc.thePlayer.posZ) + 0.5
             if (x == p1.xCoord && y == p1.yCoord && z == p1.zCoord && !awaitingClip && iceFillAuto.value) {
 
@@ -96,6 +96,7 @@ object IceFillSolver {
                     IceFillFloors.IceFillFloors[floorIndex][patternIndex].toMutableList().let {
                         currentPatterns.addAll(it.map { startPosition.addVec(x = 0.5, y = 0.1, z = 0.5).add(transformTo(it, rotation)) })
                     }
+
                     return@forEachIndexed
                 }
             }

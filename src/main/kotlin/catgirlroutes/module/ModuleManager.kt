@@ -5,12 +5,12 @@ import catgirlroutes.events.impl.PreMouseInputEvent
 import catgirlroutes.module.ModuleManager.modules
 import catgirlroutes.module.impl.dungeons.*
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
-import catgirlroutes.module.impl.dungeons.puzzlesolvers.TicTacToeSolver
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
 import catgirlroutes.module.impl.render.*
 import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting
+import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.hud.EditHudGUI
@@ -60,7 +60,6 @@ object ModuleManager {
         Puzzles,
         Blink,
         AutoExcavator,
-        TicTacToeSolver,
 
         // Misc
         F7sim,
@@ -90,7 +89,7 @@ object ModuleManager {
     init {
         for (module in modules) {
             if (!module::class.hasAnnotation<NoShowInList>()) {
-                module.addSettings(BooleanSetting("Show in List", true))
+                module.addSettings(BooleanSetting("Show in List", true, null, Visibility.ADVANCED_ONLY))
             }
             module.keybinding.let {
                 module.register(KeyBindSetting("Key Bind", it, description = "Toggles the module"))

@@ -17,34 +17,39 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 
 object BlockAura {
 
-    val blockArray = mutableListOf<BlockPos>()
+    val blockArray = mutableListOf<BlockAuraAction>()
     val breakArray = mutableListOf<BlockPos>()
     private val recentClicks = mutableListOf<MovingObjectPosition>()
+
+    data class BlockAuraAction (
+        val block: BlockPos,
+        val reach: Double,
+    )
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || blockArray.isEmpty()) return
-        blockArray.forEach{block ->
-            if (Utils.distanceToPlayer(block.x, block.y, block.z) < 4) {
-                val blockState = mc.theWorld.getBlockState(block)
-                blockState.block.setBlockBoundsBasedOnState(mc.theWorld, block)
-                val aabb = aabbConvert(blockState.block.getSelectedBoundingBox(mc.theWorld, block), block)
-                val eyePos = mc.thePlayer.getPositionEyes(0f)
-                val centerPos = Vec3(block).addVector(
+        blockArray.forEach{action ->
+            val eyePos = mc.thePlayer.getPositionEyes(0f)
+            if (eyePos.distanceTo(Vec3(action.block)) <= action.reach) {
+                val blockState = mc.theWorld.getBlockState(action.block)
+                blockState.block.setBlockBoundsBasedOnState(mc.theWorld, action.block)
+                val aabb = aabbConvert(blockState.block.getSelectedBoundingBox(mc.theWorld, action.block), action.block)
+                val centerPos = Vec3(action.block).addVector(
                     (aabb.minX + aabb.maxX) / 2,
                     (aabb.minY + aabb.maxY) / 2,
                     (aabb.minZ + aabb.maxZ) / 2
                 )
                 //modMessage(block)
                 val movingObjectPosition: MovingObjectPosition = BlockUtils.collisionRayTrace(
-                    block,
+                    action.block,
                     aabb,
                     eyePos,
                     centerPos
                 ) ?: return@forEach
                 mc.netHandler.networkManager.sendPacket(
                     C08PacketPlayerBlockPlacement(
-                        block,
+                        action.block,
                         movingObjectPosition.sideHit.index,
                         mc.thePlayer.heldItem,
                         movingObjectPosition.hitVec.xCoord.toFloat(),
@@ -52,7 +57,7 @@ object BlockAura {
                         movingObjectPosition.hitVec.zCoord.toFloat()
                     )
                 )
-                blockArray.remove(block)
+                blockArray.remove(action)
                 recentClicks.add(movingObjectPosition)
                 scheduleTask(10) {recentClicks.remove(movingObjectPosition)}
                 return

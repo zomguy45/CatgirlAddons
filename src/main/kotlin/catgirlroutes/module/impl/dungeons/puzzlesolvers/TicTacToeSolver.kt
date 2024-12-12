@@ -1,10 +1,9 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.impl.MotionUpdateEvent
-import catgirlroutes.module.Category
-import catgirlroutes.module.Module
-import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.tttAuto
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.tttReach
+import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
@@ -14,11 +13,6 @@ import net.minecraft.init.Blocks
 import net.minecraft.init.Items
 import net.minecraft.util.BlockPos
 import net.minecraft.util.EnumFacing
-import net.minecraftforge.client.event.RenderWorldLastEvent
-import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.awt.Color
 import kotlin.experimental.and
 
@@ -28,13 +22,7 @@ import kotlin.experimental.and
  * Based on the [Skytils](https://github.com/Skytils/SkytilsMod) Tic Tac Toe Solver.
  * @author Aton
  */
-object TicTacToeSolver : Module(
-    "Tic Tac Toe Aura",
-    category = Category.DUNGEON,
-    description = "Automatically solves the tic tac toe puzzle."
-) {
-    private val renderNext = BooleanSetting("Show Next Move", true, description = "Shows which move is next.")
-
+object TicTacToeSolver {
 
     private var topLeft: BlockPos? = null
     private var roomFacing: EnumFacing? = null
@@ -45,21 +33,14 @@ object TicTacToeSolver : Module(
     private var nextClick: Long = System.currentTimeMillis()
     private const val cooldown = 500L
 
-    init {
-        this.addSettings(
-            renderNext
-        )
-    }
-
     /**
      * Solve the board.
      *
      * Taken from Skytils.
      */
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
+    fun onTick() {
         if (!inDungeons) return
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || mc.theWorld == null) return
+        if (mc.thePlayer == null || mc.theWorld == null) return
         if (currentRoomName != "Tic Tac Toe") {
             bestMove = null
             return
@@ -168,16 +149,15 @@ object TicTacToeSolver : Module(
     /**
      * Initiates the scan for secrets in range
      */
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    fun onTick(event: MotionUpdateEvent.Post) {
-        if (bestMove == null || blockArray.contains(bestMove)) return
+
+    fun onMotion() {
+        if (bestMove == null || blockArray.contains(BlockAura.BlockAuraAction(bestMove!!, tttReach.value)) || !tttAuto.value) return
         if (System.currentTimeMillis() < nextClick) return
-        blockArray.add(bestMove!!)
+        blockArray.add(BlockAura.BlockAuraAction(bestMove!!, tttReach.value))
         nextClick = System.currentTimeMillis() + cooldown
     }
 
-    @SubscribeEvent
-    fun onWorldLoad(event: WorldEvent.Load) {
+    fun onWorldLoad() {
         topLeft = null
         roomFacing = null
         board = null
@@ -185,8 +165,7 @@ object TicTacToeSolver : Module(
         mappedPositions.clear()
     }
 
-    @SubscribeEvent
-    fun onRenderWorld(event: RenderWorldLastEvent) {
+    fun onRenderWorld() {
         if (!inDungeons) return
         if (bestMove != null) {
             WorldRenderUtils.drawBoxAtBlock(

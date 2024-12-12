@@ -3,6 +3,7 @@ package catgirlroutes.commands.impl
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.IceFillSolver
+import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.BlockAura.breakArray
 import catgirlroutes.utils.ChatUtils
@@ -102,7 +103,8 @@ val devCommands = commodore("dev") {
         val blocks = BlockPos.getAllInBox(blockPos1, blockPos2)
         for (block in blocks) {
             val blockstate = mc.theWorld.getBlockState(block)
-            if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) blockArray.add(block)
+            if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) blockArray.add(
+                BlockAura.BlockAuraAction(block, 6.0))
         }
     }
     literal("breakaura").runs {
