@@ -57,11 +57,11 @@ object IceFillSolver {
                 p2.xCoord, p2.yCoord, p2.zCoord,
                 color, 4.0f, false
             )
-            val x = floor(mc.thePlayer.posX) + 0.5
+            val fx = floor(mc.thePlayer.posX) + 0.5
             val y = mc.thePlayer.posY + 0.1
-            val z = floor(mc.thePlayer.posZ) + 0.5
-            if (x == p1.xCoord && y == p1.yCoord && z == p1.zCoord && !awaitingClip && iceFillAuto.value) {
+            val fz = floor(mc.thePlayer.posZ) + 0.5
 
+            if ((fx == p1.xCoord && y == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && y == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && !awaitingClip && iceFillAuto.value) {
                 awaitingClip = true
                 scheduleTask(iceFillDelay.value.toInt() - 1) {
                     if(mc.thePlayer.isCollidedVertically) {
@@ -138,7 +138,6 @@ object IceFillSolver {
             }
 
             updatedPatterns.add(point)
-            if (stupid71 && stupid72) break
         }
 
         currentPatterns = updatedPatterns
