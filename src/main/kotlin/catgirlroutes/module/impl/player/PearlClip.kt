@@ -10,8 +10,7 @@ import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
 import catgirlroutes.utils.PlayerUtils.relativeClip
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.rotation.FakeRotater.rotate
-import catgirlroutes.utils.rotation.Rotater.Companion.shouldClick
+import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
@@ -45,9 +44,8 @@ object PearlClip : Module(
         val swapResult = swapFromName("ender pearl")
         if (swapResult != "NOT_FOUND") {
             active = true
-            rotate(mc.thePlayer.rotationYaw, 90F)
             scheduleTask(0) {
-                shouldClick = true
+                clickAt(mc.thePlayer.rotationYaw, 90F)
             }
         }
     }
