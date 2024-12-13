@@ -79,9 +79,9 @@ object PlayerUtils {
 
     fun leftClick2() {;
         val clickMouse: Method = try {
-            Minecraft::class.java.getDeclaredMethod("clickMouse")
+            Minecraft::class.java.getDeclaredMethod("func_147116_af")
         } catch (e: NoSuchMethodException) {
-            Minecraft::class.java.getDeclaredMethod("clickMouse")
+            Minecraft::class.java.getDeclaredMethod("func_147116_af")
         }
         clickMouse.isAccessible = true
         clickMouse.invoke(mc)
