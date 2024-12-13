@@ -1,6 +1,7 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.utils.dungeon.tiles.Rotations
 import net.minecraft.entity.Entity
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
@@ -56,6 +57,15 @@ object VecUtils {
     fun Vec3.toBlockPos(add: Double = 0.0): BlockPos {
         return BlockPos(this.xCoord + add, this.yCoord + add, this.zCoord + add)
     }
+
+    fun BlockPos.addRotationCoords(rotation: Rotations, x: Int, z: Int): BlockPos =
+        when (rotation) {
+            Rotations.NORTH -> BlockPos(this.x + x, this.y, this.z + z)
+            Rotations.SOUTH -> BlockPos(this.x - x, this.y, this.z - z)
+            Rotations.WEST ->  BlockPos(this.x + z, this.y, this.z - x)
+            Rotations.EAST ->  BlockPos(this.x - z, this.y, this.z + x)
+            else -> this
+        }
 
     fun Vec3.get(index: Int): Double {
         return when (index) {
