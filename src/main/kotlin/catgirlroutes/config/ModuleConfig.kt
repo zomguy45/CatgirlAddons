@@ -103,7 +103,17 @@ class ModuleConfig(path: File) {
     fun saveConfig() {
         try {
             configFile.bufferedWriter().use {
-                it.write(gson.toJson(ModuleManager.modules))
+                val filteredModules = ModuleManager.modules.map { module ->
+                    ConfigModule(
+                        name = module.name,
+                        keyCode = module.keybinding.key,
+                        category = module.category,
+                        toggled = module.enabled,
+                        settings = ArrayList(module.settings.toList().filter { it !is DropdownSetting }), // simple way of preventing {} in config
+                        description = module.description
+                    )
+                }
+                it.write(gson.toJson(filteredModules))
             }
         } catch (e: IOException) {
             println("Error saving $MOD_NAME config.")
