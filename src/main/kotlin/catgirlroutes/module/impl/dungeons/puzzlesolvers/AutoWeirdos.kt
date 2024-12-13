@@ -5,11 +5,18 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.EntityAura
 import catgirlroutes.utils.EntityAura.entityArray
+import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.VecUtils.addRotationCoords
+import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import catgirlroutes.utils.dungeon.Puzzle
+import catgirlroutes.utils.dungeon.PuzzleStatus
 import kotlinx.coroutines.runBlocking
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Blocks
@@ -40,6 +47,7 @@ object AutoWeirdos: Module(
     private var removedChests = mutableListOf<BlockPos>()
     private var correctBozo: String? = null
     private var correctChest: BlockPos? = null
+    private var addedChest: Boolean = false
 
     /**
      * Used to check incoming chat messages for solutions to the three weirdos puzzle.
@@ -73,45 +81,24 @@ object AutoWeirdos: Module(
      * Handles the removal of the chests in the room and puts the correct chest back.
      */
     @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) = runBlocking {
-        if (event.phase != TickEvent.Phase.START || !inDungeons) return@runBlocking
-        if (currentRoomName != "Three Weirdos") return@runBlocking
-        mc.theWorld.loadedEntityList.stream()
-            .filter { entity ->
-                entity is EntityArmorStand && entity.hasCustomName()
-                        && entity.name == "CLICK"
-            }.forEach { entity ->
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START || !inDungeons) return
+        if (currentRoomName != "Three Weirdos") return
+        if (addedChest) return
 
-                for (direction in EnumFacing.HORIZONTALS) {
-                    val potentialPos = entity.position.offset(direction)
-                    if (correctBozo?.let { entity.customNameTag.contains(it) } == true) {
-                        // this is the npc with the blessing
-                        if (removedChests.contains(potentialPos)
-                            && mc.theWorld.getBlockState(potentialPos).block === Blocks.air) {
-                            // the chest has been removed here
-                            mc.theWorld.setBlockState(potentialPos, Blocks.chest.defaultState)
-                            correctChest = potentialPos
-                            blockArray.add(BlockAura.BlockAuraAction(correctChest!!, 6.0))
-                        }
-                    }else {
-                        // solution not found yet or wrong npc
-                        // might be good to add a check for CLICK as name, to only create ghost blocks next to the
-                        // actual weirdos. Otherwise, complications with mobs / player in the room or in an adjacent room
-                        // possible
-                        if (mc.theWorld.getBlockState(potentialPos).block === Blocks.chest && correctChest != potentialPos) {
-                            mc.theWorld.setBlockToAir(potentialPos)
-                            removedChests.add(potentialPos)
-                            break
-                        }
-                    }
-                }
+        mc.theWorld.loadedEntityList
+            .filter { it is EntityArmorStand && it.name.contains("CLICK") }
+            .forEach { entity ->
                 if (clickedBozos.contains(entity.entityId)) return@forEach
                 entityArray.add(EntityAura.EntityAuraAction(entity, C02PacketUseEntity.Action.INTERACT_AT))
                 clickedBozos.add(entity.entityId)
             }
 
-
-
+        val correctNPC = mc.theWorld.loadedEntityList.find { it is EntityArmorStand && it.name.noControlCodes == correctBozo } ?: return
+        val room = currentRoom ?: return
+        correctChest = BlockPos(correctNPC.posX - 0.5, 69.0, correctNPC.posZ - 0.5).addRotationCoords(room.rotation, -1, 0)
+        blockArray.add(BlockAura.BlockAuraAction(correctChest!!, 6.0))
+        addedChest = true
     }
 
     /**
@@ -124,5 +111,6 @@ object AutoWeirdos: Module(
         removedChests = mutableListOf<BlockPos>()
         correctBozo = null
         correctChest = null
+        addedChest = false
     }
 }
