@@ -100,6 +100,7 @@ object AutoExcavator : Module(
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
+        if (mc.ingameGUI == null) return
         if (!shouldClick) return
         if (lastClick + clickDelay.value > System.currentTimeMillis()) return
         lastClick = System.currentTimeMillis()
