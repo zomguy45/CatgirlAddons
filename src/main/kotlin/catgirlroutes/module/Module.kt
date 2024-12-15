@@ -97,7 +97,8 @@ abstract class Module(
     category: Category = Category.MISC,
     toggled: Boolean = false,
     settings: ArrayList<Setting<*>> = ArrayList(),
-    description: String = ""
+    description: String = "",
+    tag: TagType = TagType.NONE
 ){
     @Expose
     @SerializedName("name")
@@ -126,6 +127,8 @@ abstract class Module(
      */
     val description: String
 
+    val tag: TagType
+
     val hudElements: MutableList<HudElement> = mutableListOf()
 
     init {
@@ -133,6 +136,7 @@ abstract class Module(
         this.category = category
         this.settings = settings
         this.description = description
+        this.tag = tag
     }
 
     /**
@@ -141,8 +145,9 @@ abstract class Module(
     constructor(
         name: String,
         category: Category = Category.MISC,
-        description: String = ""
-    ) : this(name, 0,  category =  category, description =  description)
+        description: String = "",
+        tag: TagType = TagType.NONE
+    ) : this(name, 0,  category =  category, description =  description, tag = tag)
 
     /**
      * Will toggle the module.
@@ -273,5 +278,9 @@ abstract class Module(
 
     fun getSettingByName(name: String): Setting<*>? {
         return settings.find { it.name.equals(name, ignoreCase = true) }
+    }
+
+    enum class TagType {
+        NONE, HARAM
     }
 }
