@@ -28,7 +28,7 @@ import net.minecraft.util.BlockPos
 
 val devCommands = commodore("dev") {
 
-    literal("help").run { // todo: add description
+    literal("help").runs { // todo: add description
         modMessage("""
             List of commands:
               §7/relativecoords

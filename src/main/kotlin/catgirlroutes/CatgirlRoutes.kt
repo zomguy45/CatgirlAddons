@@ -45,9 +45,8 @@ class CatgirlRoutes {
 
         registerCommands(
             catgirlAddonsCommands, devCommands,
-            pearlClip, lavaClip,
+            pearlClip, lavaClip, aura, inventoryButtons,
             autoP3Commands, autoRoutesCommands,
-            inventoryButtonsCommands
         )
 
         listOf(
