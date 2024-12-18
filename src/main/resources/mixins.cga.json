@@ -15,6 +15,7 @@
     "MixinGuiContainer",
     "MixinMinecraft",
     "MixinNetworkManager",
+    "accessors.AccessorGuiContainer",
     "accessors.IEntityPlayerSPAccessor",
     "entity.MixinAbstractClientPlayer",
     "entity.MixinEntityPlayerSP",
