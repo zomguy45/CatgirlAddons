@@ -56,6 +56,18 @@ object PlayerUtils {
         return "NOT_FOUND"
     }
 
+    fun swapToSlot(slot: Int): String {
+        if (mc.thePlayer.inventory.currentItem != slot) {
+            if (recentlySwapped) {
+                modMessage("u swapping too faaaast")
+                return "TOO_FAST"
+            }
+            recentlySwapped = true
+            mc.thePlayer.inventory.currentItem = slot
+            return "SWAPPED"
+        } else return "ALREADY_HELD"
+    }
+
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase == TickEvent.Phase.END) {
