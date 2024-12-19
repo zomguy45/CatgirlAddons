@@ -15,6 +15,7 @@ import catgirlroutes.utils.rotation.Rotater.Companion.shouldClick
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
+import kotlin.math.round
 
 object PearlClip : Module(
     "Pearl Clip",
@@ -57,7 +58,9 @@ object PearlClip : Module(
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {
-            relativeClip(0.0, -abs(clipDepth!!), 0.0)
+            val x = (round(mc.thePlayer.posX))
+            val z = (round(mc.thePlayer.posZ))
+            relativeClip(x + 0.5, -abs(clipDepth!!), z + 0.5)
         }
     }
 }

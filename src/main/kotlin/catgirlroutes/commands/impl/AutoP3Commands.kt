@@ -152,12 +152,12 @@ val autoP3Commands = commodore("p3") {
                 }
             }
 
-            val x = Math.round(mc.thePlayer.posX * 2) / 2.0
-            val y = Math.round(mc.thePlayer.posY * 2) / 2.0
-            val z = Math.round(mc.thePlayer.posZ * 2) / 2.0
+            val x = Math.round(mc.renderManager.viewerPosX * 2) / 2.0
+            val y = Math.round(mc.renderManager.viewerPosY * 2) / 2.0
+            val z = Math.round(mc.renderManager.viewerPosZ * 2) / 2.0
             val location = Vec3(x, y, z)
-            val yaw = mc.thePlayer.rotationYaw
-            val pitch = mc.thePlayer.rotationPitch
+            val yaw = mc.renderManager.playerViewY
+            val pitch = mc.renderManager.playerViewX
 
             val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, packets, route)
 

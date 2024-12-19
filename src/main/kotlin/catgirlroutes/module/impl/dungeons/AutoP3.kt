@@ -206,6 +206,7 @@ object AutoP3 : Module(
             "hclip" -> {
                 modMessage("Hclipping!")
                 hClip(ring.yaw)
+                scheduleTask(1) { setKey("w", true) }
             }
             "vclip" -> {
                 modMessage("Vclipping!")
