@@ -45,7 +45,7 @@ object ColorUtil {
 
     fun sliderKnobColor(dragging: Boolean): Int = clickGUIColor.withAlpha(if (dragging) 255 else 230).rgb
 
-    private fun Color.withAlpha(alpha: Int): Color {
+    fun Color.withAlpha(alpha: Int): Color {
         return Color(red, green, blue, alpha)
     }
 

@@ -2,6 +2,7 @@ package catgirlroutes.ui.notification
 
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.ui.clickgui.util.ColorUtil
 //import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
@@ -26,7 +27,7 @@ class Notification(
         GlStateManager.enableBlend()
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
 
-//        HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
+        HUDRenderUtils.renderRect(x, y, width, height, Color(ColorUtil.bgColor)) // bg
         HUDRenderUtils.renderRectBorder(x, y, width, height, 1.0, this.type.getColour()) // border
 
         //easing stuff

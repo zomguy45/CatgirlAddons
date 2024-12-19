@@ -15,10 +15,12 @@
     "MixinGuiContainer",
     "MixinMinecraft",
     "MixinNetworkManager",
+    "accessors.AccessorGuiContainer",
     "accessors.IEntityPlayerSPAccessor",
     "entity.MixinAbstractClientPlayer",
     "entity.MixinEntityPlayerSP",
     "entity.MixinRenderLivingEntity",
+    "entity.MixinRenderPlayer",
     "entity.MovementUpdateEvent"
   ]
 }

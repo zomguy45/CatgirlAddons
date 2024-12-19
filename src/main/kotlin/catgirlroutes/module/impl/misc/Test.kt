@@ -19,7 +19,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 object Test : Module(
     "Test",
     Category.MISC,
-    "MODULE FOR VARIOUS TESTS"
+    "MODULE FOR VARIOUS TESTS",
+    TagType.HARAM
 ) {
     private val notifDropDown = DropdownSetting("Drop down", false)
     private val notif = ActionSetting("notif", "nofiification") { Notifications.send("Info", "I think this is an info") }.withDependency { notifDropDown.enabled }

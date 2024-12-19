@@ -1,5 +1,6 @@
 package catgirlroutes.ui.clickgui.elements
 
+import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.render.ClickGui
@@ -11,6 +12,7 @@ import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.util.ResourceLocation
 
 /**
  * Provides the toggle button for modules in the click gui.
@@ -114,6 +116,15 @@ class ModuleButton(val module: Module, val panel: Panel) {
             }
         }
 
+        /** Render the tag*/
+        if (module.tag == Module.TagType.HARAM) {
+            mc.textureManager.bindTexture(haramIcon)
+            Gui.drawModalRectWithCustomSizedTexture(
+                104, 1,
+                0f, 0f, 10, 10, 10f, 10f
+            )
+        }
+
         GlStateManager.popMatrix()
 
         return offs
@@ -196,5 +207,9 @@ class ModuleButton(val module: Module, val panel: Panel) {
     private fun isMouseUnderButton(mouseX: Int, mouseY: Int): Boolean {
         if (!extended) return false
         return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY > yAbsolute + height
+    }
+
+    companion object {
+        private val haramIcon = ResourceLocation(RESOURCE_DOMAIN, "haram.png")
     }
 }

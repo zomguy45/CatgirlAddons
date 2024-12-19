@@ -6,10 +6,10 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraftforge.fml.client.config.GuiUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
-import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -37,7 +37,7 @@ object HUDRenderUtils {
         GlStateManager.disableTexture2D()
         GlStateManager.enableAlpha()
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-        GlStateManager.translate(0f, 0f, -10f)
+//        GlStateManager.translate(0f, 0f, -10f)
         GlStateManager.color(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)
@@ -136,6 +136,101 @@ object HUDRenderUtils {
      */
     fun endScissor() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST)
+    }
+
+    fun drawRoundedBorderedRect(x: Double, y: Double, width: Double, height: Double, radius: Double, thickness: Double, colour1: Color, colour2: Color) {
+        drawRoundedRect(x, y, width, height, radius, colour1)
+        drawOutlinedRectBorder(x, y, width, height, radius, thickness, colour2)
+    }
+    // todo: change those numbers in GL11.glEnable(3553)..
+    fun drawRoundedRect(x: Double, y: Double, width: Double, height: Double, radius: Double, colour: Color) {
+        if (colour.alpha == 0) return
+        GlStateManager.enableBlend();
+        GlStateManager.disableTexture2D();
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+
+        val color = colour.rgb
+        var x1 = x
+        var y1 = y
+        val x2 = x1 + width
+        val y2 = y1 + height
+        val f = ((color shr 24) and 0xFF) / 255.0f
+        val f2 = ((color shr 16) and 0xFF) / 255.0f
+        val f3 = ((color shr 8) and 0xFF) / 255.0f
+        val f4 = (color and 0xFF) / 255.0f
+
+        GL11.glPushAttrib(0);
+        GL11.glScaled(0.5, 0.5, 0.5);
+
+        x1 *= 2.0
+        y1 *= 2.0
+        val x2Scaled = x2 * 2.0
+        val y2Scaled = y2 * 2.0
+
+        GL11.glDisable(3553);
+        GL11.glColor4f(f2, f3, f4, f);
+        GL11.glEnable(2848);
+        GL11.glBegin(9);
+
+        drawArc(x1 + radius, y1 + radius, -radius, -radius, 0, 90, 3)
+        drawArc(x1 + radius, y2Scaled - radius, -radius, -radius, 90, 180, 3)
+        drawArc(x2Scaled - radius, y2Scaled - radius, radius, radius, 0, 90, 3)
+        drawArc(x2Scaled - radius, y1 + radius, radius, radius, 90, 180, 3)
+
+        GL11.glEnd();
+        GL11.glEnable(3553);
+        GL11.glDisable(2848);
+        GL11.glEnable(3553);
+        GL11.glScaled(2.0, 2.0, 2.0);
+        GL11.glPopAttrib();
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
+
+    fun drawOutlinedRectBorder(x: Double, y: Double, width: Double, height: Double, radius: Double, thickness: Double, colour: Color) {
+        GlStateManager.enableBlend()
+        GlStateManager.disableTexture2D()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+        var x2 = x + width
+        var y2 = y + height
+        val f: Float = (colour.rgb shr 24 and 0xFF) / 255.0f
+        val f2: Float = (colour.rgb shr 16 and 0xFF) / 255.0f
+        val f3: Float = (colour.rgb shr 8 and 0xFF) / 255.0f
+        val f4: Float = (colour.rgb and 0xFF) / 255.0f
+        GL11.glPushAttrib(0)
+        GL11.glScaled(0.5, 0.5, 0.5)
+        val x1 = x * 2.0f
+        val y1 = y * 2.0f
+        x2 *= 2.0
+        y2 *= 2.0
+        GL11.glLineWidth(thickness.toFloat())
+        GL11.glDisable(3553)
+        GL11.glColor4f(f2, f3, f4, f)
+        GL11.glEnable(2848)
+        GL11.glBegin(2)
+
+        drawArc(x1 + radius, y1 + radius, -radius, -radius, 0, 90, 3)
+        drawArc(x1 + radius, y2 - radius, -radius, -radius, 90, 180, 3)
+        drawArc(x2 - radius, y2 - radius, radius, radius, 0, 90, 3)
+        drawArc(x2 - radius, y1 + radius, radius, radius, 90, 180, 3)
+
+        GL11.glEnd();
+        GL11.glEnable(3553);
+        GL11.glDisable(2848);
+        GL11.glEnable(3553);
+        GL11.glScaled(2.0, 2.0, 2.0);
+        GL11.glPopAttrib();
+        GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+        GlStateManager.enableTexture2D();
+        GlStateManager.disableBlend();
+    }
+
+    private fun drawArc(centerX: Double, centerY: Double, radiusX: Double, radiusY: Double, startAngle: Int, endAngle: Int, step: Int) {
+        for (i in startAngle..endAngle step step) {
+            val angle = Math.toRadians(i.toDouble())
+            GL11.glVertex2d(centerX + sin(angle) * radiusX, centerY + cos(angle) * radiusY)
+        }
     }
 
     fun drawTexturedRect(

@@ -14,7 +14,8 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
-import net.minecraft.network.play.client.C03PacketPlayer.*
+import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
+import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -95,14 +96,19 @@ object Blink : Module(
         packetArray.clear()
     }
 
+    var lastX = 0.0
+    var lastY = 0.0
+    var lastZ = 0.0
+
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer) return
         val currentTime = System.currentTimeMillis()
-        if (event.packet is C05PacketPlayerLook && this.enabled) {
-            packetArray.add(currentTime)
-            event.isCanceled = true
-        } else if (mc.thePlayer.motionX == 0.0 && mc.thePlayer.motionZ == 0.0 && mc.thePlayer.isCollidedVertically && this.enabled) {
+        if ((event.packet is C04PacketPlayerPosition || event.packet is C06PacketPlayerPosLook)) {
+            if (packetArray.isNotEmpty()) {
+                packetArray.removeFirst()
+            }
+        } else if (this.enabled) {
             packetArray.add(currentTime)
             event.isCanceled = true
         } else {
@@ -112,7 +118,6 @@ object Blink : Module(
         }
 
         packetArray.removeIf { currentTime - it > 20000 }
-
     }
 
     @SubscribeEvent

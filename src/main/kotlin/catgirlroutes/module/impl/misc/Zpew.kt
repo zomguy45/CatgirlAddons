@@ -35,17 +35,17 @@ object Zpew : Module(
 ) {
     private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
 
-    enum class SoundOptions(override val displayName: String) : Options {
-        NOTE_PLING("note.pling"),
-        MOB_BLAZE_HIT("mob.blaze.hit"),
-        FIRE_IGNITE("fire.ignite"),
-        RANDOM_ORB("random.orb"),
-        RANDOM_BREAK("random.break"),
-        MOB_GUARDIAN_LAND_HIT("mob.guardian.land.hit"),
-        CUSTOM("Custom");
-    }
-    private val soundSelector = SelectorSetting("Custom Sound", SoundOptions.NOTE_PLING, SoundOptions.entries.toTypedArray(), "Sound Selection").withDependency { dingdingding.enabled }
-    private val customSound: StringSetting = StringSetting("Custom Sound", SoundOptions.NOTE_PLING.displayName, description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding.enabled }
+    private val soundOptions = arrayListOf(
+        "note.pling",
+        "mob.blaze.hit",
+        "fire.ignite",
+        "random.orb",
+        "random.break",
+        "mob.guardian.land.hit",
+        "Custom"
+    )
+    private val soundSelector = StringSelectorSetting("Sound", soundOptions[0], soundOptions, "Sound Selection").withDependency { dingdingding.enabled }
+    private val customSound: StringSetting = StringSetting("Custom Sound", soundOptions[0], description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding.enabled && soundSelector.selected == "Custom" }
     private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding.enabled }
 
     init {

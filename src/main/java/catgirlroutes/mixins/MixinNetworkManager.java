@@ -31,6 +31,11 @@ public class MixinNetworkManager {
             ci.cancel();
     }
 
+    @Inject(method = "channelRead0*", at = @At("RETURN"))
+    private void onReceivePacketReturn(ChannelHandlerContext context, Packet<?> packet, CallbackInfo ci) {
+        MinecraftForge.EVENT_BUS.post(new PacketReceiveEventReturn(packet));
+    }
+
     @Inject(method = {"sendPacket(Lnet/minecraft/network/Packet;)V"}, at = {@At("HEAD")}, cancellable = true)
     private void onSendPacket(Packet<?> packet, CallbackInfo ci) {
         if (MinecraftForge.EVENT_BUS.post(new PacketSentEvent(packet)))
