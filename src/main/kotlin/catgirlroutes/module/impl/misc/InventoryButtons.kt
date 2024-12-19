@@ -7,6 +7,7 @@ import catgirlroutes.mixins.accessors.AccessorGuiContainer
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.ui.misc.inventorybuttons.InventoryButtonEditor
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.render.HUDRenderUtils
@@ -23,10 +24,12 @@ object InventoryButtons : Module(
     "Inventory buttons",
     Category.MISC
 ) {
+    val equipmentOverlay: BooleanSetting = BooleanSetting("Equipment Overlay", false)
+
     val editMode: ActionSetting = ActionSetting("Edit") { display = InventoryButtonEditor() }
 
     init {
-        addSettings(this.editMode)
+        addSettings(this.equipmentOverlay, this.editMode)
     }
 
     @SubscribeEvent
@@ -35,6 +38,7 @@ object InventoryButtons : Module(
         val accessor = event.gui as AccessorGuiContainer
         InventoryButtonsConfig.allButtons.forEach {
             if (!it.isActive()) return@forEach
+            if (it.isEquipment && !equipmentOverlay.enabled) return@forEach
 
             GlStateManager.pushMatrix()
             GlStateManager.disableLighting()

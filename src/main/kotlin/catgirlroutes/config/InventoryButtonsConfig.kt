@@ -73,6 +73,7 @@ fun createDefaultInventoryButtons(): MutableList<InventoryButton> {
         if (i > 3) {
             inventoryButtons.add(InventoryButton(-18, 5 + o * i))
         } else {
+            inventoryButtons.add(InventoryButton(-18, 5 + o * i, "/eq", "barrier", true)) // eq buttons
             inventoryButtons.add(InventoryButton(-18 - 18 - 1, 5 + o * i))
         }
 

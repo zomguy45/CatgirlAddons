@@ -121,6 +121,7 @@ class InventoryButtonEditor : GuiScreen() {
 
 
         InventoryButtonsConfig.allButtons.forEach { button ->
+            if (button.isEquipment) return@forEach
             if (button.isHovered(mouseX - invX, mouseY - invY)) {
                 if (editingButton == button && !isHoveringEditor(mouseX, mouseY)) {
                     editingButton = null
