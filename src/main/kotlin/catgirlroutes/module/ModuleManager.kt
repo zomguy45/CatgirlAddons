@@ -75,6 +75,7 @@ object ModuleManager {
         HClip,
         PearlClip,
         VerticalJerry,
+        PlayerSize,
 
         // Render
         ClickGui,

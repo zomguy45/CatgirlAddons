@@ -2,8 +2,11 @@ package catgirlroutes.ui.clickgui.util
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import net.minecraft.client.gui.FontRenderer
+import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.StringUtils
 import java.util.*
+import kotlin.math.min
+
 
 /**
  * Provides methods for rending text.

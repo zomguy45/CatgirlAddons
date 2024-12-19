@@ -333,7 +333,8 @@ object SecretAura : Module(
             event.isCanceled = true
         }
     }
-    private fun clearBlocks() {
+
+    fun clearBlocks() {
         blocksDone.clear()
         blocksCooldown.clear()
     }
