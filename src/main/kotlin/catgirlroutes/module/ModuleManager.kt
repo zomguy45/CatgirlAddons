@@ -67,6 +67,7 @@ object ModuleManager {
         F7sim,
         CatMode,
         InventoryButtons,
+        InstantSprint,
         //AutoRouteUtils,
 
         // Player

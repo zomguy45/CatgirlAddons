@@ -14,6 +14,7 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.LocationManager.inSkyblock
 import catgirlroutes.utils.PlayerUtils.playLoudSound
 import catgirlroutes.utils.Utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
@@ -149,6 +150,7 @@ object Zpew : Module(
         val dir = event.packet.placedBlockDirection
         if (dir != 255) return
 
+        if (!inSkyblock) return
         if (!isSneaking || mc.thePlayer.heldItem.skyblockID != "ASPECT_OF_THE_VOID" || getBlockPlayerIsLookingAt() in blackListedBlocks) return
 
         if(!checkAllowedFails()) {
