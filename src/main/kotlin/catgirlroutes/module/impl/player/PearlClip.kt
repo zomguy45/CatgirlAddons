@@ -58,8 +58,7 @@ object PearlClip : Module(
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         active = false
         scheduleTask(0) {
-            val x = (round(mc.thePlayer.posX))
-            val z = (round(mc.thePlayer.posZ))
+            if (event.isCancelled == true) return
             relativeClip(0.0, -abs(clipDepth!!), 0.0)
         }
     }
