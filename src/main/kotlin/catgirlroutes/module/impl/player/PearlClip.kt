@@ -56,9 +56,9 @@ object PearlClip : Module(
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !active) return
-        active = false
         scheduleTask(0) {
             if (event.isCancelled == true) return
+            active = false
             relativeClip(0.0, -abs(clipDepth!!), 0.0)
         }
     }
