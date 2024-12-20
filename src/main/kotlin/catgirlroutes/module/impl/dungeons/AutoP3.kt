@@ -207,7 +207,8 @@ object AutoP3 : Module(
                 modMessage("Hclipping!")
                 hClip(ring.yaw)
                 ring.arguments?.let {
-            if ("walk" in it) scheduleTask(1) { setKey("w", true)}
+                    if ("walk" in it) scheduleTask(1) { setKey("w", true) }
+                }
             }
             "vclip" -> {
                 modMessage("Vclipping!")

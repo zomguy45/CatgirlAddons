@@ -15,7 +15,6 @@ import catgirlroutes.utils.rotation.Rotater.Companion.shouldClick
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
-import kotlin.math.round
 
 object PearlClip : Module(
     "Pearl Clip",
@@ -57,7 +56,7 @@ object PearlClip : Module(
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook || !active) return
         scheduleTask(0) {
-            if (event.isCancelled == true) return
+            if (event.isCanceled) return@scheduleTask
             active = false
             relativeClip(0.0, -abs(clipDepth!!), 0.0)
         }

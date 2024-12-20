@@ -1,7 +1,9 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.RoomEnterEvent
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFill
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFillAuto
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFillDelay
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -18,9 +20,11 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import me.odinmain.utils.toVec3
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraft.util.Vec3i
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
@@ -45,6 +49,7 @@ object IceFillSolver {
     }
 
     private var awaitingClip = false
+    private var tpCooldown = false
 
     fun onRenderWorld(color: Color) {
         if (currentPatterns.isEmpty() || DungeonUtils.currentRoomName != "Ice Fill") return
@@ -61,7 +66,7 @@ object IceFillSolver {
             val y = mc.thePlayer.posY + 0.1
             val fz = floor(mc.thePlayer.posZ) + 0.5
 
-            if ((fx == p1.xCoord && y == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && y == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && !awaitingClip && iceFillAuto.value) {
+            if ((fx == p1.xCoord && y == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && y == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && !awaitingClip && iceFillAuto.value && !tpCooldown) {
                 awaitingClip = true
                 scheduleTask(iceFillDelay.value.toInt() - 1) {
                     if(mc.thePlayer.isCollidedVertically) {
@@ -73,6 +78,13 @@ object IceFillSolver {
                 //modMessage("Next pos: ${p2.xCoord} ${p2.yCoord} ${p2.zCoord}")
             }
         }
+    }
+
+    @SubscribeEvent
+    fun onPacket(event: PacketReceiveEvent) {
+        if (event.packet !is S08PacketPlayerPosLook || !iceFill.value) return
+        tpCooldown = true
+
     }
 
     fun onRoomEnter(event: RoomEnterEvent) {
