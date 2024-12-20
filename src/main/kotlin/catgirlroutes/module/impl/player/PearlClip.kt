@@ -60,7 +60,7 @@ object PearlClip : Module(
         scheduleTask(0) {
             val x = (round(mc.thePlayer.posX))
             val z = (round(mc.thePlayer.posZ))
-            relativeClip(x + 0.5, -abs(clipDepth!!), z + 0.5)
+            relativeClip(0.0, -abs(clipDepth!!), 0.0)
         }
     }
 }
