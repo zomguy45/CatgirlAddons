@@ -99,7 +99,7 @@ val autoRoutesCommands = commodore("node") {
                     §7- command §8: §rexecutes a specified command
                     §7- aotv §8: §ruses AOTV
                     §7- hype §8: §ruses hyperion
-                  List of args: §7w_, h_, delay_, look, walk, await, stop
+                  List of args: §7w_, h_, delay_, look, walk, await, stop, once, unshift
                     §7- w §8: §rnode width (w1 - default)
                     §7- h §8: §rnode height (h1 - default)
                     §7- delay §8: §rnode action delay (delay0 - default)
@@ -107,6 +107,8 @@ val autoRoutesCommands = commodore("node") {
                     §7- walk §8: §rmakes the player walk
                     §7- await §8: §rawait for secret
                     §7- stop §8: §rsets your velocity to 0
+                    §7- once §8: §rmakes the node activate once
+                    §7- unshift §8: §runshift upon entering the node
             """.trimIndent())
         }
 
@@ -147,7 +149,7 @@ val autoRoutesCommands = commodore("node") {
                     arg.startsWith("w") && arg != "walk" -> width = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("h") -> height = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("delay") -> { delay = arg.substring(5).toIntOrNull() ?: return@runs modMessage("§cInvalid delay!") }
-                    arg in listOf("stop", "look", "walk", "await") -> arguments.add(arg)
+                    arg in listOf("stop", "look", "walk", "await", "unshift", "once") -> arguments.add(arg)
                 }
             }
 
