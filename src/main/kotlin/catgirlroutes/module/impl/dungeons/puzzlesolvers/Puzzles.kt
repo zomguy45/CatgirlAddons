@@ -1,13 +1,20 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
 import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.WaterSolver.waterInteract
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.DropdownSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.clock.Executor
+import catgirlroutes.utils.clock.Executor.Companion.register
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
@@ -31,6 +38,10 @@ object Puzzles : Module ( // todo: auto icefill
     var tttAuto: BooleanSetting = BooleanSetting("Auto TTT", false).withDependency { tttSettings.value }
     var tttReach: NumberSetting = NumberSetting("Auto TTT reach", 4.5, 1.0, 6.0, 0.1).withDependency { tttSettings.value }
 
+    private val waterSettings: DropdownSetting = DropdownSetting("Water board", false)
+    val waterSolver: BooleanSetting = BooleanSetting("Water Board Solver", false, description = "Shows you the solution to the water puzzle.").withDependency { waterSettings.value }
+    val showTracer: BooleanSetting = BooleanSetting("Show Tracer", true, description = "Shows a tracer to the next lever.").withDependency { waterSettings.value }
+
     init {
         addSettings(
             iceFillSettings,
@@ -43,13 +54,23 @@ object Puzzles : Module ( // todo: auto icefill
             renderNext,
             tttAuto,
             tttReach,
+
+            waterSettings,
+            waterSolver,
+            showTracer
         )
+
+        Executor(500) {
+            if (!inDungeons || inBoss) return@Executor
+            if (waterSolver.value) WaterSolver.scan()
+        }.register()
     }
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         IceFillSolver.reset()
         TicTacToeSolver.onWorldLoad()
+        WaterSolver.reset()
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -58,15 +79,24 @@ object Puzzles : Module ( // todo: auto icefill
     }
 
     @SubscribeEvent
+    fun onPacket(event: PacketSentEvent) {
+        if (event.packet is C08PacketPlayerBlockPlacement) {
+            if (waterSolver.value) waterInteract(event.packet)
+        }
+    }
+
+    @SubscribeEvent
     fun onWorldLast(event: RenderWorldLastEvent) {
         if (iceFill.enabled) IceFillSolver.onRenderWorld(Color.GREEN)
         if (ttt.enabled) TicTacToeSolver.onRenderWorld()
+        if (waterSolver.enabled)   WaterSolver.onRenderWorld(showTracer.value)
     }
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         TicTacToeSolver.onTick()
+        WaterSolver.onTick()
     }
 
     @SubscribeEvent
