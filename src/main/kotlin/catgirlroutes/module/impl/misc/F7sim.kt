@@ -23,7 +23,7 @@ object F7sim : Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!LocationManager.currentArea.isArea(Island.SinglePlayer)) return
-
+        if (!this.enabled) return
         mc.thePlayer.getEntityAttribute(net.minecraft.entity.SharedMonsterAttributes.movementSpeed).baseValue = 0.50000000745
         mc.thePlayer.capabilities?.setPlayerWalkSpeed(0.5f)
         var h = 3.5

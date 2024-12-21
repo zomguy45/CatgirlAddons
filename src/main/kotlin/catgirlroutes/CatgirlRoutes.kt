@@ -6,7 +6,6 @@ import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
-import catgirlroutes.module.impl.misc.InventoryButtons
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -47,6 +46,7 @@ class CatgirlRoutes {
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, aura, inventoryButtons,
             autoP3Commands, autoRoutesCommands,
+            thisshit,
         )
 
         listOf(
