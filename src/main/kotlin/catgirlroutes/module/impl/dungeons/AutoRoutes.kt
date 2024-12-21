@@ -19,6 +19,7 @@ import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
+import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
@@ -124,6 +125,9 @@ object AutoRoutes : Module(
                     executeAction(node)
                 }
             } else if (cooldown) {
+                node.arguments?.let {
+                    if ("once" in it) return
+                }
                 cooldownMap[key] = false
             }
         }
@@ -220,6 +224,7 @@ object AutoRoutes : Module(
             if ("stop" in it) MovementUtils.stopVelo()
             if ("walk" in it) MovementUtils.setKey("w", true)
             if ("look" in it) snapTo(yaw, node.pitch)
+            if ("unshift" in it) setKey("shift", false)
         }
         when(node.type) {
             "warp" -> {
