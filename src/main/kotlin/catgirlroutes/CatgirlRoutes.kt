@@ -2,9 +2,11 @@ package catgirlroutes
 
 import catgirlroutes.commands.impl.*
 import catgirlroutes.commands.registerCommands
+import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
+import catgirlroutes.module.impl.misc.InventoryButtons
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -43,8 +45,8 @@ class CatgirlRoutes {
 
         registerCommands(
             catgirlAddonsCommands, devCommands,
-            pearlClip, lavaClip,
-            autoP3Commands, autoRoutesCommands
+            pearlClip, lavaClip, aura, inventoryButtons,
+            autoP3Commands, autoRoutesCommands,
         )
 
         listOf(
@@ -75,6 +77,7 @@ class CatgirlRoutes {
                 moduleConfig.loadConfig()
             }
         }
+        InventoryButtonsConfig.load()
         ModuleManager.initializeModules()
 
         clickGUI = ClickGUI()

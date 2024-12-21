@@ -62,6 +62,7 @@ object ModuleManager {
         Blink,
         AutoExcavator,
         AutoWeirdos,
+        Relics,
 
         // Misc
         F7sim,
@@ -75,6 +76,7 @@ object ModuleManager {
         HClip,
         PearlClip,
         VerticalJerry,
+        PlayerSize,
 
         // Render
         ClickGui,

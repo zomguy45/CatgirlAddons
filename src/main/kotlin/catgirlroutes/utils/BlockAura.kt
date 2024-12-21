@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import net.minecraft.network.play.client.C07PacketPlayerDigging
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
@@ -29,6 +30,7 @@ object BlockAura {
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || blockArray.isEmpty()) return
+        if (recentlySwapped) return
         blockArray.forEach{action ->
             val eyePos = mc.thePlayer.getPositionEyes(0f)
             if (eyePos.distanceTo(Vec3(action.block)) <= action.reach) {

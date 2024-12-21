@@ -340,7 +340,7 @@ object WorldRenderUtils {
 
      */
 
-    private fun drawSquare(
+    fun drawSquare(
         x: Double,
         y: Double,
         z: Double,

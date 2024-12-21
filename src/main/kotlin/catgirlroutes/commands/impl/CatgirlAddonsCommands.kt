@@ -19,6 +19,7 @@ val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
               §7/node
               §7/p3
               §7/dev
+              §7/cga aura
         """.trimIndent())
     }
 }

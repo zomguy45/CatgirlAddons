@@ -21,12 +21,12 @@ object Puzzles : Module ( // todo: auto icefill
     "Puzzle solvers"
 ) {
     private val iceFillSettings: DropdownSetting = DropdownSetting("Ice fill", false)
-    private var iceFill: BooleanSetting = BooleanSetting("Ice fill solver", false).withDependency { iceFillSettings.value }
+    var iceFill: BooleanSetting = BooleanSetting("Ice fill solver", false).withDependency { iceFillSettings.value }
     var iceFillAuto: BooleanSetting = BooleanSetting("Auto ice fill", false).withDependency { iceFillSettings.value }
     var iceFillDelay: NumberSetting = NumberSetting("Auto ice fill delay", 2.0, 1.0, 10.0, 1.0).withDependency { iceFillSettings.value }
 
     private val tttSettings: DropdownSetting = DropdownSetting("Tic tac toe", false)
-    private var ttt: BooleanSetting = BooleanSetting("Tic tac toe solver", false).withDependency { tttSettings.value }
+    var ttt: BooleanSetting = BooleanSetting("Tic tac toe solver", false).withDependency { tttSettings.value }
     val renderNext = BooleanSetting("Show Next Move", true, description = "Shows which move is next.").withDependency { tttSettings.value }
     var tttAuto: BooleanSetting = BooleanSetting("Auto TTT", false).withDependency { tttSettings.value }
     var tttReach: NumberSetting = NumberSetting("Auto TTT reach", 4.5, 1.0, 6.0, 0.1).withDependency { tttSettings.value }
