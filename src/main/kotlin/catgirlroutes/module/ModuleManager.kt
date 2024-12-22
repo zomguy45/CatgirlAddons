@@ -77,6 +77,7 @@ object ModuleManager {
         PearlClip,
         VerticalJerry,
         PlayerSize,
+        NoDebuff,
 
         // Render
         ClickGui,
