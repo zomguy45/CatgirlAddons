@@ -63,6 +63,7 @@ object ModuleManager {
         AutoExcavator,
         AutoWeirdos,
         Relics,
+        Doorless,
 
         // Misc
         F7sim,
