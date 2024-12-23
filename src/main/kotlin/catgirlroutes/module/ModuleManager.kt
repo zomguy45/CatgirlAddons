@@ -64,6 +64,7 @@ object ModuleManager {
         AutoWeirdos,
         Relics,
         Doorless,
+        CoreClip,
 
         // Misc
         F7sim,

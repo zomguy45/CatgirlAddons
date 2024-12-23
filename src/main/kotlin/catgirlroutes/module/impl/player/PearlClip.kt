@@ -21,11 +21,13 @@ object PearlClip : Module(
     category = Category.PLAYER,
     description = "Clips you down selected blocks using an ender pearl."
 ){
-    private val pearlClipDistance: NumberSetting = NumberSetting("Pearl Clip distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
+    private val pearlClipDistance: NumberSetting = NumberSetting("Distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
+    private val pearlClipDelay: NumberSetting = NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0, description = "Pearl clip delay")
 
     init {
         this.addSettings(
-            pearlClipDistance
+            pearlClipDistance,
+            pearlClipDelay
         )
     }
 
@@ -46,7 +48,7 @@ object PearlClip : Module(
         if (swapResult != "NOT_FOUND") {
             active = true
             rotate(mc.thePlayer.rotationYaw, 90F)
-            scheduleTask(0) {
+            scheduleTask(pearlClipDelay.value.toInt()) {
                 shouldClick = true
             }
         }
