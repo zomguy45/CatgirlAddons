@@ -65,6 +65,7 @@ object ModuleManager {
         Relics,
         Doorless,
         CoreClip,
+        LeapOrganiser,
 
         // Misc
         F7sim,
