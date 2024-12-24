@@ -103,7 +103,9 @@ object MovementUtils {
 
         val(yaw, pitch) = getYawAndPitch(targetBlock.xCoord, targetBlock.yCoord, targetBlock.zCoord)
 
-        val speed = mc.thePlayer.capabilities.walkSpeed * 2.806
+        val speed = if (!mc.thePlayer.isSneaking) {mc.thePlayer.capabilities.walkSpeed * 2.806} else {
+            mc.thePlayer.capabilities.walkSpeed * 0.64753846153
+        }
         val radians = yaw * Math.PI / 180 // todo: MathUtils?
         mc.thePlayer.motionX = speed * -sin(radians)
         mc.thePlayer.motionZ = speed * cos(radians)
