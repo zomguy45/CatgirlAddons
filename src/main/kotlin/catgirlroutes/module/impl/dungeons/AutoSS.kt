@@ -5,6 +5,8 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.BlockAura.BlockAuraAction
+import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.PlayerUtils.rightClick
 import me.odinmain.utils.skyblock.modMessage
@@ -58,7 +60,7 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!this.enabled) return
-        if (LocationManager.inSkyblock || mc.objectMouseOver == null) return
+        if (LocationManager.inSkyblock) return
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
         val startButton: BlockPos = BlockPos(110, 121, 91)
 
@@ -82,10 +84,10 @@ object AutoSS : Module(
             Thread{
                 try {
                     for (i in 0 until 2) {
-                        rightClick() //TODO: Click start button with packets
+                        blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
                         Thread.sleep(Random.nextInt(125, 141).toLong())
                     }
-                    rightClick() //TODO: Click start button with packets
+                    blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
                 } catch (e: Exception) {
                     modMessage("NIGGER")
                 }
@@ -108,7 +110,7 @@ object AutoSS : Module(
                 if (progress < clicks.size) {
                     val next: BlockPos = clicks.get(progress)
                     if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
-                        rightClick() //TODO: Click next with packets
+                        blockArray.add(BlockAuraAction(next, 6.0)) //rightClick() //TODO: Click next with packets
                         progress++
                         delayTick = delay.value.toInt() / 50
                     }
