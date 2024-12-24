@@ -80,7 +80,7 @@ object AutoSS : Module(
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!this.enabled) return
         if (event.phase != TickEvent.Phase.START) return
-        //if (!LocationManager.inSkyblock) return
+        if (!LocationManager.inSkyblock && !forceDevice.value) return
         if (mc.theWorld == null) return
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
         val startButton: BlockPos = BlockPos(110, 121, 91)
