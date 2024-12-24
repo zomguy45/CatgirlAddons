@@ -1,14 +1,15 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.BlockChangeEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.BlockAura.BlockAuraAction
 import catgirlroutes.utils.BlockAura.blockArray
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
-import me.odinmain.utils.skyblock.modMessage
 import net.minecraft.block.Block
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Blocks
@@ -133,15 +134,16 @@ object AutoSS : Module(
     }
 
     @SubscribeEvent
-    fun onBlockChange(event: PacketReceiveEvent) {
-        if (event.packet !is S23PacketBlockChange) return
-        if (event.packet.blockPosition.x == 111 && event.packet.blockPosition.y >= 120 && event.packet.blockPosition.y <= 123 && event.packet.blockPosition.z >= 92 && event.packet.blockPosition.z <= 95) {
-            val button: BlockPos = BlockPos(110, event.packet.blockPosition.y, event.packet.blockPosition.z)
-            if (event.packet.blockState.block == Blocks.sea_lantern) {
+    fun onBlockChange(event: BlockChangeEvent) {
+        if (event.pos.x == 111 && event.pos.y >= 120 && event.pos.y <= 123 && event.pos.z >= 92 && event.pos.z <= 95) {
+            val button: BlockPos = BlockPos(110, event.pos.y, event.pos.z)
+            if (event.update.block == Blocks.sea_lantern) {
                 if (!clicks.contains(button) || !doneFirst) {
                     clicks.add(button)
                 }
             }
         }
     }
+
+
 }
