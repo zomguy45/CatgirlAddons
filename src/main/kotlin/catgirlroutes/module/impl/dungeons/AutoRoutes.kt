@@ -52,7 +52,6 @@ object AutoRoutes : Module(
     description = "A module that allows you to place down nodes that execute various actions."
 ){
     private val editTitle = BooleanSetting("EditMode title", false)
-    private val annoyingShit = BooleanSetting("Annoying messages", true)
     private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
     private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
     private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
@@ -62,7 +61,6 @@ object AutoRoutes : Module(
     init {
         this.addSettings(
             editTitle,
-            annoyingShit,
             boomType,
             preset,
             layers,
@@ -87,7 +85,6 @@ object AutoRoutes : Module(
 
     @SubscribeEvent
     fun onSecret(event: SecretPickupEvent) {
-        if (annoyingShit.enabled) modMessage("secret!?!?!?!??!?!?!!??!?")
         scheduleTask(1) {
             secretPickedUpDeferred?.complete(Unit)
             secretPickedUpDeferred = null

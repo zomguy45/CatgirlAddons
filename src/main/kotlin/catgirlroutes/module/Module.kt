@@ -281,6 +281,6 @@ abstract class Module(
     }
 
     enum class TagType {
-        NONE, HARAM
+        NONE, HARAM, WHIP
     }
 }

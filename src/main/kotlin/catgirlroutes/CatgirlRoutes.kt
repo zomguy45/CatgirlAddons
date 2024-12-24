@@ -67,6 +67,7 @@ class CatgirlRoutes {
             EntityAura,
             BlockAura,
             LeapUtils,
+            CgaUsers
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

@@ -117,12 +117,23 @@ class ModuleButton(val module: Module, val panel: Panel) {
         }
 
         /** Render the tag*/
-        if (module.tag == Module.TagType.HARAM) {
-            mc.textureManager.bindTexture(haramIcon)
-            Gui.drawModalRectWithCustomSizedTexture(
-                104, 1,
-                0f, 0f, 10, 10, 10f, 10f
-            )
+        when (module.tag) {
+            Module.TagType.HARAM -> {
+                mc.textureManager.bindTexture(haramIcon)
+                Gui.drawModalRectWithCustomSizedTexture(
+                    104, 1,
+                    0f, 0f, 10, 10, 10f, 10f
+                )
+            }
+
+            Module.TagType.WHIP -> {
+                mc.textureManager.bindTexture(whipIcon)
+                Gui.drawModalRectWithCustomSizedTexture(
+                    103, 0,
+                    0f, 0f, 12, 12, 12f, 12f
+                )
+            }
+            Module.TagType.NONE -> null
         }
 
         GlStateManager.popMatrix()
@@ -211,5 +222,6 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
     companion object {
         private val haramIcon = ResourceLocation(RESOURCE_DOMAIN, "haram.png")
+        private val whipIcon = ResourceLocation(RESOURCE_DOMAIN, "whip.png")
     }
 }

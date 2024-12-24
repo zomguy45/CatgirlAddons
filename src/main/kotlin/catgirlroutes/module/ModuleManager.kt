@@ -63,6 +63,9 @@ object ModuleManager {
         AutoExcavator,
         AutoWeirdos,
         Relics,
+        Doorless,
+        CoreClip,
+        LeapOrganiser,
 
         // Misc
         F7sim,
@@ -77,6 +80,7 @@ object ModuleManager {
         PearlClip,
         VerticalJerry,
         PlayerSize,
+        NoDebuff,
 
         // Render
         ClickGui,

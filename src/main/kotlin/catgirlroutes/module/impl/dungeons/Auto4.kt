@@ -16,7 +16,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 object Auto4: Module(
     "Auto 4",
     category = Category.DUNGEON,
-    description = "Automatically does fourth dev."
+    description = "Automatically does fourth dev.",
+    tag = TagType.WHIP
 ){
 
     data class BowStats (
