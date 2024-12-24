@@ -51,11 +51,9 @@ suspend fun getDataFromServer(url: String = "http://localhost:3002/cga/users"): 
             connection.requestMethod = "GET"
 
             val responseCode = connection.responseCode
-//            if (DevPlayers.isDev) println("Response Code: $responseCode")
             if (responseCode != 200) return@withTimeoutOrNull ""
             val inputStream = connection.inputStream
             val response = inputStream.bufferedReader().use { it.readText() }
-//            if (DevPlayers.isDev) println("Response: $response")
 
             connection.disconnect()
 
