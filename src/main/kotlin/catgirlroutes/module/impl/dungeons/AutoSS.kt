@@ -142,6 +142,8 @@ object AutoSS : Module(
                         delayTick = delay.value.toInt() / 50
                         debugMessage("Clicked at: x: ${next.x}, y: ${next.y}, z: ${next.z}")
                     }
+                } else {
+                    clicks.clear()
                 }
             }
         }
