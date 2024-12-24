@@ -151,6 +151,7 @@ object Relics: Module(
         if (posX in 90.0..90.7 && posY == 6.0 && posZ in 55.0..55.7) {
             if (Blink.packetArray.size > orangePackets.size && relicBlink.value) {
                 modMessage("Blinking orange")
+                snapTo(111F, 0F)
                 swapToSlot(8)
                 blockArray.add(BlockAura.BlockAuraAction(BlockPos(57.0, 7.0, 42.0), 6.0))
                 scheduleTask(0) {
@@ -168,6 +169,7 @@ object Relics: Module(
         } else if (posX in 22.3..23.0 && posY == 6.0 && posZ in 58.0..58.7) {
             if (relicBlink.value && Blink.packetArray.size > redPackets.size) {
                 modMessage("Blinking red")
+                snapTo(-120F, 0F)
                 swapToSlot(8)
                 blockArray.add(BlockAura.BlockAuraAction(BlockPos(51.0, 7.0, 42.0), 6.0))
                 scheduleTask(0) {

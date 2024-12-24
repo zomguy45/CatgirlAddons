@@ -2,13 +2,12 @@ package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.BlockAura.BlockAuraAction
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.LocationManager
-import catgirlroutes.utils.PlayerUtils.rightClick
 import me.odinmain.utils.skyblock.modMessage
 import net.minecraft.block.Block
 import net.minecraft.entity.item.EntityArmorStand
@@ -28,6 +27,7 @@ import kotlin.random.Random
 
 object AutoSS : Module(
     name = "AutoSS",
+    Category.DUNGEON
 ){
     val delay: NumberSetting = NumberSetting("Delay", 200.0, 0.0, 500.0, 50.0)
 
@@ -45,6 +45,7 @@ object AutoSS : Module(
 
     fun reset() {
         clicks.clear()
+        next = false
         progress = 0
         delayTick = 0
         doneFirst = false
@@ -60,7 +61,9 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!this.enabled) return
-        if (LocationManager.inSkyblock) return
+        if (event.phase != TickEvent.Phase.START) return
+        if (!LocationManager.inSkyblock) return
+        if (mc.theWorld == null) return
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
         val startButton: BlockPos = BlockPos(110, 121, 91)
 
@@ -71,7 +74,7 @@ object AutoSS : Module(
         mc.theWorld.loadedEntityList
             .filterIsInstance<EntityArmorStand>()
             .filter { it.getDistanceToEntity(mc.thePlayer) < 6 && it.displayName.unformattedText.contains("Device") }
-            .forEach {
+            .forEach { _ ->
                 device = true
             }
 
@@ -85,19 +88,19 @@ object AutoSS : Module(
                 try {
                     for (i in 0 until 2) {
                         blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
-                        Thread.sleep(Random.nextInt(125, 141).toLong())
+                        Thread.sleep(Random.nextInt(125, 140).toLong())
                     }
                     blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
                 } catch (e: Exception) {
                     modMessage("NIGGER")
                 }
             }.start()
-        } else {
-            clicked = false
+            return
         }
+
         if (detect == Blocks.air) {
             progress = 0
-        } else if (detect == Blocks.stone_button) {
+        } else if (detect == Blocks.stone_button && doingSS) {
             if (delayTick > 0) {
                 delayTick--
             } else {
@@ -108,7 +111,7 @@ object AutoSS : Module(
                     doneFirst = true
                 }
                 if (progress < clicks.size) {
-                    val next: BlockPos = clicks.get(progress)
+                    val next: BlockPos = clicks[progress]
                     if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
                         blockArray.add(BlockAuraAction(next, 6.0)) //rightClick() //TODO: Click next with packets
                         progress++
@@ -121,8 +124,7 @@ object AutoSS : Module(
 
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
-        val mop: MovingObjectPosition = mc.objectMouseOver
-        if (mop == null) return
+        val mop: MovingObjectPosition = mc.objectMouseOver ?: return
 
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
