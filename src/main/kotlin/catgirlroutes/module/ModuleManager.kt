@@ -66,6 +66,7 @@ object ModuleManager {
         Doorless,
         CoreClip,
         LeapOrganiser,
+        AutoSS,
 
         // Misc
         F7sim,
