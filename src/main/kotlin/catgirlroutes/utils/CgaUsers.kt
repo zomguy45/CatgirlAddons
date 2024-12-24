@@ -47,7 +47,6 @@ object CgaUsers {
                 users[it.username] = CgaUser(it.dimensions.first, it.dimensions.second, it.dimensions.third)
             }
         }
-        println(users)
         return users
     }
 

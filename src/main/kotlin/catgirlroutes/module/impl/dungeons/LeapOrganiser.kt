@@ -10,7 +10,8 @@ import catgirlroutes.ui.misc.LeapOrganiser
 
 object LeapOrganiser : Module(
     "Leap organiser",
-    Category.DUNGEON
+    Category.DUNGEON,
+    tag = TagType.WHIP
 ) {
     val leapOrder: StringSetting = StringSetting("Leap order", "_ _ _ _", visibility = Visibility.HIDDEN)
     val player1Note: StringSetting = StringSetting("Player1 note", "ee2", description = "Player 1 note")

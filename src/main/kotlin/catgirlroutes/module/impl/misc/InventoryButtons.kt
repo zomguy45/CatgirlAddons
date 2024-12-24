@@ -22,7 +22,8 @@ import org.lwjgl.input.Mouse
 
 object InventoryButtons : Module(
     "Inventory buttons",
-    Category.MISC
+    Category.MISC,
+    tag = TagType.WHIP
 ) {
     val equipmentOverlay: BooleanSetting = BooleanSetting("Equipment Overlay", false)
 

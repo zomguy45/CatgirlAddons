@@ -11,7 +11,8 @@ import kotlin.math.sin
 
 object InstantSprint: Module(
     name = "Instant Sprint",
-    category = Category.MISC
+    category = Category.MISC,
+    tag = TagType.WHIP
 ) {
     private val forwarKeybing = (mc.gameSettings.keyBindForward)
     var veloSet = false

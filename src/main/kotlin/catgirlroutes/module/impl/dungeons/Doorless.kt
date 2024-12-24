@@ -28,7 +28,8 @@ import kotlin.math.*
 
 object Doorless: Module(
     "Doorless",
-    category = Category.DUNGEON
+    category = Category.DUNGEON,
+    tag = TagType.WHIP
 ){
     private var doorClip = BooleanSetting("Clip", false)
     private var doorMotion = BooleanSetting("Motion", false)

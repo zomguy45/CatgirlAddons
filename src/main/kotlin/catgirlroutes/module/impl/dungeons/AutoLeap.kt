@@ -13,7 +13,8 @@ import catgirlroutes.utils.dungeon.LeapUtils.leap
 
 object AutoLeap : Module(
     name = "Auto Leap",
-    category = Category.DUNGEON
+    category = Category.DUNGEON,
+    tag = TagType.WHIP
 ) {
     private val target = StringSetting("target", "", description = "Target for leap!")
 
