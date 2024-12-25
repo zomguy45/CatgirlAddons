@@ -2,6 +2,8 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
+import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.addBlock
 import catgirlroutes.utils.MovementUtils.clearBlocks
@@ -88,8 +90,10 @@ object MovementUtils {
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
         if (targetBlocks.isEmpty()) return
         val targetBlock = targetBlocks[0]
+        return
         if (mc.thePlayer?.onGround == true) {
             if (
                 abs(mc.thePlayer.posX - targetBlock.xCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed &&
@@ -110,10 +114,10 @@ object MovementUtils {
         val radians = yaw * Math.PI / 180 // todo: MathUtils?
         if (mc.thePlayer?.onGround == true) {
             mc.thePlayer.motionX = speed * -sin(radians)
-            mc.thePlayer.motionZ = speed * cos(radians)
+            mc.thePlayer.motionY = speed * cos(radians)
         } else {
-            mc.thePlayer.motionX = mc.thePlayer.motionX * 0.91 + 0.2 * mc.thePlayer.capabilities.walkSpeed * 1.3 * -sin(radians)
-            mc.thePlayer.motionZ = mc.thePlayer.motionZ * 0.91 + 0.2 * mc.thePlayer.capabilities.walkSpeed * 1.3 * cos(radians)
+            //mc.thePlayer.motionX = mc.thePlayer.motionX * 0.91 + 0.02 * 1.3 * -sin(radians)
+            //mc.thePlayer.motionZ = mc.thePlayer.motionZ * 0.91 + 0.02 * 1.3 * cos(radians)
         }
     }
 }
