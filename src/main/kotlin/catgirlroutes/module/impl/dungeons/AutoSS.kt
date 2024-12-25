@@ -20,6 +20,7 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S23PacketBlockChange
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MovingObjectPosition
+import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -34,9 +35,9 @@ object AutoSS : Module(
     name = "AutoSS",
     Category.DUNGEON
 ){
-    val delay: NumberSetting = NumberSetting("Delay", 200.0, 0.0, 500.0, 50.0)
+    val delay: NumberSetting = NumberSetting("Delay", 200.0, 50.0, 500.0, 10.0)
     val forceDevice: BooleanSetting = BooleanSetting("Force Device", false)
-    var resetSS: ActionSetting = ActionSetting("Reset") {reset2()}
+    var resetSS: ActionSetting = ActionSetting("Reset") {reset()}
 
     init {
         this.addSettings(delay, forceDevice, resetSS)
@@ -49,6 +50,8 @@ object AutoSS : Module(
     var doingSS = false
     var clicked = false
     var clicks = ArrayList<BlockPos>()
+    var lastClick = System.currentTimeMillis()
+    var wtflip = System.currentTimeMillis()
 
     fun reset() {
         clicks.clear()
@@ -59,27 +62,14 @@ object AutoSS : Module(
         debugMessage("Reset!")
     }
 
-    fun reset2() {
-        doingSS = false
-        clicked = false
-        clicks.clear()
-        next = false
-        progress = 0
-        delayTick = 0
-        doneFirst = false
-    }
-
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load) {
         reset()
-        doingSS = false
-        clicked = false
     }
 
     @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
+    fun onRender(event: RenderWorldLastEvent) {
         if (!this.enabled) return
-        if (event.phase != TickEvent.Phase.START) return
         if (!LocationManager.inSkyblock && !forceDevice.value) return
         if (mc.theWorld == null) return
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
@@ -100,7 +90,10 @@ object AutoSS : Module(
                 device = true
             }
 
-        if (!device) return
+        if (!device) {
+            clicked = false
+            return
+        }
 
         if (!clicked) {
             clicked = true
@@ -124,9 +117,10 @@ object AutoSS : Module(
         if (detect == Blocks.air) {
             progress = 0
         } else if (detect == Blocks.stone_button && doingSS) {
-            if (delayTick > 0) {
-                delayTick--
+            if (System.currentTimeMillis() - lastClick < delay.value) {
+                return
             } else {
+                lastClick = System.currentTimeMillis()
                 if (!doneFirst) {
                     if (clicks.size == 3) {
                         clicks.removeAt(0)
@@ -142,9 +136,6 @@ object AutoSS : Module(
                         delayTick = delay.value.toInt() / 50
                         debugMessage("Clicked at: x: ${next.x}, y: ${next.y}, z: ${next.z}")
                     }
-                } else {
-                    progress = 0
-                    //clicks.clear()
                 }
             }
         }
@@ -153,7 +144,8 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val mop: MovingObjectPosition = mc.objectMouseOver ?: return
-
+        if (System.currentTimeMillis() - wtflip < 500) return
+        wtflip = System.currentTimeMillis()
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
@@ -167,6 +159,7 @@ object AutoSS : Module(
             if (event.update.block == Blocks.sea_lantern) {
                 if (!clicks.contains(button)) {
                     debugMessage("Added to clicks: x: ${event.pos.x}, y: ${event.pos.y}, z: ${event.pos.z}")
+                    progress = 0
                     clicks.add(button)
                 }
             }
