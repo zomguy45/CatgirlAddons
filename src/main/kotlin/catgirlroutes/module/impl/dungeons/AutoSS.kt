@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.dungeons
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.BlockChangeEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ActionSetting
@@ -20,6 +21,7 @@ import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S23PacketBlockChange
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MovingObjectPosition
+import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
@@ -37,10 +39,13 @@ object AutoSS : Module(
 ){
     val delay: NumberSetting = NumberSetting("Delay", 200.0, 50.0, 500.0, 10.0)
     val forceDevice: BooleanSetting = BooleanSetting("Force Device", false)
-    var resetSS: ActionSetting = ActionSetting("Reset") {reset()}
+    val resetSS: ActionSetting = ActionSetting("Reset") {reset()}
+    val customStart: BooleanSetting = BooleanSetting("Custom start", false)
+    val autoStart: NumberSetting = NumberSetting("Autostart", 125.0, 50.0, 200.0, 1.0)
+
 
     init {
-        this.addSettings(delay, forceDevice, resetSS)
+        this.addSettings(delay, forceDevice, resetSS, autoStart, customStart)
     }
 
     var next = false
@@ -65,6 +70,28 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load) {
         reset()
+    }
+
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
+        if (customStart.value == false) return
+        val msg = event.message.unformattedText
+        val startButton: BlockPos = BlockPos(110, 121, 91)
+        if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
+        if (clicked) return
+        clicked = true
+        doingSS = true
+        reset()
+        try {
+            for (i in 0 until 2) {
+                clickButton(startButton.x, startButton.y, startButton.z)
+                Thread.sleep(autoStart.value.toLong())
+            }
+            clickButton(startButton.x, startButton.y, startButton.z)
+            debugMessage("Starting SS")
+        } catch (e: Exception) {
+            modMessage("NIGGER")
+        }
     }
 
     @SubscribeEvent
@@ -95,7 +122,7 @@ object AutoSS : Module(
             return
         }
 
-        if (!clicked) {
+        if (!clicked && !customStart.value) {
             clicked = true
             doingSS = true
             reset()
@@ -149,6 +176,7 @@ object AutoSS : Module(
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
+            reset()
         }
     }
 
