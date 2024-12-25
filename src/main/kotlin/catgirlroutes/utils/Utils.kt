@@ -207,3 +207,15 @@ object Utils {
     data class Vec3f(val x: Float, val y: Float, val z: Float)
     data class Vec4f(val x: Float, val y: Float, val z: Float, val w: Float)
 }
+
+fun Event.postAndCatch(): Boolean { //THIS MAKES NO SENSE HELP
+    return runCatching {
+        MinecraftForge.EVENT_BUS.post(this)
+    }.onFailure {
+        it.printStackTrace()
+        //logger.error("An error occurred", it)
+        val style = ChatStyle()
+        style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, "/od copy ```${it.stackTraceToString().lineSequence().take(10).joinToString("\n")}```") // odon clint
+        style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText("§6Click to copy the error to your clipboard."))
+        modMessage(" Caught an ${it::class.simpleName ?: "error"} at ${this::class.simpleName}. §cPlease click this message to copy and send it in the Odin discord!")}.getOrDefault(isCanceled)
+}

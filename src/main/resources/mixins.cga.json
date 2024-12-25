@@ -4,6 +4,7 @@
   "package": "catgirlroutes.mixins",
   "refmap": "mixins.cga.refmap.json",
   "mixins": [
+    "MixinChunk",
     "MixinModList",
     "MixinWorld",
     "entity.MixinEntity",

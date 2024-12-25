@@ -1,6 +1,7 @@
 package catgirlroutes.events
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.BlockChangeEvent
 import catgirlroutes.events.impl.EntityRemovedEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.events.impl.PacketReceiveEvent

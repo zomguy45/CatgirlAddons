@@ -1,17 +1,22 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.BlockChangeEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.BlockAura.BlockAuraAction
 import catgirlroutes.utils.BlockAura.blockArray
+import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
-import me.odinmain.utils.skyblock.modMessage
 import net.minecraft.block.Block
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Blocks
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S23PacketBlockChange
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MovingObjectPosition
@@ -30,9 +35,11 @@ object AutoSS : Module(
     Category.DUNGEON
 ){
     val delay: NumberSetting = NumberSetting("Delay", 200.0, 0.0, 500.0, 50.0)
+    val forceDevice: BooleanSetting = BooleanSetting("Force Device", false)
+    var resetSS: ActionSetting = ActionSetting("Reset") {reset2()}
 
     init {
-        this.addSettings(delay)
+        this.addSettings(delay, forceDevice, resetSS)
     }
 
     var next = false
@@ -44,6 +51,17 @@ object AutoSS : Module(
     var clicks = ArrayList<BlockPos>()
 
     fun reset() {
+        clicks.clear()
+        next = false
+        progress = 0
+        delayTick = 0
+        doneFirst = false
+        debugMessage("Reset!")
+    }
+
+    fun reset2() {
+        doingSS = false
+        clicked = false
         clicks.clear()
         next = false
         progress = 0
@@ -62,7 +80,7 @@ object AutoSS : Module(
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (!this.enabled) return
         if (event.phase != TickEvent.Phase.START) return
-        if (!LocationManager.inSkyblock) return
+        if (!LocationManager.inSkyblock && !forceDevice.value) return
         if (mc.theWorld == null) return
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
         val startButton: BlockPos = BlockPos(110, 121, 91)
@@ -70,6 +88,10 @@ object AutoSS : Module(
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
 
         var device = false
+
+        if (forceDevice.value) {
+            device = true
+        }
 
         mc.theWorld.loadedEntityList
             .filterIsInstance<EntityArmorStand>()
@@ -87,10 +109,11 @@ object AutoSS : Module(
             Thread{
                 try {
                     for (i in 0 until 2) {
-                        blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
+                        clickButton(startButton.x, startButton.y, startButton.z)
                         Thread.sleep(Random.nextInt(125, 140).toLong())
                     }
-                    blockArray.add(BlockAuraAction(startButton, 6.0)) //rightClick() //TODO: Click start button with packets
+                    clickButton(startButton.x, startButton.y, startButton.z)
+                    debugMessage("Starting SS")
                 } catch (e: Exception) {
                     modMessage("NIGGER")
                 }
@@ -109,14 +132,19 @@ object AutoSS : Module(
                         clicks.removeAt(0)
                     }
                     doneFirst = true
+                    debugMessage("First Phase")
                 }
                 if (progress < clicks.size) {
                     val next: BlockPos = clicks[progress]
                     if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
-                        blockArray.add(BlockAuraAction(next, 6.0)) //rightClick() //TODO: Click next with packets
+                        clickButton(next.x, next.y, next.z)
                         progress++
                         delayTick = delay.value.toInt() / 50
+                        debugMessage("Clicked at: x: ${next.x}, y: ${next.y}, z: ${next.z}")
                     }
+                } else {
+                    progress = 0
+                    //clicks.clear()
                 }
             }
         }
@@ -133,15 +161,20 @@ object AutoSS : Module(
     }
 
     @SubscribeEvent
-    fun onBlockChange(event: PacketReceiveEvent) {
-        if (event.packet !is S23PacketBlockChange) return
-        if (event.packet.blockPosition.x == 111 && event.packet.blockPosition.y >= 120 && event.packet.blockPosition.y <= 123 && event.packet.blockPosition.z >= 92 && event.packet.blockPosition.z <= 95) {
-            val button: BlockPos = BlockPos(110, event.packet.blockPosition.y, event.packet.blockPosition.z)
-            if (event.packet.blockState.block == Blocks.sea_lantern) {
-                if (!clicks.contains(button) || !doneFirst) {
+    fun onBlockChange(event: BlockChangeEvent) {
+        if (event.pos.x == 111 && event.pos.y >= 120 && event.pos.y <= 123 && event.pos.z >= 92 && event.pos.z <= 95) {
+            val button: BlockPos = BlockPos(110, event.pos.y, event.pos.z)
+            if (event.update.block == Blocks.sea_lantern) {
+                if (!clicks.contains(button)) {
+                    debugMessage("Added to clicks: x: ${event.pos.x}, y: ${event.pos.y}, z: ${event.pos.z}")
                     clicks.add(button)
                 }
             }
         }
+    }
+
+    fun clickButton(x: Int, y: Int, z: Int) {
+        if (mc.thePlayer.getDistanceSqToCenter(BlockPos(x, y, z)) > 25) return
+        mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(x, y, z), 4, mc.thePlayer.heldItem, 0.875f, 0.5f, 0.5f))
     }
 }
