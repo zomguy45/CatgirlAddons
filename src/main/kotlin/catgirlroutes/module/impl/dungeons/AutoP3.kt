@@ -182,6 +182,14 @@ object AutoP3 : Module(
             if ("stop" in it) stopVelo()
             if ("walk" in it) setKey("w", true)
             if ("look" in it) snapTo(ring.yaw, ring.pitch)
+            if ("fullstop" in it) {
+                stopMovement()
+                stopVelo()
+            }
+            if ("block" in it) {
+                val(yaw, pitch) = getYawAndPitch(ring.lookBlock!!.xCoord, ring.lookBlock!!.yCoord, ring.lookBlock!!.zCoord)
+                snapTo(yaw, pitch)
+            }
         }
         when(ring.type) {
             "walk" -> {

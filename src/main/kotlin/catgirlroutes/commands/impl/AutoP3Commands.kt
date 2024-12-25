@@ -103,6 +103,9 @@ val autoP3Commands = commodore("p3") {
                     §7- walk §8: §rmakes the player walk
                     §7- term §8: §ractivates the node when terminal opens
                     §7- stop §8: §rsets your velocity to 0
+                    §7- fullstop §8: §rfully stops the player similar to stop ring
+                    §7- exact §8: §rplaces the ring at your exact position
+                    §7- block §8: §rlooks at a block instead of yaw and pitch
             """.trimIndent())
         }
 
@@ -157,7 +160,11 @@ val autoP3Commands = commodore("p3") {
                         y = mc.renderManager.viewerPosY
                         z = mc.renderManager.viewerPosZ
                     }
-                    arg in listOf("stop", "look", "walk", "term") -> arguments.add(arg)
+                    arg == "block" -> {
+                        lookBlock = mc.thePlayer.rayTrace(40.0, 1F).hitVec
+                        arguments.add(arg)
+                    }
+                    arg in listOf("stop", "look", "walk", "term", "fullstop", "block") -> arguments.add(arg)
                 }
             }
 
