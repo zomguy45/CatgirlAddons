@@ -143,18 +143,24 @@ val autoP3Commands = commodore("p3") {
                 }
             }
 
+            var x = Math.round(mc.renderManager.viewerPosX * 2) / 2.0
+            var y = Math.round(mc.renderManager.viewerPosY * 2) / 2.0
+            var z = Math.round(mc.renderManager.viewerPosZ * 2) / 2.0
+
             args.forEach { arg ->
                 when {
                     arg.startsWith("w") && arg != "walk" -> width = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("h") && arg != "hclip" -> height = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("delay") -> { delay = arg.substring(5).toIntOrNull() ?: return@runs modMessage("§cInvalid delay!") }
+                    arg == "exact" -> {
+                        x = mc.renderManager.viewerPosX
+                        y = mc.renderManager.viewerPosY
+                        z = mc.renderManager.viewerPosZ
+                    }
                     arg in listOf("stop", "look", "walk", "term") -> arguments.add(arg)
                 }
             }
 
-            var x = Math.round(mc.renderManager.viewerPosX * 2) / 2.0
-            var y = Math.round(mc.renderManager.viewerPosY * 2) / 2.0
-            var z = Math.round(mc.renderManager.viewerPosZ * 2) / 2.0
             val location = Vec3(x, y, z)
             val yaw = mc.renderManager.playerViewY
             val pitch = mc.renderManager.playerViewX

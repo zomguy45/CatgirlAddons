@@ -155,18 +155,18 @@ val autoRoutesCommands = commodore("node") {
 
             val room = currentRoom  //return@runs
 
-            val x = floor(mc.thePlayer.posX)
-            val y = floor(mc.thePlayer.posY)
-            val z = floor(mc.thePlayer.posZ)
+            val x = floor(mc.renderManager.viewerPosX)
+            val y = floor(mc.renderManager.viewerPosY)
+            val z = floor(mc.renderManager.viewerPosZ)
             var location = Vec3(x, y, z)
-            var yaw = mc.thePlayer.rotationYaw
+            var yaw = mc.renderManager.playerViewY
             var name = getArea().toString()
             if (room != null) {
                 name = currentRoomName
                 location = room.getRelativeCoords(Vec3(x, y, z))
-                yaw = room.getRelativeYaw(mc.thePlayer.rotationYaw)
+                yaw = room.getRelativeYaw(mc.renderManager.playerViewY)
             }
-            val pitch = mc.thePlayer.rotationPitch
+            val pitch = mc.renderManager.playerViewX
 
             val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, name)
 

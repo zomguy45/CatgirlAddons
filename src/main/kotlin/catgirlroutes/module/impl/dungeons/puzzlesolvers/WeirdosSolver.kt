@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.dungeons.puzzlesolvers
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.weirdoSolver
 import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -13,15 +14,13 @@ import catgirlroutes.utils.VecUtils.addRotationCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import catgirlroutes.utils.render.WorldRenderUtils.drawBoxAtBlock
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.network.play.client.C02PacketUseEntity
 import net.minecraft.util.BlockPos
 import net.minecraft.util.StringUtils.stripControlCodes
 import net.minecraftforge.client.event.ClientChatReceivedEvent
-import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
+import java.awt.Color
 
 object AutoWeirdos: Module(
     "Auto Weirdos",
@@ -45,7 +44,6 @@ object AutoWeirdos: Module(
     /**
      * Used to check incoming chat messages for solutions to the three weirdos puzzle.
      */
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: ClientChatReceivedEvent) {
         if (event.type.toInt() == 2 || !inDungeons) return
         if (currentRoomName != "Three Weirdos") return
@@ -73,11 +71,11 @@ object AutoWeirdos: Module(
     /**
      * Handles the removal of the chests in the room and puts the correct chest back.
      */
-    @SubscribeEvent
-    fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || !inDungeons) return
+    fun onTick() {
+        if (!inDungeons || !weirdoSolver.value) return
         if (currentRoomName != "Three Weirdos") return
         if (addedChest) return
+        if (!Puzzles.autoWeirdos.value) return
 
         mc.theWorld.loadedEntityList
             .filter { it is EntityArmorStand && it.name.contains("CLICK") }
@@ -94,11 +92,19 @@ object AutoWeirdos: Module(
         addedChest = true
     }
 
+    fun renderWorld() {
+        if (!inDungeons || !weirdoSolver.value) return
+        if (currentRoomName != "Three Weirdos") return
+        val correctNPC = mc.theWorld.loadedEntityList.find { it is EntityArmorStand && it.name.noControlCodes == correctBozo } ?: return
+        val room = currentRoom ?: return
+        correctChest = BlockPos(correctNPC.posX - 0.5, 69.0, correctNPC.posZ - 0.5).addRotationCoords(room.rotation, -1, 0)
+        drawBoxAtBlock(correctChest!!, Color.GREEN)
+    }
+
     /**
      * Resets the values when changing world.
      */
-    @SubscribeEvent
-    fun onWorldChange(event: WorldEvent.Load) {
+    fun onWorldChange() {
         bozos = mutableListOf()
         clickedBozos = mutableListOf()
         removedChests = mutableListOf<BlockPos>()

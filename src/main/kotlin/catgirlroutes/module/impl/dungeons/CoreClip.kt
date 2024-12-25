@@ -15,7 +15,13 @@ object CoreClip: Module(
     "Core clip",
     category = Category.DUNGEON
 ){
-    private var clipDelay = NumberSetting("Delay", 0.0, 0.0, 5.0, 1.0)
+    private var clipDelay = NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0)
+
+    init {
+        addSettings(clipDelay)
+    }
+
+    private var passedTicks = 0
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
@@ -23,12 +29,26 @@ object CoreClip: Module(
         if (mc.thePlayer == null) return
         if (mc.thePlayer.posY != 115.0) return
         if (mc.thePlayer.posX !in 52.0..57.0) return
+        if (!mc.thePlayer.isCollidedHorizontally) {
+            passedTicks = 0
+            return
+        }
         if (isWithinTolerence(mc.thePlayer.posZ, 53.7)) {
+            if (passedTicks < clipDelay.value) {
+                passedTicks++
+                return
+            }
+            passedTicks = 0
             mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, 53.7624)
             scheduleTask(0) {mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, 55.301)}
             stopMovement()
             scheduleTask(0) {restartMovement()}
         } else if (isWithinTolerence(mc.thePlayer.posZ, 55.3)) {
+            if (passedTicks < clipDelay.value) {
+                passedTicks++
+                return
+            }
+            passedTicks = 0
             mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, 55.2376)
             scheduleTask(0) {mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, 53.699)}
             stopMovement()

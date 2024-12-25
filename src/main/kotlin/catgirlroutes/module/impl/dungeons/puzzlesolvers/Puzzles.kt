@@ -15,6 +15,7 @@ import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
@@ -42,6 +43,10 @@ object Puzzles : Module ( // todo: auto icefill
     val waterSolver: BooleanSetting = BooleanSetting("Water Board Solver", false, description = "Shows you the solution to the water puzzle.").withDependency { waterSettings.value }
     val showTracer: BooleanSetting = BooleanSetting("Show Tracer", true, description = "Shows a tracer to the next lever.").withDependency { waterSettings.value }
 
+    private val weirdosSettings: DropdownSetting = DropdownSetting("Three weirdos", false)
+    val weirdoSolver: BooleanSetting = BooleanSetting("Weirdo solver", false).withDependency { weirdosSettings.value }
+    val autoWeirdos = BooleanSetting("Auto weirdos", false).withDependency { weirdosSettings.value }
+
     init {
         addSettings(
             iceFillSettings,
@@ -57,7 +62,11 @@ object Puzzles : Module ( // todo: auto icefill
 
             waterSettings,
             waterSolver,
-            showTracer
+            showTracer,
+
+            weirdosSettings,
+            weirdoSolver,
+            autoWeirdos
         )
 
         Executor(500) {
@@ -71,6 +80,7 @@ object Puzzles : Module ( // todo: auto icefill
         IceFillSolver.reset()
         TicTacToeSolver.onWorldLoad()
         WaterSolver.reset()
+        AutoWeirdos.onWorldChange()
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -85,6 +95,11 @@ object Puzzles : Module ( // todo: auto icefill
         }
     }
 
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    fun onChat(event: ClientChatReceivedEvent) {
+        AutoWeirdos.onChat(event)
+    }
+
     @SubscribeEvent
     fun onWorldLast(event: RenderWorldLastEvent) {
         if (iceFill.enabled) IceFillSolver.onRenderWorld(Color.GREEN)
@@ -97,6 +112,7 @@ object Puzzles : Module ( // todo: auto icefill
         if (event.phase != TickEvent.Phase.START) return
         TicTacToeSolver.onTick()
         WaterSolver.onTick()
+        AutoWeirdos.onTick()
     }
 
     @SubscribeEvent
