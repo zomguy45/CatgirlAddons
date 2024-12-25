@@ -82,16 +82,18 @@ object AutoSS : Module(
         clicked = true
         doingSS = true
         reset()
-        try {
-            for (i in 0 until 2) {
-                clickButton(startButton.x, startButton.y, startButton.z)
-                Thread.sleep(autoStart.value.toLong())
-            }
-            clickButton(startButton.x, startButton.y, startButton.z)
-            debugMessage("Starting SS")
-        } catch (e: Exception) {
-            modMessage("NIGGER")
-        }
+        Thread{
+                try {
+                    for (i in 0 until 2) {
+                        clickButton(startButton.x, startButton.y, startButton.z)
+                        Thread.sleep(autoStart.value.toLong())
+                    }
+                    clickButton(startButton.x, startButton.y, startButton.z)
+                    debugMessage("Starting SS")
+                } catch (e: Exception) {
+                    modMessage("NIGGER")
+                }
+            }.start()
     }
 
     @SubscribeEvent
