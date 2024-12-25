@@ -90,15 +90,16 @@ object MovementUtils {
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (targetBlocks.isEmpty()) return
         val targetBlock = targetBlocks[0]
-        if (mc.thePlayer?.onGround == false) return
-        if (
-            abs(mc.thePlayer.posX - targetBlock.xCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed &&
-            abs(mc.thePlayer.posZ - targetBlock.zCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed
-        ) {
-            mc.thePlayer.setVelocity(0.0, mc.thePlayer.motionY, 0.0)
-            mc.thePlayer.setPosition(targetBlock.xCoord, mc.thePlayer.posY, targetBlock.zCoord)
-            targetBlocks.removeFirst()
-            return
+        if (mc.thePlayer?.onGround == true) {
+            if (
+                abs(mc.thePlayer.posX - targetBlock.xCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed &&
+                abs(mc.thePlayer.posZ - targetBlock.zCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed
+            ) {
+                mc.thePlayer.setVelocity(0.0, mc.thePlayer.motionY, 0.0)
+                mc.thePlayer.setPosition(targetBlock.xCoord, mc.thePlayer.posY, targetBlock.zCoord)
+                targetBlocks.removeFirst()
+                return
+            }
         }
 
         val(yaw, pitch) = getYawAndPitch(targetBlock.xCoord, targetBlock.yCoord, targetBlock.zCoord)
@@ -107,8 +108,13 @@ object MovementUtils {
             mc.thePlayer.capabilities.walkSpeed * 0.64753846153
         }
         val radians = yaw * Math.PI / 180 // todo: MathUtils?
-        mc.thePlayer.motionX = speed * -sin(radians)
-        mc.thePlayer.motionZ = speed * cos(radians)
+        if (mc.thePlayer?.onGround == true) {
+            mc.thePlayer.motionX = speed * -sin(radians)
+            mc.thePlayer.motionZ = speed * cos(radians)
+        } else {
+            mc.thePlayer.motionX = mc.thePlayer.motionX * 0.91 + 0.2 * mc.thePlayer.capabilities.walkSpeed * 1.3 * -sin(radians)
+            mc.thePlayer.motionZ = mc.thePlayer.motionZ * 0.91 + 0.2 * mc.thePlayer.capabilities.walkSpeed * 1.3 * cos(radians)
+        }
     }
 }
 
