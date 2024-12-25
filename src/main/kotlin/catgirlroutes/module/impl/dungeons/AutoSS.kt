@@ -143,7 +143,8 @@ object AutoSS : Module(
                         debugMessage("Clicked at: x: ${next.x}, y: ${next.y}, z: ${next.z}")
                     }
                 } else {
-                    clicks.clear()
+                    progress = 0
+                    //clicks.clear()
                 }
             }
         }
