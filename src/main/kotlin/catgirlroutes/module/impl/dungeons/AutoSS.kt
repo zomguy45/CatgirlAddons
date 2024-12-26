@@ -6,8 +6,10 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.BlockAura.BlockAuraAction
 import catgirlroutes.utils.BlockAura.blockArray
@@ -27,6 +29,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Keyboard
 import kotlin.random.Random
 
 /** @Author Kaze.0707**/
@@ -38,14 +41,14 @@ object AutoSS : Module(
     Category.DUNGEON
 ){
     val delay: NumberSetting = NumberSetting("Delay", 200.0, 50.0, 500.0, 10.0)
-    val forceDevice: BooleanSetting = BooleanSetting("Force Device", false)
-    val resetSS: ActionSetting = ActionSetting("Reset") {reset()}
-    val customStart: BooleanSetting = BooleanSetting("Custom start", false)
-    val autoStart: NumberSetting = NumberSetting("Autostart", 125.0, 50.0, 200.0, 1.0)
+    private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.HIDDEN)
+    private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
+    private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
+    private val startKeybind: KeyBindSetting = KeyBindSetting("Start", Keyboard.KEY_NONE)
 
 
     init {
-        this.addSettings(delay, forceDevice, resetSS, autoStart, customStart)
+        this.addSettings(delay, forceDevice, resetSS, autoStart, startKeybind)
     }
 
     var next = false
@@ -67,22 +70,25 @@ object AutoSS : Module(
         debugMessage("Reset!")
     }
 
+    override fun onKeyBind() {
+        clicked = false
+        doingSS = false
+        start()
+    }
+
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load) {
         reset()
     }
 
-    @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
-        if (customStart.value == false) return
-        val msg = event.message.unformattedText
+    fun start() {
         val startButton: BlockPos = BlockPos(110, 121, 91)
-        if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
-        if (clicked) return
-        clicked = true
-        doingSS = true
-        reset()
-        Thread{
+        if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
+        if (!clicked) {
+            clicked = true
+            doingSS = true
+            reset()
+            Thread{
                 try {
                     for (i in 0 until 2) {
                         clickButton(startButton.x, startButton.y, startButton.z)
@@ -94,6 +100,16 @@ object AutoSS : Module(
                     modMessage("NIGGER")
                 }
             }.start()
+        }
+    }
+
+    @SubscribeEvent
+    fun onChat(event: ClientChatReceivedEvent) {
+        val msg = event.message.unformattedText
+        val startButton: BlockPos = BlockPos(110, 121, 91)
+        if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
+        if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
+        start()
     }
 
     @SubscribeEvent
@@ -124,7 +140,7 @@ object AutoSS : Module(
             return
         }
 
-        if (!clicked && !customStart.value) {
+        /*if (!clicked) {
             clicked = true
             doingSS = true
             reset()
@@ -141,7 +157,9 @@ object AutoSS : Module(
                 }
             }.start()
             return
-        }
+        }*/
+
+        if (!clicked) return
 
         if (detect == Blocks.air) {
             progress = 0
@@ -163,7 +181,6 @@ object AutoSS : Module(
                         clickButton(next.x, next.y, next.z)
                         progress++
                         delayTick = delay.value.toInt() / 50
-                        debugMessage("Clicked at: x: ${next.x}, y: ${next.y}, z: ${next.z}")
                     }
                 }
             }
@@ -173,12 +190,13 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val mop: MovingObjectPosition = mc.objectMouseOver ?: return
-        if (System.currentTimeMillis() - wtflip < 500) return
+        if (System.currentTimeMillis() - wtflip < 2500) return
         wtflip = System.currentTimeMillis()
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
-            reset()
+            doingSS = false
+            start()
         }
     }
 
@@ -198,6 +216,7 @@ object AutoSS : Module(
 
     fun clickButton(x: Int, y: Int, z: Int) {
         if (mc.thePlayer.getDistanceSqToCenter(BlockPos(x, y, z)) > 25) return
+        debugMessage("Clicked at: x: ${x}, y: ${y}, z: ${z}. Time: ${System.currentTimeMillis()}")
         mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(x, y, z), 4, mc.thePlayer.heldItem, 0.875f, 0.5f, 0.5f))
     }
 }
