@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.WorldToScreen
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
@@ -484,4 +485,43 @@ object WorldRenderUtils {
         GlStateManager.enableDepth()
         GlStateManager.disableBlend()
     }
+
+    fun drawStringInWorld(
+        text: String,
+        vec3: Vec3,
+        color: Color = WHITE,
+        depthTest: Boolean = true,
+        scale: Float = 0.3f,
+        shadow: Boolean = false
+    ) {
+        if (text.isBlank()) return
+        GlStateManager.pushMatrix()
+
+        GlStateManager.enableAlpha()
+        GlStateManager.enableBlend()
+        GlStateManager.disableLighting()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+
+        translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+
+        GlStateManager.translate(vec3.xCoord, vec3.yCoord, vec3.zCoord)
+        GlStateManager.rotate(-renderManager.playerViewY, 0.0f, 1.0f, 0.0f)
+        GlStateManager.rotate(renderManager.playerViewX * if (mc.gameSettings.thirdPersonView == 2) -1 else 1, 1.0f, 0.0f, 0.0f)
+        GlStateManager.scale(-scale, -scale, scale)
+
+        if (depthTest) GlStateManager.enableDepth() else GlStateManager.disableDepth()
+        GlStateManager.depthMask(depthTest)
+
+        mc.fontRendererObj.drawString("$text§r", -mc.fontRendererObj.getStringWidth(text) / 2f, 0f, color.rgb, shadow)
+
+        if (!depthTest) {
+            GlStateManager.enableDepth()
+            GlStateManager.depthMask(true)
+        }
+        GlStateManager.disableBlend()
+        GlStateManager.enableTexture2D()
+        GlStateManager.resetColor()
+        GlStateManager.popMatrix()
+    }
+
 }

@@ -2,10 +2,13 @@ package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.impl.Ring
+import catgirlroutes.commands.impl.RingManager
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.ringEditMode
+import catgirlroutes.events.impl.MotionUpdateEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -29,6 +32,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
+import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
@@ -39,13 +43,17 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.ScaledResolution
-import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
+import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.server.S08PacketPlayerPosLook
+import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import org.lwjgl.input.Keyboard
 import java.awt.Color
 import java.awt.Color.WHITE
 import java.awt.Color.black
@@ -66,6 +74,28 @@ object AutoP3 : Module(
     private val style = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
     private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
     private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { style.selected == "Normal" }
+    private val disableLength = NumberSetting("Recording length", 50.0, 1.0, 100.0)
+    private val recordLength = NumberSetting("Recording length", 50.0, 1.0, 999.0)
+    private val recordBind: KeyBindSetting = KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in editmode")
+        .onPress {
+            if (movementRecord) {
+                movementRecord = false
+                modMessage("Done recording")
+                return@onPress
+            }
+            if (!ringEditMode) return@onPress
+            rings.forEach { ring ->
+                if (inRing(ring) && ring.type == "movement") {
+                    modMessage("Started recording")
+                    mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+                    movementRecord = true
+                    movementCurrentRing = ring
+                    movementCurrentRing!!.packets = mutableListOf<Blink.BlinkC06>()
+                }
+            }
+        }
+
+
 
     init {
         this.addSettings(
@@ -75,7 +105,10 @@ object AutoP3 : Module(
             boomType,
             style,
             layers,
-            colour
+            colour,
+            disableLength,
+            recordLength,
+            recordBind,
         )
     }
 
@@ -128,7 +161,7 @@ object AutoP3 : Module(
                 "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
-            if (ring.type == "blink" && ring.packets.size != 0) {
+            if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
                     val p1 = ring.packets[i]
                     val p2 = ring.packets[i + 1]
@@ -138,6 +171,7 @@ object AutoP3 : Module(
                         Color.PINK, 4.0f, false
                     )
                 }
+                drawStringInWorld((ring.packets.size - 1).toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
             }
         }
     }
@@ -259,12 +293,86 @@ object AutoP3 : Module(
                 if (packetArray.size > ring.packets.size) {
                     scheduleTask(0) {
                         ring.packets.forEach{ packet ->
-                            mc.netHandler.networkManager.sendPacket(C04PacketPlayerPosition(packet.x, packet.y, packet.z, packet.onGround))
+                            mc.netHandler.networkManager.sendPacket(
+                                C03PacketPlayer.C04PacketPlayerPosition(
+                                    packet.x,
+                                    packet.y,
+                                    packet.z,
+                                    packet.onGround
+                                )
+                            )
                         }
                         mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
                     }
                 }
             }
+            "movement" -> {
+                if (ring.packets.size == 0) return
+                movementList = ring.packets.toMutableList()
+                movementOn = true
+            }
         }
+    }
+
+    private var movementRecord = false
+    private var movementCurrentRing: Ring? = null
+
+    @SubscribeEvent
+    fun onMovementRecorder(event: PacketSentEvent) {
+        if (event.packet !is C03PacketPlayer || !movementRecord) return
+        if (movementCurrentRing!!.packets.size == recordLength.value.toInt()) {
+            movementRecord = false
+            RingManager.saveRings()
+            modMessage("Done recording")
+        }
+        if (event.packet is C03PacketPlayer.C06PacketPlayerPosLook || event.packet is C03PacketPlayer.C04PacketPlayerPosition) {
+            movementCurrentRing!!.packets.add(
+                Blink.BlinkC06(
+                    event.packet.yaw,
+                    event.packet.pitch,
+                    event.packet.positionX,
+                    event.packet.positionY,
+                    event.packet.positionZ,
+                    event.packet.isOnGround
+                )
+            )
+        }
+    }
+
+    private var movementList = mutableListOf<Blink.BlinkC06>()
+    private var movementOn = false
+    private var onlyHorizontal = false
+
+    @SubscribeEvent
+    fun onTickMovement(event: MotionUpdateEvent.Pre) {
+        if (!movementOn) return
+        if (movementList.isEmpty()) {
+            movementOn = false
+            return
+        }
+        val move = movementList.first()
+        val x = move.x - mc.thePlayer.posX
+        var y = move.y - mc.thePlayer.posY
+        val z = move.z - mc.thePlayer.posZ
+        if (onlyHorizontal) y = 0.0
+        movementList.removeFirst()
+        mc.thePlayer.moveEntity(x, y, z)
+    }
+
+    @SubscribeEvent
+    fun onS12(event: PacketReceiveEvent) {
+        if (event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
+        if (event.packet.motionY == 28000) {
+            onlyHorizontal = true
+            scheduleTask((disableLength.value - 1).toInt()) {onlyHorizontal = false}
+        }
+    }
+
+
+    @SubscribeEvent
+    fun onS08(event: PacketReceiveEvent) {
+        if (event.packet !is S08PacketPlayerPosLook) return
+        movementOn = false
+        movementList = mutableListOf()
     }
 }

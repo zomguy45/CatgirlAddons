@@ -59,7 +59,7 @@ data class Ring(
 
 var route: String = selectedRoute.value
 var ringEditMode: Boolean = false
-var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink")
+var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
 
 
 val autoP3Commands = commodore("p3") {
@@ -95,6 +95,8 @@ val autoP3Commands = commodore("p3") {
                     §7- jump §8: §rmakes the player jump
                     §7- align §8: §raligns the player with the centre of a block
                     §7- command §8: §rexecutes a specified command
+                    §7- blink §8: §rteleports you
+                    §7- movement §8: §rreplays a movement recording
                   List of args: §7w_, h_, delay_, look, walk, term, stop
                     §7- w §8: §rring width (w1 - default)
                     §7- h §8: §rring height (h1 - default)

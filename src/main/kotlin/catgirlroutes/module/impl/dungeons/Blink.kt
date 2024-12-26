@@ -10,6 +10,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.impl.KeyBindSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils
 import net.minecraft.client.gui.ScaledResolution
@@ -28,10 +29,12 @@ object Blink : Module(
     category = Category.DUNGEON
 ) {
 
+    private val recordLength = NumberSetting("Recording length", 28.0, 1.0, 50.0)
     private val recordBind: KeyBindSetting = KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in editmode")
         .onPress {
             if (recorderActive) {
                 recorderActive = false
+                modMessage("Done recording")
                 return@onPress
             }
             if (!ringEditMode) return@onPress
@@ -47,37 +50,23 @@ object Blink : Module(
         }
 
     init {
-        this.addSettings(this.recordBind)
+        this.addSettings(this.recordBind, recordLength)
     }
 
     val packetArray = mutableListOf<Long>()
     private var recorderActive = false
     private var currentRing: Ring? = null
 
-    /*
-    override fun onKeyBind() {
-        if (!ringEditMode) return
-        RingManager.rings.forEach { ring ->
-            if (AutoP3.inRing(ring) && ring.type == "blink") {
-                modMessage("Started recording")
-                mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
-                recorderActive = true
-                currentRing = ring
-                currentRing!!.packets = mutableListOf<BlinkC06>()
-            }
-        }
-    }
-     */
-
     @SubscribeEvent
     fun onPacketRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !recorderActive) return
-        if (currentRing!!.packets.size == 28) {
+        if (currentRing!!.packets.size == recordLength.value.toInt()) {
             recorderActive = false
             saveRings()
             modMessage("Done recording")
         }
         if (event.packet is C06PacketPlayerPosLook || event.packet is C04PacketPlayerPosition) {
+            if (currentRing!!.packets.isNotEmpty() && currentRing!!.packets.last() == BlinkC06(event.packet.yaw, event.packet.pitch, event.packet.positionX, event.packet.positionY, event.packet.positionZ, event.packet.isOnGround)) return
             currentRing!!.packets.add(BlinkC06(event.packet.yaw, event.packet.pitch, event.packet.positionX, event.packet.positionY, event.packet.positionZ, event.packet.isOnGround))
         }
     }

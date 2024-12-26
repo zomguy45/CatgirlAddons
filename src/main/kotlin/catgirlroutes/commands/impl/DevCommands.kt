@@ -123,4 +123,7 @@ val devCommands = commodore("dev") {
             if (blockstate.block == Blocks.chest || blockstate.block == Blocks.lever || blockstate.block == Blocks.emerald_block || blockstate.block == Blocks.stone_button) breakArray.add(block)
         }
     }
+    literal("moveentity").runs { x: Double, y: Double, z: Double ->
+        mc.thePlayer.moveEntity(x, y, z)
+    }
 }
