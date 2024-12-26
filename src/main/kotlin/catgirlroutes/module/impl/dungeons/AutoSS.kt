@@ -48,11 +48,10 @@ object AutoSS : Module(
     private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.ADVANCED_ONLY)
     private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
     private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
-    private val startKeybind: KeyBindSetting = KeyBindSetting("Start", Keyboard.KEY_NONE)
 
 
     init {
-        this.addSettings(delay, forceDevice, resetSS, autoStart, startKeybind)
+        this.addSettings(delay, forceDevice, resetSS, autoStart)
     }
 
     var next = false
@@ -66,6 +65,7 @@ object AutoSS : Module(
     var wtflip = System.currentTimeMillis()
     var clickedButton: Vec3? = null
     var allButtons = ArrayList<Vec3>()
+    var lastClickAdded = System.currentTimeMillis()
 
     fun reset() {
         clicks.clear()
@@ -127,12 +127,16 @@ object AutoSS : Module(
         val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
         val startButton: BlockPos = BlockPos(110, 121, 91)
 
+        if (System.currentTimeMillis() - lastClickAdded > delay.value) {
+            clickedButton = null
+        }
+
         if (mc.thePlayer.getDistanceSqToCenter(startButton) < 1600) {
             if (clickedButton != null) {
                 drawCustomSizedBoxAt(clickedButton!!.xCoord + 0.875, clickedButton!!.yCoord + 0.375, clickedButton!!.zCoord + 0.3125, 0.125, 0.25, 0.375, Color.PINK, filled = true)
             }
             allButtons.forEachIndexed{index, location ->
-                drawStringInWorld((index + 1).toString(), Vec3(location.xCoord - 0.125, location.yCoord + 0.5, location.zCoord + 0.5), scale = 0.02f, shadow = true, depthTest = false)
+                drawStringInWorld((index + 1).toString(), Vec3(location.xCoord - 0.0625, location.yCoord + 0.5625, location.zCoord + 0.5), scale = 0.02f, shadow = true, depthTest = false)
             }
         }
 
@@ -236,6 +240,7 @@ object AutoSS : Module(
         if (mc.thePlayer.getDistanceSqToCenter(BlockPos(x, y, z)) > 25) return
         debugMessage("Clicked at: x: ${x}, y: ${y}, z: ${z}. Time: ${System.currentTimeMillis()}")
         clickedButton = Vec3(x.toDouble(), y.toDouble(), z.toDouble())
+        lastClickAdded = System.currentTimeMillis()
         mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(x, y, z), 4, mc.thePlayer.heldItem, 0.875f, 0.5f, 0.5f))
     }
 }

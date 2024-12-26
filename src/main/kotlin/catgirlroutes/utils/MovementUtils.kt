@@ -93,7 +93,7 @@ object MovementUtils {
         if (event.phase != TickEvent.Phase.START) return
         if (targetBlocks.isEmpty()) return
         val targetBlock = targetBlocks[0]
-        return
+
         if (mc.thePlayer?.onGround == true) {
             if (
                 abs(mc.thePlayer.posX - targetBlock.xCoord) <= 1.3 * mc.thePlayer.capabilities.walkSpeed &&
