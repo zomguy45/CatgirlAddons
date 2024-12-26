@@ -41,7 +41,7 @@ object AutoSS : Module(
     Category.DUNGEON
 ){
     val delay: NumberSetting = NumberSetting("Delay", 200.0, 50.0, 500.0, 10.0)
-    private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.HIDDEN)
+    private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.ADVANCED_ONLY)
     private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
     private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
     private val startKeybind: KeyBindSetting = KeyBindSetting("Start", Keyboard.KEY_NONE)
