@@ -80,6 +80,7 @@ object ModuleManager {
         VerticalJerry,
         PlayerSize,
         NoDebuff,
+        BlockClip,
 
         // Render
         ClickGui,
