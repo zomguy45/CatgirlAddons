@@ -16,7 +16,7 @@ suspend fun hasBonusPaulScore(): Boolean = withTimeoutOrNull(5000) {
     } else false
 } == true
 
-suspend fun sendDataToServer(body: String, url: String = "https://arasfjoiadjf.p-e.kr/cga/users" ): String = withTimeoutOrNull(5000) {
+suspend fun sendDataToServer(body: String, url: String = "https://arasfjoiadjf.p-e.kr/cga/users" ): String = withTimeoutOrNull(5000) { // arasfjoiadjf.p-e.kr
     return@withTimeoutOrNull try {
         val connection = withContext(Dispatchers.IO) {
             URL(url).openConnection()
@@ -60,4 +60,40 @@ suspend fun getDataFromServer(url: String = "https://arasfjoiadjf.p-e.kr/cga/use
             response
         } catch (_: Exception) { "" }
     } ?: ""
+}
+
+suspend fun downloadImageFromServer(url: String, outputFile: File): Boolean {
+    return withTimeoutOrNull(10000) {
+        try {
+            val connection = withContext(Dispatchers.IO) {
+                URL(url).openConnection()
+            } as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.instanceFollowRedirects = true
+            connection.setRequestProperty("User-Agent", "Mozilla/5.0")
+            connection.setRequestProperty("Accept", "image/*")
+
+            val responseCode = connection.responseCode
+
+            if (responseCode != 200) return@withTimeoutOrNull false
+
+            val contentType = connection.contentType
+            println("Content Type: $contentType")
+            if (contentType.equals("text/html")) return@withTimeoutOrNull false
+
+            withContext(Dispatchers.IO) {
+                connection.inputStream.use { input ->
+                    FileOutputStream(outputFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            }
+
+            connection.disconnect()
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    } ?: false
 }

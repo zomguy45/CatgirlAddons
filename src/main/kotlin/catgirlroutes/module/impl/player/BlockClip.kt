@@ -22,7 +22,7 @@ object BlockClip : Module(
     "Block Clip",
     Category.PLAYER,
     "Clips you through blocks"
-){
+) {
     private val distance: NumberSetting = NumberSetting("Distance", 1.25, 0.0, 1.5, 0.01)
     private val directions: StringSelectorSetting = StringSelectorSetting("Directions", "All", arrayListOf("All", "Axis"))
     private val notifications: BooleanSetting = BooleanSetting("Notifications", false, "Makes Block Clip send notification on activation.")

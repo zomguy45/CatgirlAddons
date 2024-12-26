@@ -78,12 +78,12 @@ object ModuleManager {
         HClip,
         PearlClip,
         VerticalJerry,
-        PlayerSize,
         NoDebuff,
         BlockClip,
 
         // Render
         ClickGui,
+        CgaUser,
         DungeonESP,
         BossESP,
         TerminalEsp,

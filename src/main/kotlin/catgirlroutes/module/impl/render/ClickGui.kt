@@ -2,22 +2,13 @@ package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes
 import catgirlroutes.CatgirlRoutes.Companion.display
-import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.CatgirlRoutes.Companion.scope
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.player.PlayerSize.scaleX
-import catgirlroutes.module.impl.player.PlayerSize.scaleY
-import catgirlroutes.module.impl.player.PlayerSize.scaleZ
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.utils.CgaUsers
-import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.sendDataToServer
-import kotlinx.coroutines.launch
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
@@ -55,24 +46,6 @@ object ClickGui: Module(
     val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency { devSettings.enabled }
 
     val showUsageInfo = BooleanSetting("Usage Info", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
-
-    val updateUser = ActionSetting("Update User Data") {
-        scope.launch {
-            val jsonString = """
-                {
-                    "name": "${mc.thePlayer.name}",
-                    "uuid": "${mc.session.playerID}",
-                    "dimensions": {
-                        "x": ${scaleX.value},
-                        "y": ${scaleY.value},
-                        "z": ${scaleZ.value}
-                    }
-                }
-                """
-            modMessage(sendDataToServer(body = jsonString))
-            CgaUsers.updateUsers()
-        }
-    }
 
     val panelX: MutableMap<Category, NumberSetting> = mutableMapOf()
     val panelY: MutableMap<Category, NumberSetting> = mutableMapOf()
@@ -115,7 +88,6 @@ object ClickGui: Module(
             forceDungeon,
 
             showUsageInfo,
-            updateUser,
             advancedRelX,
             advancedRelY
         )

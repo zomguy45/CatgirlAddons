@@ -1,6 +1,6 @@
 package catgirlroutes.mixins.entity;
 
-import catgirlroutes.module.impl.player.PlayerSize;
+import catgirlroutes.module.impl.render.CgaUser;
 import net.minecraft.client.entity.AbstractClientPlayer;
 import net.minecraft.client.renderer.entity.RenderPlayer;
 import org.spongepowered.asm.mixin.Mixin;
@@ -12,6 +12,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinRenderPlayer {
     @Inject(method = "preRenderCallback(Lnet/minecraft/client/entity/AbstractClientPlayer;F)V", at = @At("TAIL"))
     private void onPreRenderCallback(AbstractClientPlayer entitylivingbaseIn, float partialTickTime, CallbackInfo ci) {
-        PlayerSize.INSTANCE.scaleHook(entitylivingbaseIn);
+        CgaUser.INSTANCE.scaleHook(entitylivingbaseIn);
     }
 }

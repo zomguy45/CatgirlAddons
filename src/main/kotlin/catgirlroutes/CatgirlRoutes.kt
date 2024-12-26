@@ -78,6 +78,7 @@ class CatgirlRoutes {
                 moduleConfig.loadConfig()
             }
         }
+        CgaUsers.updateUsers() // kinda suboptimal to do 2 requests on launch, but idrc rn
         InventoryButtonsConfig.load()
         ModuleManager.initializeModules()
 
