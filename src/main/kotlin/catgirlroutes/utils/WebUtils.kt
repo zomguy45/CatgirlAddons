@@ -78,7 +78,6 @@ suspend fun downloadImageFromServer(url: String, outputFile: File): Boolean {
             if (responseCode != 200) return@withTimeoutOrNull false
 
             val contentType = connection.contentType
-            println("Content Type: $contentType")
             if (contentType.equals("text/html")) return@withTimeoutOrNull false
 
             withContext(Dispatchers.IO) {
