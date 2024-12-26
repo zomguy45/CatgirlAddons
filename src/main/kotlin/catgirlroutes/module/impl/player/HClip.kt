@@ -30,7 +30,7 @@ object HClip : Module(
 
     override fun onKeyBind() {
         if (!this.enabled) return // todo: do something about it idk?!
-        if (shouldNotify.value) Notifications.send("Hclipping", "") else modMessage("Hclipping")
+        if (shouldNotify.value) Notifications.send("Hclipping") else modMessage("Hclipping")
         hClip()
     }
 

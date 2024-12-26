@@ -16,6 +16,7 @@ val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
               §7/cga
               §7/pearlclip §5[§ddepth§5]
               §7/lavaclip §5[§ddepth§5]
+              §7/blockclip §5[§ddistance§5]
               §7/node
               §7/p3
               §7/dev

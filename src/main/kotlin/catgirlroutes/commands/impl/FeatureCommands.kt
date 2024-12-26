@@ -4,6 +4,7 @@ import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.LavaClip
 import catgirlroutes.module.impl.dungeons.SecretAura
 import catgirlroutes.module.impl.misc.InventoryButtons
+import catgirlroutes.module.impl.player.BlockClip
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.utils.ChatUtils.modMessage
 
@@ -15,7 +16,13 @@ val pearlClip = commodore("pearlclip") {
 
 val lavaClip = commodore("lavaclip") {
     runs { depth: Double? ->
-        LavaClip.lavaClipToggle(depth ?: 0.0);
+        LavaClip.lavaClipToggle(depth ?: 0.0)
+    }
+}
+
+val blockClip = commodore("blockclip") {
+    runs {  distance: Double? ->
+        BlockClip.blockClip(distance ?: 1.0)
     }
 }
 

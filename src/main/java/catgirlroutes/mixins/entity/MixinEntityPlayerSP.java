@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 
-@Mixin(EntityPlayerSP.class)
+@Mixin(value = {EntityPlayerSP.class})
 public abstract class MixinEntityPlayerSP extends EntityPlayer {
     private double oldPosX;
     private double oldPosY;
