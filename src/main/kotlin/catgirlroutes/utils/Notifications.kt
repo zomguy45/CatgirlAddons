@@ -14,7 +14,7 @@ import kotlin.math.pow
 object Notifications {
     private val notifications = mutableListOf<Notification>()
 
-    fun send(title: String, description: String, duration: Double = 2000.0, type: NotificationType = NotificationType.INFO, icon: String? = null) {
+    fun send(title: String, description: String = "", duration: Double = 2000.0, type: NotificationType = NotificationType.INFO, icon: String? = null) {
         notifications.add(Notification(title, description, duration, type, icon))
     }
 
