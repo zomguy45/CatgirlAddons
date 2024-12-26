@@ -144,14 +144,14 @@ object WorldRenderUtils {
     }
 
     fun draw2DBoxByEntity(entity: Entity, color: Color, width: Double, height: Double, partialTicks: Float = 0f, lineWidth: Double = 2.0, phase: Boolean = false, xOffset: Double = 0.0, yOffset: Double = 0.0, zOffset: Double = 0.0) { // todo remove it I think
-        val x = entity.posX + ((entity.posX-entity.lastTickPosX)*partialTicks) + xOffset - width / 2.0
-        val y = entity.posY + ((entity.posY-entity.lastTickPosY)*partialTicks) + yOffset
-        val z = entity.posZ + ((entity.posZ-entity.lastTickPosZ)*partialTicks) + zOffset - width / 2.0
+            val x = entity.posX + ((entity.posX-entity.lastTickPosX)*partialTicks) + xOffset - width / 2.0
+            val y = entity.posY + ((entity.posY-entity.lastTickPosY)*partialTicks) + yOffset
+            val z = entity.posZ + ((entity.posZ-entity.lastTickPosZ)*partialTicks) + zOffset - width / 2.0
 
 
-        GlStateManager.pushMatrix()
+            GlStateManager.pushMatrix()
 
-        GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
+            GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
             color.blue.toFloat() / 255f, 1f)
 
         GL11.glTranslated(x, y - 0.2, z)
@@ -259,7 +259,7 @@ object WorldRenderUtils {
     }
 
 
-    fun drawCustomSizedBoxAt(x: Double, y: Double, z: Double, xWidth: Double, yHeight: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true) {
+    fun drawCustomSizedBoxAt(x: Double, y: Double, z: Double, xWidth: Double, yHeight: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true, filled: Boolean = false) {
         GlStateManager.disableLighting()
         GlStateManager.enableBlend()
         GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
@@ -270,7 +270,9 @@ object WorldRenderUtils {
         GlStateManager.pushMatrix()
 
         if (relocate) GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+
         worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
+        //worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
         GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
             color.blue.toFloat() / 255f, 1f)
 
