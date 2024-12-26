@@ -8,6 +8,7 @@ import catgirlroutes.ui.clickgui.advanced.elements.AdvancedElementType
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import net.minecraft.client.gui.Gui
+import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
@@ -359,10 +360,12 @@ class AdvancedElementTextField(
         if (listening) {
             if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
                 listening = false
+            } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+                setting.text += GuiScreen.getClipboardString()
             } else if (keyCode == Keyboard.KEY_BACK) {
                 setting.text = setting.text.dropLast(1)
             }else if (!keyBlackList.contains(keyCode)) {
-                setting.text = setting.text + typedChar.toString()
+                setting.text += typedChar.toString()
             }
             return true
         }

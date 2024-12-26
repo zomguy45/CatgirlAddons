@@ -5,6 +5,7 @@ import catgirlroutes.ui.clickgui.elements.Element
 import catgirlroutes.ui.clickgui.elements.ElementType
 import catgirlroutes.ui.clickgui.elements.ModuleButton
 import catgirlroutes.ui.clickgui.util.FontUtil
+import net.minecraft.client.gui.GuiScreen
 import org.lwjgl.input.Keyboard
 
 /**
@@ -53,10 +54,12 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
         if (listening) {
             if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
                 listening = false
+            } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+                setting.text += GuiScreen.getClipboardString()
             } else if (keyCode == Keyboard.KEY_BACK) {
                 setting.text = setting.text.dropLast(1)
-            }else if (!keyBlackList.contains(keyCode)) {
-                setting.text = setting.text + typedChar.toString()
+            } else if (!keyBlackList.contains(keyCode)) {
+                setting.text += typedChar.toString()
             }
             return true
         }
