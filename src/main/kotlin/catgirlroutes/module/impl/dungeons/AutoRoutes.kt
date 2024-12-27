@@ -24,23 +24,29 @@ import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
+import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.*
 import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.settings.KeyBinding
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Keyboard
 import java.awt.Color.black
 import java.awt.Color.white
 import kotlin.collections.set
@@ -53,10 +59,10 @@ object AutoRoutes : Module(
 ){
     private val editTitle = BooleanSetting("EditMode title", false)
     private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
-    private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), description = "Ring render style to be used.")
-    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected == "Normal" }
-    private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { preset.selected == "Normal" }
-    private val colour2 = ColorSetting("Ring colour (active)", white, false, "Colour of Normal ring style while active").withDependency { preset.selected == "Normal" }
+    private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+"), description = "Ring render style to be used.")
+    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
+    private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
+    private val colour2 = ColorSetting("Ring colour (active)", white, false, "Colour of Normal ring style while active").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
 
     init {
         this.addSettings(
@@ -152,6 +158,7 @@ object AutoRoutes : Module(
             when(preset.selected) {
                 "Trans"     -> renderTransFlag(x, y, z, node.width, node.height)
                 "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.value.toInt())
+                "Ring"      -> drawCylinder(Vec3(x, y, z), node.width / 2, node.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
             }
         }
@@ -207,6 +214,17 @@ object AutoRoutes : Module(
         }
     }
 
+    @SubscribeEvent
+    fun onKeyInputEvent(event: InputEvent.KeyInputEvent) {
+        if (Keyboard.getEventKey() == 42) {
+            nodes.forEach { node ->
+                if (inNode(node) && node.type == "warp") {
+                    KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, true)
+                }
+            }
+        }
+    }
+
     private suspend fun executeAction(node: Node) {
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         val room2 = currentRoom
@@ -219,20 +237,28 @@ object AutoRoutes : Module(
         delay(actionDelay.toLong())
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
-            if ("walk" in it) MovementUtils.setKey("w", true)
+            if ("walk" in it) setKey("w", true)
             if ("look" in it) snapTo(yaw, node.pitch)
             if ("unshift" in it) setKey("shift", false)
         }
         when(node.type) {
             "warp" -> {
                 val state = swapFromName("aspect of the void")
-                MovementUtils.setKey("shift", true)
+                setKey("shift", true)
                 if (state == "SWAPPED") {
                     scheduleTask(0) {
                         shouldClick = true
                     }
                 } else if (state == "ALREADY_HELD") {
                     shouldClick = true
+                }
+                scheduleTask(1) {
+                    nodes.forEach { node ->
+                        if (inNode(node) && node.type == "warp") {
+                            return@scheduleTask
+                        }
+                    }
+                    setKey("shift", false)
                 }
             }
             "aotv" -> {

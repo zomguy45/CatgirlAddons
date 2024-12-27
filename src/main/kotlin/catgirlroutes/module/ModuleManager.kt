@@ -71,7 +71,6 @@ object ModuleManager {
         CatMode,
         InventoryButtons,
         InstantSprint,
-        //AutoRouteUtils,
 
         // Player
         AutoSprint,
@@ -80,6 +79,7 @@ object ModuleManager {
         VerticalJerry,
         NoDebuff,
         BlockClip,
+        //BarPhase,
 
         // Render
         ClickGui,
