@@ -9,6 +9,7 @@ import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.events.impl.MotionUpdateEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.TermOpenEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -148,7 +149,6 @@ object AutoP3 : Module(
     }
 
     var termFound = false
-    var termListener = false
     var dir: Double? = null
     var airTicks = 0
     var lastX = 0.0
@@ -170,9 +170,8 @@ object AutoP3 : Module(
             val cooldown: Boolean = cooldownMap[key] == true
             if (inRing(ring)) {
                 if (ring.arguments!!.contains("term") && !termFound) {
-                    termListener = true
                     return
-                } else scheduleTask(1) { termFound = false }
+                }
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -228,15 +227,11 @@ object AutoP3 : Module(
         )
     }
 
-    @SubscribeEvent(priority = EventPriority.HIGHEST) // idk if you actually need this. but jic for inv walk
-    fun onTerm(event: PacketReceiveEvent) {
-        if (!termListener || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
-        if (event.packet !is S2DPacketOpenWindow) return
-        val windowTitle = event.packet.windowTitle
-        if (windowTitle != null && termGuiTitles.any { windowTitle.unformattedText.startsWith(it) }) {
-            modMessage("Term found")
-            termFound = true
-            termListener = false
+    @SubscribeEvent
+    fun onTerm(event: TermOpenEvent) {
+        termFound = true
+        scheduleTask(2) {
+            termFound = false
         }
     }
 
@@ -277,7 +272,6 @@ object AutoP3 : Module(
         }
         when (ring.type) {
             "walk" -> {
-                dir = null
                 modMessage("Walking!")
                 setKey("w", true)
             }
@@ -295,7 +289,6 @@ object AutoP3 : Module(
             }
 
             "boom" -> {
-                dir = null
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 //modMessage(boomType.selected)
@@ -322,7 +315,6 @@ object AutoP3 : Module(
             }
 
             "bonzo" -> {
-                dir = null
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
                 scheduleTask(0) {
@@ -331,13 +323,11 @@ object AutoP3 : Module(
             }
 
             "look" -> {
-                dir = null
                 modMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
 
             "align" -> {
-                dir = null
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(
                     floor(mc.thePlayer.posX) + 0.5,
@@ -347,7 +337,6 @@ object AutoP3 : Module(
             }
 
             "block" -> {
-                dir = null
                 modMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
                 val (yaw, pitch) = getYawAndPitch(
                     ring.lookBlock!!.xCoord,
@@ -358,7 +347,6 @@ object AutoP3 : Module(
             }
 
             "edge" -> {
-                dir = null
                 modMessage("Edging!")
                 edge()
             }
@@ -369,6 +357,7 @@ object AutoP3 : Module(
             }
 
             "blink" -> {
+                dir = null
                 if (ring.packets.size == 0) return
                 if (packetArray.size > ring.packets.size) {
                     scheduleTask(0) {
@@ -476,6 +465,8 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
+    var clickingMelody = false
+
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (event.phase !== TickEvent.Phase.START) return
@@ -500,16 +491,20 @@ object AutoP3 : Module(
         val z = cos(radians) * speed * 2.806
 
         if (airTicks < 2) {
-            mc.thePlayer.motionX = x
-            mc.thePlayer.motionZ = z
             lastX = x
             lastZ = z
+            if (!clickingMelody) {
+                mc.thePlayer.motionX = x
+                mc.thePlayer.motionZ = z
+            }
         } else {
             //assume max acceleration
-            mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-            mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
             lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
             lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            if (!clickingMelody) {
+                mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            }
         }
     }
 

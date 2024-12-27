@@ -1,11 +1,7 @@
 package catgirlroutes.events
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.impl.BlockChangeEvent
-import catgirlroutes.events.impl.EntityRemovedEvent
-import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.SecretPickupEvent
+import catgirlroutes.events.impl.*
 import catgirlroutes.utils.Utils.containsOneOf
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.postAndCatch
@@ -17,6 +13,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.isSecret
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S29PacketSoundEffect
+import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object EventDispatcher { // I didn't come up with anything better so I'm just skibidiing odon clint :(
@@ -36,5 +33,23 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet is S29PacketSoundEffect && inDungeons && !inBoss && (event.packet.soundName.equalsOneOf("mob.bat.hurt", "mob.bat.death") && event.packet.volume == 0.1f)) SecretPickupEvent.Bat(event.packet).postAndCatch()
+    }
+
+    val termNames = listOf(
+        Regex("^Click in order!$"),
+        Regex("^Select all the (.+?) items!$"),
+        Regex("^What starts with: '(.+?)'\\?$"),
+        Regex("^Change all to same color!$"),
+        Regex("^Correct all the panes!$"),
+        Regex("^Click the button on time!$")
+    )
+
+    @SubscribeEvent
+    fun onS2D(event: PacketReceiveEvent) = with(event.packet) {
+        if (event.packet !is S2DPacketOpenWindow) return
+        val title = event.packet.windowTitle.unformattedText
+        if (termNames.any{regex -> regex.matches(title)}) {
+            TermOpenEvent.open(event.packet).postAndCatch()
+        }
     }
 }
