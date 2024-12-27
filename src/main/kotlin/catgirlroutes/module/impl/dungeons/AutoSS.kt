@@ -68,6 +68,7 @@ object AutoSS : Module(
     var lastClickAdded = System.currentTimeMillis()
 
     fun reset() {
+        allButtons.clear()
         clicks.clear()
         next = false
         progress = 0
@@ -85,6 +86,7 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load) {
         reset()
+        allButtons.clear()
     }
 
     fun start() {
@@ -92,6 +94,8 @@ object AutoSS : Module(
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (!clicked) {
+            debugMessage("Starting SS")
+            modMessage(System.currentTimeMillis())
             clicked = true
             doingSS = true
             reset()
@@ -99,10 +103,9 @@ object AutoSS : Module(
                 try {
                     for (i in 0 until 2) {
                         clickButton(startButton.x, startButton.y, startButton.z)
-                        Thread.sleep(autoStart.value.toLong())
+                        Thread.sleep(Random.nextInt(delay.value.toInt(), delay.value.toInt() * 1136 / 1000).toLong())
                     }
                     clickButton(startButton.x, startButton.y, startButton.z)
-                    debugMessage("Starting SS")
                 } catch (e: Exception) {
                     modMessage("NIGGER")
                 }
@@ -115,6 +118,9 @@ object AutoSS : Module(
         val msg = event.message.unformattedText
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
+        if (msg.contains("Device")) {
+            modMessage(System.currentTimeMillis())
+        }
         if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
         start()
     }

@@ -2,7 +2,6 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
-import catgirlroutes.events.impl.MotionUpdateEvent
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.addBlock
@@ -88,11 +87,44 @@ object MovementUtils {
         targetBlocks.add(Vec3(x, 0.0, z))
     }
 
+    var airTicks = 0
+    var lastX = 0.0
+    var lastZ = 0.0
+
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
         if (targetBlocks.isEmpty()) return
         val targetBlock = targetBlocks[0]
+
+        if (mc.thePlayer?.onGround == true) {
+            airTicks = 0
+        } else {
+            airTicks += 1
+        }
+
+        val(yaw, pitch) = getYawAndPitch(targetBlock.xCoord, targetBlock.yCoord, targetBlock.zCoord)
+
+        val speed = mc.thePlayer.capabilities.walkSpeed
+        val radians = yaw * Math.PI / 180 // todo: MathUtils?
+        val x = -sin(radians) * speed * 2.806
+        val z = cos(radians) * speed * 2.806
+
+        if (airTicks < 2) {
+            mc.thePlayer.motionX = x
+            mc.thePlayer.motionZ = z
+            lastX = x
+            lastZ = z
+        } else {
+            //assume max acceleration
+            modMessage(speed)
+            modMessage(lastX)
+            mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * 0.1 * -sin(radians)
+            mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * 0.1 * cos(radians)
+            lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            modMessage(mc.thePlayer.motionX)
+        }
 
         if (mc.thePlayer?.onGround == true) {
             if (
@@ -104,20 +136,6 @@ object MovementUtils {
                 targetBlocks.removeFirst()
                 return
             }
-        }
-
-        val(yaw, pitch) = getYawAndPitch(targetBlock.xCoord, targetBlock.yCoord, targetBlock.zCoord)
-
-        val speed = if (!mc.thePlayer.isSneaking) {mc.thePlayer.capabilities.walkSpeed * 2.806} else {
-            mc.thePlayer.capabilities.walkSpeed * 0.64753846153
-        }
-        val radians = yaw * Math.PI / 180 // todo: MathUtils?
-        if (mc.thePlayer?.onGround == true) {
-            mc.thePlayer.motionX = speed * -sin(radians)
-            mc.thePlayer.motionY = speed * cos(radians)
-        } else {
-            //mc.thePlayer.motionX = mc.thePlayer.motionX * 0.91 + 0.02 * 1.3 * -sin(radians)
-            //mc.thePlayer.motionZ = mc.thePlayer.motionZ * 0.91 + 0.02 * 1.3 * cos(radians)
         }
     }
 }
