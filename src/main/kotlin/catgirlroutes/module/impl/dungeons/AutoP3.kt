@@ -53,30 +53,62 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.InputEvent
+import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 import java.awt.Color.WHITE
 import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.abs
+import kotlin.math.cos
 import kotlin.math.floor
+import kotlin.math.sin
 
 
 object AutoP3 : Module(
     "Auto P3",
     category = Category.DUNGEON,
     description = "A module that allows you to place down rings that execute various actions."
-){
+) {
     val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
     private val inBossOnly = BooleanSetting("Boss only", true)
     private val editTitle = BooleanSetting("EditMode title", false)
-    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
-    private val style = StringSelectorSetting("Ring style","Trans", arrayListOf("Trans", "Normal", "LGBTQIA+"), "Ring render style to be used.")
-    private val layers = NumberSetting("Ring layers amount", 3.0, 3.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
-    private val colour = ColorSetting("Ring colour", black, false, "Colour of Normal ring style").withDependency { style.selected == "Normal" }
+    private val boomType = StringSelectorSetting(
+        "Boom type",
+        "Regular",
+        arrayListOf("Regular", "Infinity"),
+        "Superboom TNT type to use for BOOM ring"
+    )
+    private val style = StringSelectorSetting(
+        "Ring style",
+        "Trans",
+        arrayListOf("Trans", "Normal", "LGBTQIA+"),
+        "Ring render style to be used."
+    )
+    private val layers = NumberSetting(
+        "Ring layers amount",
+        3.0,
+        3.0,
+        5.0,
+        1.0,
+        "Amount of ring layers to render"
+    ).withDependency { style.selected == "Normal" }
+    private val colour = ColorSetting(
+        "Ring colour",
+        black,
+        false,
+        "Colour of Normal ring style"
+    ).withDependency { style.selected == "Normal" }
     private val disableLength = NumberSetting("Recording length", 50.0, 1.0, 100.0)
     private val recordLength = NumberSetting("Recording length", 50.0, 1.0, 999.0)
-    private val recordBind: KeyBindSetting = KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in editmode")
+    private val recordBind: KeyBindSetting = KeyBindSetting(
+        "Movement record",
+        Keyboard.KEY_NONE,
+        "Starts recording a movement replay if you are on a movement ring and in editmode"
+    )
         .onPress {
             if (movementRecord) {
                 movementRecord = false
@@ -87,14 +119,17 @@ object AutoP3 : Module(
             rings.forEach { ring ->
                 if (inRing(ring) && ring.type == "movement") {
                     modMessage("Started recording")
-                    mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+                    mc.thePlayer.setPosition(
+                        floor(mc.thePlayer.posX) + 0.5,
+                        mc.thePlayer.posY,
+                        floor(mc.thePlayer.posZ) + 0.5
+                    )
                     movementRecord = true
                     movementCurrentRing = ring
                     movementCurrentRing!!.packets = mutableListOf<Blink.BlinkC06>()
                 }
             }
         }
-
 
 
     init {
@@ -114,6 +149,10 @@ object AutoP3 : Module(
 
     var termFound = false
     var termListener = false
+    var dir: Double? = null
+    var airTicks = 0
+    var lastX = 0.0
+    var lastZ = 0.0
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
@@ -129,11 +168,11 @@ object AutoP3 : Module(
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
-            if(inRing(ring)) {
+            if (inRing(ring)) {
                 if (ring.arguments!!.contains("term") && !termFound) {
                     termListener = true
                     return
-                } else  scheduleTask (1) { termFound = false }
+                } else scheduleTask(1) { termFound = false }
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -156,10 +195,10 @@ object AutoP3 : Module(
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
             val color = if (cooldown) WHITE else colour.value
 
-            when(style.selected) {
-                "Trans"     -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal"    -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
-                "LGBTQIA+"  -> renderGayFlag(x, y, z, ring.width, ring.height)
+            when (style.selected) {
+                "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
+                "Normal" -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
+                "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
@@ -182,7 +221,11 @@ object AutoP3 : Module(
         if (!ringEditMode || (inBossOnly.enabled && floorNumber != 7)) return
         val sr = ScaledResolution(mc)
         val t = "Edit Mode"
-        renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
+        renderText(
+            t,
+            sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2,
+            sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT
+        )
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST) // idk if you actually need this. but jic for inv walk
@@ -204,16 +247,19 @@ object AutoP3 : Module(
         val distanceZ = abs(viewerPos.viewerPosZ - ring.location.zCoord)
 
         return distanceX < (ring.width / 2) &&
-               distanceY < ring.height &&
-               distanceY >= -0.5 &&
-               distanceZ < (ring.width / 2);
+                distanceY < ring.height &&
+                distanceY >= -0.5 &&
+                distanceZ < (ring.width / 2);
     }
 
     private suspend fun executeAction(ring: Ring) {
         val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
         delay(actionDelay.toLong())
         ring.arguments?.let {
-            if ("stop" in it) stopVelo()
+            if ("stop" in it) {
+                dir = null
+                stopVelo()
+            }
             if ("walk" in it) setKey("w", true)
             if ("look" in it) snapTo(ring.yaw, ring.pitch)
             if ("fullstop" in it) {
@@ -221,34 +267,46 @@ object AutoP3 : Module(
                 stopVelo()
             }
             if ("block" in it) {
-                val(yaw, pitch) = getYawAndPitch(ring.lookBlock!!.xCoord, ring.lookBlock!!.yCoord, ring.lookBlock!!.zCoord)
+                val (yaw, pitch) = getYawAndPitch(
+                    ring.lookBlock!!.xCoord,
+                    ring.lookBlock!!.yCoord,
+                    ring.lookBlock!!.zCoord
+                )
                 snapTo(yaw, pitch)
             }
         }
-        when(ring.type) {
+        when (ring.type) {
             "walk" -> {
+                dir = null
                 modMessage("Walking!")
                 setKey("w", true)
             }
+
             "jump" -> {
                 modMessage("Jumping!")
                 jump()
             }
+
             "stop" -> {
+                dir = null
                 modMessage("Stopping!")
                 stopMovement()
                 stopVelo()
             }
+
             "boom" -> {
+                dir = null
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 //modMessage(boomType.selected)
-                scheduleTask(0) {leftClick()}
+                scheduleTask(0) { leftClick() }
             }
+
             "hclip" -> {
+                dir = null
                 modMessage("Hclipping!")
                 hClip(ring.yaw)
-                ring.arguments?.let{
+                ring.arguments?.let {
                     if ("walk" in it) {
                         scheduleTask(1) {
                             setKey("w", true)
@@ -256,43 +314,65 @@ object AutoP3 : Module(
                     }
                 }
             }
+
             "vclip" -> {
+                dir = null
                 modMessage("Vclipping!")
                 lavaClipToggle(ring.depth!!.toDouble(), true)
             }
+
             "bonzo" -> {
+                dir = null
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
                 scheduleTask(0) {
                     clickAt(ring.yaw, ring.pitch)
                 }
             }
+
             "look" -> {
+                dir = null
                 modMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
+
             "align" -> {
+                dir = null
                 modMessage("Aligning!")
-                mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+                mc.thePlayer.setPosition(
+                    floor(mc.thePlayer.posX) + 0.5,
+                    mc.thePlayer.posY,
+                    floor(mc.thePlayer.posZ) + 0.5
+                )
             }
+
             "block" -> {
+                dir = null
                 modMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
-                val(yaw, pitch) = getYawAndPitch(ring.lookBlock!!.xCoord, ring.lookBlock!!.yCoord, ring.lookBlock!!.zCoord)
+                val (yaw, pitch) = getYawAndPitch(
+                    ring.lookBlock!!.xCoord,
+                    ring.lookBlock!!.yCoord,
+                    ring.lookBlock!!.zCoord
+                )
                 snapTo(yaw, pitch)
             }
+
             "edge" -> {
+                dir = null
                 modMessage("Edging!")
                 edge()
             }
+
             "command" -> {
                 modMessage("Sexecuting!")
                 commandAny(ring.command!!)
             }
+
             "blink" -> {
                 if (ring.packets.size == 0) return
                 if (packetArray.size > ring.packets.size) {
                     scheduleTask(0) {
-                        ring.packets.forEach{ packet ->
+                        ring.packets.forEach { packet ->
                             mc.netHandler.networkManager.sendPacket(
                                 C03PacketPlayer.C04PacketPlayerPosition(
                                     packet.x,
@@ -306,10 +386,29 @@ object AutoP3 : Module(
                     }
                 }
             }
+
             "movement" -> {
+                dir = null
                 if (ring.packets.size == 0) return
                 movementList = ring.packets.toMutableList()
                 movementOn = true
+            }
+
+            "velo" -> {
+                lastX = 0.0
+                lastZ = 0.0
+                airTicks = 0
+                modMessage("Motion")
+                if (mc.thePlayer.onGround) {
+                    stopMovement()
+                    dir = ring.yaw.toDouble()
+                } else {
+                    stopMovement()
+                    stopVelo()
+                    scheduleTask(0) {
+                        dir = ring.yaw.toDouble()
+                    }
+                }
             }
         }
     }
@@ -364,7 +463,7 @@ object AutoP3 : Module(
         if (event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
         if (event.packet.motionY == 28000) {
             onlyHorizontal = true
-            scheduleTask((disableLength.value - 1).toInt()) {onlyHorizontal = false}
+            scheduleTask((disableLength.value - 1).toInt()) { onlyHorizontal = false }
         }
     }
 
@@ -373,6 +472,52 @@ object AutoP3 : Module(
     fun onS08(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
         movementOn = false
+        dir = null
         movementList = mutableListOf()
+    }
+
+    @SubscribeEvent
+    fun onTick(event: ClientTickEvent) {
+        if (event.phase !== TickEvent.Phase.START) return
+        if (dir == null) {
+            return
+        }
+
+        if (mc.thePlayer?.onGround == true) {
+            airTicks = 0
+        } else {
+            airTicks += 1
+        }
+
+        val speed = if (!mc.thePlayer.isSneaking) {
+            mc.thePlayer.capabilities.walkSpeed
+        } else {
+            mc.thePlayer.capabilities.walkSpeed * 3 / 10 /// doesnt let me do 0.3???
+        }
+
+        val radians = dir!! * Math.PI / 180 // todo: MathUtils?
+        val x = -sin(radians) * speed * 2.806
+        val z = cos(radians) * speed * 2.806
+
+        if (airTicks < 2) {
+            mc.thePlayer.motionX = x
+            mc.thePlayer.motionZ = z
+            lastX = x
+            lastZ = z
+        } else {
+            //assume max acceleration
+            mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
+            mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+        }
+    }
+
+    @SubscribeEvent
+    fun stupid(event: InputEvent.KeyInputEvent) {
+        var keycode = Keyboard.getEventKey()
+        if (keycode == mc.gameSettings.keyBindBack.keyCode) {
+            dir = null
+        }
     }
 }

@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.addBlock
@@ -105,7 +106,11 @@ object MovementUtils {
 
         val(yaw, pitch) = getYawAndPitch(targetBlock.xCoord, targetBlock.yCoord, targetBlock.zCoord)
 
-        val speed = mc.thePlayer.capabilities.walkSpeed
+        val speed = if(!mc.thePlayer.isSneaking) {
+            mc.thePlayer.capabilities.walkSpeed
+        } else {
+            mc.thePlayer.capabilities.walkSpeed * 3 / 10 /// doesnt let me do 0.3???
+        }
         val radians = yaw * Math.PI / 180 // todo: MathUtils?
         val x = -sin(radians) * speed * 2.806
         val z = cos(radians) * speed * 2.806
@@ -117,13 +122,10 @@ object MovementUtils {
             lastZ = z
         } else {
             //assume max acceleration
-            modMessage(speed)
-            modMessage(lastX)
-            mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * 0.1 * -sin(radians)
-            mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * 0.1 * cos(radians)
+            mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
+            mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
             lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
             lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
-            modMessage(mc.thePlayer.motionX)
         }
 
         if (mc.thePlayer?.onGround == true) {

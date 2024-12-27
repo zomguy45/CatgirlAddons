@@ -59,7 +59,7 @@ data class Ring(
 
 var route: String = selectedRoute.value
 var ringEditMode: Boolean = false
-var ringTypes: List<String> = listOf("walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
+var ringTypes: List<String> = listOf("velo", "walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
 
 
 val autoP3Commands = commodore("p3") {
