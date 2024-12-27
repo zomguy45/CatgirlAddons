@@ -397,9 +397,8 @@ object AutoP3 : Module(
                 } else {
                     stopMovement()
                     stopVelo()
-                    scheduleTask(0) {
-                        dir = ring.yaw.toDouble()
-                    }
+                    stupid4 = true
+                    stupid5 = ring.yaw.toDouble()
                 }
             }
         }
@@ -433,6 +432,8 @@ object AutoP3 : Module(
     private var movementList = mutableListOf<Blink.BlinkC06>()
     private var movementOn = false
     private var onlyHorizontal = false
+    private var stupid4 = false
+    private var stupid5 = 0.0
 
     @SubscribeEvent
     fun onTickMovement(event: MotionUpdateEvent.Pre) {
@@ -512,6 +513,13 @@ object AutoP3 : Module(
                 mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
             }
         }
+    }
+
+    @SubscribeEvent
+    fun stupid3(event: MotionUpdateEvent.Pre) {
+        if (!stupid4) return
+        stupid4 = false
+        dir = stupid5
     }
 
     @SubscribeEvent
