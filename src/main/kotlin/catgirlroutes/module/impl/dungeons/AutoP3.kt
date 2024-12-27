@@ -45,9 +45,12 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C0DPacketCloseWindow
+import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraft.network.play.server.S2EPacketCloseWindow
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -465,7 +468,8 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
-    var clickingMelody = false
+    var inMelody = false
+    var melodyClicked = System.currentTimeMillis()
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
@@ -473,6 +477,8 @@ object AutoP3 : Module(
         if (dir == null) {
             return
         }
+
+        val clickingMelody = (System.currentTimeMillis() - melodyClicked > 300)
 
         if (mc.thePlayer?.onGround == true) {
             airTicks = 0
@@ -514,5 +520,33 @@ object AutoP3 : Module(
         if (keycode == mc.gameSettings.keyBindBack.keyCode) {
             dir = null
         }
+    }
+
+    @SubscribeEvent
+    fun isInMelody(event: PacketSentEvent) {
+        if (event.packet !is S2DPacketOpenWindow) return
+        if (!event.packet.windowTitle.unformattedText.contains("Click the button on time!")) {
+            return
+        }
+        inMelody = true
+    }
+
+    @SubscribeEvent
+    fun stupid1(event: PacketSentEvent) {
+        if (event.packet !is C0DPacketCloseWindow) return
+        inMelody = false
+    }
+
+    @SubscribeEvent
+    fun stupid2(event: PacketReceiveEvent) {
+        if (event.packet !is S2EPacketCloseWindow) return
+        inMelody = false
+    }
+
+    @SubscribeEvent
+    fun melodyListener(event: PacketSentEvent) {
+        if (event.packet !is C0EPacketClickWindow) return
+        if (!inMelody) return
+        melodyClicked = System.currentTimeMillis()
     }
 }
