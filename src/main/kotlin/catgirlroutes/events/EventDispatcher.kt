@@ -2,6 +2,7 @@ package catgirlroutes.events
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.*
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.containsOneOf
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.postAndCatch
@@ -44,7 +45,7 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
         Regex("^Click the button on time!$")
     )
 
-    @SubscribeEvent
+    @SubscribeEvent(receiveCanceled = true)
     fun onS2D(event: PacketReceiveEvent) = with(event.packet) {
         if (event.packet !is S2DPacketOpenWindow) return
         val title = event.packet.windowTitle.unformattedText

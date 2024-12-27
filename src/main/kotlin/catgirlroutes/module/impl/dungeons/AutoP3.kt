@@ -19,6 +19,7 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.commandAny
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.edge
@@ -56,6 +57,7 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -533,13 +535,13 @@ object AutoP3 : Module(
         }
     }
 
-    @SubscribeEvent
-    fun isInMelody(event: PacketSentEvent) {
+    @SubscribeEvent(receiveCanceled = true)
+    fun isInMelody(event: PacketReceiveEvent) {
         if (event.packet !is S2DPacketOpenWindow) return
-        if (!event.packet.windowTitle.unformattedText.contains("Click the button on time!")) {
-            return
+        modMessage("Window title: '${event.packet.windowTitle.unformattedText}'")
+        if (event.packet.windowTitle.unformattedText.contains("Click the button on time!", ignoreCase = true)) {
+            inMelody = true
         }
-        inMelody = true
     }
 
     @SubscribeEvent
@@ -557,7 +559,8 @@ object AutoP3 : Module(
     @SubscribeEvent
     fun melodyListener(event: PacketSentEvent) {
         if (event.packet !is C0EPacketClickWindow) return
-        if (!inMelody) return
-        melodyClicked = System.currentTimeMillis()
+        if (inMelody) {
+            melodyClicked = System.currentTimeMillis()
+        }
     }
 }
