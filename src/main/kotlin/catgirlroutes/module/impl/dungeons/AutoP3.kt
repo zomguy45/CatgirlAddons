@@ -478,7 +478,7 @@ object AutoP3 : Module(
             return
         }
 
-        val clickingMelody = (System.currentTimeMillis() - melodyClicked > 300)
+        val clickingMelody = (System.currentTimeMillis() - melodyClicked < 300)
 
         if (mc.thePlayer?.onGround == true) {
             airTicks = 0
