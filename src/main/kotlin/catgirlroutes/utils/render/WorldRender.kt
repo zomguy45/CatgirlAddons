@@ -12,6 +12,7 @@ import net.minecraft.entity.Entity
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
+import org.lwjgl.util.glu.Cylinder
 import org.lwjgl.util.vector.Vector3f
 import java.awt.Color
 import java.awt.Color.*
@@ -571,6 +572,48 @@ object WorldRenderUtils {
         GlStateManager.disableBlend()
         GlStateManager.enableTexture2D()
         GlStateManager.resetColor()
+        GlStateManager.popMatrix()
+    }
+
+    fun drawCylinder(
+        pos: Vec3, baseRadius: Number, topRadius: Number, height: Number,
+        slices: Number, stacks: Number, rot1: Number, rot2: Number, rot3: Number,
+        color: Color, depth: Boolean = false
+    ) {
+        GlStateManager.pushMatrix()
+        GlStateManager.disableCull()
+        GL11.glLineWidth(2.0f)
+
+        GlStateManager.enableAlpha()
+        GlStateManager.enableBlend()
+        GlStateManager.disableLighting()
+        GlStateManager.disableTexture2D()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
+        translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+
+        if (depth) GlStateManager.enableDepth() else GlStateManager.disableDepth()
+        GlStateManager.depthMask(depth)
+
+        GlStateManager.resetColor()
+        GlStateManager.color(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+
+        GlStateManager.translate(pos.xCoord, pos.yCoord, pos.zCoord)
+        GlStateManager.rotate(rot1.toFloat(), 1f, 0f, 0f)
+        GlStateManager.rotate(rot2.toFloat(), 0f, 0f, 1f)
+        GlStateManager.rotate(rot3.toFloat(), 0f, 1f, 0f)
+
+        Cylinder().draw(baseRadius.toFloat(), topRadius.toFloat(), height.toFloat(), slices.toInt(), stacks.toInt())
+
+        GlStateManager.disableBlend()
+        GlStateManager.enableTexture2D()
+        GlStateManager.resetColor()
+
+        GL11.glLineWidth(1f)
+        GlStateManager.enableCull()
+        if (!depth) {
+            GlStateManager.enableDepth()
+            GlStateManager.depthMask(true)
+        }
         GlStateManager.popMatrix()
     }
 
