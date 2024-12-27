@@ -30,7 +30,6 @@ import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import catgirlroutes.utils.dungeon.DungeonUtils.termGuiTitles
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
@@ -55,10 +54,8 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent.KeyInputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
@@ -390,7 +387,7 @@ object AutoP3 : Module(
                 lastX = 0.0
                 lastZ = 0.0
                 airTicks = 0
-                modMessage("Motion")
+                modMessage("Meowtion")
                 if (mc.thePlayer.onGround) {
                     stopMovement()
                     dir = ring.yaw.toDouble()
