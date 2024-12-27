@@ -16,6 +16,7 @@ import catgirlroutes.module.impl.dungeons.Blink.packetArray
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -38,6 +39,7 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
+import catgirlroutes.utils.thisshit
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -132,6 +134,8 @@ object AutoP3 : Module(
             }
         }
 
+    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 500.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+
 
     init {
         this.addSettings(
@@ -145,6 +149,7 @@ object AutoP3 : Module(
             disableLength,
             recordLength,
             recordBind,
+            stupid2
         )
     }
 
@@ -503,11 +508,12 @@ object AutoP3 : Module(
             }
         } else {
             //assume max acceleration
-            lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            var thisshit2 = stupid2.value / 10000
+            lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             }
         }
     }
