@@ -15,6 +15,7 @@ import net.minecraft.entity.item.EntityItem
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S29PacketSoundEffect
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object EventDispatcher { // I didn't come up with anything better so I'm just skibidiing odon clint :(
@@ -45,7 +46,7 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
         Regex("^Click the button on time!$")
     )
 
-    @SubscribeEvent(receiveCanceled = true)
+    @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun onS2D(event: PacketReceiveEvent) = with(event.packet) {
         if (event.packet !is S2DPacketOpenWindow) return
         val title = event.packet.windowTitle.unformattedText

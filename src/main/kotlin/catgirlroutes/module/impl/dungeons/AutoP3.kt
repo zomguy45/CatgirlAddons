@@ -535,7 +535,7 @@ object AutoP3 : Module(
         }
     }
 
-    @SubscribeEvent(receiveCanceled = true)
+    @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun isInMelody(event: PacketReceiveEvent) {
         if (event.packet !is S2DPacketOpenWindow) return
         modMessage("Window title: '${event.packet.windowTitle.unformattedText}'")
