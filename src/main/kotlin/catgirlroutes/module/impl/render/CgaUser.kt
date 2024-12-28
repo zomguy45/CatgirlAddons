@@ -27,12 +27,12 @@ object CgaUser : Module(
     private val scaleY = NumberSetting("Scale Y", 1.0, -3.0, 3.0, 0.1)
     private val scaleZ = NumberSetting("Scale Z", 1.0, -3.0, 3.0, 0.1)
 
-    private val cape: StringSetting = StringSetting("Cape", "cB5PcVh")
+    private val cape: StringSetting = StringSetting("Cape", "XkdcuPO")
 
     private val reset: ActionSetting = ActionSetting("Reset") {
         modMessage("Resetting User settings")
         scaleX.value = 1.0; scaleY.value = 1.0; scaleZ.value = 1.0
-        cape.text = "cB5PcVh"
+        cape.text = "XkdcuPO"
     }
 
     val updateUser = ActionSetting("Update User Data") {

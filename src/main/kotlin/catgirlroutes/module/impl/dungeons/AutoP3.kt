@@ -6,7 +6,10 @@ import catgirlroutes.commands.impl.RingManager
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.*
+import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.TermOpenEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -42,7 +45,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.odinmain.utils.name
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0DPacketCloseWindow
@@ -471,6 +473,7 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
+    var inMelody = false
     var melodyClicked = System.currentTimeMillis()
 
     @SubscribeEvent
@@ -537,7 +540,6 @@ object AutoP3 : Module(
         val title = event.container.name
         if (title.contains("Click the button on time!")) {
             melodyClicked = System.currentTimeMillis()
-            modMessage("Melody clicked")
         }
     }
 }
