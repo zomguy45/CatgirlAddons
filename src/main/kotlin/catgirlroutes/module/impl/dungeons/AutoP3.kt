@@ -533,4 +533,21 @@ object AutoP3 : Module(
             dir = null
         }
     }
+
+    @SubscribeEvent
+    fun melodyListener(event: PacketSentEvent) {
+        if (event.packet !is C0EPacketClickWindow) return
+        val metadata = event.packet.clickedItem?.metadata
+        val registry = event.packet.clickedItem?.item?.registryName
+        val name = event.packet.clickedItem?.displayName
+        val slot = event.packet.slotId
+
+        if(arrayListOf(16, 25, 34, 43).contains(slot)) {
+            if (registry == "minecraft:stained_hardened_clay" && metadata == 5) {
+                melodyClicked = System.currentTimeMillis()
+                debugMessage("Melody clicked!")
+            }
+        }
+        debugMessage(registry + ", " + metadata + ", " + slot)
+    }
 }
