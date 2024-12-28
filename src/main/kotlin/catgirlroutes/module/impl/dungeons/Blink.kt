@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.impl.Ring
 import catgirlroutes.commands.impl.RingManager
 import catgirlroutes.commands.impl.RingManager.saveRings
+import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
@@ -37,7 +38,7 @@ object Blink : Module(
                 modMessage("Done recording")
                 return@onPress
             }
-            if (!ringEditMode) return@onPress
+            if (!ringEditMode && !blinkEditMode) return@onPress
             RingManager.rings.forEach { ring ->
                 if (AutoP3.inRing(ring) && ring.type == "blink") {
                     modMessage("Started recording")

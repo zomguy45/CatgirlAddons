@@ -45,7 +45,6 @@ object LavaClip : Module(
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
         if (!mc.thePlayer.isInLava || !lavaClipping) return
-
         lavaClipping = false
         if (adjustedDistance == 0.0) adjustedDistance = findDistanceToAirBlocks()
 

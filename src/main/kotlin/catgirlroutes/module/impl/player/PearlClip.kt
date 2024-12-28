@@ -41,6 +41,7 @@ object PearlClip : Module(
     private var clipDepth: Double? = 0.0
 
     fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
+        if (!this.enabled) return
         clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
         if (clipDepth == null) return
 

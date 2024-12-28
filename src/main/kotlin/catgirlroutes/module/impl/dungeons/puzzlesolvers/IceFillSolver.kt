@@ -8,7 +8,9 @@ import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFillAuto
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles.iceFillDelay
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopVelo
+import catgirlroutes.utils.MovementUtils.targetBlocks
 import catgirlroutes.utils.Utils.Vec2
 import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.dungeon.DungeonUtils
@@ -50,6 +52,19 @@ object IceFillSolver {
 
     private var awaitingClip = false
     private var tpCooldown = false
+    private var teleported = false
+
+    @SubscribeEvent
+    fun onPacket2(event: PacketReceiveEvent) {
+        if (event.packet !is S08PacketPlayerPosLook) return
+        scheduleTask(1) {
+            if (event.isCanceled) return@scheduleTask
+            teleported = true
+        }
+        scheduleTask(20) {
+            teleported = false
+        }
+    }
 
     fun onRenderWorld(color: Color) {
         if (currentPatterns.isEmpty() || DungeonUtils.currentRoomName != "Ice Fill") return
@@ -63,19 +78,20 @@ object IceFillSolver {
                 color, 4.0f, false
             )
             val fx = floor(mc.thePlayer.posX) + 0.5
-            val y = mc.thePlayer.posY + 0.1
+            val fy = mc.thePlayer.posY + 0.1
             val fz = floor(mc.thePlayer.posZ) + 0.5
 
-            if ((fx == p1.xCoord && y == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && y == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && !awaitingClip && iceFillAuto.value && !tpCooldown) {
-                awaitingClip = true
+            if ((fx == p1.xCoord && fy == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && fy == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && targetBlocks.isEmpty() && iceFillAuto.value && !tpCooldown) {
                 scheduleTask(iceFillDelay.value.toInt() - 1) {
-                    if(mc.thePlayer.isCollidedVertically) {
+                    if(mc.thePlayer.isCollidedVertically && !teleported) {
                         stopVelo()
-                        mc.thePlayer.setPosition(p2.xCoord, p2.yCoord - 0.1, p2.zCoord)
+                        val x = p2.xCoord - mc.thePlayer.posX
+                        val y = p2.yCoord - 0.1 - mc.thePlayer.posY
+                        val z = p2.zCoord - mc.thePlayer.posZ
+                        setKey("shift", false)
+                        mc.thePlayer.moveEntity(x, y, z)
                     }
-                    awaitingClip = false
                 }
-                //modMessage("Next pos: ${p2.xCoord} ${p2.yCoord} ${p2.zCoord}")
             }
         }
     }

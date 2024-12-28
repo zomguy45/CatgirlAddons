@@ -5,6 +5,7 @@ import catgirlroutes.commands.impl.Ring
 import catgirlroutes.commands.impl.RingManager
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
+import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.events.impl.*
 import catgirlroutes.module.Category
@@ -26,6 +27,7 @@ import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
@@ -62,7 +64,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
 import java.awt.Color
-import java.awt.Color.WHITE
 import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.abs
@@ -88,7 +89,7 @@ object AutoP3 : Module(
     private val style = StringSelectorSetting(
         "Ring style",
         "Trans",
-        arrayListOf("Trans", "Normal", "LGBTQIA+"),
+        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+"),
         "Ring render style to be used."
     )
     private val layers = NumberSetting(
@@ -99,12 +100,8 @@ object AutoP3 : Module(
         1.0,
         "Amount of ring layers to render"
     ).withDependency { style.selected == "Normal" }
-    private val colour = ColorSetting(
-        "Ring colour",
-        black,
-        false,
-        "Colour of Normal ring style"
-    ).withDependency { style.selected == "Normal" }
+    private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+    private val colour2 = ColorSetting("Ring colour (active)", Color.white, false, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
     private val disableLength = NumberSetting("Recording length", 50.0, 1.0, 100.0)
     private val recordLength = NumberSetting("Recording length", 50.0, 1.0, 999.0)
     private val recordBind: KeyBindSetting = KeyBindSetting(
@@ -145,7 +142,8 @@ object AutoP3 : Module(
             boomType,
             style,
             layers,
-            colour,
+            colour1,
+            colour2,
             disableLength,
             recordLength,
             recordBind,
@@ -189,6 +187,12 @@ object AutoP3 : Module(
     }
 
     @SubscribeEvent
+    fun onPacketS2D(event: PacketReceiveEvent) {
+        if (event.packet !is S2DPacketOpenWindow) return
+        debugMessage("window opened lol")
+    }
+
+    @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (inBossOnly.enabled && floorNumber != 7 && !inBoss) return
         rings.forEach { ring ->
@@ -197,11 +201,12 @@ object AutoP3 : Module(
             val z: Double = ring.location.zCoord
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
-            val color = if (cooldown) WHITE else colour.value
+            val color = if (cooldown) colour2.value else colour1.value
 
             when (style.selected) {
-                "Trans" -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal" -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
+                "Trans"    -> renderTransFlag(x, y, z, ring.width, ring.height)
+                "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
+                "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
             }
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
@@ -222,9 +227,10 @@ object AutoP3 : Module(
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
         if (!editTitle.enabled) return
-        if (!ringEditMode || (inBossOnly.enabled && floorNumber != 7)) return
+        if (inBossOnly.enabled && floorNumber != 7) return
         val sr = ScaledResolution(mc)
-        val t = "Edit Mode"
+        val t: String
+        t = if (ringEditMode) "Edit Mode" else if (blinkEditMode) "Blink edit" else return
         renderText(
             t,
             sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2,
@@ -364,7 +370,7 @@ object AutoP3 : Module(
 
             "blink" -> {
                 dir = null
-                if (ring.packets.size == 0) return
+                if (ring.packets.size == 0 || blinkEditMode) return
                 if (packetArray.size > ring.packets.size) {
                     scheduleTask(0) {
                         ring.packets.forEach { packet ->

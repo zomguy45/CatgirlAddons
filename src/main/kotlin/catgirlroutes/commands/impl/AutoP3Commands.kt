@@ -59,6 +59,7 @@ data class Ring(
 
 var route: String = selectedRoute.value
 var ringEditMode: Boolean = false
+var blinkEditMode: Boolean = false
 var ringTypes: List<String> = listOf("velo", "walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
 
 
@@ -193,6 +194,11 @@ val autoP3Commands = commodore("p3") {
     literal("em").runs {
         ringEditMode = !ringEditMode
         modMessage("EditMode ${if (ringEditMode) "§aenabled" else "§cdisabled"}")
+    }
+
+    literal("bem").runs {
+        blinkEditMode = !blinkEditMode
+        modMessage("Blink edit ${if (blinkEditMode) "§aenabled" else "§cdisabled"}")
     }
 
     literal("toggle").runs {
