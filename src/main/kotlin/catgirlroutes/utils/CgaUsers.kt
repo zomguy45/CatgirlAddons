@@ -56,13 +56,6 @@ object CgaUsers { // todo: move to CgaUser module, add capes with gif
             } else {
                 jsonObject?.get("cape")?.asString
             }
-            println("""
-                AMONGUS
-                $name
-                $uuid
-                $sizeTriple
-                $cape
-            """.trimIndent())
 
             return UserData(name ?: "", uuid ?: "", permission ?: 1, sizeTriple, cape ?: "XkdcuPO")
         }
@@ -70,14 +63,10 @@ object CgaUsers { // todo: move to CgaUser module, add capes with gif
 
     fun updateUsers(): HashMap<String, CgaUser> {
         runBlocking(scope.coroutineContext) {
-            val data = getDataFromServer().ifEmpty { println("ACONGUS EMPTY"); return@runBlocking }
+            val data = getDataFromServer().ifEmpty { return@runBlocking }
             val gson = GsonBuilder().registerTypeAdapter(UserData::class.java, UserDeserializer())?.create() ?: return@runBlocking
             gson.fromJson(data, Array<UserData>::class.java).forEach {
                 val capeResourceLocation = getCapeResourceLocation(it.cape)
-                println("""
-                    ALONGUS
-                    $it
-                """.trimIndent())
                 users[it.username] = CgaUser(it.dimensions.first, it.dimensions.second, it.dimensions.third, capeResourceLocation)
             }
         }
@@ -119,10 +108,6 @@ object CgaUsers { // todo: move to CgaUser module, add capes with gif
             }
 
             try {
-                println("""
-                    AGONGUS
-                    ${deferredResource.await()}
-                """.trimIndent())
                 deferredResource.await()
             } catch (e: Exception) {
                 e.printStackTrace()
