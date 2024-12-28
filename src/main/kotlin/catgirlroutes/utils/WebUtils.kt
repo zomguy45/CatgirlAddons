@@ -51,6 +51,7 @@ suspend fun getDataFromServer(url: String = "https://arasfjoiadjf.p-e.kr/cga/use
             connection.requestMethod = "GET"
 
             val responseCode = connection.responseCode
+
             if (responseCode != 200) return@withTimeoutOrNull ""
             val inputStream = connection.inputStream
             val response = inputStream.bufferedReader().use { it.readText() }

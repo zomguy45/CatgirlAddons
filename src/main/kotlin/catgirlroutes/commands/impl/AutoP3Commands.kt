@@ -167,7 +167,7 @@ val autoP3Commands = commodore("p3") {
                         lookBlock = mc.thePlayer.rayTrace(40.0, 1F).hitVec
                         arguments.add(arg)
                     }
-                    arg in listOf("stop", "look", "walk", "term", "fullstop", "block") -> arguments.add(arg)
+                    arg in listOf("stop", "look", "walk", "term", "fullstop", "block", "term") -> arguments.add(arg)
                 }
             }
 

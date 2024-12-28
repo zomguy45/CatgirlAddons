@@ -7,16 +7,14 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.MotionUpdateEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.events.impl.TermOpenEvent
+import catgirlroutes.events.impl.*
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
 import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
 import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
@@ -41,10 +39,12 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
+import catgirlroutes.utils.thisshit
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.odinmain.utils.name
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0DPacketCloseWindow
@@ -57,6 +57,7 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -130,6 +131,8 @@ object AutoP3 : Module(
             }
         }
 
+    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 500.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+
 
     init {
         this.addSettings(
@@ -144,6 +147,7 @@ object AutoP3 : Module(
             disableLength,
             recordLength,
             recordBind,
+            stupid2
         )
     }
 
@@ -265,6 +269,7 @@ object AutoP3 : Module(
             if ("walk" in it) setKey("w", true)
             if ("look" in it) snapTo(ring.yaw, ring.pitch)
             if ("fullstop" in it) {
+                dir = null
                 stopMovement()
                 stopVelo()
             }
@@ -401,9 +406,8 @@ object AutoP3 : Module(
                 } else {
                     stopMovement()
                     stopVelo()
-                    scheduleTask(0) {
-                        dir = ring.yaw.toDouble()
-                    }
+                    stupid4 = true
+                    stupid5 = ring.yaw.toDouble()
                 }
             }
         }
@@ -437,6 +441,8 @@ object AutoP3 : Module(
     private var movementList = mutableListOf<Blink.BlinkC06>()
     private var movementOn = false
     private var onlyHorizontal = false
+    private var stupid4 = false
+    private var stupid5 = 0.0
 
     @SubscribeEvent
     fun onTickMovement(event: MotionUpdateEvent.Pre) {
@@ -509,13 +515,21 @@ object AutoP3 : Module(
             }
         } else {
             //assume max acceleration
-            lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            var thisshit2 = stupid2.value / 10000
+            lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             }
         }
+    }
+
+    @SubscribeEvent
+    fun stupid3(event: MotionUpdateEvent.Pre) {
+        if (!stupid4) return
+        stupid4 = false
+        dir = stupid5
     }
 
     @SubscribeEvent
@@ -527,30 +541,19 @@ object AutoP3 : Module(
     }
 
     @SubscribeEvent
-    fun isInMelody(event: PacketSentEvent) {
-        if (event.packet !is S2DPacketOpenWindow) return
-        if (!event.packet.windowTitle.unformattedText.contains("Click the button on time!")) {
-            return
-        }
-        inMelody = true
-    }
-
-    @SubscribeEvent
-    fun stupid1(event: PacketSentEvent) {
-        if (event.packet !is C0DPacketCloseWindow) return
-        inMelody = false
-    }
-
-    @SubscribeEvent
-    fun stupid2(event: PacketReceiveEvent) {
-        if (event.packet !is S2EPacketCloseWindow) return
-        inMelody = false
-    }
-
-    @SubscribeEvent
     fun melodyListener(event: PacketSentEvent) {
         if (event.packet !is C0EPacketClickWindow) return
-        if (!inMelody) return
-        melodyClicked = System.currentTimeMillis()
+        val metadata = event.packet.clickedItem?.metadata
+        val registry = event.packet.clickedItem?.item?.registryName
+        val name = event.packet.clickedItem?.displayName
+        val slot = event.packet.slotId
+
+        if(arrayListOf(16, 25, 34, 43).contains(slot)) {
+            if (registry == "minecraft:stained_hardened_clay" && metadata == 5) {
+                melodyClicked = System.currentTimeMillis()
+                debugMessage("Melody clicked!")
+            }
+        }
+        debugMessage(registry + ", " + metadata + ", " + slot)
     }
 }

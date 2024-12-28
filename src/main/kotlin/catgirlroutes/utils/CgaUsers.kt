@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.scope
 import com.google.gson.*
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.runBlocking
 import net.minecraft.client.renderer.texture.DynamicTexture
 import net.minecraft.util.ResourceLocation
@@ -65,7 +66,6 @@ object CgaUsers { // todo: move to CgaUser module, add capes with gif
             val data = getDataFromServer().ifEmpty { return@runBlocking }
             val gson = GsonBuilder().registerTypeAdapter(UserData::class.java, UserDeserializer())?.create() ?: return@runBlocking
             gson.fromJson(data, Array<UserData>::class.java).forEach {
-                if (it.cape == "XkdcuPOv") return@forEach
                 val capeResourceLocation = getCapeResourceLocation(it.cape)
                 users[it.username] = CgaUser(it.dimensions.first, it.dimensions.second, it.dimensions.third, capeResourceLocation)
             }
@@ -93,13 +93,26 @@ object CgaUsers { // todo: move to CgaUser module, add capes with gif
                 }
             }
 
-            var resourceLocation: ResourceLocation? = null
-            mc.addScheduledTask { // without this bs this shit throws error
-                val texture = DynamicTexture(ImageIO.read(capeFile))
-                resourceLocation = mc.textureManager.getDynamicTextureLocation(RESOURCE_DOMAIN, texture)
+            // I don't even know what this shit is but ty stackoverflow
+            // it's something like promise idk
+            val deferredResource = CompletableDeferred<ResourceLocation>()
+
+            mc.addScheduledTask {
+                try {
+                    val texture = DynamicTexture(ImageIO.read(capeFile))
+                    val resourceLocation = mc.textureManager.getDynamicTextureLocation(RESOURCE_DOMAIN, texture)
+                    deferredResource.complete(resourceLocation)
+                } catch (e: Exception) {
+                    deferredResource.completeExceptionally(e)
+                }
             }
 
-            return@run resourceLocation ?: ResourceLocation(RESOURCE_DOMAIN, "default_cape.png")
+            try {
+                deferredResource.await()
+            } catch (e: Exception) {
+                e.printStackTrace()
+                ResourceLocation(RESOURCE_DOMAIN, "default_cape.png")
+            }
 
         }
     }
