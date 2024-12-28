@@ -6,10 +6,7 @@ import catgirlroutes.commands.impl.RingManager
 import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.MotionUpdateEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.events.impl.TermOpenEvent
+import catgirlroutes.events.impl.*
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -45,6 +42,7 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import me.odinmain.utils.name
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0DPacketCloseWindow
@@ -473,7 +471,6 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
-    var inMelody = false
     var melodyClicked = System.currentTimeMillis()
 
     @SubscribeEvent
@@ -535,32 +532,12 @@ object AutoP3 : Module(
         }
     }
 
-    @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
-    fun isInMelody(event: PacketReceiveEvent) {
-        if (event.packet !is S2DPacketOpenWindow) return
-        modMessage("Window title: '${event.packet.windowTitle.unformattedText}'")
-        if (event.packet.windowTitle.unformattedText.contains("Click the button on time!", ignoreCase = true)) {
-            inMelody = true
-        }
-    }
-
     @SubscribeEvent
-    fun stupid1(event: PacketSentEvent) {
-        if (event.packet !is C0DPacketCloseWindow) return
-        inMelody = false
-    }
-
-    @SubscribeEvent
-    fun stupid2(event: PacketReceiveEvent) {
-        if (event.packet !is S2EPacketCloseWindow) return
-        inMelody = false
-    }
-
-    @SubscribeEvent
-    fun melodyListener(event: PacketSentEvent) {
-        if (event.packet !is C0EPacketClickWindow) return
-        if (inMelody) {
+    fun onGuiSlotDraw(event: GuiContainerEvent.SlotClickEvent) {
+        val title = event.container.name
+        if (title.contains("Click the button on time!")) {
             melodyClicked = System.currentTimeMillis()
+            modMessage("Melody clicked")
         }
     }
 }
