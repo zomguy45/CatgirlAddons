@@ -263,6 +263,7 @@ object AutoP3 : Module(
             if ("walk" in it) setKey("w", true)
             if ("look" in it) snapTo(ring.yaw, ring.pitch)
             if ("fullstop" in it) {
+                dir = null
                 stopMovement()
                 stopVelo()
             }
@@ -530,14 +531,6 @@ object AutoP3 : Module(
         var keycode = Keyboard.getEventKey()
         if (keycode == mc.gameSettings.keyBindBack.keyCode) {
             dir = null
-        }
-    }
-
-    @SubscribeEvent
-    fun onGuiSlotDraw(event: GuiContainerEvent.SlotClickEvent) {
-        val title = event.container.name
-        if (title.contains("Click the button on time!")) {
-            melodyClicked = System.currentTimeMillis()
         }
     }
 }
