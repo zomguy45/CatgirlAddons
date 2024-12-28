@@ -126,4 +126,7 @@ val devCommands = commodore("dev") {
     literal("moveentity").runs { x: Double, y: Double, z: Double ->
         mc.thePlayer.moveEntity(x, y, z)
     }
+    literal("ystop").runs {
+        mc.thePlayer.motionY = 0.0
+    }
 }
