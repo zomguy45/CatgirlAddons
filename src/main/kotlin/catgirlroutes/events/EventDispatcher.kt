@@ -2,7 +2,6 @@ package catgirlroutes.events
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.*
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.containsOneOf
 import catgirlroutes.utils.Utils.equalsOneOf
@@ -12,7 +11,6 @@ import catgirlroutes.utils.dungeon.DungeonUtils.dungeonItemDrops
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.dungeon.DungeonUtils.isSecret
-import me.odinmain.utils.name
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S29PacketSoundEffect
@@ -51,7 +49,6 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
     @SubscribeEvent(receiveCanceled = true, priority = EventPriority.HIGHEST)
     fun onS2D(event: PacketReceiveEvent) = with(event.packet) {
         if (event.packet !is S2DPacketOpenWindow) return
-        debugMessage("SADASDASD")
         val title = event.packet.windowTitle.unformattedText
         if (termNames.any{regex -> regex.matches(title)}) {
             TermOpenEvent.open(event.packet).postAndCatch()

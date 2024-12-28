@@ -80,8 +80,7 @@ object AutoSS : Module(
     override fun onKeyBind() {
         clicked = false
         doingSS = false
-        //start()
-        //&lingling()
+        start()
     }
 
     @SubscribeEvent
@@ -249,19 +248,5 @@ object AutoSS : Module(
         clickedButton = Vec3(x.toDouble(), y.toDouble(), z.toDouble())
         lastClickAdded = System.currentTimeMillis()
         mc.netHandler.addToSendQueue(C08PacketPlayerBlockPlacement(BlockPos(x, y, z), 4, mc.thePlayer.heldItem, 0.875f, 0.5f, 0.5f))
-    }
-
-    fun lingling() {
-        Thread{
-            try {
-                for (i in 0 until 7) {
-                    val startButton: BlockPos = BlockPos(151, 64, 105)
-                    clickButton(startButton.x, startButton.y, startButton.z)
-                    Thread.sleep(50)
-                }
-            } catch (e: Exception) {
-                modMessage("...")
-            }
-        }.start()
     }
 }
