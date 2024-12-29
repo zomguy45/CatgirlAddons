@@ -56,11 +56,13 @@ object LeapUtils {
             if (teammate.name != name) return@forEach
             val state = swapFromName("Infinileap")
             if (state == "SWAPPED") {
-                scheduleTask(0) {
+                scheduleTask(1) {
+                    modMessage("swapped leap")
                     airClick()
                     clickedLeap = true
                 }
             } else if (state == "ALREADY_HELD") {
+                modMessage("already held")
                 airClick()
                 clickedLeap = true
             }
@@ -80,11 +82,13 @@ object LeapUtils {
             if (teammate.clazz == clazzz) {
                 val state = swapFromName("Infinileap")
                 if (state == "SWAPPED") {
-                    scheduleTask(0) {
+                    modMessage("swapped leap")
+                    scheduleTask(1) {
                         airClick()
                         clickedLeap = true
                     }
                 } else if (state == "ALREADY_HELD") {
+                    modMessage("already held")
                     airClick()
                     clickedLeap = true
                 }

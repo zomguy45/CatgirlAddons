@@ -103,14 +103,12 @@ object AutoLeap : Module(
     fun onChat(event: ClientChatReceivedEvent) {
         if (!inDungeons || event.type.toInt() == 2 || !inBoss) return
         val message = stripControlCodes(event.message.unformattedText)
-        if (message.endsWith(" (7/7)") || message.endsWith(" (8/8)")) {
+        if (message.endsWith("(7/7)") || message.endsWith("(8/8)")) {
             handleLeap()
         }
     }
 
     private fun handleLeap() {
-        if (leapMode.selected == "Name") leap(clearLeap.selected)
-        else if (leapMode.selected == "Class") leap(classEnumMapping[clearLeapClass.index])
         val posX = mc.thePlayer.posX
         val posY = mc.thePlayer.posY
         val posZ = mc.thePlayer.posZ
