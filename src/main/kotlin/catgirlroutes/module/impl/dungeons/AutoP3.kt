@@ -7,10 +7,7 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.MotionUpdateEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.PacketSentEvent
-import catgirlroutes.events.impl.TermOpenEvent
+import catgirlroutes.events.impl.*
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -184,7 +181,7 @@ object AutoP3 : Module(
     }
 
     @SubscribeEvent
-    fun onPacketS2D(event: PacketReceiveEvent) {
+    fun onPacketS2D(event: PacketReceiveEventReturn) {
         if (event.packet !is S2DPacketOpenWindow) return
         debugMessage("window opened lol")
     }
