@@ -72,6 +72,7 @@ object ModuleManager {
         InventoryButtons,
         InstantSprint,
         NickHider,
+        InvincibilityTimer,
 
         // Player
         AutoSprint,

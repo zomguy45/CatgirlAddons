@@ -13,6 +13,7 @@ import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.Utils.romanToInt
 import catgirlroutes.utils.Utils.rotateAroundNorth
 import catgirlroutes.utils.Utils.rotateToNorth
 import catgirlroutes.utils.Utils.rotationNumber
@@ -100,7 +101,7 @@ object DungeonUtils {
         get() = currentDungeon?.leapTeammates.orEmpty()
 
     val currentDungeonPlayer: DungeonPlayer
-        get() = dungeonTeammates.find { it.name == mc.thePlayer?.name } ?: DungeonPlayer(mc.thePlayer?.name ?: "Unknown", DungeonClass.Unknown, entity = mc.thePlayer)
+        get() = dungeonTeammates.find { it.name == mc.thePlayer?.name } ?: DungeonPlayer(mc.thePlayer?.name ?: "Unknown", DungeonClass.Unknown, 0, entity = mc.thePlayer)
 
     val doorOpener: String
         get() = currentDungeon?.dungeonStats?.doorOpener ?: "Unknown"
@@ -172,6 +173,11 @@ object DungeonUtils {
         }
     }
 
+    fun getMageCooldownMultiplier(): Double {
+        return if (currentDungeonPlayer.clazz != DungeonClass.Mage) 1.0
+        else 1 - 0.25 - (floor(currentDungeonPlayer.clazzLvl / 2.0) / 100) * if (dungeonTeammates.count { it.clazz == DungeonClass.Mage } == 1) 2 else 1
+    }
+
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
         if (inDungeons) currentDungeon?.onPacket(event)
@@ -219,10 +225,10 @@ object DungeonUtils {
     fun getDungeonTeammates(previousTeammates: ArrayList<DungeonPlayer>, tabList: List<S38PacketPlayerListItem.AddPlayerData>): ArrayList<DungeonPlayer> {
         for (line in tabList) {
             val displayName = line.displayName?.unformattedText?.noControlCodes ?: continue
-            val (_, name, clazz, _) = tablistRegex.find(displayName)?.destructured ?: continue
+            val (_, name, clazz, clazzLevel) = tablistRegex.find(displayName)?.destructured ?: continue
 
             previousTeammates.find { it.name == name }?.let { player -> player.isDead = clazz == "DEAD" } ?:
-            previousTeammates.add(DungeonPlayer(name, DungeonClass.entries.find { it.name == clazz } ?: continue, mc.netHandler?.getPlayerInfo(name)?.locationSkin ?: continue, mc.theWorld?.getPlayerEntityByName(name), false))
+            previousTeammates.add(DungeonPlayer(name, DungeonClass.entries.find { it.name == clazz } ?: continue, clazzLvl = romanToInt(clazzLevel), mc.netHandler?.getPlayerInfo(name)?.locationSkin ?: continue, mc.theWorld?.getPlayerEntityByName(name), false))
         }
         return previousTeammates
     }
