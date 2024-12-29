@@ -25,6 +25,7 @@ object Trail: Module(
 
     private var trailColor = ColorSetting("Color", java.awt.Color.PINK)
     private var trailThickness = NumberSetting("Thickness", 3.0, 1.0, 5.0)
+    private var trailStay = BooleanSetting("Stay", true)
     private var trailPhase = BooleanSetting("Phase", false)
 
     init {
@@ -32,6 +33,7 @@ object Trail: Module(
             trailTicks,
             trailColor,
             trailThickness,
+            trailStay,
             trailPhase
         )
     }
@@ -46,7 +48,7 @@ object Trail: Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (mc.thePlayer == null || !this.enabled) return
-        if (!hasMoved()) return
+        if (!hasMoved() && trailStay.value) return
         posToRender.add(Vec3(renderManager.viewerPosX, renderManager.viewerPosY + 0.05, renderManager.viewerPosZ))
         if (posToRender.size.toDouble() == trailTicks.value * 2) posToRender.removeFirst()
         if (posToRender.size > trailTicks.value * 2) posToRender.clear()
