@@ -5,8 +5,10 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraftforge.client.event.ClientChatReceivedEvent
@@ -18,10 +20,11 @@ object InvincibilityTimer : Module(
     name = "Invincibility Timer"
 ) {
     private val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
-    private val dungeonOnly = BooleanSetting("Dungeons only", true)
+    private val dungeonOnly = BooleanSetting("Dungeons only", false)
+    private val bossOnly = BooleanSetting("Boss only", false)
 
     init {
-        this.addSettings(this.cataLevel, this.dungeonOnly)
+        this.addSettings(this.cataLevel, this.dungeonOnly, this.bossOnly)
     }
     var spiritTicks = 0
     var bonzoTicks = 0
@@ -51,11 +54,13 @@ object InvincibilityTimer : Module(
     @RegisterHudElement
     object TimerHud : HudElement(
         this,
-        6,
-        12
+        0, 0,
+        mc.fontRendererObj.getStringWidth("Phoenix: 30.2") + 6,
+        (mc.fontRendererObj.FONT_HEIGHT + 2) * 3
     ) {
         override fun renderHud() {
-            if (dungeonOnly.value && !inDungeons) return
+            if ((dungeonOnly.enabled && !inDungeons) || (bossOnly.enabled && !inBoss)) return
+
             val name = mc.thePlayer?.inventory?.armorInventory?.get(3)?.displayName
             val offset = when {
                 name?.contains("Bonzo") == true -> 10.0
@@ -67,12 +72,12 @@ object InvincibilityTimer : Module(
             val spiritReady = stupid("Spirit", spiritTicks, phoenix && offset == 20.0 && phoenixTicks < 0.0)
             val phoenixReady = stupid("Phoenix", phoenixTicks, phoenix && ((offset == 20.0 && spiritTicks < 0.0) || (offset == 10.0 && bonzoTicks < 0.0)))
 
-            mc.fontRendererObj.drawStringWithShadow(bonzoReady, 0.0F, 10.0f, Color.PINK.rgb)
-            mc.fontRendererObj.drawStringWithShadow(spiritReady, 0.0F, 20.0f, Color.PINK.rgb)
-            mc.fontRendererObj.drawStringWithShadow(phoenixReady, 0.0F, 30.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow(bonzoReady, 6.0F, 0.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow(spiritReady, 6.0F, 10.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow(phoenixReady, 6.0F, 20.0f, Color.PINK.rgb)
 
-            renderRect(-6.0, offset + 2.0, 3.0, 3.0, Color.PINK)
-            if (phoenix) renderRect(-6.0, 32.0, 3.0, 3.0, Color.PINK)
+            renderRect(0.0, offset + 2.0, 3.0, 3.0, Color.PINK)
+            if (phoenix) renderRect(0.0, 32.0, 3.0, 3.0, Color.PINK)
         }
 
         private fun stupid(name: String, ticks: Int, highlight: Boolean): String {  // stupid thing for colour highlight
