@@ -3,9 +3,11 @@ package catgirlroutes.module.impl.misc
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -15,10 +17,11 @@ import java.awt.Color
 object InvincibilityTimer : Module(
     name = "Invincibility Timer"
 ) {
-    val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
+    private val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
+    private val dungeonOnly = BooleanSetting("Dungeons only", true)
 
     init {
-        this.addSettings(cataLevel)
+        this.addSettings(this.cataLevel, this.dungeonOnly)
     }
     var spiritTicks = 0
     var bonzoTicks = 0
@@ -52,6 +55,7 @@ object InvincibilityTimer : Module(
         12
     ) {
         override fun renderHud() {
+            if (dungeonOnly.value && !inDungeons) return
             val name = mc.thePlayer?.inventory?.armorInventory?.get(3)?.displayName
             val offset = when {
                 name?.contains("Bonzo") == true -> 10.0
