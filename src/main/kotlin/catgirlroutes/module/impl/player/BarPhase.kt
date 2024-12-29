@@ -29,37 +29,13 @@ object BarPhase: Module(
         if (!mc.thePlayer.onGround) return
         val blockPos = BlockPos(mc.thePlayer.posX, mc.thePlayer.posY + 0.5, mc.thePlayer.posZ)
         val blockState = mc.theWorld.getBlockState(blockPos)
-        if (blockState.block == Blocks.iron_bars) {
-            if (panesConnected(blockPos, blockState)) return
-            blockState.block.setBlockBoundsBasedOnState(mc.theWorld, blockPos)
-            val aabb = blockState.block.getCollisionBoundingBox(mc.theWorld, blockPos, blockState)
-            if (abs(aabb.minX - aabb.maxX) <= 0.3) {
-                val playerWidth = mc.thePlayer.width / 2.0
-                val closerToMin = abs(mc.thePlayer.posX - aabb.minX) < abs(mc.thePlayer.posX - aabb.maxX)
-                val boundaryAdjustment = if (closerToMin) aabb.maxX + playerWidth + 0.1 else aabb.minX - playerWidth + 0.1
-                if ((closerToMin && mc.thePlayer.posX - 0.3 < aabb.minX || !closerToMin && mc.thePlayer.posX + 0.3 > aabb.maxX) && !lagBacked && mc.thePlayer.isCollidedHorizontally) {
-                    mc.thePlayer.setPosition(boundaryAdjustment, mc.thePlayer.posY, mc.thePlayer.posZ)
-                    lagbackRegister = true
-                    scheduleTask(2) { lagbackRegister = false }
-                    lastX = boundaryAdjustment
-                } else if (lastX != boundaryAdjustment && lastX != Double.MAX_VALUE) {
-                    lastX = Double.MAX_VALUE
-                }
-            }
-            if (abs(aabb.minZ - aabb.maxZ) <= 0.3) {
-                val playerWidth = mc.thePlayer.width / 2.0
-                val closerToMin = abs(mc.thePlayer.posZ - aabb.minZ) < abs(mc.thePlayer.posZ - aabb.maxZ)
-                val boundaryAdjustment = if (closerToMin) aabb.maxZ + playerWidth + 0.1 else aabb.minZ - playerWidth + 0.1
-                if ((closerToMin && mc.thePlayer.posZ - 0.3 < aabb.minZ || !closerToMin && mc.thePlayer.posZ + 0.3 > aabb.maxZ) && !lagBacked && mc.thePlayer.isCollidedHorizontally) {
-                    mc.thePlayer.setPosition(mc.thePlayer.posX, mc.thePlayer.posY, boundaryAdjustment)
-                    lagbackRegister = true
-                    scheduleTask(2) { lagbackRegister = false }
-                    lastZ = boundaryAdjustment
-                } else if (lastZ != boundaryAdjustment && lastZ != Double.MAX_VALUE) {
-                    lastZ = Double.MAX_VALUE
-                }
-            }
-        }
+        if (blockState.block != Blocks.iron_bars || panesConnected(blockPos, blockState)) return
+
+        blockState.block.setBlockBoundsBasedOnState(mc.theWorld, blockPos)
+        val aabb = blockState.block.getCollisionBoundingBox(mc.theWorld, blockPos, blockState)
+
+        adjustPos(aabb.minX, aabb.maxX, lastX, mc.thePlayer.posX)
+        adjustPos(aabb.minZ, aabb.maxZ, lastZ, mc.thePlayer.posZ)
     }
 
     @SubscribeEvent
@@ -70,33 +46,34 @@ object BarPhase: Module(
         scheduleTask(10) { lagBacked = false}
     }
 
-    private fun panesConnected(var1: BlockPos?, var2: IBlockState): Boolean {
-        val var3 = var2.block as BlockPane
-        return if (!var3.canPaneConnectTo(
-                mc.theWorld,
-                var1,
-                EnumFacing.NORTH
-            ) && !var3.canPaneConnectTo(
-                mc.theWorld,
-                var1,
-                EnumFacing.SOUTH
-            ) || !var3.canPaneConnectTo(
-                mc.theWorld,
-                var1,
-                EnumFacing.WEST
-            ) && !var3.canPaneConnectTo(mc.theWorld, var1, EnumFacing.EAST)
-        ) {
-            !var3.canPaneConnectTo(mc.theWorld, var1, EnumFacing.NORTH) && !var3.canPaneConnectTo(
-                mc.theWorld,
-                var1,
-                EnumFacing.SOUTH
-            ) && !var3.canPaneConnectTo(
-                mc.theWorld,
-                var1,
-                EnumFacing.WEST
-            ) && !var3.canPaneConnectTo(mc.theWorld, var1, EnumFacing.EAST)
-        } else {
-            true
+    private fun adjustPos(min: Double, max: Double, lastValue: Double, pos: Double) {
+        if (abs(min - max) > 0.3) return
+
+        val playerWidth = mc.thePlayer.width / 2.0
+        val closerToMin = abs(pos - min) < abs(pos - max)
+        val boundaryAdjustment = if (closerToMin) max + playerWidth + 0.1 else min - playerWidth + 0.1
+        val isStupid = closerToMin && pos - 0.3 < min || !closerToMin && pos + 0.3 > max
+
+        if (isStupid && !lagBacked && mc.thePlayer.isCollidedHorizontally) {
+            mc.thePlayer.setPosition(
+                if (pos == mc.thePlayer.posX) boundaryAdjustment else mc.thePlayer.posX,
+                mc.thePlayer.posY,
+                if (pos == mc.thePlayer.posZ) boundaryAdjustment else mc.thePlayer.posZ
+            )
+            lagbackRegister = true
+            scheduleTask(2) { lagbackRegister = false }
+            if (pos == mc.thePlayer.posX) lastX = boundaryAdjustment else lastZ = boundaryAdjustment
+        } else if (lastValue != boundaryAdjustment && lastValue != Double.MAX_VALUE) {
+            if (pos == mc.thePlayer.posX) lastX = Double.MAX_VALUE else lastZ = Double.MAX_VALUE
         }
+    }
+
+    private fun panesConnected(pos: BlockPos?, state: IBlockState): Boolean {
+        val block = state.block as BlockPane
+        val ns = block.canPaneConnectTo(mc.theWorld, pos, EnumFacing.NORTH) ||
+                block.canPaneConnectTo(mc.theWorld, pos, EnumFacing.SOUTH)
+        val we = block.canPaneConnectTo(mc.theWorld, pos, EnumFacing.WEST) ||
+                block.canPaneConnectTo(mc.theWorld, pos, EnumFacing.EAST)
+        return ns && we || !ns && !we
     }
 }
