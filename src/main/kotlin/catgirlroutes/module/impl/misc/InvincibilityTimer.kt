@@ -3,9 +3,11 @@ package catgirlroutes.module.impl.misc
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -16,9 +18,10 @@ object InvincibilityTimer : Module(
     name = "Invincibility Timer"
 ) {
     val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
+    val dungeonOnly = BooleanSetting("Dungeons only", true)
 
     init {
-        this.addSettings(cataLevel)
+        this.addSettings(cataLevel, dungeonOnly)
     }
     var spiritTicks = 0
     var bonzoTicks = 0
@@ -30,7 +33,7 @@ object InvincibilityTimer : Module(
         val msg = event.message.unformattedText
         when {
             msg.contains("Second Wind Activated! Your Spirit Mask saved your life!") -> spiritTicks = (600 * getMageCooldownMultiplier()).toInt()
-            msg.contains("Bonzo's Mask saved your life!") -> bonzoTicks = (7200 - (cataLevel.value.toInt() * 72) * getMageCooldownMultiplier()).toInt()
+            msg.contains("Bonzo's Mask saved your life!") -> bonzoTicks = 7200 - cataLevel.value.toInt() * 72
             msg.contains("Your Phoenix Pet saved you from certain death!") -> phoenixTicks = (1200)
             msg.contains("You summoned your") -> phoenix = if (msg.contains("Phoenix")) true else false
             msg.contains("Autopet equipped your") -> phoenix = if (msg.contains("Phoenix")) true else false
@@ -52,6 +55,7 @@ object InvincibilityTimer : Module(
         12
     ) {
         override fun renderHud() {
+            if (dungeonOnly.value && !inDungeons) return
             val name = mc.thePlayer?.inventory?.armorInventory?.get(3)?.displayName
             val offset = if (name?.contains("Bonzo") == true) 10.0 else if (name?.contains("Spirit") == true) 20.0 else 10000.0 //schizo way to not render indictator on screen
             val bonzoReady = if (bonzoTicks <= 0) "Bonzo: ${if (phoenix && offset == 10.0 && phoenixTicks < 0.0) "§c" else "§a"}✔" else "Bonzo: §c${(bonzoTicks / 20.0)}"

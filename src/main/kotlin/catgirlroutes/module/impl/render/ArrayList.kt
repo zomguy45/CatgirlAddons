@@ -56,9 +56,9 @@ object ModuleList : Module(
                 val startText = if (isLeft) 9.0 else -mc.fontRendererObj.getStringWidth(active) + 1.0
                 GlStateManager.pushMatrix()
                 GlStateManager.translate(0f,0f,-10f)
-                HUDRenderUtils.renderRect(startLine, y - 2.0, 2.0, 11.0, colorText.value)
                 HUDRenderUtils.renderRect(startBox, y - 2.0, mc.fontRendererObj.getStringWidth(active) + 4.0, 11.0, Color(0, 0, 0, 128))
                 GlStateManager.popMatrix()
+                HUDRenderUtils.renderRect(startLine, y - 2.0, 2.0, 11.0, colorText.value)
                 mc.fontRendererObj.drawStringWithShadow(active, (startText).toFloat(), y.toFloat(), colorText.value.rgb)
             y += if (isTop) 11.0 else -11.0
             }
