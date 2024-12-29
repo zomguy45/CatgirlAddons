@@ -4,11 +4,12 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.utils.ChatUtils.devMessage
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.PlayerUtils.rightClick
+import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
-import me.odinmain.utils.skyblock.modMessage
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
@@ -49,14 +50,51 @@ object LeapUtils {
     fun leap(name: String) {
         if (!inDungeons) return
         if (inProgress) return
+        if (name == "None") return
         inProgress = true
-        swapFromName("Infinileap")
-        scheduleTask(0) {
-            rightClick()
-            clickedLeap = true
+        dungeonTeammatesNoSelf.forEach{ teammate ->
+            if (teammate.name != name) return@forEach
+            val state = swapFromName("Infinileap")
+            if (state == "SWAPPED") {
+                scheduleTask(0) {
+                    airClick()
+                    clickedLeap = true
+                }
+            } else if (state == "ALREADY_HELD") {
+                airClick()
+                clickedLeap = true
+            }
+            leapQueue.add(name)
+            devMessage(leapQueue[0])
+            return
         }
-        leapQueue.add(name)
-        devMessage(leapQueue[0])
+        inProgress = false
+        modMessage("$name not found")
+    }
+
+    fun leap(clazzz: DungeonClass) {
+        if (!inDungeons || clazzz == DungeonClass.Unknown) return
+        if (inProgress) return
+        inProgress = true
+        dungeonTeammatesNoSelf.forEach{ teammate ->
+            if (teammate.clazz == clazzz) {
+                val state = swapFromName("Infinileap")
+                if (state == "SWAPPED") {
+                    scheduleTask(0) {
+                        airClick()
+                        clickedLeap = true
+                    }
+                } else if (state == "ALREADY_HELD") {
+                    airClick()
+                    clickedLeap = true
+                }
+                leapQueue.add(teammate.name)
+                devMessage(leapQueue[0])
+                return
+            }
+        }
+        inProgress = false
+        modMessage("$clazzz not found")
     }
 
     @SubscribeEvent
