@@ -7,7 +7,6 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.stripControlCodes
 import catgirlroutes.utils.dungeon.DungeonClass
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
@@ -30,8 +29,6 @@ object AutoLeap : Module(
     category = Category.DUNGEON,
     tag = TagType.WHIP
 ) {
-    private val target = StringSetting("target", "", description = "Target for leap!")
-
     private val fastLeap = BooleanSetting("Fast leap", false)
     private val autoLeap = BooleanSetting("Auto leap", false)
 
@@ -52,7 +49,8 @@ object AutoLeap : Module(
 
     init {
         this.addSettings(
-            target,
+            fastLeap,
+            autoLeap,
             leapMode,
             clearLeap,
             s1leap,
@@ -93,7 +91,7 @@ object AutoLeap : Module(
 
     @SubscribeEvent
     fun onMouse(event: MouseEvent) {
-        if (!event.buttonstate || !inDungeons) return
+        if (!event.buttonstate || !inDungeons || !fastLeap.value) return
         if (event.button != 0) return
         if (mc.thePlayer.heldItem.displayName.stripControlCodes() != "Infinileap") return
         handleLeap()
@@ -101,7 +99,7 @@ object AutoLeap : Module(
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!inDungeons || event.type.toInt() == 2 || !inBoss) return
+        if (!inDungeons || event.type.toInt() == 2 || !inBoss || !autoLeap.value) return
         val message = stripControlCodes(event.message.unformattedText)
         if (message.endsWith("(7/7)") || message.endsWith("(8/8)")) {
             handleLeap()
@@ -134,9 +132,5 @@ object AutoLeap : Module(
                 else if (leapMode.selected == "Class") leap(classEnumMapping[clearLeapClass.index])
             }
         }
-    }
-
-    override fun onKeyBind() {
-        leap(target.value)
     }
 }
