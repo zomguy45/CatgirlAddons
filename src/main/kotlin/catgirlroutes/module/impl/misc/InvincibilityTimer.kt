@@ -28,14 +28,10 @@ object InvincibilityTimer : Module(
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
         val msg = event.message.unformattedText
-        when (true) {
+        when {
             msg.contains("Second Wind Activated! Your Spirit Mask saved your life!") -> spiritTicks = (600 * getMageCooldownMultiplier()).toInt()
             msg.contains("Bonzo's Mask saved your life!") -> bonzoTicks = (7200 - (cataLevel.value.toInt() * 72) * getMageCooldownMultiplier()).toInt()
             msg.contains("Your Phoenix Pet saved you from certain death!") -> phoenixTicks = (1200)
-            else -> {}
-        }
-
-        when{
             msg.contains("You summoned your") -> phoenix = if (msg.contains("Phoenix")) true else false
             msg.contains("Autopet equipped your") -> phoenix = if (msg.contains("Phoenix")) true else false
             msg.contains("You despawned your Phoenix!") -> phoenix = false
