@@ -71,6 +71,7 @@ object ModuleManager {
         CatMode,
         InventoryButtons,
         InstantSprint,
+        NickHider,
 
         // Player
         AutoSprint,
