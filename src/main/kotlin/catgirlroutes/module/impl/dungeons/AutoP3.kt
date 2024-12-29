@@ -131,7 +131,7 @@ object AutoP3 : Module(
             }
         }
 
-    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 500.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
 
 
     init {
@@ -549,7 +549,7 @@ object AutoP3 : Module(
         val slot = event.packet.slotId
 
         if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (registry == "minecraft:stained_hardened_clay" && metadata == 5) {
+            if (registry == "minecraft:stained_hardened_clay" && metadata == 5 && name == "") {
                 melodyClicked = System.currentTimeMillis()
                 debugMessage("Melody clicked!")
             }
