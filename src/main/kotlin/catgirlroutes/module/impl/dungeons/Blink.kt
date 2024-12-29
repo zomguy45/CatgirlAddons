@@ -22,7 +22,6 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Keyboard
-import kotlin.math.floor
 
 @AlwaysActive
 object Blink : Module(
@@ -42,7 +41,7 @@ object Blink : Module(
             RingManager.rings.forEach { ring ->
                 if (AutoP3.inRing(ring) && ring.type == "blink") {
                     modMessage("Started recording")
-                    mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
+                    mc.thePlayer.setPosition(ring.location.xCoord, mc.thePlayer.posY, ring.location.zCoord)
                     recorderActive = true
                     currentRing = ring
                     currentRing!!.packets = mutableListOf<BlinkC06>()

@@ -7,7 +7,10 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.*
+import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.TermOpenEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -39,25 +42,20 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
-import catgirlroutes.utils.thisshit
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import me.odinmain.utils.name
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
-import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraft.network.play.server.S2DPacketOpenWindow
-import net.minecraft.network.play.server.S2EPacketCloseWindow
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.world.WorldEvent
-import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
@@ -68,7 +66,6 @@ import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.cos
-import kotlin.math.floor
 import kotlin.math.sin
 
 
@@ -120,9 +117,9 @@ object AutoP3 : Module(
                 if (inRing(ring) && ring.type == "movement") {
                     modMessage("Started recording")
                     mc.thePlayer.setPosition(
-                        floor(mc.thePlayer.posX) + 0.5,
+                        ring.location.xCoord,
                         mc.thePlayer.posY,
-                        floor(mc.thePlayer.posZ) + 0.5
+                        ring.location.zCoord
                     )
                     movementRecord = true
                     movementCurrentRing = ring
@@ -258,6 +255,8 @@ object AutoP3 : Module(
                 distanceZ < (ring.width / 2);
     }
 
+    var blinkCd = false
+
     private suspend fun executeAction(ring: Ring) {
         val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
         delay(actionDelay.toLong())
@@ -342,9 +341,9 @@ object AutoP3 : Module(
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(
-                    floor(mc.thePlayer.posX) + 0.5,
+                    ring.location.xCoord,
                     mc.thePlayer.posY,
-                    floor(mc.thePlayer.posZ) + 0.5
+                    ring.location.zCoord
                 )
             }
 
@@ -371,8 +370,9 @@ object AutoP3 : Module(
             "blink" -> {
                 dir = null
                 if (ring.packets.size == 0 || blinkEditMode) return
-                if (packetArray.size > ring.packets.size) {
+                if (packetArray.size > ring.packets.size && !blinkCd) {
                     scheduleTask(0) {
+                        blinkCd = true
                         ring.packets.forEach { packet ->
                             mc.netHandler.networkManager.sendPacket(
                                 C03PacketPlayer.C04PacketPlayerPosition(
@@ -385,6 +385,12 @@ object AutoP3 : Module(
                         }
                         mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
                     }
+                    scheduleTask(10) {
+                        blinkCd = false
+                    }
+                } else {
+                    val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
+                    cooldownMap[key] = false
                 }
             }
 

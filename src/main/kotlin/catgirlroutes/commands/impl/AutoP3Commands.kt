@@ -171,6 +171,8 @@ val autoP3Commands = commodore("p3") {
                 }
             }
 
+            if (type == "align") width = 1.0F
+
             val location = Vec3(x, y, z)
             val yaw = mc.renderManager.playerViewY
             val pitch = mc.renderManager.playerViewX
