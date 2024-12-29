@@ -37,7 +37,6 @@ object HUDRenderUtils {
         GlStateManager.disableTexture2D()
         GlStateManager.enableAlpha()
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-        GlStateManager.translate(0f, 0f, -10f)
         GlStateManager.color(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION)

@@ -3,9 +3,13 @@ package catgirlroutes.module.impl.misc
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -15,10 +19,12 @@ import java.awt.Color
 object InvincibilityTimer : Module(
     name = "Invincibility Timer"
 ) {
-    val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
+    private val cataLevel = NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0)
+    private val dungeonOnly = BooleanSetting("Dungeons only", false)
+    private val bossOnly = BooleanSetting("Boss only", false)
 
     init {
-        this.addSettings(cataLevel)
+        this.addSettings(this.cataLevel, this.dungeonOnly, this.bossOnly)
     }
     var spiritTicks = 0
     var bonzoTicks = 0
@@ -29,32 +35,14 @@ object InvincibilityTimer : Module(
     fun onChat(event: ClientChatReceivedEvent) {
         val msg = event.message.unformattedText
 
-        when (true) {
-            msg.contains("Second Wind Activated! Your Spirit Mask saved your life!") -> spiritTicks = (600 * getMageCooldownMultiplier()).toInt()
-            msg.contains("Bonzo's Mask saved your life!") -> bonzoTicks = (7200 - (cataLevel.value.toInt() * 72) * getMageCooldownMultiplier()).toInt()
-            msg.contains("Your Phoenix Pet saved you from certain death!") -> phoenixTicks = (1200)
-            else -> {}
+        when {
+            "Second Wind Activated! Your Spirit Mask saved your life!" in msg -> spiritTicks = (600 * getMageCooldownMultiplier()).toInt()
+            "Bonzo's Mask saved your life!" in msg -> bonzoTicks = ((7200 - cataLevel.value.toInt() * 72) * getMageCooldownMultiplier()).toInt()
+            "Your Phoenix Pet saved you from certain death!" in msg -> phoenixTicks = 1200
+            "You summoned your" in msg || "Autopet equipped your" in msg -> phoenix = msg.contains("Phoenix")
+            "You despawned your Phoenix!" in msg -> phoenix = false
         }
-
-        if (msg.contains("You summoned your")) {
-            if (msg.contains("Phoenix")) {
-                phoenix = true
-            } else {
-                phoenix = false
-            }
-        }
-
-        if (msg.contains("Autopet equipped your")) {
-            if (msg.contains("Phoenix")) {
-                phoenix = true
-            } else {
-                phoenix = false
-            }
-        }
-
-        if (msg.contains("You despawned your Phoenix!")) phoenix = false
     }
-
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
@@ -66,20 +54,36 @@ object InvincibilityTimer : Module(
     @RegisterHudElement
     object TimerHud : HudElement(
         this,
-        6,
-        12
+        0, 0,
+        mc.fontRendererObj.getStringWidth("Phoenix: 30.2") + 6,
+        (mc.fontRendererObj.FONT_HEIGHT + 2) * 3
     ) {
         override fun renderHud() {
+            if ((dungeonOnly.enabled && !inDungeons) || (bossOnly.enabled && !inBoss)) return
+
             val name = mc.thePlayer?.inventory?.armorInventory?.get(3)?.displayName
-            val offset = if (name?.contains("Diamond") == true) 10.0 else if (name?.contains("Golden") == true) 20.0 else 10000.0 //schizo way to not render indictator on screen
-            val bonzoReady = if (bonzoTicks <= 0) "Bonzo: ${if (phoenix && offset == 10.0 && phoenixTicks < 0.0) "§c" else "§a"}✔" else "Bonzo: §c${(bonzoTicks / 20.0)}"
-            val spiritReady = if (spiritTicks <= 0) "Spirit: ${if (phoenix && offset == 20.0 && phoenixTicks < 0.0) "§c" else "§a"}✔" else "Spirit: §c${(spiritTicks / 20.0)}"
-            val phoenixReady = if (phoenixTicks <= 0) "Phoenix: ${if (phoenix && ((offset == 20.0 && spiritTicks < 0.0) || (offset == 10.0 && bonzoTicks < 0.0))) "§c" else "§a"}✔" else "Phoenix: §c${(phoenixTicks / 20.0)}"
-            mc.fontRendererObj.drawStringWithShadow(bonzoReady, 0.0F, 10.0f, java.awt.Color.PINK.rgb)
-            mc.fontRendererObj.drawStringWithShadow(spiritReady, 0.0F, 20.0f, java.awt.Color.PINK.rgb)
-            mc.fontRendererObj.drawStringWithShadow(phoenixReady, 0.0F, 30.0f, java.awt.Color.PINK.rgb)
-            renderRect(-6.0, offset + 2.0, 3.0, 3.0, Color.PINK)
-            if (phoenix) renderRect(-6.0, 32.0, 3.0, 3.0, Color.PINK)
+            val offset = when {
+                name?.contains("Bonzo") == true -> 10.0
+                name?.contains("Spirit") == true -> 20.0
+                else -> 10000.0  // some shit to hide some shit
+            }
+
+            val bonzoReady = stupid("Bonzo", bonzoTicks, phoenix && offset == 10.0 && phoenixTicks < 0.0)
+            val spiritReady = stupid("Spirit", spiritTicks, phoenix && offset == 20.0 && phoenixTicks < 0.0)
+            val phoenixReady = stupid("Phoenix", phoenixTicks, phoenix && ((offset == 20.0 && spiritTicks < 0.0) || (offset == 10.0 && bonzoTicks < 0.0)))
+
+            mc.fontRendererObj.drawStringWithShadow(bonzoReady, 6.0F, 0.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow(spiritReady, 6.0F, 10.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow(phoenixReady, 6.0F, 20.0f, Color.PINK.rgb)
+
+            renderRect(0.0, offset + 2.0, 3.0, 3.0, Color.PINK)
+            if (phoenix) renderRect(0.0, 32.0, 3.0, 3.0, Color.PINK)
+        }
+
+        private fun stupid(name: String, ticks: Int, highlight: Boolean): String {  // stupid thing for colour highlight
+            val c = if (ticks < 0 && highlight) "§c" else if (ticks <= 0) "§a" else "§c"
+            val time = if (ticks <= 0) "✔" else "%.1f".format(ticks / 20.0)
+            return "$name: $c$time"
         }
     }
 }
