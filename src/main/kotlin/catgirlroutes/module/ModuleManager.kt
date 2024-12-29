@@ -79,7 +79,7 @@ object ModuleManager {
         VerticalJerry,
         NoDebuff,
         BlockClip,
-        //BarPhase,
+        BarPhase,
 
         // Render
         ClickGui,
@@ -88,7 +88,8 @@ object ModuleManager {
         BossESP,
         TerminalEsp,
         ModuleList,
-        EditHud
+        EditHud,
+        Trail,
     )
 
     /**

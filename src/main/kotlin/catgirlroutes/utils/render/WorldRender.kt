@@ -43,7 +43,7 @@ object WorldRenderUtils {
 
     private val tessellator: Tessellator = Tessellator.getInstance()
     private val worldRenderer: WorldRenderer = tessellator.worldRenderer
-    private val renderManager = mc.renderManager
+    val renderManager = mc.renderManager
 
     /**
      * Draws a line connecting the points [start] and [finish].
