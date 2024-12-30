@@ -125,7 +125,7 @@ object AutoP3 : Module(
             }
         }
 
-    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+    private val stupid2: NumberSetting = NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
 
 
     init {

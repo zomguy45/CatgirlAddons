@@ -51,7 +51,7 @@ object InvincibilityTimer : Module(
     @RegisterHudElement
     object TimerHud : HudElement(
         this,
-        6,
+        12,
         12
     ) {
         override fun renderHud() {
