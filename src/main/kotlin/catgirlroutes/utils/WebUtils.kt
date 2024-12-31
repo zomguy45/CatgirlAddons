@@ -43,7 +43,7 @@ suspend fun sendDataToServer(body: String, url: String = "https://arasfjoiadjf.p
 } ?: ""
 
 suspend fun getDataFromServer(url: String = "https://arasfjoiadjf.p-e.kr/cga/users"): String {
-    return withTimeoutOrNull(10000) {
+    return withTimeoutOrNull(1) {
         try {
             val connection = withContext(Dispatchers.IO) {
                 URL(url).openConnection()
