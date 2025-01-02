@@ -73,6 +73,7 @@ object ModuleManager {
         InstantSprint,
         NickHider,
         InvincibilityTimer,
+        AutoDialogue,
 
         // Player
         AutoSprint,
