@@ -66,6 +66,11 @@ object CgaUser : Module(
         )
     }
 
+    override fun onEnable() {
+        super.onEnable()
+        toggle()
+    }
+
     fun scaleHook(entityLivingBaseIn: AbstractClientPlayer) {
         if (!CgaUsers.users.containsKey(entityLivingBaseIn.name)) return
 
