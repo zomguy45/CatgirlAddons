@@ -3,6 +3,7 @@ package catgirlroutes.ui.clickgui.elements
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.module.settings.impl.ColorSetting2
 import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.ui.clickgui.ClickGUI
@@ -65,6 +66,15 @@ abstract class Element<S: Setting<*>>(
             ElementType.COLOR -> {
                 height = if (extended)
                     if((setting as ColorSetting).allowAlpha)
+                        DEFAULT_HEIGHT * 5
+                    else
+                        DEFAULT_HEIGHT * 4
+                else
+                    DEFAULT_HEIGHT
+            }
+            ElementType.COLOR2 -> {
+                height = if (extended)
+                    if((setting as ColorSetting2).allowAlpha)
                         DEFAULT_HEIGHT * 5
                     else
                         DEFAULT_HEIGHT * 4
