@@ -38,6 +38,12 @@ object Utils {
         return this?.first == first && this?.second == second
     }
 
+    val ItemStack?.lore: List<String>
+        get() = this?.tagCompound?.getCompoundTag("display")?.getTagList("Lore", 8)?.let {
+            List(it.tagCount()) { i -> it.getStringTagAt(i) }
+        }.orEmpty()
+
+
     fun Event.postAndCatch(): Boolean {
         return runCatching {
             MinecraftForge.EVENT_BUS.post(this)

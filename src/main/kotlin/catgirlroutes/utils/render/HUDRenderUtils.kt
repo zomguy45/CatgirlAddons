@@ -6,7 +6,6 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraftforge.fml.client.config.GuiUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
@@ -289,5 +288,33 @@ object HUDRenderUtils {
 
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST)
+    }
+
+    fun drawSBBox(x: Int, y: Int, x2: Int, y2: Int, topLeft: Int) {
+        val a1 = (topLeft shr 24 and 0xFF) / 255.0f
+        val r1 = (topLeft shr 16 and 0xFF) / 255.0f
+        val g1 = (topLeft shr 8 and 0xFF) / 255.0f
+        val b1 = (topLeft and 0xFF) / 255.0f
+
+        GlStateManager.pushMatrix()
+        GlStateManager.disableTexture2D()
+        GlStateManager.enableBlend()
+        GlStateManager.disableAlpha()
+//        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
+        GL11.glShadeModel(GL11.GL_SMOOTH)
+
+
+        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR)
+        worldRenderer.pos(x.toDouble(), y2.toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.0f).endVertex() // BLACK
+        worldRenderer.pos(x2.toDouble(), y2.toDouble(), 0.0).color(0.0f, 0.0f, 0.0f, 0.0f).endVertex() // BLACK
+        worldRenderer.pos(x2.toDouble(), y.toDouble(), 0.0).color(1.0f, 1.0f, 1.0f, 1.0f).endVertex() // WHITE
+        worldRenderer.pos(x.toDouble(), y.toDouble(), 0.0).color(r1, g1, b1, a1).endVertex() // COLOUR
+        tessellator.draw()
+
+        GL11.glShadeModel(GL11.GL_FLAT)
+        GlStateManager.disableBlend()
+        GlStateManager.enableDepth()
+        GlStateManager.enableTexture2D()
+        GlStateManager.popMatrix()
     }
 }
