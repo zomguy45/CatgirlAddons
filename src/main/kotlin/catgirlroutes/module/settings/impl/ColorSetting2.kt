@@ -1,5 +1,6 @@
 package catgirlroutes.module.settings.impl
 
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.Visibility
 import net.minecraft.util.MathHelper
@@ -23,19 +24,19 @@ class ColorSetting2(
     var red: Int
         get() = value.red
         set(input) {
-            value = Color(MathHelper.clamp_int(input,0,255), green, blue, alpha)
+            value = Color(MathHelper.clamp_int(input,0,255), green, blue, (alpha * 255).toInt())
         }
 
     var green: Int
         get() = value.green
         set(input) {
-            value = Color(red, MathHelper.clamp_int(input,0,255), blue, alpha)
+            value = Color(red, MathHelper.clamp_int(input,0,255), blue, (alpha * 255).toInt())
         }
 
     var blue: Int
         get() = value.blue
         set(input) {
-            value = Color(red, green, MathHelper.clamp_int(input,0,255), alpha)
+            value = Color(red, green, MathHelper.clamp_int(input,0,255), (alpha * 255).toInt())
         }
 
     var hue: Float
@@ -65,12 +66,12 @@ class ColorSetting2(
             updateColor()
         }
 
-    var alpha: Int
-        get() = value.alpha
+    var alpha: Float
+        get() = value.alpha / 255f
         set(input) {
             // prevents changing the alpha if not allowed
             if (!allowAlpha) return
-            value = Color(red, green, blue, MathHelper.clamp_int(input,0,255))
+            value = Color(red, green, blue, MathHelper.clamp_int((input * 255).toInt(),0,255))
         }
 
     /**
@@ -78,6 +79,6 @@ class ColorSetting2(
      */
     private fun updateColor() {
         val tempColor =  Color(Color.HSBtoRGB(hsbvals[0], hsbvals[1], hsbvals[2]))
-        value = Color(tempColor.red, tempColor.green, tempColor.blue, alpha)
+        value = Color(tempColor.red, tempColor.green, tempColor.blue, (alpha * 255).toInt())
     }
 }

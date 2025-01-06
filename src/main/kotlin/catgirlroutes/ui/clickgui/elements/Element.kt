@@ -75,9 +75,9 @@ abstract class Element<S: Setting<*>>(
             ElementType.COLOR2 -> {
                 height = if (extended)
                     if((setting as ColorSetting2).allowAlpha)
-                        DEFAULT_HEIGHT * 5
+                        DEFAULT_HEIGHT * 9
                     else
-                        DEFAULT_HEIGHT * 4
+                        DEFAULT_HEIGHT * 8
                 else
                     DEFAULT_HEIGHT
             }

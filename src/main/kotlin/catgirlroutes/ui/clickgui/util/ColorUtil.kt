@@ -49,6 +49,23 @@ object ColorUtil {
         return Color(red, green, blue, alpha)
     }
 
+    fun Color.withAlpha(alpha: Float): Color {
+        return Color(red, green, blue, (alpha / 255).toInt())
+    }
+
+    fun Color.hsbMax(): Color {
+        val hsb = FloatArray(3)
+        Color.RGBtoHSB(this.red, this.green, this.blue, hsb)
+
+        return Color.getHSBColor(hsb[0], 1f, 1f)
+    }
+
+    val Color.hex: String
+        get() {
+            val rgba = (red shl 24) or (green shl 16) or (blue shl 8) or alpha
+            return String.format("%08X", rgba)
+        }
+
     const val jellyColor = -0x44eaeaeb
     const val newColor = -0xdcdcdd
     const val moduleButtonColor = -0xe5e5e6
