@@ -522,8 +522,8 @@ object AutoP3 : Module(
             lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
             lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * 0.5 * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * 0.5 * cos(radians)
             }
         }
     }
