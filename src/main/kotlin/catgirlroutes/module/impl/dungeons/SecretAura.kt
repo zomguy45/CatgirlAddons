@@ -169,22 +169,35 @@ object SecretAura : Module( // TODO: RECODE
                 val tileEntity: TileEntity = mc.theWorld.getTileEntity(block) as? TileEntitySkull ?: continue // I think we have a util for this, but I cba
                 val profile = (tileEntity as TileEntitySkull).playerProfile ?: continue
                 val profileId = profile.id.toString()
-                if (profileId != "e0f3e929-869e-3dca-9504-54c666ee6f23") {
-                    if (profileId == "fed95410-aba1-39df-9b95-1d4f361eb66e") {
-                        val stupidRedstone = listOf(
-                            block.down(),
-                            block.north(),
-                            block.south(),
-                            block.west(),
-                            block.east()
-                        ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
-
-                        if (stupidRedstone) {
-                            redstoneKey = false
-                            blocksDone.add(block)
-                        }
+//                if (profileId != "e0f3e929-869e-3dca-9504-54c666ee6f23") { // cba to debug idk what's wrong
+//                    if (profileId == "fed95410-aba1-39df-9b95-1d4f361eb66e") {
+//                        val stupidRedstone = listOf(
+//                            block.down(),
+//                            block.north(),
+//                            block.south(),
+//                            block.west(),
+//                            block.east()
+//                        ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
+//
+//                        if (stupidRedstone) {
+//                            redstoneKey = false
+//                            blocksDone.add(block)
+//                        }
+//                    }
+//                    continue
+                if (!Objects.equals(profileId, "e0f3e929-869e-3dca-9504-54c666ee6f23")) {
+                    if (!Objects.equals(profileId, "fed95410-aba1-39df-9b95-1d4f361eb66e")) continue
+                    else if (
+                        mc.theWorld.getBlockState(block.down()).block === Blocks.redstone_block ||
+                        mc.theWorld.getBlockState(block.north()).block === Blocks.redstone_block ||
+                        mc.theWorld.getBlockState(block.south()).block === Blocks.redstone_block ||
+                        mc.theWorld.getBlockState(block.west()).block === Blocks.redstone_block ||
+                        mc.theWorld.getBlockState(block.east()).block === Blocks.redstone_block
+                    ) {
+                        redstoneKey = false
+                        blocksDone.add(block)
+                        continue
                     }
-                    continue
                 }
 
                 val aabb = when (blockState.properties[BlockSkull.FACING] as EnumFacing) {
@@ -229,14 +242,24 @@ object SecretAura : Module( // TODO: RECODE
                 if (!redstoneKey) continue
                 if (mc.thePlayer.posX < -200 || mc.thePlayer.posZ < -200 || mc.thePlayer.posX > 0 || mc.thePlayer.posZ > 0) continue
 
-                val stupidRedstone = listOf(
-                    block.down(),
-                    block.north(),
-                    block.south(),
-                    block.west(),
-                    block.east()
-                ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
-                if (stupidRedstone) {
+//                val stupidRedstone = listOf( // no idea what's wrong cba to debug
+//                    block.down(),
+//                    block.north(),
+//                    block.south(),
+//                    block.west(),
+//                    block.east()
+//                ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
+//                if (stupidRedstone) {
+//                    redstoneKey = false
+//                    blocksDone.add(block)
+//                    continue
+//                }
+                if (mc.theWorld.getBlockState(block.up()).block === Blocks.skull ||
+                    mc.theWorld.getBlockState(block.north()).block === Blocks.skull ||
+                    mc.theWorld.getBlockState(block.south()).block === Blocks.skull ||
+                    mc.theWorld.getBlockState(block.west()).block === Blocks.skull ||
+                    mc.theWorld.getBlockState(block.east()).block === Blocks.skull
+                ) {
                     redstoneKey = false
                     blocksDone.add(block)
                     continue
