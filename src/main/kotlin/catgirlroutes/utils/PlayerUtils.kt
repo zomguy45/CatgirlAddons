@@ -89,7 +89,7 @@ object PlayerUtils {
         KeyBinding.onTick(mc.gameSettings.keyBindAttack.keyCode)
     }
 
-    fun leftClick2() {;
+    fun leftClick2() {
         val clickMouse: Method = try {
             Minecraft::class.java.getDeclaredMethod("func_147116_af")
         } catch (e: NoSuchMethodException) {
@@ -103,8 +103,15 @@ object PlayerUtils {
         PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(mc.thePlayer.heldItem))
     }
 
-    fun relativeClip(x: Double, y: Double, z: Double) {
-        modMessage("clipping2")
+    fun relativeClip(x: Double, y: Double, z: Double, message: Boolean = true) {
+
+        val text = listOfNotNull(
+            if (x != 0.0) "x: $x" else null,
+            if (y != 0.0) "y: $y" else null,
+            if (z != 0.0) "z: $z" else null
+        ).joinToString(" ")
+
+        if (message && text.isNotEmpty()) modMessage("Clipping $text")
         mc.thePlayer.setPosition(posX + x, posY + y,posZ + z)
     }
 
@@ -129,6 +136,4 @@ object PlayerUtils {
         }
         return null
     }
-
-
 }
