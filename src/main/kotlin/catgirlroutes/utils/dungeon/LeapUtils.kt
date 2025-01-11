@@ -8,6 +8,7 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import net.minecraft.network.play.client.C0DPacketCloseWindow
@@ -55,13 +56,13 @@ object LeapUtils {
         dungeonTeammatesNoSelf.forEach{ teammate ->
             if (teammate.name != name) return@forEach
             val state = swapFromName("Infinileap")
-            if (state == "SWAPPED") {
+            if (state == SwapState.SWAPPED) {
                 scheduleTask(1) {
                     modMessage("swapped leap")
                     airClick()
                     clickedLeap = true
                 }
-            } else if (state == "ALREADY_HELD") {
+            } else if (state == SwapState.ALREADY_HELD) {
                 modMessage("already held")
                 airClick()
                 clickedLeap = true
@@ -81,13 +82,13 @@ object LeapUtils {
         dungeonTeammatesNoSelf.forEach{ teammate ->
             if (teammate.clazz == clazzz) {
                 val state = swapFromName("Infinileap")
-                if (state == "SWAPPED") {
+                if (state == SwapState.SWAPPED) {
                     modMessage("swapped leap")
                     scheduleTask(1) {
                         airClick()
                         clickedLeap = true
                     }
-                } else if (state == "ALREADY_HELD") {
+                } else if (state == SwapState.ALREADY_HELD) {
                     modMessage("already held")
                     airClick()
                     clickedLeap = true

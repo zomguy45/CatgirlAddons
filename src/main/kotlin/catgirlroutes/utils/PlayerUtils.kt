@@ -32,7 +32,7 @@ object PlayerUtils {
 
 
     var recentlySwapped = false
-    fun swapFromName(name: String): String {
+    fun swapFromName(name: String): SwapState {
         for (i in 0..8) {
             val stack: ItemStack? = mc.thePlayer.inventory.getStackInSlot(i)
             val itemName = stack?.displayName
@@ -41,31 +41,31 @@ object PlayerUtils {
                     if (mc.thePlayer.inventory.currentItem != i) {
                         if (recentlySwapped) {
                             modMessage("yo somethings wrong $itemName")
-                            return "TOO_FAST"
+                            return SwapState.TOO_FAST
                         }
                         recentlySwapped = true
                         mc.thePlayer.inventory.currentItem = i
-                        return "SWAPPED"
+                        return SwapState.SWAPPED
                     } else {
-                        return "ALREADY_HELD"
+                        return SwapState.ALREADY_HELD
                     }
                 }
             }
         }
         modMessage("$name not found.")
-        return "NOT_FOUND"
+        return SwapState.UNKNOWN
     }
 
-    fun swapToSlot(slot: Int): String {
+    fun swapToSlot(slot: Int): SwapState {
         if (mc.thePlayer.inventory.currentItem != slot) {
             if (recentlySwapped) {
                 modMessage("u swapping too faaaast")
-                return "TOO_FAST"
+                return SwapState.TOO_FAST
             }
             recentlySwapped = true
             mc.thePlayer.inventory.currentItem = slot
-            return "SWAPPED"
-        } else return "ALREADY_HELD"
+            return SwapState.SWAPPED
+        } else return SwapState.ALREADY_HELD
     }
 
     @SubscribeEvent
@@ -136,4 +136,8 @@ object PlayerUtils {
         }
         return null
     }
+}
+
+enum class SwapState{
+    SWAPPED, ALREADY_HELD, TOO_FAST, UNKNOWN
 }

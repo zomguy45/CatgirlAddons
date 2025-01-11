@@ -11,6 +11,7 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
 import net.minecraft.block.Block
@@ -41,7 +42,7 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
             this.prevSlot = mc.thePlayer.inventory.currentItem;
 
             val swapResult = swapFromName("pickaxe")
-            if (swapResult == "NOT_FOUND") {
+            if (swapResult == SwapState.UNKNOWN) {
                 this.running = false
                 return@onPress
             }

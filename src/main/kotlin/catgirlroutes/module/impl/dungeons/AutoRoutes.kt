@@ -24,6 +24,7 @@ import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
@@ -245,11 +246,11 @@ object AutoRoutes : Module(
             "warp" -> {
                 val state = swapFromName("aspect of the void")
                 setKey("shift", true)
-                if (state == "SWAPPED") {
+                if (state == SwapState.SWAPPED) {
                     scheduleTask(0) {
                         shouldClick = true
                     }
-                } else if (state == "ALREADY_HELD") {
+                } else if (state == SwapState.ALREADY_HELD) {
                     shouldClick = true
                 }
                 scheduleTask(1) {
