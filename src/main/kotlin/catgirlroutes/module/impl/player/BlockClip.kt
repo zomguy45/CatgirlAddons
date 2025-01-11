@@ -12,7 +12,6 @@ import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.PlayerUtils.posZ
-import catgirlroutes.utils.PlayerUtils.relativeClip
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import kotlin.math.abs
@@ -58,6 +57,6 @@ object BlockClip : Module(
         val finalX = posX + if (this.directions.selected == "All" || abs(offsetX) > abs(offsetZ)) offsetX else 0.0
         val finalZ = posZ + if (this.directions.selected == "All" || abs(offsetZ) >= abs(offsetX)) offsetZ else 0.0
 
-        relativeClip(finalX, posY, finalZ, false)
+        mc.thePlayer.setPosition(finalX, posY, finalZ)
     }
 }
