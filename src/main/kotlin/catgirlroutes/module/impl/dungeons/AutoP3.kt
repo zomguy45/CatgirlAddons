@@ -552,7 +552,7 @@ object AutoP3 : Module(
         val slot = event.packet.slotId
 
         if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (registry == "minecraft:stained_hardened_clay" && metadata == 5 && name == "") {
+            if (registry == "minecraft:stained_hardened_clay" && (metadata == 5 || metadata == 13) && name?.contains("Clay") == false && name.contains("Terracotta") == false) {
                 melodyClicked = System.currentTimeMillis()
                 debugMessage("Melody clicked!")
             }
