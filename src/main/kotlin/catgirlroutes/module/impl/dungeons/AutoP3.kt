@@ -557,6 +557,6 @@ object AutoP3 : Module(
                 debugMessage("Melody clicked!")
             }
         }
-        debugMessage(registry + ", " + metadata + ", " + slot)
+        debugMessage(registry + ", " + metadata + ", " + slot + ", " + name)
     }
 }
