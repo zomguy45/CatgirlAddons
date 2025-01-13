@@ -117,7 +117,6 @@ object AutoRoutes : Module(
     }
 
     private val cooldownMap = mutableMapOf<String, Boolean>()
-    private var canContinue = true
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
@@ -127,17 +126,8 @@ object AutoRoutes : Module(
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
             val cooldown: Boolean = cooldownMap[key] == true
             if(inNode(node)) {
-                node.block?.let { block ->
-                    canContinue = false
-
-                    val blockState = mc.theWorld.getBlockState(BlockPos(block.first))
-                    val str = "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
-                    debugMessage(str)
-                    debugMessage(block)
-                    if (str != block.second) canContinue = true
-                }
-
                 if (cooldown) return@forEach
+
                 cooldownMap[key] = true
                 GlobalScope.launch {
                     executeAction(node)
@@ -249,7 +239,20 @@ object AutoRoutes : Module(
         }
         if (node.type == "warp" || node.type == "aotv" || node.type == "hype" || node.type == "pearl") snapTo(yaw, node.pitch)
         if (node.arguments?.contains("await") == true) awaitSecret()
-        if (!canContinue) return
+
+        node.block?.let { block ->
+            val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
+
+            val blockState = mc.theWorld.getBlockState(BlockPos(block.first))
+            val str = "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
+            debugMessage(str)
+            debugMessage(block)
+            if (str == block.second) {
+                cooldownMap[key] = false
+                return
+            }
+        }
+
         delay(actionDelay.toLong())
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
