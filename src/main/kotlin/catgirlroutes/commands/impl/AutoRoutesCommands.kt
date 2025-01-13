@@ -279,15 +279,16 @@ fun getBlock(arg: String): Pair<Vec3, String>? {
     return when {
         arg == "block" -> EtherWarpHelper.getEtherPos().pos?.let {
             val blockState = mc.theWorld.getBlockState(it)
-            Pair(
-                Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()),
-                "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
-            )
+            val vec = currentRoom?.getRelativeCoords(Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()))
+                ?: Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble())
+            Pair(vec, "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}")
         }
         arg.startsWith("block:") -> {
             val (blockId, metadata) = arg.split(":").let { it[1].toIntOrNull() to it.getOrElse(2) { "0" }.toIntOrNull() } // schizo but it works ig
             EtherWarpHelper.getEtherPos().pos?.let {
-                Pair(Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()), "$blockId:$metadata")
+                val vec = currentRoom?.getRelativeCoords(Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()))
+                    ?: Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble())
+                Pair(vec, "$blockId:$metadata")
             }
         }
         else -> null

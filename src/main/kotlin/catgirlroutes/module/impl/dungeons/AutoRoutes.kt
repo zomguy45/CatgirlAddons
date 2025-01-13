@@ -243,7 +243,7 @@ object AutoRoutes : Module(
         node.block?.let { block ->
             val key = "${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"
 
-            val blockState = mc.theWorld.getBlockState(BlockPos(block.first))
+            val blockState = mc.theWorld.getBlockState(currentRoom?.getRealCoords(BlockPos(block.first)) ?: BlockPos(block.first))
             val str = "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
             debugMessage(str)
             debugMessage(block)
