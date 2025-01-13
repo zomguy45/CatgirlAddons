@@ -137,8 +137,6 @@ object AutoRoutes : Module(
                     if (str != block.second) canContinue = true
                 }
 
-                if (!canContinue) return@forEach
-
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {
@@ -251,7 +249,7 @@ object AutoRoutes : Module(
         }
         if (node.type == "warp" || node.type == "aotv" || node.type == "hype" || node.type == "pearl") snapTo(yaw, node.pitch)
         if (node.arguments?.contains("await") == true) awaitSecret()
-
+        if (!canContinue) return
         delay(actionDelay.toLong())
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
