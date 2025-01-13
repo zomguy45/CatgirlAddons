@@ -93,7 +93,7 @@ object PlayerUtils {
         val clickMouse: Method = try {
             Minecraft::class.java.getDeclaredMethod("func_147116_af")
         } catch (e: NoSuchMethodException) {
-            Minecraft::class.java.getDeclaredMethod("func_147116_af")
+            Minecraft::class.java.getDeclaredMethod("clickMouse")
         }
         clickMouse.isAccessible = true
         clickMouse.invoke(mc)

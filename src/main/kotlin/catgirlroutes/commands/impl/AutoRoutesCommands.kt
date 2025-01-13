@@ -19,11 +19,10 @@ import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
+import net.minecraft.block.Block
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
-import net.minecraft.util.ChatComponentText
-import net.minecraft.util.ChatStyle
-import net.minecraft.util.Vec3
+import net.minecraft.util.*
 import java.io.File
 import kotlin.math.floor
 
@@ -56,6 +55,7 @@ data class Node(
     var yaw: Float,
     var pitch: Float,
     var depth: Float?,
+    var block: Pair<Vec3, String>?,
     var arguments: List<String>?,
     var delay: Int?,
     var command: String?,
@@ -99,7 +99,7 @@ val autoRoutesCommands = commodore("node") {
                     §7- command §8: §rexecutes a specified command
                     §7- aotv §8: §ruses AOTV
                     §7- hype §8: §ruses hyperion
-                  List of args: §7w_, h_, delay_, look, walk, await, stop, once, unshift
+                  List of args: §7w_, h_, delay_, look, walk, await, stop, once, unshift, block_
                     §7- w §8: §rnode width (w1 - default)
                     §7- h §8: §rnode height (h1 - default)
                     §7- delay §8: §rnode action delay (delay0 - default)
@@ -109,6 +109,7 @@ val autoRoutesCommands = commodore("node") {
                     §7- stop §8: §rsets your velocity to 0
                     §7- once §8: §rmakes the node activate once
                     §7- unshift §8: §runshift upon entering the node
+                    §7- block §8: §rtriggers when the block the player is looking at doesn't match up (block, block:<id>, block:<id>:<metadata>)
             """.trimIndent())
         }
 
@@ -117,6 +118,7 @@ val autoRoutesCommands = commodore("node") {
             var height = 1F
             var width = 1F
             var delay: Int? = null
+            var block: Pair<Vec3, String>? = null
             var command: String? = null
             val arguments = mutableListOf<String>()
 
@@ -149,6 +151,7 @@ val autoRoutesCommands = commodore("node") {
                     arg.startsWith("w") && arg != "walk" -> width = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("h") -> height = arg.slice(1 until arg.length).toFloat()
                     arg.startsWith("delay") -> { delay = arg.substring(5).toIntOrNull() ?: return@runs modMessage("§cInvalid delay!") }
+                    arg.startsWith("block") -> { block = getBlock(arg); if (block!!.second.contains("null")) return@runs modMessage("§cInvalid block! §rUsage: block, block:<id>, block:<id>:<metadata>") }
                     arg in listOf("stop", "look", "walk", "await", "unshift", "once") -> arguments.add(arg)
                 }
             }
@@ -168,7 +171,7 @@ val autoRoutesCommands = commodore("node") {
             }
             val pitch = mc.renderManager.playerViewX
 
-            val node = Node(type, location, height, width, yaw, pitch, depth, arguments, delay, command, name)
+            val node = Node(type, location, height, width, yaw, pitch, depth, block, arguments, delay, command, name)
 
             allNodes.add(node)
 
@@ -270,4 +273,24 @@ val autoRoutesCommands = commodore("node") {
     }
     
 }
+
+fun getBlock(arg: String): Pair<Vec3, String>? {
+    return when {
+        arg == "block" -> mc.thePlayer.rayTrace(60.0, 1.0f)?.blockPos?.let {
+            val blockState = mc.theWorld.getBlockState(it)
+            Pair(
+                Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()),
+                "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
+            )
+        }
+        arg.startsWith("block:") -> {
+            val (blockId, metadata) = arg.split(":").let { it[1].toIntOrNull() to it.getOrElse(2) { "0" }.toIntOrNull() } // schizo but it works ig
+            mc.thePlayer.rayTrace(60.0, 1.0f)?.blockPos?.let {
+                Pair(Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()), "$blockId:$metadata")
+            }
+        }
+        else -> null
+    }
+}
+
 

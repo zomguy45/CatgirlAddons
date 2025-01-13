@@ -16,6 +16,7 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.utils.ChatUtils.commandAny
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils
@@ -37,9 +38,11 @@ import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.*
+import net.minecraft.block.Block
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.settings.KeyBinding
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent
@@ -226,6 +229,7 @@ object AutoRoutes : Module(
         }
     }
 
+    private var canContinue = true
     private suspend fun executeAction(node: Node) {
         val actionDelay: Int = if (node.delay == null) 0 else node.delay!!
         val room2 = currentRoom
@@ -235,6 +239,18 @@ object AutoRoutes : Module(
         }
         if (node.type == "warp" || node.type == "aotv" || node.type == "hype" || node.type == "pearl") snapTo(yaw, node.pitch)
         if (node.arguments?.contains("await") == true) awaitSecret()
+
+        node.block?.let { block ->
+            canContinue = false
+
+            val blockState = mc.theWorld.getBlockState(BlockPos(block.first))
+            val str = "${Block.getIdFromBlock(blockState.block)}:${blockState.block.damageDropped(blockState)}"
+            debugMessage(str)
+            debugMessage(block)
+            if (str != block.second) canContinue = true
+        }
+
+        if (!canContinue) return
         delay(actionDelay.toLong())
         node.arguments?.let {
             if ("stop" in it) MovementUtils.stopVelo()
