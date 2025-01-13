@@ -8,6 +8,7 @@ import catgirlroutes.commands.impl.NodeManager.saveNodes
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.LocationManager.getArea
 import catgirlroutes.utils.Utils.distanceToPlayer
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
@@ -276,7 +277,7 @@ val autoRoutesCommands = commodore("node") {
 
 fun getBlock(arg: String): Pair<Vec3, String>? {
     return when {
-        arg == "block" -> mc.thePlayer.rayTrace(60.0, 1.0f)?.blockPos?.let {
+        arg == "block" -> EtherWarpHelper.getEtherPos().pos?.let {
             val blockState = mc.theWorld.getBlockState(it)
             Pair(
                 Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()),
@@ -285,7 +286,7 @@ fun getBlock(arg: String): Pair<Vec3, String>? {
         }
         arg.startsWith("block:") -> {
             val (blockId, metadata) = arg.split(":").let { it[1].toIntOrNull() to it.getOrElse(2) { "0" }.toIntOrNull() } // schizo but it works ig
-            mc.thePlayer.rayTrace(60.0, 1.0f)?.blockPos?.let {
+            EtherWarpHelper.getEtherPos().pos?.let {
                 Pair(Vec3(it.x.toDouble(), it.y.toDouble(), it.z.toDouble()), "$blockId:$metadata")
             }
         }
