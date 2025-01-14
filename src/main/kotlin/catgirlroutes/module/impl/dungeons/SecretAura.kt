@@ -77,7 +77,7 @@ object SecretAura : Module(
             if (blocksCooldown.containsKey(block) && blocksCooldown[block]!! + 500 > time) continue
             val blockState = mc.theWorld.getBlockState(block)
             if (blockState.block === Blocks.chest || blockState.block === Blocks.trapped_chest) {
-                if (roomname == "Three Weirdos") continue
+                if (roomname == "Three Weirdos" || roomname == "Ice Path") continue
                 val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
                 if (eyePos.distanceTo(Vec3(block)) <= auraRange.value) {
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(
@@ -107,7 +107,7 @@ object SecretAura : Module(
                     return
                 }
             } else if (blockState.block === Blocks.lever) {
-                if (roomname == "Water Board") continue
+                if (roomname == "Water Board" || roomname == "Ice Path") continue
                 val orientation = blockState.properties[BlockLever.FACING] as EnumOrientation
                 val aabb = if (orientation == EnumOrientation.EAST) AxisAlignedBB(0.0, 0.2, 0.315, 0.375, 0.8, 0.6875)
                 else if (orientation == EnumOrientation.WEST) AxisAlignedBB(0.625, 0.2, 0.315, 1.0, 0.8, 0.6875)

@@ -8,13 +8,13 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
-import catgirlroutes.utils.PlayerUtils.relativeClip
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.rotation.FakeRotater.rotate
 import catgirlroutes.utils.rotation.Rotater.Companion.shouldClick
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.math.abs
+import kotlin.math.floor
 
 object PearlClip : Module(
     "Pearl Clip",
@@ -39,11 +39,18 @@ object PearlClip : Module(
     }
 
     private var clipDepth: Double? = 0.0
+    private var posX: Double = 0.0
+    private var posY: Double = 0.0
+    private var posZ: Double = 0.0
 
     fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
         if (!this.enabled) return
         clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
         if (clipDepth == null) return
+
+        posX = mc.thePlayer.posX
+        posY = mc.thePlayer.posY
+        posZ = mc.thePlayer.posZ
 
         val swapResult = swapFromName("ender pearl")
         if (swapResult != "NOT_FOUND") {
@@ -61,7 +68,7 @@ object PearlClip : Module(
         scheduleTask(0) {
             if (event.isCanceled) return@scheduleTask
             active = false
-            relativeClip(0.0, -abs(clipDepth!!), 0.0)
+            mc.thePlayer.setPosition(floor(posX + 0.5), posY - abs(clipDepth!!), floor(posZ + 0.5))
         }
     }
 }

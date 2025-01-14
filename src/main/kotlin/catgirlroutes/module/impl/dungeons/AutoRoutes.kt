@@ -83,7 +83,7 @@ object AutoRoutes : Module(
 
     private var secretPickedUpDeferred: CompletableDeferred<Unit>? = null
 
-    suspend fun awaitSecret() {
+    private suspend fun awaitSecret() {
         val deferred = CompletableDeferred<Unit>()
         secretPickedUpDeferred = deferred
         deferred.await()

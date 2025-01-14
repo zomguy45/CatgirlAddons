@@ -65,6 +65,7 @@ object ModuleManager {
         CoreClip,
         LeapOrganiser,
         AutoSS,
+        Auto4,
 
         // Misc
         F7sim,
@@ -92,6 +93,7 @@ object ModuleManager {
         ModuleList,
         EditHud,
         Trail,
+        DungeonESPNew
     )
 
     /**

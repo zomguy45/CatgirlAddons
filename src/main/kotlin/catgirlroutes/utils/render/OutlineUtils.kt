@@ -11,11 +11,13 @@ import org.lwjgl.opengl.GL11.*
 import java.awt.Color
 
 object OutlineUtils {
-    fun outlineESP(event: RenderEntityModelEvent, lineWidth: Float, color: Color) {
+    fun outlineESP(event: RenderEntityModelEvent, lineWidth: Float, color: Color, phase: Boolean = true) {
         val fancyGraphics = mc.gameSettings.fancyGraphics
         val gamma = mc.gameSettings.gammaSetting
         mc.gameSettings.fancyGraphics = false
         mc.gameSettings.gammaSetting = 100000.0f
+
+        if (phase) GlStateManager.disableDepth()
 
         glPushMatrix()
         glPushAttrib(GL_ALL_ATTRIB_BITS)
@@ -39,6 +41,7 @@ object OutlineUtils {
         glPopMatrix()
         mc.gameSettings.fancyGraphics = fancyGraphics
         mc.gameSettings.gammaSetting = gamma
+        GlStateManager.enableDepth()
     }
 
     private fun render(event: RenderEntityModelEvent) {
