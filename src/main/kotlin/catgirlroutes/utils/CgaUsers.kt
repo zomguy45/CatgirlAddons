@@ -14,7 +14,7 @@ import java.io.StringReader
 import java.lang.reflect.Type
 import javax.imageio.ImageIO
 
-object CgaUsers { // todo: move to CgaUser module, add capes with gif
+object CgaUsers { // todo: add capes with gif
 
     var users: HashMap<String, CgaUser> = HashMap()
 

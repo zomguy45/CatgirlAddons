@@ -6,6 +6,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.ui.clickgui.advanced.AdvancedMenu
 import catgirlroutes.ui.clickgui.elements.menu.ElementColor
+import catgirlroutes.ui.clickgui.elements.menu.ElementColor2
 import catgirlroutes.ui.clickgui.elements.menu.ElementSlider
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -305,6 +306,9 @@ class ClickGUI : GuiScreen() {
                                 menuElement.dragging = false
                             }
                             if (menuElement is ElementColor) {
+                                menuElement.dragging = null
+                            }
+                            if (menuElement is ElementColor2) {
                                 menuElement.dragging = null
                             }
                         }

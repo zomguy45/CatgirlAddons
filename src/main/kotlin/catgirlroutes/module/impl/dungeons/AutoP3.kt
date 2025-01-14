@@ -522,8 +522,8 @@ object AutoP3 : Module(
             lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
             lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * 0.5 * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * 0.5 * cos(radians)
             }
         }
     }
@@ -552,11 +552,11 @@ object AutoP3 : Module(
         val slot = event.packet.slotId
 
         if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (registry == "minecraft:stained_hardened_clay" && metadata == 5 && name == "") {
+            if (registry == "minecraft:stained_hardened_clay" && (metadata == 5 || metadata == 13) && name?.contains("Clay") == false && name.contains("Terracotta") == false) {
                 melodyClicked = System.currentTimeMillis()
                 debugMessage("Melody clicked!")
             }
         }
-        debugMessage(registry + ", " + metadata + ", " + slot)
+        debugMessage(registry + ", " + metadata + ", " + slot + ", " + name)
     }
 }

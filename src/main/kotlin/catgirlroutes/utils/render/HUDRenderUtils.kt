@@ -1,12 +1,12 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
-import net.minecraftforge.fml.client.config.GuiUtils
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
@@ -135,6 +135,11 @@ object HUDRenderUtils {
      */
     fun endScissor() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST)
+    }
+
+    fun drawBorderedRect(x: Double, y: Double, width: Double, height: Double, thickness: Double, colour1: Color, colour2: Color) {
+        renderRect(x, y, width, height, colour1)
+        renderRectBorder(x, y, width, height, thickness, colour2)
     }
 
     fun drawRoundedBorderedRect(x: Double, y: Double, width: Double, height: Double, radius: Double, thickness: Double, colour1: Color, colour2: Color) {
@@ -290,4 +295,68 @@ object HUDRenderUtils {
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MIN_FILTER, GL11.GL_NEAREST)
         GL11.glTexParameteri(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_MAG_FILTER, GL11.GL_NEAREST)
     }
+
+    fun drawSBBox(
+        x: Int, y: Int, width: Int, height: Int,
+        topRight: Int, topLeft: Int = Color.WHITE.rgb,
+        botRight: Int = Color.black.rgb, botLeft: Int = Color.black.rgb
+    ) {
+        val x2 = x + width
+        val y2 = y + height
+
+        val a1 = (topRight shr 24 and 0xFF) / 255.0f
+        val r1 = (topRight shr 16 and 0xFF) / 255.0f
+        val g1 = (topRight shr 8 and 0xFF) / 255.0f
+        val b1 = (topRight and 0xFF) / 255.0f
+
+        // WHITE by default
+        val a2 = (topLeft shr 24 and 0xFF) / 255.0f
+        val r2 = (topLeft shr 16 and 0xFF) / 255.0f
+        val g2 = (topLeft shr 8 and 0xFF) / 255.0f
+        val b2 = (topLeft and 0xFF) / 255.0f
+
+        // black by default
+        val a3 = (botRight shr 24 and 0xFF) / 255.0f
+        val r3 = (botRight shr 16 and 0xFF) / 255.0f
+        val g3 = (botRight shr 8 and 0xFF) / 255.0f
+        val b3 = (botRight and 0xFF) / 255.0f
+
+        // black by default
+        val a4 = (botLeft shr 24 and 0xFF) / 255.0f
+        val r4 = (botLeft shr 16 and 0xFF) / 255.0f
+        val g4 = (botLeft shr 8 and 0xFF) / 255.0f
+        val b4 = (botLeft and 0xFF) / 255.0f
+
+        GlStateManager.pushMatrix()
+        GlStateManager.disableTexture2D()
+        GlStateManager.enableBlend()
+        GlStateManager.disableAlpha()
+        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
+        GL11.glShadeModel(GL11.GL_SMOOTH)
+
+
+        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR)
+        worldRenderer.pos(x.toDouble(), y2.toDouble(), 0.0).color(r3, g3, b3, a3).endVertex() // bot left
+        worldRenderer.pos(x2.toDouble(), y2.toDouble(), 0.0).color(r4, g4, b4, a4).endVertex() // bot right
+        worldRenderer.pos(x2.toDouble(), y.toDouble(), 0.0).color(r2, g2, b2, a2).endVertex() // top right COLOUR
+        worldRenderer.pos(x.toDouble(), y.toDouble(), 0.0).color(r1, g1, b1, a1).endVertex() // top left
+        tessellator.draw()
+
+        GL11.glShadeModel(GL11.GL_FLAT)
+        GlStateManager.disableBlend()
+        GlStateManager.enableDepth()
+        GlStateManager.enableTexture2D()
+        GlStateManager.popMatrix()
+    }
+
+    fun drawHueBox(x: Int, y: Int, width: Int, height: Int) {
+        for (i in 0 until width) {
+            val ratio = i.toFloat() / width.toFloat()
+            val color = Color.HSBtoRGB(ratio, 1.0f, 1.0f)
+            Gui.drawRect(x + i, y, x + i + 1, y + height, color)
+        }
+    }
+
+
+
 }

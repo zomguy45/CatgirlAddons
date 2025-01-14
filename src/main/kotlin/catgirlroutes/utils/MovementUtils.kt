@@ -124,8 +124,8 @@ object MovementUtils {
             //assume max acceleration
             mc.thePlayer.motionX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
             mc.thePlayer.motionZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
-            lastX = lastX * 0.91 + 0.0512 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + 0.0512 * speed * cos(radians)
+            lastX = lastX * 0.91 + 0.2 * -sin(radians)
+            lastZ = lastZ * 0.91 + 0.2 * cos(radians)
         }
 
         if (mc.thePlayer?.onGround == true) {
