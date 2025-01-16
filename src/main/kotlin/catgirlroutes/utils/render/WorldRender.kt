@@ -624,6 +624,22 @@ object WorldRenderUtils {
         drawSquareTwo(x, y + height, z, width, width, pink, 4f, false)
     }
 
+    fun renderLesbianFlag(
+        x: Double,
+        y: Double,
+        z: Double,
+        width: Float,
+        height: Float,
+    ){
+        drawSquareTwo(x, y + 0.01, z, width, width, Color(213, 45, 0), 4f, false)
+        drawSquareTwo(x, y + height * 0.165, z, width, width, Color(239, 118, 39), 4f, false)
+        drawSquareTwo(x, y + height * 0.33, z, width, width, Color(255, 154, 86), 4f, false)
+        drawSquareTwo(x, y + height * 0.495, z, width, width, Color(255, 255, 255), 4f, false)
+        drawSquareTwo(x, y + height * 0.66, z, width, width, Color(209, 98, 164), 4f, false)
+        drawSquareTwo(x, y + height * 0.825, z, width, width, Color(181, 86, 144), 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, Color(163, 2, 98), 4f, false)
+    }
+
 
     fun drawSquareTwo(
         x: Double,
