@@ -45,7 +45,7 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
             /**
              * SB
              */
-            HUDRenderUtils.drawSBBox(0, DEFAULT_HEIGHT, width, DEFAULT_HEIGHT * 5, colorValue.hsbMax().rgb) // todo: hue instead
+            HUDRenderUtils.drawSBBox(0, DEFAULT_HEIGHT, width, DEFAULT_HEIGHT * 5, colorValue.hsbMax().rgb)
             HUDRenderUtils.drawBorderedRect(
                 this.setting.saturation * width.toDouble(),
                 DEFAULT_HEIGHT + (1 - this.setting.brightness) * (DEFAULT_HEIGHT * 5).toDouble(),
