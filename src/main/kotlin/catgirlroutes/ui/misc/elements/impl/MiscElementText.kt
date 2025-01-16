@@ -5,6 +5,7 @@ import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.getStringWidth
 import catgirlroutes.ui.misc.elements.MiscElement
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiScreen
@@ -66,7 +67,7 @@ class MiscElementText(
         return textField.text
     }
 
-    override fun getHeight(): Int {
+    fun getHeight(): Int {
         val sr = ScaledResolution(Minecraft.getMinecraft())
         val paddingUnscaled: Int = barPadding / sr.scaleFactor
 
@@ -77,7 +78,7 @@ class MiscElementText(
         return bottomTextBox + paddingUnscaled * 2
     }
 
-    override fun getWidth(): Int {
+    fun getWidth(): Int {
         val sr = ScaledResolution(Minecraft.getMinecraft())
         val paddingUnscaled: Int = barPadding / sr.scaleFactor
 
@@ -89,30 +90,22 @@ class MiscElementText(
         val yComp = mouseY - y
         val extraSize = (barHeight + 8) / 2
         val renderText = prependText + textField.text
-        val lineNum = (yComp - extraSize) / extraSize
 
-        val textNoColour = renderText.replace(Regex("(?i)\\u00A7([^\\u00B6])(?!\\u00B6)"), "\u00B6$1")
+        val lineNum = (yComp / extraSize).coerceAtLeast(0)
+        val lines = renderText.lines()
 
-        var currentLine = 0
-        val cursorIndex = textNoColour.indexOfFirst {
-            if (it == '\n') currentLine++
-            currentLine > lineNum
-        }.takeIf { it != -1 } ?: textNoColour.length
+        val targetLine = lines.getOrNull(lineNum) ?: return renderText.length
 
-        val line = renderText.substring(cursorIndex).lines().firstOrNull() ?: return 0
-        val padding = (5.coerceAtMost(barWidth - strLenNoColor(line))) / 2
-        val trimmed = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(line, xComp - padding)
-        var linePos = strLenNoColor(trimmed)
+        val padding = ((5).coerceAtMost(barWidth - strLenNoColor(targetLine))) / 2
+        val adjustedX = (xComp - padding).coerceAtLeast(0)
 
-        if (linePos < strLenNoColor(line)) {
-            val after = line[linePos]
-            val trimmedWidth = getStringWidth(trimmed)
-            if (trimmedWidth + Minecraft.getMinecraft().fontRendererObj.getCharWidth(after) / 2 < xComp - padding) {
-                linePos++
-            }
-        }
+        val trimmed = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(targetLine, adjustedX)
+        val cursorInLine = strLenNoColor(trimmed)
 
-        return cursorIndex + linePos
+        val cursorIndex = lines.take(lineNum).sumOf { it.length + 1 } + cursorInLine
+
+        debugMessage(cursorIndex.coerceAtMost(renderText.length))
+        return cursorIndex.coerceAtMost(renderText.length)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
@@ -120,6 +113,7 @@ class MiscElementText(
             textField.text = ""
         } else {
             textField.cursorPosition = getCursorPos(mouseX, mouseY)
+            debugMessage("AMONGUS " + textField.cursorPosition)
         }
         focus = true
         return super.mouseClicked(mouseX, mouseY, mouseButton)
@@ -128,6 +122,7 @@ class MiscElementText(
     override fun otherComponentClick() {
         focus = false
         textField.setSelectionPos(textField.cursorPosition)
+        debugMessage("ALONGUS " + textField.cursorPosition)
     }
 
     private fun strLenNoColor(str: String): Int {
@@ -137,6 +132,8 @@ class MiscElementText(
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
         if (focus) {
             textField.setSelectionPos(getCursorPos(mouseX, mouseY))
+            textField.cursorPosition = getCursorPos(mouseX, mouseY)
+            debugMessage("AGONGUS " + textField.cursorPosition)
         }
         return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
@@ -150,7 +147,7 @@ class MiscElementText(
 
                 textField.text = StringBuilder(getText()).replace(start, end, GuiScreen.getClipboardString()).toString()
                 textField.cursorPosition = start + GuiScreen.getClipboardString().length
-
+                debugMessage("AZINGUS" + textField.cursorPosition)
             } else textField.setEnabled(true)
 
             val old = textField.text
@@ -203,6 +200,8 @@ class MiscElementText(
 
         if (focus && System.currentTimeMillis() % 1000 > 500) {
             val cursorText = renderText.substring(0, textField.cursorPosition + prependText.length).split("\n")
+//            debugMessage(cursorText)
+//            debugMessage(textField.cursorPosition)
             val cursorX = x + 5 + (cursorText.lastOrNull()?.let { getStringWidth(it) } ?: 0)
             val cursorY = y + (barSizeY - 8) / 2 - 1 + StringUtils.countMatches(cursorText.joinToString("\n"), "\n") * extraSize
 
