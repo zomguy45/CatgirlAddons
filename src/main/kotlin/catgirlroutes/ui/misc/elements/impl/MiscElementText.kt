@@ -163,7 +163,7 @@ class MiscElementText(
         return super.keyTyped(typedChar2, keyCode)
     }
 
-    override fun render(x: Double, y: Double) {
+    override fun render(mouseX: Int, mouseY: Int, x: Double, y: Double) {
         this.x = x
         this.y = y
         drawTextbox()

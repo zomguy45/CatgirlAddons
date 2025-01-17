@@ -73,8 +73,8 @@ class InventoryButtonEditor : GuiScreen() {
             HUDRenderUtils.drawRoundedBorderedRect(
                 editorX.toDouble(),
                 editorY.toDouble(),
-                editorWidth.toDouble(),
-                editorHeight.toDouble(),
+                editorWidth,
+                editorHeight,
                 5.0, 1.0,
                 Color(ColorUtil.bgColor), Color(ColorUtil.outlineColor)
             )
@@ -87,11 +87,11 @@ class InventoryButtonEditor : GuiScreen() {
             } else {
                 commandTextField.prependText = "§7/§r"
             }
-            commandTextField.render(editorX + 7.0, editorY + 19.0)
+            commandTextField.render(mouseX, mouseY, editorX + 7.0, editorY + 19.0)
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
             iconTextField.setText(iconTextField.getText().replace("^ +", ""))
-            iconTextField.render(editorX + 7.0, editorY + 55.0)
+            iconTextField.render(mouseX, mouseY, editorX + 7.0, editorY + 55.0)
         }
 
         GlStateManager.disableBlend()

@@ -4,6 +4,7 @@ import catgirlroutes.module.impl.dungeons.LeapOrganiser
 import catgirlroutes.CatgirlRoutes.Companion.mc as mainMc
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.elements.impl.MiscElementButton
+import catgirlroutes.ui.misc.elements.impl.MiscElementSelector
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -34,9 +35,14 @@ class LeapOrganiser : GuiScreen() {
     private val boxHeight = 80
 
     private val sr = ScaledResolution(mainMc)
-    private val updateButton = MiscElementButton("Update Party", sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120) {
+    private val updateButton = MiscElementButton("Update Party", sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120.0) {
         debugMessage("Test button")
     }
+
+    private val leapOptions = MiscElementSelector(
+        "Leap Menu", "SA", LeapOrganiser.leapMenu.options,
+        sr.scaledWidth_double / 2.0 - 125.0, sr.scaledHeight_double / 2.0 + 120.0
+    )
 
     override fun initGui() {
         if (boxes.isNotEmpty()) return
@@ -83,8 +89,8 @@ class LeapOrganiser : GuiScreen() {
         }
 
         mouseDrag(mouseX, mouseY)
-        updateButton.isHovered(mouseX, mouseY)
-        updateButton.render()
+        updateButton.render(mouseX, mouseY)
+        leapOptions.render(mouseX, mouseY)
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -97,9 +103,13 @@ class LeapOrganiser : GuiScreen() {
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        if (mouseButton != 0) return
 
         updateButton.mouseClicked(mouseX, mouseY, mouseButton)
+        if (leapOptions.mouseClicked(mouseX, mouseY, mouseButton)) {
+            if (mouseButton == 0) LeapOrganiser.leapMenu.selected = leapOptions.selected
+        }
+
+        if (mouseButton != 0) return
 
         boxes.firstOrNull { isMouseOverBox(it, mouseX, mouseY) }?.let { box ->
             selectedBox = box

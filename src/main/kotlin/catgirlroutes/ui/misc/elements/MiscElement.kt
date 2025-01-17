@@ -7,7 +7,7 @@ abstract class MiscElement(
     var height: Double = 20.0
 ) { // todo rewrite a bit
 
-    abstract fun render(x: Double = this.x, y: Double = this.y)
+    abstract fun render(mouseX: Int, mouseY: Int, x: Double = this.x, y: Double = this.y)
 
     open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean { return false }
 
@@ -16,4 +16,9 @@ abstract class MiscElement(
     open fun otherComponentClick() {  }
 
     open fun keyTyped(typedChar: Char, keyCode: Int): Boolean { return false }
+
+    open fun isHovered(mouseX: Int, mouseY: Int, xOff: Int = 0, yOff: Int = 0): Boolean {
+        return mouseX >= x + xOff && mouseX <= x + width + xOff &&
+                mouseY >= y + yOff && mouseY <= y + height + yOff
+    }
 }
