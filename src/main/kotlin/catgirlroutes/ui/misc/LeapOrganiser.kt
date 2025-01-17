@@ -39,9 +39,18 @@ class LeapOrganiser : GuiScreen() {
         debugMessage("Test button")
     }
 
+    private val updateButton2 = MiscElementButton("Update Party", sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0) {
+        debugMessage("Test button")
+    }
+
     private val leapOptions = MiscElementSelector(
         "Leap Menu", "SA", LeapOrganiser.leapMenu.options,
         sr.scaledWidth_double / 2.0 - 125.0, sr.scaledHeight_double / 2.0 + 120.0
+    )
+
+    private val horizontalSelector = MiscElementSelector(
+        "Horizontal", "1", arrayListOf("1", "2", "3"),
+        sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0, false
     )
 
     override fun initGui() {
@@ -90,7 +99,9 @@ class LeapOrganiser : GuiScreen() {
 
         mouseDrag(mouseX, mouseY)
         updateButton.render(mouseX, mouseY)
+//        updateButton2.render(mouseX, mouseY)
         leapOptions.render(mouseX, mouseY)
+        horizontalSelector.render(mouseX, mouseY)
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -105,6 +116,7 @@ class LeapOrganiser : GuiScreen() {
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
 
         updateButton.mouseClicked(mouseX, mouseY, mouseButton)
+        horizontalSelector.mouseClicked(mouseX, mouseY, mouseButton)
         if (leapOptions.mouseClicked(mouseX, mouseY, mouseButton)) {
             if (mouseButton == 0) LeapOrganiser.leapMenu.selected = leapOptions.selected
         }
