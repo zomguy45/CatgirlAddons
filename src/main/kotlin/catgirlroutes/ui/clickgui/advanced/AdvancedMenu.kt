@@ -73,6 +73,7 @@ class AdvancedMenu(val module: Module) {
                     is ColorSetting     -> AdvancedElementColor    (this, module, setting)
                     is ActionSetting    -> AdvancedElementAction   (this, module, setting)
                     is KeyBindSetting   -> AdvancedElementKeyBind  (this, module, setting)
+                    is ColorSetting2    -> AdvancedElementColor2   (this, module, setting)
 //                    is DropDownSetting  -> AdvancedElementDropDown (this, module, setting) // withDependency no wrokie, that's a feature!
                     else -> return@addElement
                 }
