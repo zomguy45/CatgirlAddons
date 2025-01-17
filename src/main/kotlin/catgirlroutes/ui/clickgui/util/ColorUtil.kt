@@ -50,13 +50,11 @@ object ColorUtil {
     }
 
     fun Color.withAlpha(alpha: Float): Color {
-        return Color(red, green, blue, (alpha / 255).toInt())
+        return Color(red, green, blue, (alpha * 255).toInt())
     }
 
     fun Color.hsbMax(): Color {
-        val hsb = FloatArray(3)
-        Color.RGBtoHSB(this.red, this.green, this.blue, hsb)
-
+        val hsb = Color.RGBtoHSB(this.red, this.green, this.blue, null)
         return Color.getHSBColor(hsb[0], 1f, 1f)
     }
 

@@ -297,12 +297,12 @@ object HUDRenderUtils {
     }
 
     fun drawSBBox(
-        x: Int, y: Int, width: Int, height: Int,
+        x: Double, y: Double, width: Double, height: Double,
         topRight: Int, topLeft: Int = Color.WHITE.rgb,
         botRight: Int = Color.black.rgb, botLeft: Int = Color.black.rgb
     ) {
-        val x2 = x + width
-        val y2 = y + height
+        val x2: Double = x + width
+        val y2: Double = y + height
 
         val a1 = (topRight shr 24 and 0xFF) / 255.0f
         val r1 = (topRight shr 16 and 0xFF) / 255.0f
@@ -331,15 +331,14 @@ object HUDRenderUtils {
         GlStateManager.disableTexture2D()
         GlStateManager.enableBlend()
         GlStateManager.disableAlpha()
-        GlStateManager.tryBlendFuncSeparate(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA, GL11.GL_ONE, GL11.GL_ZERO)
         GL11.glShadeModel(GL11.GL_SMOOTH)
 
-
         worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR)
-        worldRenderer.pos(x.toDouble(), y2.toDouble(), 0.0).color(r3, g3, b3, a3).endVertex() // bot left
-        worldRenderer.pos(x2.toDouble(), y2.toDouble(), 0.0).color(r4, g4, b4, a4).endVertex() // bot right
-        worldRenderer.pos(x2.toDouble(), y.toDouble(), 0.0).color(r2, g2, b2, a2).endVertex() // top right COLOUR
-        worldRenderer.pos(x.toDouble(), y.toDouble(), 0.0).color(r1, g1, b1, a1).endVertex() // top left
+        worldRenderer.pos(x, y, 0.0).color(r2, g2, b2, a2).endVertex() // top LEFT
+        worldRenderer.pos(x, y2, 0.0).color(r4, g4, b4, a4).endVertex() // bot left
+        worldRenderer.pos(x2, y2, 0.0).color(r3, g3, b3, a3).endVertex() // bot right
+        worldRenderer.pos(x2, y, 0.0).color(r1, g1, b1, a1).endVertex() // top RIGHT (COLOUR)
+
         tessellator.draw()
 
         GL11.glShadeModel(GL11.GL_FLAT)
@@ -356,7 +355,5 @@ object HUDRenderUtils {
             Gui.drawRect(x + i, y, x + i + 1, y + height, color)
         }
     }
-
-
 
 }

@@ -6,7 +6,6 @@ import catgirlroutes.ui.clickgui.elements.ElementType
 import catgirlroutes.ui.clickgui.elements.ModuleButton
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.ColorUtil.hex
-import catgirlroutes.ui.clickgui.util.ColorUtil.hsbMax
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.utils.ChatUtils.debugMessage
@@ -30,6 +29,9 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Int {
 
         val colorValue = this.setting.value
+//        debugMessage(colorValue)
+//        debugMessage("AA " + colorValue.hsbMax())
+//        debugMessage("${this.setting.saturation} ${this.setting.brightness}")
 
         FontUtil.drawString(displayName, 1, 2)
 
@@ -45,10 +47,10 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
             /**
              * SB
              */
-            HUDRenderUtils.drawSBBox(0, DEFAULT_HEIGHT, width, DEFAULT_HEIGHT * 5, colorValue.hsbMax().rgb)
+            HUDRenderUtils.drawSBBox(0.0, DEFAULT_HEIGHT.toDouble(), width.toDouble(), DEFAULT_HEIGHT * 5.0, colorValue.hsbMax(this.setting).rgb)
             HUDRenderUtils.drawBorderedRect(
-                this.setting.saturation * width.toDouble(),
-                DEFAULT_HEIGHT + (1 - this.setting.brightness) * (DEFAULT_HEIGHT * 5).toDouble(),
+                this.setting.saturation * width.toDouble() - 2.5,
+                DEFAULT_HEIGHT + (1 - this.setting.brightness) * DEFAULT_HEIGHT * 5.0 - 2.5,
                 5.0, 5.0, 1.0,
                 colorValue.withAlpha(255), colorValue.darker().withAlpha(255)
             )
@@ -58,10 +60,10 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
              */
             HUDRenderUtils.drawHueBox(0, DEFAULT_HEIGHT * 6 + 3, width, DEFAULT_HEIGHT - 6)
             HUDRenderUtils.drawBorderedRect(
-                this.setting.hue * width.toDouble(),
+                this.setting.hue * width.toDouble() - 1.5,
                 DEFAULT_HEIGHT.toDouble() * 6 + 3,
                 3.0, 9.0, 1.0,
-                colorValue.hsbMax().withAlpha(255), colorValue.hsbMax().darker().withAlpha(255)
+                colorValue.hsbMax(this.setting).withAlpha(255), colorValue.hsbMax(this.setting).darker().withAlpha(255)
             )
 
             /**
@@ -69,12 +71,12 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
              */
             if (this.setting.allowAlpha) {
                 HUDRenderUtils.drawSBBox(
-                    0, DEFAULT_HEIGHT * 7 + 3, width, DEFAULT_HEIGHT - 6,
+                    0.0, DEFAULT_HEIGHT.toDouble() * 7 + 3, width.toDouble(), DEFAULT_HEIGHT - 6.0,
                     this.setting.value.withAlpha(255).rgb, Color.black.rgb, this.setting.value.withAlpha(255).rgb, Color.black.rgb
                 )
 
                 HUDRenderUtils.drawBorderedRect(
-                    this.setting.alpha * width.toDouble(),
+                    this.setting.alpha * width.toDouble() - 1.5,
                     DEFAULT_HEIGHT.toDouble() * 7 + 3,
                     3.0, 9.0, 1.0,
                     Color.WHITE.withAlpha(this.setting.alpha), colorValue.darker().withAlpha(255)
@@ -89,8 +91,8 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
                     this.setting.saturation = MathHelper.clamp_float((mouseX - xAbsolute).toFloat() / width, 0.0f, 1.0f)
                     this.setting.brightness = MathHelper.clamp_float(-(mouseY - yAbsolute - DEFAULT_HEIGHT * 6).toFloat() / (DEFAULT_HEIGHT * 5), 0.0f, 1.0f)
                 }
-                1 -> this.setting.hue = MathHelper.clamp_float(((mouseX - xAbsolute - 6).toFloat() / width), 0.0f, 1.0f)
-                2 -> this.setting.alpha = MathHelper.clamp_float((mouseX - xAbsolute - 6).toFloat() / width, 0.0f, 1.0f)
+                1 -> this.setting.hue = MathHelper.clamp_float(((mouseX - xAbsolute).toFloat() / width), 0.0f, 1.0f)
+                2 -> this.setting.alpha = MathHelper.clamp_float((mouseX - xAbsolute).toFloat() / width, 0.0f, 1.0f)
             }
 
             /**
@@ -109,6 +111,7 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
 
 //            debugMessage(dragging)
 //            debugMessage("""
+//
 //                ${this.setting.saturation} ${this.setting.brightness}
 //                ${this.setting.hue}
 //                ${this.setting.alpha}
@@ -176,6 +179,10 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
                 val green = stringWithoutHash.substring(2, 4).toInt(16) / 255f
                 val blue = stringWithoutHash.substring(4, 6).toInt(16) / 255f
                 setting.value = Color(red, green, blue, alpha)
+                val hsb = Color.RGBtoHSB(setting.value.red, setting.value.green, setting.value.blue, null)
+                setting.hue = hsb[0]
+                setting.saturation = hsb[1]
+                setting.brightness = hsb[2]
                 hexPrev = hexString
             } catch (e: Exception) {
                 debugMessage(e.toString())
@@ -192,6 +199,12 @@ class ElementColor2(parent: ModuleButton, setting: ColorSetting2) :
 
     private fun isHovered(mouseX: Int, mouseY: Int, x: Int, y: Int, width: Int, height: Int): Boolean {
         return mouseX >= xAbsolute + x && mouseX <= xAbsolute + width && mouseY >= yAbsolute + y && mouseY <= yAbsolute + height
+    }
+
+    private fun Color.hsbMax(setting: ColorSetting2): Color { // the dumbest fix ever
+        val hsb = Color.RGBtoHSB(this.red, this.green, this.blue, null)
+        if (hsb[1] == 0.0f || hsb[2] == 0.0f) hsb[0] = setting.hue // when saturation or brightness are 0 hue is 0 too for some weird reason... took me a few hours to realise
+        return Color.getHSBColor(hsb[0], 1f, 1f)
     }
 
 }
