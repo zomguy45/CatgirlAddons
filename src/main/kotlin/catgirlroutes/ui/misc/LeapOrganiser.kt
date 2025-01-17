@@ -1,11 +1,15 @@
 package catgirlroutes.ui.misc
 
 import catgirlroutes.module.impl.dungeons.LeapOrganiser
+import catgirlroutes.CatgirlRoutes.Companion.mc as mainMc
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.misc.elements.impl.MiscElementButton
 import catgirlroutes.utils.ChatUtils.commandAny
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import net.minecraft.client.gui.GuiScreen
+import net.minecraft.client.gui.ScaledResolution
 import java.awt.Color
 import kotlin.math.abs
 
@@ -28,6 +32,11 @@ class LeapOrganiser : GuiScreen() {
 
     private val boxWidth = 160
     private val boxHeight = 80
+
+    private val sr = ScaledResolution(mainMc)
+    private val updateButton = MiscElementButton("Update Party", sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120) {
+        debugMessage("Test button")
+    }
 
     override fun initGui() {
         if (boxes.isNotEmpty()) return
@@ -74,6 +83,8 @@ class LeapOrganiser : GuiScreen() {
         }
 
         mouseDrag(mouseX, mouseY)
+        updateButton.isHovered(mouseX, mouseY)
+        updateButton.render()
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -87,6 +98,8 @@ class LeapOrganiser : GuiScreen() {
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         if (mouseButton != 0) return
+
+        updateButton.mouseClicked(mouseX, mouseY, mouseButton)
 
         boxes.firstOrNull { isMouseOverBox(it, mouseX, mouseY) }?.let { box ->
             selectedBox = box

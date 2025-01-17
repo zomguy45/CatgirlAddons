@@ -1,10 +1,13 @@
 package catgirlroutes.ui.misc.elements
 
-import net.minecraft.client.gui.Gui
+abstract class MiscElement(
+    var x: Double = 0.0,
+    var y: Double = 0.0,
+    var width: Double = 100.0,
+    var height: Double = 20.0
+) { // todo rewrite a bit
 
-abstract class MiscElement : Gui() { // todo rewrite a bit
-
-    abstract fun render(x: Int = 0, y: Int = 0)
+    abstract fun render(x: Double = this.x, y: Double = this.y)
 
     open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean { return false }
 

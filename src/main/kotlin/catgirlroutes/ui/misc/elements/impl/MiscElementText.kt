@@ -17,22 +17,16 @@ import java.awt.Color
 
 // modified neu shit
 class MiscElementText(
-    width: Int = 20,
-    height: Int = 100,
-    options: Int = 0,
-    text: String = ""
-) : MiscElement() {
+    width: Double = 20.0,
+    height: Double = 100.0,
+    var options: Int = 0,
+    var t: String = "",
+) : MiscElement(width = width, height = height) {
 
-    private var barWidth: Int = width
-    private var barHeight: Int = height
     private var barPadding: Int = 2
-
-    private var options: Int
 
     var focus: Boolean = false
 
-    private var x: Int = 0
-    private var y: Int = 0
 
     var prependText: String = ""
 
@@ -45,8 +39,7 @@ class MiscElementText(
         textField.isFocused = true
         textField.setCanLoseFocus(false)
         textField.maxStringLength = 9999
-        textField.text = text
-        this.options = options
+        textField.text = t
     }
 
     fun getText(): String {
@@ -57,9 +50,9 @@ class MiscElementText(
         textField.text = text
     }
 
-    fun setSize(width: Int, height: Int) {
-        barWidth = width
-        barHeight = height
+    fun setSize(width: Double, height: Double) {
+        this.width = width
+        this.height = height
     }
 
     // what the fuck is this?
@@ -67,42 +60,42 @@ class MiscElementText(
         return textField.text
     }
 
-    fun getHeight(): Int {
+    fun getElementHeight(): Double {
         val sr = ScaledResolution(Minecraft.getMinecraft())
         val paddingUnscaled: Int = barPadding / sr.scaleFactor
 
         val numLines: Int = StringUtils.countMatches(textField.text, "\n") + 1
-        val extraSize: Int = (barHeight - 8) / 2 + 8
-        val bottomTextBox: Int = barHeight + extraSize * (numLines - 1)
+        val extraSize: Double = (this.height - 8) / 2 + 8
+        val bottomTextBox: Double = this.height + extraSize * (numLines - 1)
 
         return bottomTextBox + paddingUnscaled * 2
     }
 
-    fun getWidth(): Int {
+    fun getElementWidth(): Double {
         val sr = ScaledResolution(Minecraft.getMinecraft())
         val paddingUnscaled: Int = barPadding / sr.scaleFactor
 
-        return barWidth + paddingUnscaled * 2
+        return this.width + paddingUnscaled * 2
     }
 
     private fun getCursorPos(mouseX: Int, mouseY: Int): Int {
         val xComp = mouseX - x
         val yComp = mouseY - y
-        val extraSize = (barHeight + 8) / 2
+        val extraSize = (this.height + 8) / 2
         val renderText = prependText + textField.text
 
-        val lineNum = (yComp / extraSize).coerceAtLeast(0)
+        val lineNum = (yComp / extraSize).coerceAtLeast(0.0)
         val lines = renderText.lines()
 
-        val targetLine = lines.getOrNull(lineNum) ?: return renderText.length
+        val targetLine = lines.getOrNull(lineNum.toInt()) ?: return renderText.length
 
-        val padding = ((5).coerceAtMost(barWidth - strLenNoColor(targetLine))) / 2
-        val adjustedX = (xComp - padding).coerceAtLeast(0)
+        val padding = ((5).coerceAtMost(this.width.toInt() - strLenNoColor(targetLine))) / 2
+        val adjustedX = (xComp - padding).coerceAtLeast(0.0)
 
-        val trimmed = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(targetLine, adjustedX)
+        val trimmed = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(targetLine, adjustedX.toInt())
         val cursorInLine = strLenNoColor(trimmed)
 
-        val cursorIndex = lines.take(lineNum).sumOf { it.length + 1 } + cursorInLine
+        val cursorIndex = lines.take(lineNum.toInt()).sumOf { it.length + 1 } + cursorInLine
 
         debugMessage(cursorIndex.coerceAtMost(renderText.length))
         return cursorIndex.coerceAtMost(renderText.length)
@@ -148,7 +141,14 @@ class MiscElementText(
                 textField.text = StringBuilder(getText()).replace(start, end, GuiScreen.getClipboardString()).toString()
                 textField.cursorPosition = start + GuiScreen.getClipboardString().length
                 debugMessage("AZINGUS" + textField.cursorPosition)
-            } else textField.setEnabled(true)
+            } else if (GuiScreen.isKeyComboCtrlA(keyCode)) {
+                debugMessage("CTRL A")
+                textField.setCursorPositionEnd()
+                textField.setSelectionPos(0)
+            } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+                GuiScreen.setClipboardString(textField.selectedText)
+            }
+            else textField.setEnabled(true)
 
             val old = textField.text
             if ((options and FORCE_CAPS) != 0) typedChar2 = typedChar2.uppercaseChar()
@@ -163,38 +163,35 @@ class MiscElementText(
         return super.keyTyped(typedChar2, keyCode)
     }
 
-    override fun render(x: Int, y: Int) {
+    override fun render(x: Double, y: Double) {
         this.x = x
         this.y = y
-        drawTextbox(x.toDouble(), y.toDouble(), barWidth, barHeight, barPadding, textField, focus)
+        drawTextbox()
     }
 
-    private fun drawTextbox(
-        x: Double, y: Double, barSizeX: Int, barSizeY: Int, barPadding: Int,
-        textField: GuiTextField, focus: Boolean
-    ) {
+    private fun drawTextbox() {
         val sr = ScaledResolution(mc)
         val renderText = prependText + textField.text
         GlStateManager.disableLighting()
 
         val paddingUnscaled = (barPadding / sr.scaleFactor).coerceAtLeast(1)
-        val extraSize = (barSizeY - 8) / 2 + 8
-        val bottomTextBox = y + barSizeY + extraSize * (StringUtils.countMatches(renderText, "\n") + 1 - 1)
+        val extraSize = (this.height - 8) / 2 + 8
+        val bottomTextBox = y + this.height + extraSize * (StringUtils.countMatches(renderText, "\n") + 1 - 1)
 
         drawRoundedRect(
             x - paddingUnscaled, y - paddingUnscaled,
-            (barSizeX + 2 * paddingUnscaled).toDouble(), bottomTextBox - y + 2 * paddingUnscaled,
+            (this.width + 2 * paddingUnscaled).toDouble(), bottomTextBox - y + 2 * paddingUnscaled,
             5.0, if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
         )
-        drawRoundedRect(x, y, barSizeX.toDouble(), bottomTextBox - y, 5.0, Color(ColorUtil.buttonColor))
+        drawRoundedRect(x, y, this.width.toDouble(), bottomTextBox - y, 5.0, Color(ColorUtil.buttonColor))
 
         val textNoColor = renderText.replace(Regex("(?i)\\u00A7([^\\u00B6\\n])(?!\\u00B6)")) { "\u00B6${it.groupValues[1]}" }
 
         renderText.split("\n").filter { it.isNotEmpty() }.forEachIndexed { index, text ->
             FontUtil.drawString(
-                mc.fontRendererObj.trimStringToWidth(text, barSizeX - 10),
+                mc.fontRendererObj.trimStringToWidth(text, this.width.toInt() - 10),
                 x + 5,
-                y + (barSizeY - 8) / 2 + index * extraSize
+                y + (this.height - 8) / 2 + index * extraSize
             )
         }
 
@@ -203,10 +200,11 @@ class MiscElementText(
 //            debugMessage(cursorText)
 //            debugMessage(textField.cursorPosition)
             val cursorX = x + 5 + (cursorText.lastOrNull()?.let { getStringWidth(it) } ?: 0)
-            val cursorY = y + (barSizeY - 8) / 2 - 1 + StringUtils.countMatches(cursorText.joinToString("\n"), "\n") * extraSize
+            val cursorY = y + (this.height - 8) / 2 - 1 + StringUtils.countMatches(cursorText.joinToString("\n"), "\n") * extraSize
 
             drawRoundedRect(cursorX, cursorY, 1.0, 10.0, 0.0, Color.WHITE)
         }
+//        debugMessage(textField.selectedText)
 
         if (textField.selectedText.isNotEmpty()) {
             val (left, right) = listOf(textField.cursorPosition, textField.selectionEnd).map { it + prependText.length }.let { it.minOrNull() to it.maxOrNull() }
@@ -217,7 +215,7 @@ class MiscElementText(
 
             textNoColor.forEachIndexed { i, c -> // I think it's ctrl + a logic
                 if (c == '\n') {
-                    if (i in left!! until right!!) drawRoundedRect(x + 5 + texX, y + (barSizeY - 8) / 2 - 1 + texY, 3.0, 9.0, 5.0, Color.LIGHT_GRAY)
+                    if (i in left!! until right!!) drawRoundedRect(x + 5 + texX, y + (this.height - 8) / 2 - 1 + texY, 3.0, 9.0, 5.0, Color.LIGHT_GRAY)
                     texX = 0.0; texY += extraSize; return@forEachIndexed
                 }
 
@@ -226,9 +224,9 @@ class MiscElementText(
                 val len = getStringWidth(c.toString()) + if (bold) 1 else 0
 
                 if (i in left!! until right!!) {
-                    drawRoundedRect(x + 5 + texX, y + (barSizeY - 8) / 2 - 1 + texY, len.toDouble(), 10.0, 5.0, Color(ColorUtil.bgColor))
-                    FontUtil.drawString(c.toString(), x + 5 + texX, y + barSizeY / 2.0 - 4.0 + texY, Color.BLACK.rgb)
-                    if (bold) FontUtil.drawString(c.toString(), x + 5 + texX + 1, y + barSizeY / 2.0 - 4.0 + texY, Color.BLACK.rgb)
+                    drawRoundedRect(x + 5 + texX, y + (this.height - 8) / 2 - 1 + texY, len.toDouble(), 10.0, 5.0, Color(ColorUtil.bgColor))
+                    FontUtil.drawString(c.toString(), x + 5 + texX, y + this.height / 2.0 - 4.0 + texY, Color.BLACK.rgb)
+                    if (bold) FontUtil.drawString(c.toString(), x + 5 + texX + 1, y + this.height / 2.0 - 4.0 + texY, Color.BLACK.rgb)
                 }
                 texX += len
             }

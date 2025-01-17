@@ -4,7 +4,6 @@ import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
@@ -22,13 +21,13 @@ class InventoryButtonEditor : GuiScreen() {
 
     private var editingButton: InventoryButton? = null;
 
-    private val editorWidth = 150
-    private val editorHeight = 78
+    private val editorWidth = 150.0
+    private val editorHeight = 78.0
     private var editorX = 0
     private var editorY = 0
 
-    private val commandTextField: MiscElementText = MiscElementText(editorWidth - 14, 16)
-    private val iconTextField: MiscElementText = MiscElementText(editorWidth - 14, 16)
+    private val commandTextField: MiscElementText = MiscElementText(editorWidth - 14, 16.0)
+    private val iconTextField: MiscElementText = MiscElementText(editorWidth - 14, 16.0)
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.drawScreen(mouseX, mouseY, partialTicks)
@@ -67,7 +66,7 @@ class InventoryButtonEditor : GuiScreen() {
             val x: Int = invX + editingButton!!.x
             val y: Int = invY + editingButton!!.y
 
-            editorX = x + 8 - editorWidth / 2
+            editorX = x + 8 - editorWidth.toInt() / 2
             editorY = y + 18 + 2
 
             // editor box
@@ -88,11 +87,11 @@ class InventoryButtonEditor : GuiScreen() {
             } else {
                 commandTextField.prependText = "§7/§r"
             }
-            commandTextField.render(editorX + 7, editorY + 19)
+            commandTextField.render(editorX + 7.0, editorY + 19.0)
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
             iconTextField.setText(iconTextField.getText().replace("^ +", ""))
-            iconTextField.render(editorX + 7, editorY + 55)
+            iconTextField.render(editorX + 7.0, editorY + 55.0)
         }
 
         GlStateManager.disableBlend()
@@ -167,8 +166,8 @@ class InventoryButtonEditor : GuiScreen() {
     }
 
     private fun isHoveringText(mouseX: Int, mouseY: Int, xOff: Int, yOff: Int, textField: MiscElementText): Boolean {
-        return mouseX >= editorX + xOff && mouseX <= editorX + xOff + textField.getWidth() &&
-                mouseY >= editorY + yOff && mouseY <= editorY + yOff + textField.getHeight()
+        return mouseX >= editorX + xOff && mouseX <= editorX + xOff + textField.getElementWidth() &&
+                mouseY >= editorY + yOff && mouseY <= editorY + yOff + textField.getElementHeight()
     }
 
     private fun isHoveringEditor(mouseX: Int, mouseY: Int): Boolean {
