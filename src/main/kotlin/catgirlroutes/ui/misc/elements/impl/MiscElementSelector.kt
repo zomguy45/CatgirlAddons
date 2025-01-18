@@ -72,7 +72,7 @@ class MiscElementSelector(
         }
 
         this.options.forEachIndexed { i, option ->
-            val xPos = this.x + ((i - 1) * this.width) + i * this.gap
+            val xPos = this.x + i * this.width + i * this.gap
             HUDRenderUtils.drawRoundedBorderedRect(
                 xPos, this.y, this.width, this.height, 5.0, this.thickness,
                 Color(ColorUtil.elementColor), if (this.isSelected(option)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
@@ -99,7 +99,7 @@ class MiscElementSelector(
                 val isOptionHovered = if (this.vertical)
                     this.isHovered(mouseX, mouseY, yOff = this.height.toInt() * (i + 1))
                 else
-                    this.isHovered(mouseX, mouseY, xOff = ((i - 1) * this.width.toInt()) + i * this.gap)
+                    this.isHovered(mouseX, mouseY, xOff = i * this.width.toInt() + i * this.gap)
 
                 if (isOptionHovered) {
                     this.selected = option
