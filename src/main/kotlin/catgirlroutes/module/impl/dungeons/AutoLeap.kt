@@ -93,6 +93,7 @@ object AutoLeap : Module(
     fun onMouse(event: MouseEvent) {
         if (!event.buttonstate || !inDungeons || !fastLeap.value) return
         if (event.button != 0) return
+        if (mc.thePlayer.heldItem == null) return
         if (mc.thePlayer.heldItem.displayName.stripControlCodes() != "Infinileap") return
         handleLeap()
     }
@@ -101,7 +102,7 @@ object AutoLeap : Module(
     fun onChat(event: ClientChatReceivedEvent) {
         if (!inDungeons || event.type.toInt() == 2 || !inBoss || !autoLeap.value) return
         val message = stripControlCodes(event.message.unformattedText)
-        if (message.endsWith("(7/7)") || message.endsWith("(8/8)")) {
+        if (message.contains("(7/7)") || message.contains("(8/8)")) {
             handleLeap()
         }
     }

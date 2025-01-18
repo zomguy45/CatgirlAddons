@@ -1,10 +1,10 @@
 package catgirlroutes.ui.misc.inventorybuttons
 
 import catgirlroutes.config.InventoryButtonsConfig
+import catgirlroutes.config.InventoryButtonsConfig.allButtons
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
@@ -22,13 +22,13 @@ class InventoryButtonEditor : GuiScreen() {
 
     private var editingButton: InventoryButton? = null;
 
-    private val editorWidth = 150
-    private val editorHeight = 78
+    private val editorWidth = 150.0
+    private val editorHeight = 78.0
     private var editorX = 0
     private var editorY = 0
 
-    private val commandTextField: MiscElementText = MiscElementText(editorWidth - 14, 16)
-    private val iconTextField: MiscElementText = MiscElementText(editorWidth - 14, 16)
+    private val commandTextField: MiscElementText = MiscElementText(width = editorWidth - 14, height = 16.0)
+    private val iconTextField: MiscElementText = MiscElementText(width = editorWidth - 14, height =  16.0)
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.drawScreen(mouseX, mouseY, partialTicks)
@@ -42,57 +42,49 @@ class InventoryButtonEditor : GuiScreen() {
         GlStateManager.color(1f, 1f, 1f, 1f)
 
         mc.textureManager.bindTexture(INVENTORY)
-
         HUDRenderUtils.drawTexturedRect(invX.toFloat(), invY.toFloat(), invWidth.toFloat(), invHeight.toFloat(), 0f, invWidth / 256f, 0f, invHeight / 256f, GL11.GL_NEAREST)
 
-        InventoryButtonsConfig.allButtons.forEach { button ->
-            val x: Int = invX + button.x
-            val y: Int = invY + button.y
-
-            // render button
-            var c = InventoryButton.colour
-            var bC = InventoryButton.borderColour
-            if (editingButton == button) {
-                c = c.brighter()
-                bC = bC.brighter()
+        allButtons.forEach { button ->
+            val x = invX + button.x
+            val y = invY + button.y
+            val (colour, borderColour) = if (editingButton == button) {
+                InventoryButton.colour.brighter() to InventoryButton.borderColour.brighter()
+            } else {
+                InventoryButton.colour to InventoryButton.borderColour
             }
-            button.render(invX, invY, c, bC)
-
-            if (!button.isActive()) {
-                FontUtil.drawString("+", x + 6, y + 5)
-            }
+            button.render(invX, invY, colour, borderColour)
+            if (!button.isActive) FontUtil.drawString("+", x + 6, y + 5)
         }
 
-        if (editingButton != null) {
-            val x: Int = invX + editingButton!!.x
-            val y: Int = invY + editingButton!!.y
+        editingButton?.let {
+            val x = invX + it.x
+            val y = invY + it.y
+            editorX = x + 8 - editorWidth.toInt() / 2
+            editorY = y + 20
 
-            editorX = x + 8 - editorWidth / 2
-            editorY = y + 18 + 2
-
-            // editor box
             HUDRenderUtils.drawRoundedBorderedRect(
-                editorX.toDouble(),
-                editorY.toDouble(),
-                editorWidth.toDouble(),
-                editorHeight.toDouble(),
+                editorX.toDouble(), editorY.toDouble(),
+                editorWidth, editorHeight,
                 5.0, 1.0,
                 Color(ColorUtil.bgColor), Color(ColorUtil.outlineColor)
             )
 
-
             FontUtil.drawString("Command", editorX + 7, editorY + 7, 0xffa0a0a0.toInt())
-            commandTextField.setText(commandTextField.getText().replace("^ +", "")) // remove leading spaces
-            if (commandTextField.getText().startsWith("/")) {
-                commandTextField.prependText = ""
-            } else {
-                commandTextField.prependText = "§7/§r"
+            commandTextField.apply {
+                text = text.replace("^ +", "")
+                prependText = if (text.startsWith("/")) "" else "§7/§r"
+                render(mouseX, mouseY)
+                this.x = editorX + 7.0
+                this.y = editorY + 19.0
             }
-            commandTextField.render(editorX + 7, editorY + 19)
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
-            iconTextField.setText(iconTextField.getText().replace("^ +", ""))
-            iconTextField.render(editorX + 7, editorY + 55)
+            iconTextField.apply {
+                text = text.replace("^ +", "")
+                render(mouseX, mouseY)
+                this.x = editorX + 7.0
+                this.y = editorY + 55.0
+            }
         }
 
         GlStateManager.disableBlend()
@@ -102,57 +94,35 @@ class InventoryButtonEditor : GuiScreen() {
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
         if (mouseButton != 0) return
 
-        if (editingButton != null && isHoveringEditor(mouseX, mouseY)) {
-            if (isHoveringText(mouseX, mouseY, 7, 12, commandTextField)) {
-                commandTextField.mouseClicked(mouseX, mouseY, mouseButton)
-                editingButton!!.command = commandTextField.getText()
-                iconTextField.focus = false
-                return
-            }
-
-            if (isHoveringText(mouseX, mouseY, 7, 55, iconTextField)) {
-                iconTextField.mouseClicked(mouseX, mouseY, mouseButton)
-                editingButton!!.icon = iconTextField.getText()
-                commandTextField.focus = false
-                return
-            }
-            return
+        editingButton?.takeIf { isHoveringEditor(mouseX, mouseY) }?.let {
+            if (commandTextField.mouseClicked(mouseX, mouseY, mouseButton)) it.command = commandTextField.text
+            if (iconTextField.mouseClicked(mouseX, mouseY, mouseButton)) it.icon = iconTextField.text
         }
 
-
-        InventoryButtonsConfig.allButtons.forEach { button ->
-            if (button.isEquipment) return@forEach
-            if (button.isHovered(mouseX - invX, mouseY - invY)) {
+        allButtons.filter { !it.isEquipment && it.isHovered(mouseX - invX, mouseY - invY) }
+            .forEach { button ->
                 if (editingButton == button && !isHoveringEditor(mouseX, mouseY)) {
                     editingButton = null
                 } else {
                     editingButton = button
+
                     commandTextField.focus = true
-                    commandTextField.setText(editingButton!!.command)
-                    iconTextField.setText(editingButton!!.icon)
+                    commandTextField.text = editingButton!!.command
+
+                    iconTextField.text = editingButton!!.icon
+                    iconTextField.focus = false
+
                     InventoryButtonsConfig.save()
                 }
-                return
-            }
         }
-
-        iconTextField.focus = false
-        commandTextField.focus = false
 
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
-
-        if (editingButton != null) {
-            if (commandTextField.focus) {
-                commandTextField.keyTyped(typedChar, keyCode)
-                editingButton!!.command = commandTextField.getText()
-            }
-            if (iconTextField.focus) {
-                iconTextField.keyTyped(typedChar, keyCode)
-                editingButton!!.icon = iconTextField.getText()
-            }
+        editingButton?.let {
+            if (commandTextField.keyTyped(typedChar, keyCode)) it.command = commandTextField.text
+            if (iconTextField.keyTyped(typedChar, keyCode)) it.icon = iconTextField.text
         }
         super.keyTyped(typedChar, keyCode)
     }
@@ -164,11 +134,6 @@ class InventoryButtonEditor : GuiScreen() {
 
     override fun doesGuiPauseGame(): Boolean {
         return false
-    }
-
-    private fun isHoveringText(mouseX: Int, mouseY: Int, xOff: Int, yOff: Int, textField: MiscElementText): Boolean {
-        return mouseX >= editorX + xOff && mouseX <= editorX + xOff + textField.getWidth() &&
-                mouseY >= editorY + yOff && mouseY <= editorY + yOff + textField.getHeight()
     }
 
     private fun isHoveringEditor(mouseX: Int, mouseY: Int): Boolean {

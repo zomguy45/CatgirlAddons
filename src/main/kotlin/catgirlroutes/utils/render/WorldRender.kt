@@ -9,9 +9,11 @@ import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
+import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.*
 import org.lwjgl.util.glu.Cylinder
 import org.lwjgl.util.vector.Vector3f
 import java.awt.Color
@@ -122,6 +124,140 @@ object WorldRenderUtils {
     ) {
         drawBoxByEntity(entity, color, width.toFloat(), height.toFloat(), partialTicks, lineWidth.toFloat(),phase,xOffset, yOffset, zOffset)
     }
+
+    fun drawEntityBox(entity: Entity, color: Color, fillcolor: Color, outline: Boolean, fill: Boolean, partialTicks: Float, lineWidth: Float) {
+        if (!outline && !fill) return
+        val renderManager = mc.renderManager
+        val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderManager.viewerPosX
+        val y = entity.lastTickPosY + (entity.posY - entity.lastTickPosY) * partialTicks - renderManager.viewerPosY
+        val z = entity.lastTickPosZ + (entity.posZ - entity.lastTickPosZ) * partialTicks - renderManager.viewerPosZ
+
+        var axisAlignedBB: AxisAlignedBB
+        entity.entityBoundingBox.run {
+            axisAlignedBB = AxisAlignedBB(
+                minX - entity.posX,
+                minY - entity.posY,
+                minZ - entity.posZ,
+                maxX - entity.posX,
+                maxY - entity.posY,
+                maxZ - entity.posZ
+            ).offset(x, y, z)
+        }
+
+        glPushMatrix()
+        glPushAttrib(GL_ALL_ATTRIB_BITS)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_BLEND)
+        glDisable(GL_TEXTURE_2D)
+        glDisable(GL_DEPTH_TEST)
+        glDisable(GL_LIGHTING)
+        glDepthMask(false)
+
+        if (outline) {
+            glLineWidth(lineWidth)
+            drawOutlinedAABB(axisAlignedBB, color)
+        }
+        if (fill) {
+            drawFilledAABB(axisAlignedBB, fillcolor)
+        }
+
+        glDepthMask(true)
+        glPopAttrib()
+        glPopMatrix()
+    }
+
+    private fun drawOutlinedAABB(aabb: AxisAlignedBB, color: Color) {
+        val tessellator = Tessellator.getInstance()
+        val worldRenderer = tessellator.worldRenderer
+        glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+
+        worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION)
+
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+
+        tessellator.draw()
+    }
+
+    private fun drawFilledAABB(aabb: AxisAlignedBB, color: Color) {
+        val tessellator = Tessellator.getInstance()
+        val worldRenderer = tessellator.worldRenderer
+        glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+
+        worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
+
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.minX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.minZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.maxY, aabb.maxZ).endVertex()
+        worldRenderer.pos(aabb.maxX, aabb.minY, aabb.maxZ).endVertex()
+        tessellator.draw()
+    }
+
 
     /**
      * Draws a rectangular cuboid outline (box) around the [entity].
@@ -486,6 +622,22 @@ object WorldRenderUtils {
         drawSquareTwo(x, y + height * 0.6, z, width, width, green, 4f, false)
         drawSquareTwo(x, y + height * 0.8, z, width, width, blue, 4f, false)
         drawSquareTwo(x, y + height, z, width, width, pink, 4f, false)
+    }
+
+    fun renderLesbianFlag(
+        x: Double,
+        y: Double,
+        z: Double,
+        width: Float,
+        height: Float,
+    ){
+        drawSquareTwo(x, y + 0.01, z, width, width, Color(213, 45, 0), 4f, false)
+        drawSquareTwo(x, y + height * 0.165, z, width, width, Color(239, 118, 39), 4f, false)
+        drawSquareTwo(x, y + height * 0.33, z, width, width, Color(255, 154, 86), 4f, false)
+        drawSquareTwo(x, y + height * 0.495, z, width, width, Color(255, 255, 255), 4f, false)
+        drawSquareTwo(x, y + height * 0.66, z, width, width, Color(209, 98, 164), 4f, false)
+        drawSquareTwo(x, y + height * 0.825, z, width, width, Color(181, 86, 144), 4f, false)
+        drawSquareTwo(x, y + height, z, width, width, Color(163, 2, 98), 4f, false)
     }
 
 

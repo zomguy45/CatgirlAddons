@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.misc
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.config.InventoryButtonsConfig
+import catgirlroutes.config.InventoryButtonsConfig.allButtons
 import catgirlroutes.mixins.accessors.AccessorGuiContainer
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -37,27 +38,30 @@ object InventoryButtons : Module(
     fun onDrawScreenPost(event: GuiScreenEvent.DrawScreenEvent.Post) {
         if (mc.currentScreen !is GuiInventory) return
         val accessor = event.gui as AccessorGuiContainer
-        InventoryButtonsConfig.allButtons.forEach {
-            if (!it.isActive()) return@forEach
-            if (it.isEquipment && !equipmentOverlay.enabled) return@forEach
 
-            GlStateManager.pushMatrix()
-            GlStateManager.disableLighting()
+        allButtons.filter { it.isActive && (it.isEquipment == this.equipmentOverlay.enabled) }
+            .forEach { button ->
+                GlStateManager.pushMatrix()
+                GlStateManager.disableLighting()
 
-            it.render(accessor.guiLeft, accessor.guiTop)
+                button.render(accessor.guiLeft, accessor.guiTop)
 
-            if (it.isHovered(event.mouseX - accessor.guiLeft, event.mouseY - accessor.guiTop)) {
-                GuiUtils.drawHoveringText(
-                    Lists.newArrayList("§7/${it.command.replace("/", "")}"),
-                    event.mouseX, event.mouseY,
-                    event.gui.width, event.gui.height,
-                    -1, mc.fontRendererObj
-                )
+                GlStateManager.enableLighting()
+                GlStateManager.popMatrix()
             }
 
-            GlStateManager.enableLighting()
-            GlStateManager.popMatrix()
-        }
+        // different loop so hovering text is always above the buttons
+        allButtons.filter { it.isActive && (it.isEquipment == this.equipmentOverlay.enabled) }
+            .forEach { button ->
+                if (button.isHovered(event.mouseX - accessor.guiLeft, event.mouseY - accessor.guiTop)) {
+                    GuiUtils.drawHoveringText(
+                        Lists.newArrayList("§7/${button.command.replace("/", "")}"),
+                        event.mouseX, event.mouseY,
+                        event.gui.width, event.gui.height,
+                        -1, mc.fontRendererObj
+                    )
+                }
+            }
     }
 
     @SubscribeEvent
@@ -71,11 +75,6 @@ object InventoryButtons : Module(
 
         val accessor = event.gui as AccessorGuiContainer
 
-        InventoryButtonsConfig.allButtons.forEach { button ->
-            if (!button.isActive()) return@forEach
-            if (button.isHovered(mouseX - accessor.guiLeft, mouseY - accessor.guiTop) && Mouse.getEventButtonState()) {
-                ChatUtils.commandAny(button.command)
-            }
-        }
+        allButtons.filter { it.isActive && it.isHovered(mouseX - accessor.guiLeft, mouseY - accessor.guiTop) && Mouse.getEventButtonState() }.forEach { it.action }
     }
 }

@@ -13,7 +13,6 @@ import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.MathHelper
-import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
 import java.awt.Color
 
@@ -70,7 +69,7 @@ class AdvancedMenu(val module: Module) {
                     is StringSelectorSetting  -> AdvancedElementStringSelector (this, module, setting)
                     is SelectorSetting  -> AdvancedElementSelector (this, module, setting)
                     is StringSetting    -> AdvancedElementTextField(this, module, setting)
-                    is ColorSetting     -> AdvancedElementColor    (this, module, setting)
+                    is ColorSetting -> AdvancedElementColor    (this, module, setting)
                     is ActionSetting    -> AdvancedElementAction   (this, module, setting)
                     is KeyBindSetting   -> AdvancedElementKeyBind  (this, module, setting)
 //                    is DropDownSetting  -> AdvancedElementDropDown (this, module, setting) // withDependency no wrokie, that's a feature!

@@ -54,7 +54,7 @@ object BossESP : Module( // todo: outline
     @SubscribeEvent
     fun onRenderEntityModel (event: RenderEntityModelEvent) {
         if (style.selected == "Outline" && event.entity == wither) {
-            OutlineUtils.outlineESP(event, lineWidth.value.toFloat(), color.value)
+            OutlineUtils.outlineESP(event, lineWidth.value.toFloat(), color.value, true)
         }
     }
 }

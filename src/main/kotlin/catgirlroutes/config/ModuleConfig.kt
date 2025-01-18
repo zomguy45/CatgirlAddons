@@ -77,7 +77,15 @@ class ModuleConfig(path: File) {
                         when (setting) {
                             is BooleanSetting ->    if (configSetting is BooleanSetting) setting.enabled = configSetting.enabled
                             is NumberSetting ->     if (configSetting is NumberSetting) setting.value = configSetting.value
-                            is ColorSetting ->      if (configSetting is NumberSetting) setting.value = Color(configSetting.value.toInt(), true)
+                            is ColorSetting ->      if (configSetting is NumberSetting) {
+                                setting.value = Color(configSetting.value.toInt(), true).also {
+                                    // tbh should it probably should be in ColorSetting .value but I cba todo: refactor some day
+                                    val hsb = Color.RGBtoHSB(it.red, it.green, it.blue, null)
+                                    setting.hue = hsb[0]
+                                    setting.saturation = hsb[1]
+                                    setting.brightness = hsb[2]
+                                }
+                            }
                             is StringSelectorSetting -> if (configSetting is StringSetting) setting.selected = configSetting.text
                             is SelectorSetting ->   if (configSetting is StringSetting) setting.selected = configSetting.text
                             is StringSetting ->     if (configSetting is StringSetting) setting.text = configSetting.text
