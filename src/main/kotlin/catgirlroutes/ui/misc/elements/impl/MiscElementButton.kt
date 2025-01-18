@@ -8,15 +8,15 @@ import java.awt.Color
 
 class MiscElementButton(
     var name: String,
-    x: Double,
-    y: Double,
+    x: Double = 0.0,
+    y: Double = 0.0,
     width: Double = 80.0,
     height: Double = 20.0,
     var thickness: Double = 2.0,
     var action: () -> Unit
 ) : MiscElement(x, y, width, height) {
 
-    override fun render(mouseX: Int, mouseY: Int, x: Double, y: Double) {
+    override fun render(mouseX: Int, mouseY: Int) {
         HUDRenderUtils.drawRoundedBorderedRect(
             this.x, this.y, this.width, this.height, 5.0, thickness,
             Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)

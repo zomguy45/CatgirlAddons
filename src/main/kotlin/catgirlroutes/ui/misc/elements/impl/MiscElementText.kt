@@ -17,65 +17,33 @@ import java.awt.Color
 
 // modified neu shit
 class MiscElementText(
+    x: Double = 0.0,
+    y: Double = 0.0,
     width: Double = 20.0,
     height: Double = 100.0,
+    var value: String = "",
     var options: Int = 0,
-    var t: String = "",
-) : MiscElement(width = width, height = height) {
+    var prependText: String = ""
+) : MiscElement(x, y, width, height) {
 
     private var barPadding: Int = 2
 
     var focus: Boolean = false
-
-
-    var prependText: String = ""
 
     private val textField: GuiTextField = GuiTextField(
         0, mc.fontRendererObj, 0,
         0, 0, 0
     )
 
+    var text: String
+        get() = textField.text
+        set(value) { textField.text = value }
+
     init {
         textField.isFocused = true
         textField.setCanLoseFocus(false)
         textField.maxStringLength = 9999
-        textField.text = t
-    }
-
-    fun getText(): String {
-        return textField.text
-    }
-
-    fun setText(text: String) {
-        textField.text = text
-    }
-
-    fun setSize(width: Double, height: Double) {
-        this.width = width
-        this.height = height
-    }
-
-    // what the fuck is this?
-    override fun toString(): String {
-        return textField.text
-    }
-
-    fun getElementHeight(): Double {
-        val sr = ScaledResolution(Minecraft.getMinecraft())
-        val paddingUnscaled: Int = barPadding / sr.scaleFactor
-
-        val numLines: Int = StringUtils.countMatches(textField.text, "\n") + 1
-        val extraSize: Double = (this.height - 8) / 2 + 8
-        val bottomTextBox: Double = this.height + extraSize * (numLines - 1)
-
-        return bottomTextBox + paddingUnscaled * 2
-    }
-
-    fun getElementWidth(): Double {
-        val sr = ScaledResolution(Minecraft.getMinecraft())
-        val paddingUnscaled: Int = barPadding / sr.scaleFactor
-
-        return this.width + paddingUnscaled * 2
+        textField.text = value
     }
 
     private fun getCursorPos(mouseX: Int, mouseY: Int): Int {
@@ -102,14 +70,15 @@ class MiscElementText(
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton == 1) {
-            textField.text = ""
-        } else {
-            textField.cursorPosition = getCursorPos(mouseX, mouseY)
-            debugMessage("AMONGUS " + textField.cursorPosition)
+        if (!isHovered(mouseX, mouseY)) { focus = false; return false }
+
+        when(mouseButton) {
+            1 -> textField.text = ""
+            else -> textField.cursorPosition = getCursorPos(mouseX, mouseY)
         }
         focus = true
-        return super.mouseClicked(mouseX, mouseY, mouseButton)
+
+        return true
     }
 
     override fun otherComponentClick() {
@@ -123,49 +92,52 @@ class MiscElementText(
     }
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
-        if (focus) {
-            textField.setSelectionPos(getCursorPos(mouseX, mouseY))
-            textField.cursorPosition = getCursorPos(mouseX, mouseY)
-            debugMessage("AGONGUS " + textField.cursorPosition)
-        }
+        if (!focus) return
+
+        textField.setSelectionPos(getCursorPos(mouseX, mouseY))
+        textField.cursorPosition = getCursorPos(mouseX, mouseY)
+        debugMessage("AGONGUS " + textField.cursorPosition)
+
         return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean { // todo: add more ctrl things (ctrl + a/c/x)
+        if (!focus) return false
         var typedChar2 = typedChar
-        if (focus) {
-            if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+
+        when {
+            GuiScreen.isKeyComboCtrlV(keyCode) -> {
                 textField.setEnabled(false)
                 val (start, end) = listOf(textField.cursorPosition, textField.selectionEnd).sorted()
 
-                textField.text = StringBuilder(getText()).replace(start, end, GuiScreen.getClipboardString()).toString()
+                textField.text = StringBuilder(text).replace(start, end, GuiScreen.getClipboardString()).toString()
                 textField.cursorPosition = start + GuiScreen.getClipboardString().length
                 debugMessage("AZINGUS" + textField.cursorPosition)
-            } else if (GuiScreen.isKeyComboCtrlA(keyCode)) {
-                debugMessage("CTRL A")
+            }
+            GuiScreen.isKeyComboCtrlA(keyCode) -> {
                 textField.setCursorPositionEnd()
                 textField.setSelectionPos(0)
-            } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
+            }
+            GuiScreen.isKeyComboCtrlC(keyCode) -> {
                 GuiScreen.setClipboardString(textField.selectedText)
             }
-            else textField.setEnabled(true)
-
-            val old = textField.text
-            if ((options and FORCE_CAPS) != 0) typedChar2 = typedChar2.uppercaseChar()
-            if ((options and NO_SPACE) != 0 && typedChar2 == ' ') return false
-
-            textField.apply {
-                isFocused = true
-                textboxKeyTyped(typedChar2, keyCode)
-                if ((options and NUM_ONLY) != 0 && text.any { it !in "0-9." }) text = old
-            }
+            else -> textField.setEnabled(true)
         }
-        return super.keyTyped(typedChar2, keyCode)
+
+        val old = textField.text
+        if ((options and FORCE_CAPS) != 0) typedChar2 = typedChar2.uppercaseChar()
+        if ((options and NO_SPACE) != 0 && typedChar2 == ' ') return false
+
+        textField.apply {
+            isFocused = true
+            textboxKeyTyped(typedChar2, keyCode)
+            if ((options and NUM_ONLY) != 0 && text.any { it !in "0-9." }) text = old
+        }
+
+        return true
     }
 
-    override fun render(mouseX: Int, mouseY: Int, x: Double, y: Double) {
-        this.x = x
-        this.y = y
+    override fun render(mouseX: Int, mouseY: Int) {
         drawTextbox()
     }
 
@@ -180,10 +152,10 @@ class MiscElementText(
 
         drawRoundedRect(
             x - paddingUnscaled, y - paddingUnscaled,
-            (this.width + 2 * paddingUnscaled).toDouble(), bottomTextBox - y + 2 * paddingUnscaled,
+            this.width + 2 * paddingUnscaled, bottomTextBox - y + 2 * paddingUnscaled,
             5.0, if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
         )
-        drawRoundedRect(x, y, this.width.toDouble(), bottomTextBox - y, 5.0, Color(ColorUtil.buttonColor))
+        drawRoundedRect(x, y, this.width, bottomTextBox - y, 5.0, Color(ColorUtil.buttonColor))
 
         val textNoColor = renderText.replace(Regex("(?i)\\u00A7([^\\u00B6\\n])(?!\\u00B6)")) { "\u00B6${it.groupValues[1]}" }
 
@@ -233,6 +205,11 @@ class MiscElementText(
         }
 
     }
+
+//    override fun isHovered(mouseX: Int, mouseY: Int, xOff: Int, yOff: Int): Boolean {
+//        return mouseX >= this.x + xOff && mouseX <= this.x + this.getElementWidth() + xOff &&
+//                mouseY >= this.y + yOff && mouseY <= this.y + this.getElementHeight() + yOff
+//    }
 
     companion object { // todo: change
         const val NUM_ONLY = 0b10000

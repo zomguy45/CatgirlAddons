@@ -18,8 +18,8 @@ class MiscElementSelector(
     var name: String,
     var defaultSelected: String,
     var options: ArrayList<String>,
-    x: Double,
-    y: Double,
+    x: Double = 0.0,
+    y: Double = 0.0,
     private val vertical: Boolean = true,
     width: Double = 80.0,
     height: Double = 20.0,
@@ -50,7 +50,7 @@ class MiscElementSelector(
     }
 
 
-    override fun render(mouseX: Int, mouseY: Int, x: Double, y: Double) { // todo add some indicator it's a selector
+    override fun render(mouseX: Int, mouseY: Int) { // todo add some indicator it's a selector
         if (vertical) {
             HUDRenderUtils.drawRoundedBorderedRect(
                 this.x, this.y, this.width, if (extended) this.height * (this.options.size + 1) else this.height, 5.0, this.thickness,

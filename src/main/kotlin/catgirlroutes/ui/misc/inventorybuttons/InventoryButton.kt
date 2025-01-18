@@ -2,9 +2,14 @@ package catgirlroutes.ui.misc.inventorybuttons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
+import catgirlroutes.utils.ChatUtils
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.ItemRenderer
+import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
 import net.minecraft.util.Tuple
 import org.lwjgl.opengl.GL11
@@ -19,13 +24,11 @@ class InventoryButton(
     val isEquipment: Boolean = false
 ) {
 
-    fun isHovered(mouseX: Int, mouseY: Int): Boolean {
-        return (mouseX >= x && mouseX <= (x + 16) && mouseY >= y && mouseY <= (y + 16))
-    }
+    inline val isActive: Boolean
+        get() = command.isNotEmpty()
 
-    fun isActive(): Boolean {
-        return command.isNotEmpty()
-    }
+    inline val action: Unit
+        get() = ChatUtils.commandAny(command)
 
     fun render(xOff: Int, yOff: Int, c: Color = colour, bC: Color = borderColour) {
         GlStateManager.pushMatrix()
@@ -36,19 +39,19 @@ class InventoryButton(
         HUDRenderUtils.drawRoundedBorderedRect((x + xOff).toDouble(), (y + yOff).toDouble(), 16.0, 16.0, 3.0, 2.0, c, bC)
 
         if (icon.isNotEmpty()) {
-            val item = ResourceLocation("minecraft:textures/items/${icon}.png")
-            mc.textureManager.bindTexture(item)
-            Gui.drawModalRectWithCustomSizedTexture(
-                x + xOff,
-                y + yOff,
-                0f, 0f, 16, 16, 16f, 16f
-            )
+            Item.getByNameOrId(icon)?.let {
+                mc.renderItem.renderItemAndEffectIntoGUI(ItemStack(it), x + xOff, y + yOff)
+            }
         }
 
         GlStateManager.enableDepth()
         GlStateManager.disableBlend()
         GlStateManager.enableTexture2D()
         GlStateManager.popMatrix()
+    }
+
+    fun isHovered(mouseX: Int, mouseY: Int): Boolean {
+        return (mouseX >= x && mouseX <= (x + 16) && mouseY >= y && mouseY <= (y + 16))
     }
 
     companion object {

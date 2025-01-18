@@ -7,7 +7,7 @@ abstract class MiscElement(
     var height: Double = 20.0
 ) { // todo rewrite a bit
 
-    abstract fun render(mouseX: Int, mouseY: Int, x: Double = this.x, y: Double = this.y)
+    abstract fun render(mouseX: Int, mouseY: Int)
 
     open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean { return false }
 
