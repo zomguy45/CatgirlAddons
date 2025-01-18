@@ -13,6 +13,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import java.awt.Color
 
@@ -46,6 +47,7 @@ object InvincibilityTimer : Module(
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
+        if (event.phase !== TickEvent.Phase.START) return
         spiritTicks -= 1
         phoenixTicks -= 1
         bonzoTicks -= 1

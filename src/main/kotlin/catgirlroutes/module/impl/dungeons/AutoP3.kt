@@ -552,11 +552,11 @@ object AutoP3 : Module(
         val slot = event.packet.slotId
 
         if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (registry == "minecraft:stained_hardened_clay" && metadata == 5 && name == "") {
+            if (name?.contains("Lock In Slot") == true || name?.contains("Row Not Active") == true) {
                 melodyClicked = System.currentTimeMillis()
                 debugMessage("Melody clicked!")
             }
         }
-        debugMessage(registry + ", " + metadata + ", " + slot)
+        debugMessage(registry + ", " + metadata + ", " + slot + ", " + name)
     }
 }
