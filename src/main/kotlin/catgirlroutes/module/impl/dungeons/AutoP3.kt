@@ -35,6 +35,7 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
@@ -83,7 +84,7 @@ object AutoP3 : Module(
     private val style = StringSelectorSetting(
         "Ring style",
         "Trans",
-        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+"),
+        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"),
         "Ring render style to be used."
     )
     private val layers = NumberSetting(
@@ -202,6 +203,7 @@ object AutoP3 : Module(
                 "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
+                "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
