@@ -91,7 +91,6 @@ object DojoHelper: Module(
     fun onS08(event: PacketReceiveEvent) {
         if (event.packet !is S08PacketPlayerPosLook) return
         swiftnessBlocks.clear()
-        modMessage("LAGBACK")
     }
 
     @SubscribeEvent
@@ -109,8 +108,6 @@ object DojoHelper: Module(
     fun onBlockChange(event: BlockChangeEvent) {
         if (event.pos.x in -232..-184 && event.pos.y in 99..101 && event.pos.z in -619..-571) {
             if (event.old.block == Blocks.air && event.update.block == Blocks.wool) {
-                modMessage("RAHHHHH")
-                debugMessage("")
                 swiftnessBlocks.add(Vec3(floor(event.pos.x.toDouble()) + 0.5, event.pos.y.toDouble(), floor(event.pos.z.toDouble()) + 0.5))
             }
         }
