@@ -75,6 +75,7 @@ object ModuleManager {
         NickHider,
         InvincibilityTimer,
         AutoDialogue,
+        DojoHelper,
 
         // Player
         AutoSprint,
