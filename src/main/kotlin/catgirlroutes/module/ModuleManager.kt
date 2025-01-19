@@ -76,6 +76,7 @@ object ModuleManager {
         InvincibilityTimer,
         AutoDialogue,
         AutoClicker,
+        DojoHelper,
 
         // Player
         AutoSprint,
