@@ -1,1 +1,1 @@
-kill yourself -serenity
+ kill yourself -serenity
