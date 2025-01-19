@@ -95,7 +95,8 @@ object ModuleManager {
         ModuleList,
         EditHud,
         Trail,
-        DungeonESPNew
+        DungeonESPNew,
+        ScreenImage
     )
 
     /**
