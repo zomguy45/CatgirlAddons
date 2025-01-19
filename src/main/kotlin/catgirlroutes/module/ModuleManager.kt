@@ -85,6 +85,7 @@ object ModuleManager {
         NoDebuff,
         BlockClip,
         BarPhase,
+        Animations,
 
         // Render
         ClickGui,
