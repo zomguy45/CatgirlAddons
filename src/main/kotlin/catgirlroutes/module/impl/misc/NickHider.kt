@@ -7,7 +7,6 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
-import kotlin.random.Random
 
 object NickHider: Module(
     "Nick hider",
@@ -43,7 +42,7 @@ object NickHider: Module(
     private fun obfuscateString(input: String): String {
         val replacements = listOf('I', 'l')
         return input.map {
-            if (Random.nextBoolean()) replacements.random() else it
+            replacements.random()
         }.joinToString("")
     }
 }

@@ -11,6 +11,7 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.PlayerUtils.swapToSlot
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.render.WorldRenderUtils.drawSquare
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import net.minecraft.entity.Entity
@@ -100,18 +101,18 @@ object Relics: Module(
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (!relicBlink.value && !relicLook.value) return
+        if ((!relicBlink.value && !relicLook.value) || !inBoss) return
 
         val posX = mc.thePlayer.posX
         val posY = mc.thePlayer.posY
         val posZ = mc.thePlayer.posZ
 
         if (posX in 90.0..90.7 && posY == 6.0 && posZ in 55.0..55.7) {
-            drawSquare(90.35, 6.0, 55.35, 0.7, 0.7, Color.GREEN)
-        } else drawSquare(90.35, 6.0, 55.35, 0.7, 0.7, Color.RED)
+            drawSquare(90.35, 6.0, 55.35, 0.7, 0.7, Color.GREEN, phase = false)
+        } else drawSquare(90.35, 6.0, 55.35, 0.7, 0.7, Color.RED, phase = false)
         if (posX in 22.3..23.0 && posY == 6.0 && posZ in 58.0..58.7) {
-            drawSquare(22.65, 6.0, 58.35, 0.7, 0.7, Color.GREEN)
-        } else drawSquare(22.65, 6.0, 58.35, 0.7, 0.7, Color.RED)
+            drawSquare(22.65, 6.0, 58.35, 0.7, 0.7, Color.GREEN, phase = false)
+        } else drawSquare(22.65, 6.0, 58.35, 0.7, 0.7, Color.RED, phase = false)
     }
 
     @SubscribeEvent

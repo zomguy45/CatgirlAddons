@@ -2,8 +2,6 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
-import catgirlroutes.utils.ChatUtils.debugMessage
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.addBlock
 import catgirlroutes.utils.MovementUtils.clearBlocks
@@ -32,6 +30,15 @@ object MovementUtils {
             "shift" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindSneak.keyCode, down)
             "sprint" -> KeyBinding.setKeyBindState(mc.gameSettings.keyBindSprint.keyCode, down)
         }
+    }
+
+    fun movementKeysDown(): Boolean {
+        if (mc.gameSettings.keyBindForward.isKeyDown) return true
+        if (mc.gameSettings.keyBindLeft.isKeyDown) return true
+        if (mc.gameSettings.keyBindRight.isKeyDown) return true
+        if (mc.gameSettings.keyBindBack.isKeyDown) return true
+        if (mc.gameSettings.keyBindJump.isKeyDown) return true
+        return false
     }
 
     fun stopVelo() {

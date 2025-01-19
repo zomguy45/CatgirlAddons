@@ -285,26 +285,22 @@ object AutoP3 : Module(
                 modMessage("Walking!")
                 setKey("w", true)
             }
-
             "jump" -> {
                 modMessage("Jumping!")
                 jump()
             }
-
             "stop" -> {
                 dir = null
                 modMessage("Stopping!")
                 stopMovement()
                 stopVelo()
             }
-
             "boom" -> {
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 //modMessage(boomType.selected)
                 scheduleTask(0) { leftClick() }
             }
-
             "hclip" -> {
                 dir = null
                 modMessage("Hclipping!")
@@ -317,13 +313,11 @@ object AutoP3 : Module(
                     }
                 }
             }
-
             "vclip" -> {
                 dir = null
                 modMessage("Vclipping!")
                 lavaClipToggle(ring.depth!!.toDouble(), true)
             }
-
             "bonzo" -> {
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
@@ -331,12 +325,10 @@ object AutoP3 : Module(
                     clickAt(ring.yaw, ring.pitch)
                 }
             }
-
             "look" -> {
                 modMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
-
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(
@@ -345,7 +337,6 @@ object AutoP3 : Module(
                     ring.location.zCoord
                 )
             }
-
             "block" -> {
                 modMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
                 val (yaw, pitch) = getYawAndPitch(
@@ -355,17 +346,14 @@ object AutoP3 : Module(
                 )
                 snapTo(yaw, pitch)
             }
-
             "edge" -> {
                 modMessage("Edging!")
                 edge()
             }
-
             "command" -> {
                 modMessage("Sexecuting!")
                 commandAny(ring.command!!)
             }
-
             "blink" -> {
                 dir = null
                 if (ring.packets.size == 0 || blinkEditMode) return
@@ -392,14 +380,12 @@ object AutoP3 : Module(
                     cooldownMap[key] = false
                 }
             }
-
             "movement" -> {
                 dir = null
                 if (ring.packets.size == 0) return
                 movementList = ring.packets.toMutableList()
                 movementOn = true
             }
-
             "velo" -> {
                 lastX = 0.0
                 lastZ = 0.0
