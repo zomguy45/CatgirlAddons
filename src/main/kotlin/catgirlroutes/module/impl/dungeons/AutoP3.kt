@@ -35,6 +35,7 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
@@ -83,7 +84,7 @@ object AutoP3 : Module(
     private val style = StringSelectorSetting(
         "Ring style",
         "Trans",
-        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+"),
+        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"),
         "Ring render style to be used."
     )
     private val layers = NumberSetting(
@@ -202,6 +203,7 @@ object AutoP3 : Module(
                 "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
+                "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
@@ -283,26 +285,22 @@ object AutoP3 : Module(
                 modMessage("Walking!")
                 setKey("w", true)
             }
-
             "jump" -> {
                 modMessage("Jumping!")
                 jump()
             }
-
             "stop" -> {
                 dir = null
                 modMessage("Stopping!")
                 stopMovement()
                 stopVelo()
             }
-
             "boom" -> {
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 //modMessage(boomType.selected)
                 scheduleTask(0) { leftClick() }
             }
-
             "hclip" -> {
                 dir = null
                 modMessage("Hclipping!")
@@ -315,13 +313,11 @@ object AutoP3 : Module(
                     }
                 }
             }
-
             "vclip" -> {
                 dir = null
                 modMessage("Vclipping!")
                 lavaClipToggle(ring.depth!!.toDouble(), true)
             }
-
             "bonzo" -> {
                 modMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
@@ -329,12 +325,10 @@ object AutoP3 : Module(
                     clickAt(ring.yaw, ring.pitch)
                 }
             }
-
             "look" -> {
                 modMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
-
             "align" -> {
                 modMessage("Aligning!")
                 mc.thePlayer.setPosition(
@@ -343,7 +337,6 @@ object AutoP3 : Module(
                     ring.location.zCoord
                 )
             }
-
             "block" -> {
                 modMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
                 val (yaw, pitch) = getYawAndPitch(
@@ -353,17 +346,14 @@ object AutoP3 : Module(
                 )
                 snapTo(yaw, pitch)
             }
-
             "edge" -> {
                 modMessage("Edging!")
                 edge()
             }
-
             "command" -> {
                 modMessage("Sexecuting!")
                 commandAny(ring.command!!)
             }
-
             "blink" -> {
                 dir = null
                 if (ring.packets.size == 0 || blinkEditMode) return
@@ -390,14 +380,12 @@ object AutoP3 : Module(
                     cooldownMap[key] = false
                 }
             }
-
             "movement" -> {
                 dir = null
                 if (ring.packets.size == 0) return
                 movementList = ring.packets.toMutableList()
                 movementOn = true
             }
-
             "velo" -> {
                 lastX = 0.0
                 lastZ = 0.0

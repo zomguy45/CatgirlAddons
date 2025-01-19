@@ -75,7 +75,7 @@ object ModuleManager {
         NickHider,
         InvincibilityTimer,
         AutoDialogue,
-        DojoHelper,
+        AutoClicker,
 
         // Player
         AutoSprint,
@@ -85,6 +85,7 @@ object ModuleManager {
         NoDebuff,
         BlockClip,
         BarPhase,
+        Animations,
 
         // Render
         ClickGui,
@@ -95,7 +96,8 @@ object ModuleManager {
         ModuleList,
         EditHud,
         Trail,
-        DungeonESPNew
+        DungeonESPNew,
+        ScreenImage
     )
 
     /**
