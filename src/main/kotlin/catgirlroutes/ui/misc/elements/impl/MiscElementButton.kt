@@ -7,34 +7,28 @@ import catgirlroutes.utils.render.HUDRenderUtils
 import java.awt.Color
 
 class MiscElementButton(
-    var name: String = "",
-    var x: Double,
-    var y: Double,
-    var width: Double = 10.0,
-    var height: Double = 10.0,
+    var name: String,
+    x: Double = 0.0,
+    y: Double = 0.0,
+    width: Double = 80.0,
+    height: Double = 20.0,
+    var thickness: Double = 2.0,
     var action: () -> Unit
-) : MiscElement() {
+) : MiscElement(x, y, width, height) {
 
-    private val hovering = false
-
-    override fun render(x: Int, y: Int) {
+    override fun render(mouseX: Int, mouseY: Int) {
         HUDRenderUtils.drawRoundedBorderedRect(
-            this.x, this.y, this.width, this.height, 5.0, 1.0,
-            Color(ColorUtil.elementColor), if (this.hovering) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
+            this.x, this.y, this.width, this.height, 5.0, thickness,
+            Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
         )
-        FontUtil.drawString(name, x, y)
+        FontUtil.drawTotalCenteredString(name, x + width / 2.0, y + height / 2.0)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton == 0) {
+        if (mouseButton == 0 && isHovered(mouseX, mouseY)) {
             action()
             return true
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton)
-    }
-
-    fun isHovering(mouseX: Int, mouseY: Int, xOff: Int = 0, yOff: Int = 0): Boolean {
-        return mouseX >= x + xOff && mouseX <= x + width + xOff &&
-                mouseY >= y + yOff && mouseY <= y + height + yOff
     }
 }

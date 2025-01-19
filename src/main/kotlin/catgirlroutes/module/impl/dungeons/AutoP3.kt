@@ -35,7 +35,6 @@ import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
-import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
@@ -84,7 +83,7 @@ object AutoP3 : Module(
     private val style = StringSelectorSetting(
         "Ring style",
         "Trans",
-        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"),
+        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+"),
         "Ring render style to be used."
     )
     private val layers = NumberSetting(
@@ -126,7 +125,7 @@ object AutoP3 : Module(
             }
         }
 
-    private val stupid2: NumberSetting = NumberSetting("Stupid2", 500.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+    private val stupid2: NumberSetting = NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
 
 
     init {
@@ -203,7 +202,6 @@ object AutoP3 : Module(
                 "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
-                "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
@@ -510,8 +508,8 @@ object AutoP3 : Module(
             lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
             lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * 0.5 * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * 0.5 * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
             }
         }
     }
@@ -540,7 +538,7 @@ object AutoP3 : Module(
         val slot = event.packet.slotId
 
         if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (registry == "minecraft:stained_hardened_clay" && (metadata == 5 || metadata == 13) && name?.contains("Clay") == false && name.contains("Terracotta") == false) {
+            if (name?.contains("Lock In Slot") == true || name?.contains("Row Not Active") == true) {
                 melodyClicked = System.currentTimeMillis()
                 debugMessage("Melody clicked!")
             }

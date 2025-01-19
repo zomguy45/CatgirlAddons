@@ -67,7 +67,8 @@ class CatgirlRoutes {
             EntityAura,
             BlockAura,
             LeapUtils,
-            CgaUsers
+            CgaUsers,
+            NeuRepo
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
@@ -121,7 +122,8 @@ class CatgirlRoutes {
         val scope = CoroutineScope(EmptyCoroutineContext)
 
         lateinit var clickGUI: ClickGUI
-        val moduleConfig = ModuleConfig(File(mc.mcDataDir, "config/$CONFIG_DOMAIN"))
+        val configPath = File(mc.mcDataDir, "config/$CONFIG_DOMAIN")
+        val moduleConfig = ModuleConfig(configPath)
         val onHypixel: Boolean  by LocationManager::onHypixel
         var display: GuiScreen? = null
         var tickRamp = 0

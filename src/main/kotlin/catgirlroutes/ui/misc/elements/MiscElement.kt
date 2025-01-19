@@ -1,10 +1,13 @@
 package catgirlroutes.ui.misc.elements
 
-import net.minecraft.client.gui.Gui
+abstract class MiscElement(
+    var x: Double = 0.0,
+    var y: Double = 0.0,
+    var width: Double = 100.0,
+    var height: Double = 20.0
+) { // todo rewrite a bit
 
-abstract class MiscElement : Gui() { // todo rewrite a bit
-
-    abstract fun render(x: Int = 0, y: Int = 0)
+    abstract fun render(mouseX: Int, mouseY: Int)
 
     open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean { return false }
 
@@ -13,4 +16,9 @@ abstract class MiscElement : Gui() { // todo rewrite a bit
     open fun otherComponentClick() {  }
 
     open fun keyTyped(typedChar: Char, keyCode: Int): Boolean { return false }
+
+    open fun isHovered(mouseX: Int, mouseY: Int, xOff: Int = 0, yOff: Int = 0): Boolean {
+        return mouseX >= x + xOff && mouseX <= x + width + xOff &&
+                mouseY >= y + yOff && mouseY <= y + height + yOff
+    }
 }

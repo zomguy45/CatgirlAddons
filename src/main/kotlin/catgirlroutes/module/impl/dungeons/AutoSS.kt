@@ -32,6 +32,7 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.Sys
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 import kotlin.random.Random
@@ -48,10 +49,11 @@ object AutoSS : Module(
     private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.ADVANCED_ONLY)
     private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
     private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
+    private val triggerBot: BooleanSetting = BooleanSetting("Triggerbot", false)
 
 
     init {
-        this.addSettings(delay, forceDevice, resetSS, autoStart)
+        this.addSettings(delay, forceDevice, resetSS, autoStart, triggerBot)
     }
 
     var next = false
@@ -95,10 +97,11 @@ object AutoSS : Module(
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (!clicked) {
             debugMessage("Starting SS")
-            modMessage(System.currentTimeMillis())
+            debugMessage(System.currentTimeMillis())
             clicked = true
             doingSS = true
             reset()
+            if (triggerBot.value) return
             Thread{
                 try {
                     for (i in 0 until 2) {
@@ -119,10 +122,38 @@ object AutoSS : Module(
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (msg.contains("Device")) {
-            modMessage(System.currentTimeMillis())
+            debugMessage(System.currentTimeMillis())
         }
         if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
         start()
+    }
+
+    var ling = System.currentTimeMillis()
+
+    @SubscribeEvent
+    fun triggerBot(event: RenderWorldLastEvent) {
+        if (mc.theWorld == null) return
+
+        if(!doneFirst) {
+            if (clicks.size == 3) {
+                clicks.removeAt(0)
+                allButtons.removeAt(0)
+                doneFirst = true
+            }
+        }
+
+        val mop = mc.objectMouseOver?: return
+
+        val click = clicks.getOrNull(progress) ?: return
+
+        if (mop.blockPos == click) {
+            if (System.currentTimeMillis() - ling < 50) return
+            ling = System.currentTimeMillis()
+            clickButton(click.x, click.y, click.z)
+            progress++
+            doneFirst = true
+            debugMessage("RAH")
+        }
     }
 
     @SubscribeEvent
@@ -146,6 +177,8 @@ object AutoSS : Module(
             }
         }
 
+        if (triggerBot.value) return
+
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
 
         var device = false
@@ -165,25 +198,6 @@ object AutoSS : Module(
             clicked = false
             return
         }
-
-        /*if (!clicked) {
-            clicked = true
-            doingSS = true
-            reset()
-            Thread{
-                try {
-                    for (i in 0 until 2) {
-                        clickButton(startButton.x, startButton.y, startButton.z)
-                        Thread.sleep(Random.nextInt(125, 140).toLong())
-                    }
-                    clickButton(startButton.x, startButton.y, startButton.z)
-                    debugMessage("Starting SS")
-                } catch (e: Exception) {
-                    modMessage("NIGGER")
-                }
-            }.start()
-            return
-        }*/
 
         if (!clicked) return
 
@@ -223,6 +237,7 @@ object AutoSS : Module(
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
             doingSS = false
+            doneFirst = false
             start()
         }
     }
