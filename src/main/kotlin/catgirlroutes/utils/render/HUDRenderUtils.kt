@@ -1,12 +1,15 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
@@ -355,5 +358,18 @@ object HUDRenderUtils {
             Gui.drawRect(x + i, y, x + i + 1, y + height, color)
         }
     }
+
+    fun drawItemStackWithText(stack: ItemStack?, x: Double, y: Double, text: String? = null) {
+        if (stack == null) return
+        val itemRender = mc.renderItem
+
+        RenderHelper.enableGUIStandardItemLighting()
+        itemRender.zLevel = -145f //Negates the z-offset of the below method.
+        itemRender.renderItemAndEffectIntoGUI(stack, x.toInt(), y.toInt())
+        itemRender.renderItemOverlayIntoGUI(mc.fontRendererObj, stack, x.toInt(), y.toInt(), text)
+        itemRender.zLevel = 0f
+        RenderHelper.disableStandardItemLighting()
+    }
+
 
 }
