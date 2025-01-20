@@ -107,7 +107,7 @@ suspend fun downloadImageFromServer(url: String, outputFile: File): Boolean {
 }
 
 
-suspend fun downloadAndProcessRepo(url: String = "https://github.com/NotEnoughUpdates/NotEnoughUpdates-Repo/archive/master.zip"): Triple<List<JsonObject>, List<JsonObject>, List<JsonObject>>? {
+suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotEnoughUpdates-Repo/archive/master.zip"): Triple<List<JsonObject>, List<JsonObject>, List<JsonObject>>? {
     return withTimeoutOrNull(20000) {
         try {
             val items = mutableListOf<JsonObject>()
@@ -180,4 +180,3 @@ suspend fun downloadAndProcessRepo(url: String = "https://github.com/NotEnoughUp
         }
     }
 }
-
