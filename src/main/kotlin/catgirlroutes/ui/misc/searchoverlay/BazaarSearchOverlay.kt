@@ -16,7 +16,7 @@ import org.lwjgl.input.Mouse
 import java.awt.Color
 import java.io.IOException
 
-class BazaarSearchOverlay : GuiScreen() { // todo: add ahoverlay, scrollbar work with mouse drag, shit on hover, other shit
+class BazaarSearchOverlay : GuiScreen() { // todo: add ahoverlay, shit on hover, other shit
 
     private var x = 0.0
     private var y = 0.0
@@ -29,6 +29,7 @@ class BazaarSearchOverlay : GuiScreen() { // todo: add ahoverlay, scrollbar work
     private var scrollOffset = 0
     private var scrollHeight = 0.0
     private var scrollY = 0.0
+    private var isDraggingScroll = false
 
     override fun initGui() {
         val sr = ScaledResolution(mc)
@@ -85,8 +86,21 @@ class BazaarSearchOverlay : GuiScreen() { // todo: add ahoverlay, scrollbar work
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         searchBar.focus = true
 
+        if (isHoveringScroll(mouseX, mouseY) && mouseButton == 0) {
+            isDraggingScroll = true
+        }
+
         searchResults.forEach { it.mouseClicked(mouseX, mouseY, mouseButton) }
         super.mouseClicked(mouseX, mouseY, mouseButton)
+    }
+
+    override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
+        if (isDraggingScroll) {
+            val scrollPercentage = ((mouseY - (y + 30.0)) / (overlayHeight - 35.0)).coerceIn(0.0, 1.0)
+            val newScrollOffset = (scrollPercentage * ((searchResults.size - 9) * 25.0)).toInt()
+            scrollOffset = (newScrollOffset / 25) * 25
+        }
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
@@ -125,10 +139,10 @@ class BazaarSearchOverlay : GuiScreen() { // todo: add ahoverlay, scrollbar work
         return true
     }
 
-//    private fun isHoveringScroll(mouseX: Int, mouseY: Int): Boolean {
-//        val scrollX = x + overlayWidth - 10.0
-//        return mouseX >= scrollX && mouseX <= scrollX + 5.0 && mouseY >= scrollY && mouseY <= scrollY + scrollHeight
-//    }
+    private fun isHoveringScroll(mouseX: Int, mouseY: Int): Boolean {
+        val scrollX = x + overlayWidth - 10.0
+        return mouseX >= scrollX && mouseX <= scrollX + 5.0 && mouseY >= scrollY && mouseY <= scrollY + scrollHeight
+    }
 
     companion object {
         val searchResults: ArrayList<MiscElementButton> = arrayListOf()
