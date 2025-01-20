@@ -99,6 +99,7 @@ data class Item(
     @SerializedName("nbttag") val nbt: String,
     @SerializedName("lore") val lore: List<String>,
     @SerializedName("internalname") var skyblockID: String,
+    @SerializedName("damage") val damage: Int,
     var auction: Boolean = false,
     var bazaar: Boolean = false,
     var price: Double = 0.0

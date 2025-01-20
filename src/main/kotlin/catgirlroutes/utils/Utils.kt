@@ -246,7 +246,7 @@ fun RepoItem.toStack(
         }
     }
 
-    val stack = ItemStack(Item.itemRegistry.getObject(ResourceLocation(this.id)), 1, if (this.id == "minecraft:skull") 3 else 0)
+    val stack = ItemStack(Item.itemRegistry.getObject(ResourceLocation(this.id)), 1, this.damage)
 
     if (stack.item == null) {
         return ItemStack(Item.getItemFromBlock(Blocks.stone), 0, 255) // Purple broken texture item
