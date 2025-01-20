@@ -24,7 +24,9 @@ class MiscElementText(
     var value: String = "",
     var options: Int = 0,
     var prependText: String = "",
-    var thickness: Double = 2.0
+    var thickness: Double = 2.0,
+    var radius: Double = 5.0,
+    val bgColour: Color = Color(ColorUtil.buttonColor)
 ) : MiscElement(x, y, width, height) {
 
     var focus: Boolean = false
@@ -148,9 +150,9 @@ class MiscElementText(
         val renderText = prependText + textField.text
 
         GlStateManager.pushMatrix()
-        GlStateManager.disableLighting()
+        GlStateManager.color(1.0f, 1.0f, 1.0f)
 
-        drawRoundedBorderedRect(x, y, this.width, this.height, 5.0, this.thickness, Color(ColorUtil.buttonColor), if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor))
+        drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, bgColour, if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor))
 
 //        val textX = if (getStringWidth(renderText) > this.width - 10) {
 //            x + this.width - getStringWidth(renderText) - 5
@@ -182,7 +184,6 @@ class MiscElementText(
             }
         }
 
-        GlStateManager.enableLighting()
         GlStateManager.popMatrix()
     }
 

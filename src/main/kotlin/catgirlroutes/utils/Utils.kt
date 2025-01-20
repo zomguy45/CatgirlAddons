@@ -3,19 +3,21 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
+import catgirlroutes.utils.Item as RepoItem
 import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
+import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
-import net.minecraft.util.ChatComponentText
-import net.minecraft.util.ChatStyle
-import net.minecraft.util.Vec3
-import net.minecraft.util.Vec3i
+import net.minecraft.item.Item
+import net.minecraft.nbt.*
+import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.fml.common.eventhandler.Event
 import kotlin.math.round
 import kotlin.math.sqrt
+
 
 object Utils {
     private val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE_CASE)
@@ -151,7 +153,8 @@ object Utils {
         }
     }
 
-    fun renderText( // render utils probably?
+    fun renderText(
+        // render utils probably?
         text: String,
         x: Int,
         y: Int,
@@ -225,3 +228,57 @@ fun Event.postAndCatch(): Boolean { //THIS MAKES NO SENSE HELP
         style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText("§6Click to copy the error to your clipboard."))
         modMessage(" Caught an ${it::class.simpleName ?: "error"} at ${this::class.simpleName}. §cPlease click this message to copy and send it in the Odin discord!")}.getOrDefault(isCanceled)
 }
+
+
+// modified schizo shit from neu
+private val itemStackCache: MutableMap<String, ItemStack> = HashMap()
+fun RepoItem.toStack(
+    useCache: Boolean = true,
+    copyStack: Boolean = false
+): ItemStack {
+    var cacheEnabled = useCache
+
+    if (this.skyblockID == "_") cacheEnabled = false
+
+    if (cacheEnabled) {
+        itemStackCache[this.skyblockID]?.let { stack ->
+            return if (copyStack) stack.copy() else stack
+        }
+    }
+
+    val stack = ItemStack(Item.itemRegistry.getObject(ResourceLocation(this.id)), 1, this.damage)
+
+    if (stack.item == null) {
+        return ItemStack(Item.getItemFromBlock(Blocks.stone), 0, 255) // Purple broken texture item
+    } else {
+        try {
+            val tag: NBTTagCompound = JsonToNBT.getTagFromJson(this.nbt)
+            stack.tagCompound = tag
+        } catch (ignored: NBTException) { }
+
+        val display = NBTTagCompound().apply {
+            if (stack.tagCompound != null && stack.tagCompound!!.hasKey("display")) {
+                this.merge(stack.tagCompound!!.getCompoundTag("display"))
+            }
+            this.setTag("Lore", this@toStack.lore.processLore())
+        }
+        val tag = stack.tagCompound ?: NBTTagCompound()
+        tag.setTag("display", display)
+        stack.tagCompound = tag
+    }
+
+    if (cacheEnabled) itemStackCache[this.id] = stack
+    return if (copyStack) stack.copy() else stack
+}
+
+fun List<String>.processLore(): NBTTagList {
+    val nbtLore = NBTTagList()
+    for (line in this) {
+        if (!line.contains("Click to view recipes!") &&
+            !line.contains("Click to view recipe!")) {
+            nbtLore.appendTag(NBTTagString(line))
+        }
+    }
+    return nbtLore
+}
+
