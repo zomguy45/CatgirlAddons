@@ -88,6 +88,7 @@ object ModuleManager {
         BlockClip,
         BarPhase,
         Animations,
+        PlayerDisplay,
 
         // Render
         ClickGui,
