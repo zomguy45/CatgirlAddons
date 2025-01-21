@@ -125,19 +125,22 @@ object PlayerUtils {
 
         val startPos = BlockPos(posX, posY, posZ)
         var airCount = 0
+        var gapEnd: Int? = null
 
-        for ((distance, y) in (startPos.y downTo 0).withIndex()) {
+        for ((y) in (startPos.y downTo 0).withIndex()) {
             val pos = BlockPos(startPos.x, y, startPos.z)
             val block = world.getBlockState(pos).block
-
             if (block is BlockAir) {
                 airCount++
-                if (airCount == 2) return (distance * -1).toDouble() - 1.0
+                gapEnd = y
             } else {
+                if (airCount >= 2) {
+                    return (startPos.y - gapEnd!!).toDouble()
+                }
                 airCount = 0
             }
         }
-        return null
+        return if (airCount >= 2) (startPos.y - gapEnd!!).toDouble() else null
     }
 }
 

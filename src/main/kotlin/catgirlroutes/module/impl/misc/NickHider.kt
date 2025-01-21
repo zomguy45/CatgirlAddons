@@ -3,11 +3,13 @@ package catgirlroutes.module.impl.misc
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 
+@AlwaysActive
 object NickHider: Module(
     "Nick hider",
     Category.MISC
@@ -24,6 +26,20 @@ object NickHider: Module(
         if (text == null || mc.thePlayer == null || !this.enabled) return text
         val replacement = nameInput.value
         return text.replace(Regex(mc.thePlayer.name), replacement)
+    }
+
+    @JvmStatic
+    fun replaceTextEly(text: String?): String? {
+        if (text == null || mc.thePlayer == null) return text
+        val replacement = "Alari wifeyy :3"
+        return text.replace(Regex("catgirlOnCatnip"), replacement)
+    }
+
+@JvmStatic
+    fun replaceTextOwbu(text: String?): String? {
+        if (text == null || mc.thePlayer == null) return text
+        val replacement = "tgirlowbu"
+        return text.replace(Regex("zirpzarpowbu"), replacement)
     }
 
     @JvmStatic

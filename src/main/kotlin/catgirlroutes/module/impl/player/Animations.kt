@@ -52,10 +52,6 @@ object Animations: Module(
         )
     }
 
-    /**
-     * Directly referenced hook for the itemTransform Inject in the ItemRenderer Mixin.
-     * Takes care of scaling and positioning the held item.
-     */
     fun itemTransforHook(equipProgress: Float, swingProgress: Float): Boolean {
         val newSize = (0.4f * exp(customSize.value))
         val newX = (0.56f * (1 + customX.value))
@@ -80,10 +76,6 @@ object Animations: Module(
         return true
     }
 
-    /**
-     * Directly referenced by the ItemRendereMixin. If enabled will scale the item swing animation.
-     * Returns whether custom animation was performed.
-     */
     fun scaledSwing(swingProgress: Float): Boolean {
         if (!scaleSwing.value) return false
         val scale = exp(customSize.value)
@@ -94,10 +86,6 @@ object Animations: Module(
         return true
     }
 
-    /**
-     * Directly referenced by the ItemRendereMixin. If enabled will scale the potion drink animation.
-     * Returns whether custom animation was performed.
-     */
     fun rotationlessDrink(clientPlayer: AbstractClientPlayer, partialTicks: Float): Boolean {
         if (drinkingMode.index != 1) return false
         val f: Float = clientPlayer.itemInUseCount.toFloat() - partialTicks + 1.0f
@@ -110,10 +98,6 @@ object Animations: Module(
         return true
     }
 
-    /**
-     * Directly referenced by the ItemRendereMixin. If enabled will scale the potion drink animation.
-     * Returns whether custom animation was performed.
-     */
     fun scaledDrinking(clientPlayer: AbstractClientPlayer, partialTicks: Float, itemToRender: ItemStack): Boolean {
         if (drinkingMode.index != 2) return false
         val f: Float = clientPlayer.itemInUseCount.toFloat() - partialTicks + 1.0f
@@ -124,7 +108,6 @@ object Animations: Module(
             f2 = 0.0f
         }
 
-        // Transform to correct rotation center
         val newX = (0.56f * (1 + customX.value)).toFloat()
         val newY = (-0.52f * (1 - customY.value)).toFloat()
         val newZ = (-0.71999997f * (1 + customZ.value)).toFloat()
@@ -138,10 +121,8 @@ object Animations: Module(
         GlStateManager.rotate(f3 * 10.0f, 1.0f, 0.0f, 0.0f)
         GlStateManager.rotate(f3 * 30.0f, 0.0f, 0.0f, 1.0f)
 
-        // Transform back
         GlStateManager.translate(0.56f, -0.52f, -0.71999997f)
         GlStateManager.translate(-newX, -newY, -newZ)
         return true
     }
-
 }

@@ -47,7 +47,7 @@ class LeapOrganiser : GuiScreen() {
 
     private val horizontalSelector = MiscElementSelector(
         "Horizontal", "1", arrayListOf("1", "2", "3"),
-        sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0, false
+        sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0, vertical = false
     )
 
     private val textField = MiscElementText(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 160.0, 200.0)
