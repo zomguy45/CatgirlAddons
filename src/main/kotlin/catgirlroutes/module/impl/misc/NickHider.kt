@@ -31,7 +31,7 @@ object NickHider: Module(
     @JvmStatic
     fun replaceTextEly(text: String?): String? {
         if (text == null || mc.thePlayer == null) return text
-        val replacement = "I got my account pulled!"
+        val replacement = "Alari wifeyy :3"
         return text.replace(Regex("catgirlOnCatnip"), replacement)
     }
 
