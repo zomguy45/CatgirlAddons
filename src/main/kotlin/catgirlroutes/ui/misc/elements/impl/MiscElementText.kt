@@ -13,7 +13,20 @@ import net.minecraft.client.gui.GuiTextField
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
-// modified neu shit
+/**
+ * A [MiscElement] that displays and optionally allows input for a string value with customizable options and style.
+ *
+ * @param x The x-coordinate position (default is 0.0).
+ * @param y The y-coordinate position (default is 0.0).
+ * @param width The width of the element (default is 100.0).
+ * @param height The height of the element (default is 20.0).
+ * @param value The initial text value (default is an empty string).
+ * @param options An integer representing additional options (NUM_ONLY, NO_SPACE, FORCE_CAPS).
+ * @param prependText Text that will be displayed before the text (default is none).
+ * @param thickness The border thickness (default is 2.0).
+ * @param radius The radius of the corners (default is 5.0).
+ * @param bgColour The background color of the element (default is `ColorUtil.buttonColor`).
+ */
 class MiscElementText(
     x: Double = 0.0,
     y: Double = 0.0,

@@ -9,7 +9,21 @@ import java.awt.Color
 import java.util.*
 
 /**
- * @see StringSelectorSetting
+ * A [MiscElement] for selecting an option from a list. Supports vertical or horizontal layout and customizable
+ * dimensions and style.
+ *
+ * @param name The name of the selector (doesn't really do anything)
+ * @param defaultSelected The default selected option.
+ * @param options A list of available options.
+ * @param x The x-coordinate position (default is 0.0).
+ * @param y The y-coordinate position (default is 0.0).
+ * @param width The width of the selector (default is 80.0).
+ * @param height The height of the selector (default is 20.0).
+ * @param thickness The border thickness (default is 2.0).
+ * @param radius The radius of the corners (default is 5.0).
+ * @param vertical Whether the options are displayed vertically or horizontally (default is true).
+ * @param optionsPerRow The number of options per row. Only works with horizontal selector.
+ * @param gap The gap between options (default is 5).
  */
 class MiscElementSelector(
     var name: String,

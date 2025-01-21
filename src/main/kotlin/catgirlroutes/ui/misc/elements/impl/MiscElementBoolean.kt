@@ -7,6 +7,18 @@ import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import java.awt.Color
 
+/**
+ * A [MiscElement] representing a boolean toggle with customizable text and style.
+ *
+ * @param x The x-coordinate position (default is 0.0).
+ * @param y The y-coordinate position (default is 0.0).
+ * @param width The width of the element (default is 15.0).
+ * @param height The height of the element (default is 15.0).
+ * @param text The text displayed on the element (default is none).
+ * @param enabled The initial state of the boolean toggle (default is false).
+ * @param thickness The border thickness (default is 2.0).
+ * @param radius The radius of the corners (default is 5.0).
+ */
 class MiscElementBoolean(
     x: Double = 0.0,
     y: Double = 0.0,
