@@ -6,10 +6,8 @@ import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.getStringWidth
 import catgirlroutes.ui.misc.elements.MiscElement
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.GuiTextField
 import net.minecraft.client.renderer.GlStateManager
@@ -47,26 +45,17 @@ class MiscElementText(
         textField.text = value
     }
 
-    private fun getCursorPos(mouseX: Int, mouseY: Int): Int {
-        val xComp = mouseX - x
-        val yComp = mouseY - y
-        val extraSize = (this.height + 8) / 2
+    private fun getCursorPos(mouseX: Int): Int {
+        val xComp = mouseX - x - getStringWidth(prependText)
         val renderText = prependText + textField.text
 
-        val lineNum = (yComp / extraSize).coerceAtLeast(0.0)
-        val lines = renderText.lines()
-
-        val targetLine = lines.getOrNull(lineNum.toInt()) ?: return renderText.length
+        val targetLine = renderText.lines().firstOrNull() ?: return renderText.length
 
         val padding = ((5).coerceAtMost(this.width.toInt() - strLenNoColor(targetLine))) / 2
         val adjustedX = (xComp - padding).coerceAtLeast(0.0)
 
-        val trimmed = Minecraft.getMinecraft().fontRendererObj.trimStringToWidth(targetLine, adjustedX.toInt())
-        val cursorInLine = strLenNoColor(trimmed)
-
-        val cursorIndex = lines.take(lineNum.toInt()).sumOf { it.length + 1 } + cursorInLine
-
-        return cursorIndex.coerceAtMost(renderText.length)
+        val trimmed = mc.fontRendererObj.trimStringToWidth(targetLine, adjustedX.toInt())
+        return strLenNoColor(trimmed).coerceAtMost(renderText.length)
     }
 
     private var lastClickTime: Long = 0
@@ -77,7 +66,7 @@ class MiscElementText(
         if (!isHovered(mouseX, mouseY)) { focus = false; return false }
 
         val currentTime = System.currentTimeMillis()
-        val cursorPos = getCursorPos(mouseX, mouseY)
+        val cursorPos = getCursorPos(mouseX)
 
         when(mouseButton) {
             0 -> {
@@ -86,13 +75,9 @@ class MiscElementText(
                     doubleClickStart = wordBounds.first
                     doubleClickEnd = wordBounds.second
 
-                    debugMessage("START " + doubleClickStart)
-                    debugMessage("END" + doubleClickEnd)
-
                     textField.cursorPosition = doubleClickStart
                     textField.setSelectionPos(doubleClickEnd)
                 } else textField.cursorPosition = cursorPos
-                debugMessage(currentTime - lastClickTime)
             }
             1 -> text = ""
             else -> textField.cursorPosition = cursorPos
@@ -114,7 +99,7 @@ class MiscElementText(
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
         if (!focus || !this.isHovered(mouseX, mouseY)) return
-        textField.setSelectionPos(getCursorPos(mouseX, mouseY))
+        textField.setSelectionPos(getCursorPos(mouseX))
         return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
@@ -164,12 +149,12 @@ class MiscElementText(
 
         if (focus && System.currentTimeMillis() % 1000 > 500) {
             val cursorText = renderText.substring(0, textField.cursorPosition + prependText.length)
-            renderRect(x + 5 + getStringWidth(cursorText), y + (this.height - 8) / 2 - 1, 1.0, 10.0, Color.WHITE)
+            renderRect(x + 5 + getStringWidth(cursorText) - 0.5, y + (this.height - 8) / 2 - 1, 1.0, 10.0, Color.WHITE)
         }
 
         if (textField.selectedText.isNotEmpty()) {
             val (left, right) = listOf(textField.cursorPosition, textField.selectionEnd)
-                .map { it + prependText.length }
+                .map { it + strLenNoColor(prependText) }
                 .let { it.minOrNull() to it.maxOrNull() }
 
             var texX = 0.0
