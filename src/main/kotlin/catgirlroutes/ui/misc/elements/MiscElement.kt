@@ -37,7 +37,10 @@ abstract class MiscElement(
      */
     open fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {  }
 
-//    open fun otherComponentClick() {  }
+    /**
+     *
+     */
+    open fun otherComponentClick() {  }
 
     /**
      * Dispatches key press.
