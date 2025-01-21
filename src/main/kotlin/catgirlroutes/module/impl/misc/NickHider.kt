@@ -35,6 +35,13 @@ object NickHider: Module(
         return text.replace(Regex("catgirlOnCatnip"), replacement)
     }
 
+@JvmStatic
+    fun replaceTextOwbu(text: String?): String? {
+        if (text == null || mc.thePlayer == null) return text
+        val replacement = "tgirlowbu"
+        return text.replace(Regex("zirpzarpowbu"), replacement)
+    }
+
     @JvmStatic
     fun replaceTextTeam(text: String?): String? {
         if (text == null || mc.thePlayer == null || !this.enabled || !inDungeons || !hideTeammates.value) return text
