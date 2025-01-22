@@ -100,7 +100,7 @@ object DojoHelper: Module(
         val playerPos = BlockPos(mc.thePlayer.posX, mc.thePlayer.posY - 1, mc.thePlayer.posZ)
         val blockID = Block.getIdFromBlock(mc.theWorld.getBlockState(playerPos).block)
         if (blockID == 0) {
-            jump()
+            mc.thePlayer.motionY = 0.42
         }
     }
 

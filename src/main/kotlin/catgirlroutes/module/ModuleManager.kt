@@ -46,6 +46,7 @@ object ModuleManager {
     val modules: ArrayList<Module> = arrayListOf(
         // Dungeons
         AutoP3,
+        AutoP3ConfigOverlay,
         AutoRoutes,
         GhostBlocks,
         InstaMid,

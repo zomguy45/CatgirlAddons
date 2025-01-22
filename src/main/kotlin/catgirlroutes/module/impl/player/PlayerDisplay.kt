@@ -22,7 +22,7 @@ object PlayerDisplay: Module(
     object Speed : HudElement(
         this,
         0, 0,
-        mc.fontRendererObj.getStringWidth("500✦"),
+        mc.fontRendererObj.getStringWidth("500✦") + 6,
         (mc.fontRendererObj.FONT_HEIGHT + 2)
     ) {
         override fun renderHud() {
