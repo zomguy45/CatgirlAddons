@@ -76,7 +76,11 @@ class MiscElementText(
     private var doubleClickEnd: Int = -1
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (!isHovered(mouseX, mouseY)) { focus = false; return false }
+        if (!isHovered(mouseX, mouseY)) {
+            focus = false
+            textField.setSelectionPos(textField.cursorPosition)
+            return false
+        }
 
         val currentTime = System.currentTimeMillis()
         val cursorPos = getCursorPos(mouseX)
@@ -99,11 +103,6 @@ class MiscElementText(
         lastClickTime = currentTime
 
         return true
-    }
-
-    override fun otherComponentClick() {
-        focus = false
-        textField.setSelectionPos(textField.cursorPosition)
     }
 
     private fun strLenNoColor(str: String): Int {
