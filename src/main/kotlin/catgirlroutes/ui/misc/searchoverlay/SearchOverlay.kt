@@ -7,7 +7,6 @@ import catgirlroutes.ui.misc.elements.impl.MiscElementBoolean
 import catgirlroutes.ui.misc.elements.impl.MiscElementSelector
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.utils.ChatUtils.commandAny
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo
 import catgirlroutes.utils.render.HUDRenderUtils
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
@@ -16,12 +15,19 @@ import catgirlroutes.utils.toStack
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.network.play.client.C12PacketUpdateSign
+import net.minecraft.tileentity.TileEntitySign
+import net.minecraft.util.ChatComponentText
 import net.minecraftforge.fml.client.config.GuiUtils
+import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import java.awt.Color
 import java.io.IOException
 
-class BazaarSearchOverlay : GuiScreen() { // todo: shit
+class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons -> necron's); search history; don't render scroll bar when 9 or less results; fix scrollbar ishovered shit; commands
+    val type: OverlayType,
+    private val sign: TileEntitySign? = null, // if null then run command instead
+) : GuiScreen() {
 
     private var x = 0.0
     private var y = 0.0
@@ -49,7 +55,6 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
 
     override fun initGui() {
         val sr = ScaledResolution(mc)
-
         y = sr.scaledHeight / 2.0 - overlayHeight / 2.0
         x = sr.scaledWidth / 2.0 - overlayWidth / 2.0
 
@@ -57,6 +62,11 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
 
         searchBar = MiscElementText(x, y, overlayWidth, 20.0, radius = 3.0, bgColour = Color(ColorUtil.bgColor))
         searchBar.focus = true
+
+        sign?.let {
+            sign.setEditable(false)
+            sign.signText[0] = ChatComponentText(searchBar.text)
+        }
         super.initGui()
     }
 
@@ -69,31 +79,33 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
         val ahW = 110.0
         val ahH = 85.0
 
-        // ah shit box
-        drawRoundedBorderedRect(ahX - 10.0, ahY - 5.0, ahW + 10.0, ahH + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(ahX, ahY, ahW - 5.0, 55.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(ahX, ahY + 60.0, ahW - 5.0, 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+        if (type == OverlayType.AUCTION) {
+            drawRoundedBorderedRect(ahX - 10.0, ahY - 5.0, ahW + 10.0, ahH + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+            drawRoundedBorderedRect(ahX, ahY, ahW - 5.0, 55.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+            drawRoundedBorderedRect(ahX, ahY + 60.0, ahW - 5.0, 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
 
-        FontUtil.drawString("Stars:", ahX + 5.0, ahY + 5.0)
-//        FontUtil.drawString("Only Lvl 100", ahX + 6.0, ahY + ahH / 2)
+            FontUtil.drawString("Stars:", ahX + 5.0, ahY + 5.0)
 
-        starSelector.apply {
-            x = ahX + 5.0
-            y = ahY + 15.0
-            render(mouseX, mouseY)
-        }
+            starSelector.apply {
+                x = ahX + 5.0
+                y = ahY + 15.0
+                render(mouseX, mouseY)
+            }
 
-        forcePetLvl.apply {
-            x = ahX + 5.0
-            y = ahY + 65.0
-            render(mouseX, mouseY)
+            forcePetLvl.apply {
+                x = ahX + 5.0
+                y = ahY + 65.0
+                render(mouseX, mouseY)
+            }
         }
 
         // main box
         drawRoundedBorderedRect(x - 5.0, y - 5.0, overlayWidth + 10, overlayHeight + 10, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
 
-        renderRect(ahX - 10.0 + 4.0, ahY - 5.0 + 0.5, 2.0, ahH + 10.0 - 1.0, Color(ColorUtil.bgColor))
-        doAhCorners(ahX -10.0 + 4.0, ahY - 5.0, ahH + 10.0)
+        if (type == OverlayType.AUCTION) {
+            renderRect(ahX - 10.0 + 4.0, ahY - 5.0 + 0.5, 2.0, ahH + 10.0 - 1.0, Color(ColorUtil.bgColor))
+            doAhCorners(ahX -10.0 + 4.0, ahY - 5.0, ahH + 10.0)
+        }
 
         // inner box
         drawRoundedBorderedRect(x, y + 25.0, overlayWidth, overlayHeight - 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
@@ -107,13 +119,22 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
         var offset = 30.0
         if (searchBar.text.length > 2) {
             NeuRepo.items.filter {
-                it.name.contains(searchBar.text, true) && it.auction &&
+                val toCheck = if (this.type == OverlayType.AUCTION) it.auction else it.bazaar
+                it.name.contains(searchBar.text, true) && toCheck &&
                 !(forcePetLvl.enabled && !it.name.contains("Lvl"))
-            }
-                .forEach { item ->
+            }.forEach { item ->
                     val posY = y + offset - scrollOffset
                     val resultButton = MiscElementButton("", x + 5.0, posY, overlayWidth - 20.0, 20.0, 1.0, 3.0) {
-                        commandAny("bz ${item.name.replace(Regex("\\u00A7."), "")}") // command for now
+                        var finalRes = "${if (forcePetLvl.enabled) "[Lvl 100] " else ""}${item.name}${getStars()}"
+                        finalRes = finalRes.replace(Regex("\\u00A7."), "")
+                        if (sign != null) {
+                            sign.signText[0] = ChatComponentText(finalRes)
+                            sign.markDirty()
+                            mc.displayGuiScreen(null)
+                        } else {
+                            val t = if (type == OverlayType.AUCTION) "ahs" else "bz"
+                            commandAny("$t $finalRes")
+                        }
                     }
                     searchResults.add(resultButton)
 
@@ -147,13 +168,18 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        forcePetLvl.mouseClicked(mouseX, mouseY, mouseButton)
         searchBar.mouseClicked(mouseX, mouseY, mouseButton)
         searchBar.focus = true
 
+        if (isHoveringScroll(mouseX, mouseY) && mouseButton == 0) {
+            isDraggingScroll = true
+        }
+        if (mouseY.toDouble() !in visibleRange) return
+        searchResults.forEach { it.mouseClicked(mouseX, mouseY, mouseButton) }
+
+        if (type != OverlayType.AUCTION) return
+        forcePetLvl.mouseClicked(mouseX, mouseY, mouseButton)
         if (starSelector.mouseClicked(mouseX, mouseY, mouseButton)) {
-            debugMessage(starSelector.selected)
-            debugMessage(this.lastSelected)
             if (starSelector.selected == this.lastSelected) {
                 // starSelector.selected = blahblhablah doesn't work for some reason, so I just reset it this way...
                 starSelector = MiscElementSelector(
@@ -167,12 +193,6 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
                 this.lastSelected = starSelector.selected
             }
         }
-
-        if (isHoveringScroll(mouseX, mouseY) && mouseButton == 0) {
-            isDraggingScroll = true
-        }
-        if (mouseY.toDouble() !in visibleRange) return
-        searchResults.forEach { it.mouseClicked(mouseX, mouseY, mouseButton) }
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
@@ -188,6 +208,17 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         searchBar.keyTyped(typedChar, keyCode)
+
+        sign?.let {
+            if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_ESCAPE) {
+                sign.markDirty()
+                mc.displayGuiScreen(null)
+                return
+            }
+
+            sign.signText[0] = ChatComponentText(searchBar.text)
+        }
+
         super.keyTyped(typedChar, keyCode)
     }
 
@@ -205,6 +236,13 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
             }
 
             if (this.scroll(i)) return
+        }
+    }
+
+    override fun onGuiClosed() {
+        sign?.let {
+            mc.netHandler?.addToSendQueue(C12PacketUpdateSign(sign.pos, sign.signText))
+            sign.setEditable(true)
         }
     }
 
@@ -239,7 +277,20 @@ class BazaarSearchOverlay : GuiScreen() { // todo: shit
         renderRect(x + 1.5, y + h - 0.5, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
     }
 
+    private fun getStars(): String {
+        val res = StringBuilder(" ")
+        when {
+            starSelector.index in 1..5 -> res.append("✪".repeat(starSelector.index))
+            starSelector.index > 5 -> res.append("✪".repeat(5)).append(starSelector.selected.last())
+        }
+        return res.toString()
+    }
+
     companion object {
         val searchResults: ArrayList<MiscElementButton> = arrayListOf()
     }
+}
+
+enum class OverlayType {
+    BAZAAR, AUCTION, NONE
 }

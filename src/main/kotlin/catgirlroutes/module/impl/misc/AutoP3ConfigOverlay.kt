@@ -6,7 +6,6 @@ import catgirlroutes.commands.impl.RingManager.saveRings
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.ui.misc.configoverlay.ConfigOverlay
-import catgirlroutes.ui.misc.searchoverlay.BazaarSearchOverlay
 
 object AutoP3ConfigOverlay: Module(
     name = "P3 Config",
