@@ -35,7 +35,6 @@ object PearlClip : Module(
     private var active = false
     override fun onKeyBind() {
         if (!this.enabled) return
-        modMessage("Pearl clipping!")
         pearlClip((pearlClipDistance.value * -1))
     }
 
@@ -44,9 +43,9 @@ object PearlClip : Module(
     private var posY = 0.0
     private var posZ = 0.0
 
-    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
+    fun pearlClip(depth: Double? = findDistanceToAirBlocks()) {
         if (!this.enabled) return
-        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
+        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth
         if (clipDepth == null) return
 
         posX = mc.thePlayer.posX
@@ -55,6 +54,7 @@ object PearlClip : Module(
 
         val swapResult = swapFromName("ender pearl")
         if (swapResult != SwapState.UNKNOWN) {
+            modMessage("Pearl clipping ($depth)!")
             active = true
             rotate(mc.thePlayer.rotationYaw, 90F)
             scheduleTask(pearlClipDelay.value.toInt()) {
