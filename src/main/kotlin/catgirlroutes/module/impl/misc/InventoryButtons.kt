@@ -25,7 +25,7 @@ object InventoryButtons : Module(
     "Inventory buttons",
     Category.MISC,
     tag = TagType.WHIP
-) {
+) { // todo: Eq overlay
     val equipmentOverlay: BooleanSetting = BooleanSetting("Equipment Overlay", false)
 
     val editMode: ActionSetting = ActionSetting("Edit") { display = InventoryButtonEditor() }
@@ -44,7 +44,7 @@ object InventoryButtons : Module(
                 GlStateManager.pushMatrix()
                 GlStateManager.disableLighting()
 
-                button.render(accessor.guiLeft, accessor.guiTop)
+                button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble())
 
                 GlStateManager.enableLighting()
                 GlStateManager.popMatrix()

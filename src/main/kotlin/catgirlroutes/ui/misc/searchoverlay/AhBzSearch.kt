@@ -128,7 +128,7 @@ class AhBzSearch( // todo: ctrl + f to open
 
         var offset = 30.0
         if (searchBar.text.length > 2) {
-            val filteredItems = NeuRepo.items.filter {
+            val filteredItems = NeuRepo.repoItems.filter {
                 val nameNoJunk = it.name.replace(Regex("['.]"), "") // remove ' and . (necron's -> necrons, l.a.s.r - lasr, )
                 val toCheck = if (this.type == OverlayType.AUCTION) it.auction else it.bazaar
 
