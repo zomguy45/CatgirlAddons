@@ -13,7 +13,7 @@ import net.minecraft.nbt.*
 import net.minecraft.util.ResourceLocation
 
 object NeuRepo {
-    var items = mutableListOf<Item>()
+    var repoItems = mutableListOf<RepoItem>()
     var mobs = mutableListOf<JsonObject>()
     var constants = mutableListOf<JsonObject>()
 
@@ -27,9 +27,9 @@ object NeuRepo {
             result?.let {
                 val gson = Gson()
 
-                val itemList: List<Item> = gson.fromJson(gson.toJson(it.first), object : TypeToken<List<Item>>() {}.type)
+                val repoItemLists: List<RepoItem> = gson.fromJson(gson.toJson(it.first), object : TypeToken<List<RepoItem>>() {}.type)
 
-                items = itemList.map { item ->
+                repoItems = repoItemLists.map { item ->
                     // convert shitty neu skyblockID to normal format (WISDOM;2 -> ENCHANTMENT_WISDOM_2)
                     if (item.skyblockID.contains(";") && item.id == "minecraft:enchanted_book") {
                         val parts = item.skyblockID.split(";")
@@ -62,7 +62,7 @@ object NeuRepo {
             val auctionMap = Gson().fromJson(auctionDataJson, JsonObject::class.java)
                 .entrySet().associate { it.key to it.value.asDouble }
 
-            items.forEach { item ->
+            repoItems.forEach { item ->
                 val price = auctionMap[item.skyblockID] ?: 0.0
                 item.auction = price > 0.0
                 item.price = price
@@ -76,7 +76,7 @@ object NeuRepo {
             val products = Gson().fromJson(bazaarDataJson, JsonObject::class.java)
                 .getAsJsonObject("products") ?: return@runBlocking
 
-            items.forEach { item ->
+            repoItems.forEach { item ->
                 val price = products[item.skyblockID]?.asJsonObject
                     ?.getAsJsonObject("quick_status")?.get("buyPrice")?.asDouble ?: 0.0
                 if (price > 0.0) {
@@ -87,19 +87,19 @@ object NeuRepo {
         }
     }
 
-    fun getItemFromID(skyblockID: String): Item? = items.find { it.skyblockID == skyblockID }
+    fun getItemFromID(skyblockID: String): RepoItem? = repoItems.find { it.skyblockID == skyblockID }
 
-    fun getItemFromName(name: String, contains: Boolean = true): Item? {
+    fun getItemFromName(name: String, contains: Boolean = true): RepoItem? {
         return if (contains) {
-            items.find { it.name.noControlCodes.contains(name) }
+            repoItems.find { it.name.noControlCodes.contains(name) }
         } else {
-            items.find { it.name == name }
+            repoItems.find { it.name == name }
         }
     }
 
     // modified schizo shit from neu
     private val itemStackCache: MutableMap<String, ItemStack> = HashMap()
-    fun Item.toStack(
+    fun RepoItem.toStack(
         useCache: Boolean = true,
         copyStack: Boolean = false
     ): ItemStack {
@@ -150,7 +150,7 @@ object NeuRepo {
     }
 }
 
-data class Item(
+data class RepoItem(
     @SerializedName("itemid") val id: String,
     @SerializedName("displayname") var name: String,
     @SerializedName("nbttag") val nbt: String,
