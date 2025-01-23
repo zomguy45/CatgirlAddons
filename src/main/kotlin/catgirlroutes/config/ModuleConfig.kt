@@ -65,6 +65,7 @@ class ModuleConfig(path: File) {
                 ModuleManager.getModuleByName(configModule.name).run updateModule@{
                     // If the module was not found check whether it can be a keybind
                     val module = this!!
+                    println("MODULE: $module")
                     if (module.enabled != configModule.enabled) module.toggle()
 //                    module.keyCode = configModule.keyCode
                     for (configSetting in configModule.settings) {
