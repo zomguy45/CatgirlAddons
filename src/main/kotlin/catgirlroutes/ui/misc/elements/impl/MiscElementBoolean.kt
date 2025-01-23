@@ -37,7 +37,7 @@ class MiscElementBoolean(
         )
         if (this.enabled) drawRoundedRect(this.x + 1.0, this.y + 1.0, this.width - 2.0, this.height - 2.0, this.radius, ColorUtil.clickGUIColor)
 
-        FontUtil.drawString(this.text, this.x + this.width + 3.0, this.y + this.height / 2 - FontUtil.fontHeight / 2)
+        FontUtil.drawString(this.text, this.x + this.width + 5.0, this.y + this.height / 2 - FontUtil.fontHeight / 2)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
