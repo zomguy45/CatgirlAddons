@@ -1,11 +1,16 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.scope
+import catgirlroutes.utils.Utils.noControlCodes
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.runBlocking
+import net.minecraft.init.Blocks
+import net.minecraft.item.ItemStack
+import net.minecraft.nbt.*
+import net.minecraft.util.ResourceLocation
 
 object NeuRepo {
     var items = mutableListOf<Item>()
@@ -86,10 +91,62 @@ object NeuRepo {
 
     fun getItemFromName(name: String, contains: Boolean = true): Item? {
         return if (contains) {
-            items.find { it.name.contains(name) }
+            items.find { it.name.noControlCodes.contains(name) }
         } else {
             items.find { it.name == name }
         }
+    }
+
+    // modified schizo shit from neu
+    private val itemStackCache: MutableMap<String, ItemStack> = HashMap()
+    fun Item.toStack(
+        useCache: Boolean = true,
+        copyStack: Boolean = false
+    ): ItemStack {
+        var cacheEnabled = useCache
+
+        if (this.skyblockID == "_") cacheEnabled = false
+
+        if (cacheEnabled) {
+            itemStackCache[this.skyblockID]?.let { stack ->
+                return if (copyStack) stack.copy() else stack
+            }
+        }
+
+        val stack = ItemStack(net.minecraft.item.Item.itemRegistry.getObject(ResourceLocation(this.id)), 1, this.damage)
+
+        if (stack.item == null) {
+            return ItemStack(net.minecraft.item.Item.getItemFromBlock(Blocks.stone), 0, 255) // Purple broken texture item
+        } else {
+            try {
+                val tag: NBTTagCompound = JsonToNBT.getTagFromJson(this.nbt)
+                stack.tagCompound = tag
+            } catch (ignored: NBTException) { }
+
+            val display = NBTTagCompound().apply {
+                if (stack.tagCompound != null && stack.tagCompound!!.hasKey("display")) {
+                    this.merge(stack.tagCompound!!.getCompoundTag("display"))
+                }
+                this.setTag("Lore", this@toStack.lore.processLore())
+            }
+            val tag = stack.tagCompound ?: NBTTagCompound()
+            tag.setTag("display", display)
+            stack.tagCompound = tag
+        }
+
+        if (cacheEnabled) itemStackCache[this.id] = stack
+        return if (copyStack) stack.copy() else stack
+    }
+
+    private fun List<String>.processLore(): NBTTagList {
+        val nbtLore = NBTTagList()
+        for (line in this) {
+            if (!line.contains("Click to view recipes!") &&
+                !line.contains("Click to view recipe!")) {
+                nbtLore.appendTag(NBTTagString(line))
+            }
+        }
+        return nbtLore
     }
 }
 

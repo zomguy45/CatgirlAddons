@@ -3,14 +3,17 @@ package catgirlroutes.commands.impl
 import catgirlroutes.CatgirlRoutes.Companion.clickGUI
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.commands.commodore
+import catgirlroutes.ui.misc.searchoverlay.AhBzSearch
+import catgirlroutes.ui.misc.searchoverlay.OverlayType
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.LocationManager.inSkyblock
 
 val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
     runs {
         display = clickGUI
     }
 
-    literal("help").run { // todo: add description
+    literal("help").runs { // todo: add description
         modMessage("""
             List of commands:
               §7/cga
@@ -20,7 +23,21 @@ val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
               §7/node
               §7/p3
               §7/dev
-              §7/cga aura
+              §7/cgaaura
+              §7/cga ah
+              §7/cga bz
         """.trimIndent())
+    }
+
+    literal("ah").runs {
+        if (inSkyblock) {
+            display = AhBzSearch(OverlayType.AUCTION)
+        } else modMessage("You're not in skyblock")
+    }
+
+    literal("bz").runs {
+        if (inSkyblock) {
+            display = AhBzSearch(OverlayType.BAZAAR)
+        } else modMessage("You're not in skyblock")
     }
 }

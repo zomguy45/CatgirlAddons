@@ -78,7 +78,7 @@ object ModuleManager {
         AutoDialogue,
         AutoClicker,
         DojoHelper,
-        BazaarSearchOverlay,
+        SearchOverlay,
 
         // Player
         AutoSprint,

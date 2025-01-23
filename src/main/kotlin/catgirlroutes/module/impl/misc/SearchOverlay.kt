@@ -4,8 +4,11 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.mixins.accessors.AccessorGuiEditSign
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.ui.misc.searchoverlay.SearchOverlay
+import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.ui.misc.searchoverlay.AhBzSearch
 import catgirlroutes.ui.misc.searchoverlay.OverlayType
 import catgirlroutes.utils.LocationManager.inSkyblock
 import net.minecraft.client.gui.inventory.GuiEditSign
@@ -14,19 +17,22 @@ import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 
-object BazaarSearchOverlay : Module(
-    "Bazaar Search",
+object SearchOverlay : Module(
+    "Search Overlay",
     Category.MISC,
     tag = TagType.WHIP
-) {
+) { // todo: neu type shit search overlay (jei shit on the side)
 
     private val auctionOverlay = BooleanSetting("Auction Overlay")
     private val bazaarOverlay = BooleanSetting("Bazaar Overlay")
 
+    val ahHistory = StringSetting("AH_SEARCH", "[\"\"]",  9999, visibility = Visibility.HIDDEN)
+    val bzHistory = StringSetting("BZ_SEARCH", "[\"\"]", 9999, visibility = Visibility.HIDDEN)
+
     private var overlay: OverlayType = OverlayType.NONE
 
     init {
-        addSettings(this.auctionOverlay, this.bazaarOverlay)
+        addSettings(this.auctionOverlay, this.bazaarOverlay, this.ahHistory, this.bzHistory)
     }
 
 //    override fun onEnable() {
@@ -52,7 +58,7 @@ object BazaarSearchOverlay : Module(
 
         val sign = (event.gui as AccessorGuiEditSign).tileSign
         sign?.let {
-            event.gui = SearchOverlay(overlay, sign)
+            event.gui = AhBzSearch(overlay, sign)
         }
     }
 }

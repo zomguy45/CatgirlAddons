@@ -1,17 +1,22 @@
 package catgirlroutes.ui.misc.searchoverlay
 
+import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
+import catgirlroutes.module.impl.misc.SearchOverlay.ahHistory
+import catgirlroutes.module.impl.misc.SearchOverlay.bzHistory
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.ui.misc.elements.impl.MiscElementButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementBoolean
+import catgirlroutes.ui.misc.elements.impl.MiscElementButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementSelector
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.utils.ChatUtils.commandAny
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo
+import catgirlroutes.utils.NeuRepo.toStack
+import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
-import catgirlroutes.utils.toStack
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -23,8 +28,9 @@ import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
 import java.awt.Color
 import java.io.IOException
+import java.util.*
 
-class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons -> necron's); search history; don't render scroll bar when 9 or less results; fix scrollbar ishovered shit; commands
+class AhBzSearch( // todo: ctrl + f to open
     val type: OverlayType,
     private val sign: TileEntitySign? = null, // if null then run command instead
 ) : GuiScreen() {
@@ -47,6 +53,9 @@ class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons
         vertical = false, optionsPerRow = 5
     )
     private val forcePetLvl = MiscElementBoolean(text = "Lvl 100 Pets", radius = 3.0, thickness = 1.0)
+
+    private var resHistorySetting = if (type == OverlayType.AUCTION) ahHistory else bzHistory
+    private var resHistory = if (type == OverlayType.AUCTION) ahHistory.value.toArrayList() else bzHistory.value.toArrayList()
 
     private var scrollOffset = 0
     private var scrollHeight = 0.0
@@ -115,46 +124,102 @@ class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons
 
         searchResults.clear()
         val tooltips = mutableListOf<Pair<List<String>, Pair<Int, Int>>>()
+        val petLvl = if (forcePetLvl.enabled) "[Lvl 100]" else ""
 
         var offset = 30.0
         if (searchBar.text.length > 2) {
-            NeuRepo.items.filter {
+            val filteredItems = NeuRepo.items.filter {
+                val nameNoJunk = it.name.replace(Regex("['.]"), "") // remove ' and . (necron's -> necrons, l.a.s.r - lasr, )
                 val toCheck = if (this.type == OverlayType.AUCTION) it.auction else it.bazaar
-                it.name.contains(searchBar.text, true) && toCheck &&
-                !(forcePetLvl.enabled && !it.name.contains("Lvl"))
-            }.forEach { item ->
-                    val posY = y + offset - scrollOffset
-                    val resultButton = MiscElementButton("", x + 5.0, posY, overlayWidth - 20.0, 20.0, 1.0, 3.0) {
-                        var finalRes = "${if (forcePetLvl.enabled) "[Lvl 100] " else ""}${item.name}${getStars()}"
-                        finalRes = finalRes.replace(Regex("\\u00A7."), "")
-                        if (sign != null) {
-                            sign.signText[0] = ChatComponentText(finalRes)
-                            sign.markDirty()
-                            mc.displayGuiScreen(null)
-                        } else {
-                            val t = if (type == OverlayType.AUCTION) "ahs" else "bz"
-                            commandAny("$t $finalRes")
-                        }
-                    }
-                    searchResults.add(resultButton)
 
-                    if (posY in visibleRange) {
-                        val itemStack = item.toStack()
-                        resultButton.render(mouseX, mouseY)
-                        FontUtil.drawString(item.name, x + 25.0, posY + 7.0)
-                        HUDRenderUtils.drawItemStackWithText(itemStack, x + 7.0, posY + 3.0)
-                        if (resultButton.isHovered(mouseX, mouseY)) {
-                            tooltips.add(Pair(itemStack.getTooltip(mc.thePlayer, false), Pair(mouseX, mouseY)))
-                        }
+                toCheck &&
+                (it.name.contains(searchBar.text, true) || nameNoJunk.contains(searchBar.text, true) ||
+                (this.type == OverlayType.BAZAAR && it.lore.any { it.contains(searchBar.text, true) })) && // only search lore if bazaar
+                (!forcePetLvl.enabled || it.name.contains("Lvl"))
+            }
+
+            filteredItems.forEach {
+                val posY = y + offset - scrollOffset
+                val width = overlayWidth - if (filteredItems.count() > 9) 20.0 else 10.0
+                val resultButton = MiscElementButton("", x + 5.0, posY, width, 20.0, 1.0, 3.0) {
+                    var finalRes = "$petLvl${it.name}${getStars()}"
+                    finalRes = finalRes.noControlCodes.replace("[Lvl {LVL}]", "")
+
+                    resHistory.add(0, "REPOITEM:${it.name.noControlCodes}")
+                    resHistory = ArrayList(resHistory.distinct())
+                    if (resHistory.size > 9) resHistory.removeLast()
+
+                    if (sign != null) {
+                        sign.signText[0] = ChatComponentText(finalRes)
+                        sign.markDirty()
+                        mc.displayGuiScreen(null)
+                    } else {
+                        mc.displayGuiScreen(null)
+                        commandAny("${if (type == OverlayType.AUCTION) "ahs" else "bz"} $finalRes")
                     }
-                    offset += 25.0
                 }
-        } else scrollOffset = 0
+                searchResults.add(resultButton)
 
-        if (searchResults.isNotEmpty()) {
-            scrollHeight = if (searchResults.size <= 9) overlayHeight - 35.0 else (overlayHeight - 25.0) * (9.0 / searchResults.size)
+                if (posY in visibleRange) {
+                    val itemStack = it.toStack()
+                    resultButton.render(mouseX, mouseY)
+                    FontUtil.drawString(it.name, x + 25.0, posY + 7.0)
+                    HUDRenderUtils.drawItemStackWithText(itemStack, x + 7.0, posY + 3.0)
+                    if (resultButton.isHovered(mouseX, mouseY)) {
+                        tooltips.add(Pair(itemStack.getTooltip(mc.thePlayer, false), Pair(mouseX, mouseY)))
+                    }
+                }
+                offset += 25.0
+            }
+        } else {
+            scrollOffset = 0
+
+            resHistory.filter { it.trim().isNotEmpty() }.forEach { // Idc about optimisation (dupe code etc) rn. if it works it works
+                val posY = y + offset
+                val name = it.replace("REPOITEM:", "")
+                val resultButton = MiscElementButton("", x + 5.0, posY, overlayWidth - 10.0, 20.0, 1.0, 3.0) {
+                    var finalRes = "$petLvl$name${getStars()}"
+                    finalRes = finalRes.noControlCodes.replace("[Lvl {LVL}]", "")
+
+                    resHistory.add(0, it.noControlCodes)
+                    resHistory = ArrayList(resHistory.distinct())
+                    if (resHistory.size > 9) resHistory.removeLast()
+                    if (sign != null) {
+                        sign.signText[0] = ChatComponentText(finalRes)
+                        sign.markDirty()
+                        mc.displayGuiScreen(null)
+                    } else {
+                        mc.displayGuiScreen(null)
+                        commandAny("${if (type == OverlayType.AUCTION) "ahs" else "bz"} $finalRes")
+                    }
+                }
+                searchResults.add(resultButton)
+
+                if (it.startsWith("REPOITEM:")) {
+                    val item = NeuRepo.getItemFromName(name)
+                    val itemStack = item!!.toStack()
+                    resultButton.render(mouseX, mouseY)
+                    FontUtil.drawString(item.name, x + 25.0, posY + 7.0)
+                    HUDRenderUtils.drawItemStackWithText(itemStack, x + 7.0, posY + 3.0)
+                    if (resultButton.isHovered(mouseX, mouseY)) {
+                        tooltips.add(Pair(itemStack.getTooltip(mc.thePlayer, false), Pair(mouseX, mouseY)))
+                    }
+                } else {
+                    resultButton.render(mouseX, mouseY)
+                    FontUtil.drawString(name, x + 25.0, posY + 7.0)
+                }
+                offset += 25.0
+            }
+        }
+
+        if (searchResults.size > 9) { // scroll bar
+            scrollHeight = (overlayHeight - 25.0) * (9.0 / searchResults.size)
             scrollY = y + 30.0 + (scrollOffset / ((searchResults.size - 9) * 25.0)).coerceIn(0.0, 1.0) * (overlayHeight - 35.0 - scrollHeight)
-            drawRoundedBorderedRect(x + overlayWidth - 10.0, scrollY, 5.0, scrollHeight, 3.0, 1.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+            drawRoundedBorderedRect(
+                x + overlayWidth - 10.0, scrollY, 5.0, scrollHeight,
+                3.0, 1.0, Color(ColorUtil.bgColor),
+                if (isHoveringScroll(mouseX, mouseY) || isDraggingScroll) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
+            )
         }
 
         tooltips.forEach { (tooltip, position) ->
@@ -206,16 +271,38 @@ class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
+    override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
+        isDraggingScroll = false
+        super.mouseReleased(mouseX, mouseY, state)
+    }
+
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         searchBar.keyTyped(typedChar, keyCode)
 
-        sign?.let {
-            if (keyCode == Keyboard.KEY_RETURN || keyCode == Keyboard.KEY_ESCAPE) {
-                sign.markDirty()
-                mc.displayGuiScreen(null)
-                return
+        when (keyCode) {
+            Keyboard.KEY_RETURN -> {
+                resHistory.add(0, searchBar.text)
+                resHistory = ArrayList(resHistory.distinct())
+
+                if (resHistory.size > 9) {
+                    resHistory.removeLast()
+                }
+
+                if (sign != null) {
+                    sign.markDirty()
+                    mc.displayGuiScreen(null)
+                } else {
+                    mc.displayGuiScreen(null)
+                    commandAny("${if (type == OverlayType.AUCTION) "ahs" else "bz"} ${searchBar.text}")
+                }
             }
 
+            Keyboard.KEY_ESCAPE -> {
+                mc.displayGuiScreen(null)
+            }
+        }
+
+        sign?.let {
             sign.signText[0] = ChatComponentText(searchBar.text)
         }
 
@@ -244,6 +331,10 @@ class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons
             mc.netHandler?.addToSendQueue(C12PacketUpdateSign(sign.pos, sign.signText))
             sign.setEditable(true)
         }
+        debugMessage(resHistory)
+        debugMessage(resHistory.toFormattedString())
+        resHistorySetting.value = resHistory.toFormattedString()
+        moduleConfig.saveConfig()
     }
 
     override fun doesGuiPauseGame(): Boolean {
@@ -284,6 +375,18 @@ class SearchOverlay( // todo: reforges; autocompletion (lasr -> l.a.s.r, necrons
             starSelector.index > 5 -> res.append("✪".repeat(5)).append(starSelector.selected.last())
         }
         return res.toString()
+    }
+
+    private fun ArrayList<String>.toFormattedString(): String {
+        return joinToString(separator = ", ", prefix = "[", postfix = "]") { "\"$it\"" }
+    }
+
+    private fun String.toArrayList(): ArrayList<String> {
+        return ArrayList(
+            this.removeSurrounding("[", "]")
+                .split(", ")
+                .map { it.trim('"') }
+        )
     }
 
     companion object {
