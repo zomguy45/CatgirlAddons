@@ -30,7 +30,7 @@ import java.awt.Color
 import java.io.IOException
 import java.util.*
 
-class AhBzSearch( // todo: ctrl + f to open
+class AhBzSearch(
     val type: OverlayType,
     private val sign: TileEntitySign? = null, // if null then run command instead
 ) : GuiScreen() {
@@ -53,6 +53,9 @@ class AhBzSearch( // todo: ctrl + f to open
         vertical = false, optionsPerRow = 5
     )
     private val forcePetLvl = MiscElementBoolean(text = "Lvl 100 Pets", radius = 3.0, thickness = 1.0)
+    private val petLvl: String
+        get() = if (forcePetLvl.enabled) "[Lvl 100]" else ""
+
 
     private var resHistorySetting = if (type == OverlayType.AUCTION) ahHistory else bzHistory
     private var resHistory = if (type == OverlayType.AUCTION) ahHistory.value.toArrayList() else bzHistory.value.toArrayList()
@@ -124,7 +127,6 @@ class AhBzSearch( // todo: ctrl + f to open
 
         searchResults.clear()
         val tooltips = mutableListOf<Pair<List<String>, Pair<Int, Int>>>()
-        val petLvl = if (forcePetLvl.enabled) "[Lvl 100]" else ""
 
         var offset = 30.0
         if (searchBar.text.length > 2) {
@@ -293,7 +295,7 @@ class AhBzSearch( // todo: ctrl + f to open
                     mc.displayGuiScreen(null)
                 } else {
                     mc.displayGuiScreen(null)
-                    commandAny("${if (type == OverlayType.AUCTION) "ahs" else "bz"} ${searchBar.text}")
+                    commandAny("${if (type == OverlayType.AUCTION) "ahs" else "bz"} $petLvl${searchBar.text}")
                 }
             }
 
@@ -303,7 +305,7 @@ class AhBzSearch( // todo: ctrl + f to open
         }
 
         sign?.let {
-            sign.signText[0] = ChatComponentText(searchBar.text)
+            sign.signText[0] = ChatComponentText("$petLvl ${searchBar.text}")
         }
 
         super.keyTyped(typedChar, keyCode)
