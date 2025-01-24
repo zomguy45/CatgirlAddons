@@ -57,10 +57,12 @@ object SearchOverlay : Module(
     fun onS2DPacketOpenWindow(event: PacketReceiveEvent) {
         if (!inSkyblock || event.packet !is S2DPacketOpenWindow) return
         val title = event.packet.windowTitle.unformattedText
-        if ((title.contains("Auctions") || title.contains("Auction House")) && this.auctionOverlay.enabled) {
-            overlay = OverlayType.AUCTION
+        overlay = if ((title.contains("Auctions") || title.contains("Auction House")) && this.auctionOverlay.enabled) {
+            OverlayType.AUCTION
         } else if (title.contains("Bazaar") && this.bazaarOverlay.enabled) {
-            overlay = OverlayType.BAZAAR
+            OverlayType.BAZAAR
+        } else {
+            OverlayType.NONE
         }
     }
 
