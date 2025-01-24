@@ -78,7 +78,7 @@ object ModuleManager {
         AutoDialogue,
         AutoClicker,
         DojoHelper,
-        SearchOverlay,
+        // SearchOverlay,
 
         // Player
         AutoSprint,
@@ -101,7 +101,10 @@ object ModuleManager {
         EditHud,
         Trail,
         DungeonESPNew,
-        ScreenImage
+        ScreenImage,
+
+        // temp
+        SearchOverlay
     )
 
     /**
