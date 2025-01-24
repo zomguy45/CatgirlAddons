@@ -62,6 +62,8 @@ class InventoryButtonEditor : GuiScreen() {
             editorX = x + 8 - editorWidth.toInt() / 2
             editorY = y + 20
 
+            GlStateManager.pushMatrix()
+            GlStateManager.translate(0.0, 0.0, 50.0)
             HUDRenderUtils.drawRoundedBorderedRect(
                 editorX.toDouble(), editorY.toDouble(),
                 editorWidth, editorHeight,
@@ -85,6 +87,7 @@ class InventoryButtonEditor : GuiScreen() {
                 this.x = editorX + 7.0
                 this.y = editorY + 55.0
             }
+            GlStateManager.popMatrix()
         }
 
         GlStateManager.disableBlend()

@@ -1,13 +1,14 @@
 package catgirlroutes.ui.misc.inventorybuttons
 
-import catgirlroutes.utils.ChatUtils
-import catgirlroutes.utils.NeuRepo
+import catgirlroutes.module.impl.misc.InventoryButtons.equipmentOverlay
+import catgirlroutes.utils.*
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo.toStack
-import catgirlroutes.utils.RepoItem
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
+import net.minecraft.nbt.JsonToNBT
 import java.awt.Color
 
 
@@ -20,7 +21,7 @@ class InventoryButton(
 ) {
 
     inline val isActive: Boolean
-        get() = command.isNotEmpty()
+        get() = if (isEquipment) equipmentOverlay.enabled else command.isNotEmpty()
 
     inline val action: Unit
         get() = ChatUtils.commandAny(command)
@@ -31,14 +32,21 @@ class InventoryButton(
         HUDRenderUtils.drawRoundedBorderedRect(x + xOff, y + yOff, 16.0, 16.0, 3.0, 2.0, c, bC)
 
         if (icon.isNotEmpty()) {
-            val item = Item.getByNameOrId(icon.lowercase()) ?: NeuRepo.getItemFromID(icon.uppercase())
+            val itemStack = when {
+                this.isEquipment && this.icon != "barrier" -> this.icon.toJsonObject().toItemStack()
 
-            item?.let {
-                val itemStack = when (it) {
-                    is Item -> ItemStack(it)
-                    else -> (it as RepoItem).toStack()
+                else -> {
+                    val item = Item.getByNameOrId(icon.lowercase()) ?: NeuRepo.getItemFromID(icon.uppercase())
+                    item?.let {
+                        when (it) {
+                            is Item -> ItemStack(it)
+                            else -> (it as RepoItem).toStack()
+                        }
+                    }
                 }
-                HUDRenderUtils.drawItemStackWithText(itemStack, x + xOff, y + yOff)
+            }
+            itemStack?.let {
+                HUDRenderUtils.drawItemStackWithText(it, x + xOff, y + yOff)
             }
         }
 

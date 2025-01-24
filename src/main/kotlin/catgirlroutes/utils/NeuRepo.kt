@@ -51,6 +51,7 @@ object NeuRepo {
             }
             updateItemsWithAuctionData()
             updateItemsWithBazaarData()
+            println("Successfully loaded NeuRepo")
         }
     }
 
