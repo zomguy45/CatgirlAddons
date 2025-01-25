@@ -145,9 +145,9 @@ class AhBzSearch(
                 val width = overlayWidth - if (filteredItems.count() > 9) 20.0 else 10.0
                 val resultButton = MiscElementButton("", x + 5.0, posY, width, 20.0, 1.0, 3.0) {
                     var finalRes = "$petLvl${it.name}${getStars()}"
-                    finalRes = finalRes.noControlCodes.replace("[Lvl {LVL}]", "")
+                    finalRes = finalRes.clean
 
-                    resHistory.add(0, "REPOITEM:${it.name.noControlCodes}")
+                    resHistory.add(0, "REPOITEM:${it.name.clean}")
                     resHistory = ArrayList(resHistory.distinct())
                     if (resHistory.size > 9) resHistory.removeLast()
 
@@ -181,9 +181,9 @@ class AhBzSearch(
                 val name = it.replace("REPOITEM:", "")
                 val resultButton = MiscElementButton("", x + 5.0, posY, overlayWidth - 10.0, 20.0, 1.0, 3.0) {
                     var finalRes = "$petLvl$name${getStars()}"
-                    finalRes = finalRes.noControlCodes.replace("[Lvl {LVL}]", "")
+                    finalRes = finalRes.clean
 
-                    resHistory.add(0, it.noControlCodes)
+                    resHistory.add(0, it.clean)
                     resHistory = ArrayList(resHistory.distinct())
                     if (resHistory.size > 9) resHistory.removeLast()
                     if (sign != null) {
@@ -390,6 +390,9 @@ class AhBzSearch(
                 .map { it.trim('"') }
         )
     }
+
+    private val String.clean: String
+        get() = this.noControlCodes.replace("[Lvl {LVL}] ", "")
 
     companion object {
         val searchResults: ArrayList<MiscElementButton> = arrayListOf()
