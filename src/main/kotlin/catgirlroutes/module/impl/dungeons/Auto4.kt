@@ -56,6 +56,8 @@ object Auto4: Module(
 
     private val aimSnap = BooleanSetting("Aim snapping")
 
+    private val statusMessages = BooleanSetting("Status messages")
+
     private val deviceTextOn = StringSetting("On text")
     private val deviceTextOff = StringSetting("Off text")
 
@@ -70,7 +72,7 @@ object Auto4: Module(
     private val forceTerm = BooleanSetting("Force term")
 
     init {
-        addSettings(autoPlate, aimSnap, deviceTextOn, deviceTextOff, autoLeap, leapMode, devLeap, action, devLeapClass, forceTerm)
+        addSettings(autoPlate, aimSnap, statusMessages, deviceTextOn, deviceTextOff, autoLeap, leapMode, devLeap, action, devLeapClass, forceTerm)
     }
 
     private fun updateTeammates() {
@@ -90,7 +92,7 @@ object Auto4: Module(
         if (message.matches(Regex("(\\w+) completed a device! \\((.*?)\\)"))) {
             if (leapMode.selected == "Name" && autoLeap.value) leap(devLeap.selected)
             else if (leapMode.selected == "Class" && autoLeap.value) leap(classEnumMapping[devLeapClass.index])
-            ChatUtils.commandAny("/pc [CGA] I4 completed")
+            if (statusMessages.value) ChatUtils.commandAny("/pc [CGA] I4 completed")
         } else if (message.matches(Regex("☠ (\\w{1,16}) .* and became a ghost\\."))) {
             ChatUtils.commandAny("/pc [CGA] I4 not completed")
         }
