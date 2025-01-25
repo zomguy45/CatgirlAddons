@@ -24,6 +24,7 @@ import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraft.network.play.server.S2EPacketCloseWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.client.config.GuiUtils
@@ -110,6 +111,11 @@ object InventoryButtons : Module(
         if (!inSkyblock || !this.equipmentOverlay.enabled || event.packet !is S2DPacketOpenWindow) return
         shouldScanEq = event.packet.windowTitle.unformattedText == "Your Equipment and Stats"
         debugMessage(shouldScanEq)
+    }
+
+    @SubscribeEvent
+    fun onS2EPacketCloseWindow(event: PacketReceiveEvent) {
+        if (this.equipmentOverlay.enabled && event.packet is S2EPacketCloseWindow) shouldScanEq = false
     }
 
     @SubscribeEvent
