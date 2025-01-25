@@ -142,6 +142,28 @@ object PlayerUtils {
         }
         return if (airCount >= 2) (startPos.y - gapEnd!!).toDouble() else null
     }
+
+    fun findDistanceToAirBlocksLegacy(): Double? {
+        val world = mc.theWorld
+
+        if (mc.thePlayer == null || world == null) return null
+
+        val startPos = BlockPos(posX, posY, posZ)
+        var airCount = 0
+
+        for ((distance, y) in (startPos.y downTo 0).withIndex()) {
+            val pos = BlockPos(startPos.x, y, startPos.z)
+            val block = world.getBlockState(pos).block
+
+            if (block is BlockAir) {
+                airCount++
+                if (airCount == 2) return (distance * -1).toDouble() - 1.0
+            } else {
+                airCount = 0
+            }
+        }
+        return null
+    }
 }
 
 enum class SwapState{

@@ -4,10 +4,12 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
+import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocksLegacy
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.rotation.FakeRotater.rotate
@@ -24,11 +26,14 @@ object PearlClip : Module(
 ){
     private val pearlClipDistance: NumberSetting = NumberSetting("Distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
     private val pearlClipDelay: NumberSetting = NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0, description = "Pearl clip delay")
+    private val legacyDetection: BooleanSetting = BooleanSetting("Legacy detection")
+
 
     init {
         this.addSettings(
             pearlClipDistance,
-            pearlClipDelay
+            pearlClipDelay,
+            legacyDetection
         )
     }
 
@@ -46,7 +51,7 @@ object PearlClip : Module(
 
     fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
         if (!this.enabled) return
-        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
+        clipDepth = if (depth == 0.0 && !legacyDetection.value) findDistanceToAirBlocks() else if (depth == 0.0) findDistanceToAirBlocksLegacy() else depth; // fuck k*tlin
         if (clipDepth == null) return
 
         posX = mc.thePlayer.posX

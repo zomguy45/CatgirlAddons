@@ -9,6 +9,7 @@ import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.clearBlocks
 import catgirlroutes.utils.MovementUtils.moveToBlock
@@ -84,11 +85,14 @@ object Auto4: Module(
 
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
-        if (!inDungeons || event.type.toInt() == 2 || !inBoss || !autoLeap.value || !onDev()) return
+        if (!inDungeons || event.type.toInt() == 2 || !inBoss || !onDev()) return
         val message = StringUtils.stripControlCodes(event.message.unformattedText)
         if (message.matches(Regex("(\\w+) completed a device! \\((.*?)\\)"))) {
-            if (leapMode.selected == "Name") leap(devLeap.selected)
-            else if (leapMode.selected == "Class") leap(classEnumMapping[devLeapClass.index])
+            if (leapMode.selected == "Name" && autoLeap.value) leap(devLeap.selected)
+            else if (leapMode.selected == "Class" && autoLeap.value) leap(classEnumMapping[devLeapClass.index])
+            ChatUtils.commandAny("/pc [CGA] I4 completed")
+        } else if (message.matches(Regex("☠ (\\w{1,16}) .* and became a ghost\\."))) {
+            ChatUtils.commandAny("/pc [CGA] I4 not completed")
         }
     }
 
