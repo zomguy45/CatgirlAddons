@@ -36,8 +36,8 @@ object SearchOverlay : Module(
     private val auctionOverlay = BooleanSetting("Auction Overlay")
     private val bazaarOverlay = BooleanSetting("Bazaar Overlay")
 
-    val ahHistory = StringSetting("AH_SEARCH", "[\"\"]",  9999, visibility = Visibility.HIDDEN)
-    val bzHistory = StringSetting("BZ_SEARCH", "[\"\"]", 9999, visibility = Visibility.HIDDEN)
+    val ahHistory = StringSetting("AH_SEARCH", "[\"\"]",  999, visibility = Visibility.HIDDEN)
+    val bzHistory = StringSetting("BZ_SEARCH", "[\"\"]", 999, visibility = Visibility.HIDDEN)
     private val ctrlF = BooleanSetting("Ctrl + F to search")
 
     private var overlay: OverlayType = OverlayType.NONE
