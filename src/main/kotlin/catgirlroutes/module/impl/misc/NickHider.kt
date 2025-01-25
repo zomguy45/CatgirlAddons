@@ -31,8 +31,15 @@ object NickHider: Module(
     @JvmStatic
     fun replaceTextEly(text: String?): String? {
         if (text == null || mc.thePlayer == null) return text
-        val replacement = "Chubby Niglet"
-        return text.replace(Regex("catgirlOnCatnip"), replacement)
+        val replacement = "Alari wifeyy :3"
+        return text.replace(Regex("sillylittletgirl"), replacement)
+    }
+
+@JvmStatic
+    fun replaceTextOwbu(text: String?): String? {
+        if (text == null || mc.thePlayer == null) return text
+        val replacement = "tgirlowbu"
+        return text.replace(Regex("zirpzarpowbu"), replacement)
     }
 
     @JvmStatic

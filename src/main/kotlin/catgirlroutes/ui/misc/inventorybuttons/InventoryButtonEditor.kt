@@ -52,7 +52,7 @@ class InventoryButtonEditor : GuiScreen() {
             } else {
                 InventoryButton.colour to InventoryButton.borderColour
             }
-            button.render(invX, invY, colour, borderColour)
+            button.render(invX.toDouble(), invY.toDouble(), colour, borderColour)
             if (!button.isActive) FontUtil.drawString("+", x + 6, y + 5)
         }
 
@@ -62,6 +62,8 @@ class InventoryButtonEditor : GuiScreen() {
             editorX = x + 8 - editorWidth.toInt() / 2
             editorY = y + 20
 
+            GlStateManager.pushMatrix()
+            GlStateManager.translate(0.0, 0.0, 50.0)
             HUDRenderUtils.drawRoundedBorderedRect(
                 editorX.toDouble(), editorY.toDouble(),
                 editorWidth, editorHeight,
@@ -71,7 +73,7 @@ class InventoryButtonEditor : GuiScreen() {
 
             FontUtil.drawString("Command", editorX + 7, editorY + 7, 0xffa0a0a0.toInt())
             commandTextField.apply {
-                text = text.replace("^ +", "")
+//                text = text.replace("^ +", "")
                 prependText = if (text.startsWith("/")) "" else "§7/§r"
                 render(mouseX, mouseY)
                 this.x = editorX + 7.0
@@ -80,11 +82,12 @@ class InventoryButtonEditor : GuiScreen() {
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
             iconTextField.apply {
-                text = text.replace("^ +", "")
+//                text = text.replace("^ +", "")
                 render(mouseX, mouseY)
                 this.x = editorX + 7.0
                 this.y = editorY + 55.0
             }
+            GlStateManager.popMatrix()
         }
 
         GlStateManager.disableBlend()

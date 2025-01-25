@@ -46,6 +46,7 @@ object ModuleManager {
     val modules: ArrayList<Module> = arrayListOf(
         // Dungeons
         AutoP3,
+        AutoP3ConfigOverlay,
         AutoRoutes,
         GhostBlocks,
         InstaMid,
@@ -77,7 +78,7 @@ object ModuleManager {
         AutoDialogue,
         AutoClicker,
         DojoHelper,
-        BazaarSearchOverlay,
+        // SearchOverlay,
 
         // Player
         AutoSprint,
@@ -88,6 +89,7 @@ object ModuleManager {
         BlockClip,
         BarPhase,
         Animations,
+        PlayerDisplay,
 
         // Render
         ClickGui,
@@ -99,7 +101,10 @@ object ModuleManager {
         EditHud,
         Trail,
         DungeonESPNew,
-        ScreenImage
+        ScreenImage,
+
+        // temp
+        SearchOverlay
     )
 
     /**

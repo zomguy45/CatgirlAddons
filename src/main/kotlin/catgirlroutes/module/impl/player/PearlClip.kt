@@ -9,7 +9,6 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocks
-import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocksLegacy
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.rotation.FakeRotater.rotate
@@ -51,7 +50,7 @@ object PearlClip : Module(
 
     fun pearlClip(depth: Double? = findDistanceToAirBlocks()) { // todo: move to ClipUtils
         if (!this.enabled) return
-        clipDepth = if (depth == 0.0 && !legacyDetection.value) findDistanceToAirBlocks() else if (depth == 0.0) findDistanceToAirBlocksLegacy() else depth; // fuck k*tlin
+        clipDepth = if (depth == 0.0) findDistanceToAirBlocks() else depth; // fuck k*tlin
         if (clipDepth == null) return
 
         posX = mc.thePlayer.posX
@@ -60,6 +59,7 @@ object PearlClip : Module(
 
         val swapResult = swapFromName("ender pearl")
         if (swapResult != SwapState.UNKNOWN) {
+            modMessage("Pearl clipping ($depth)!")
             active = true
             rotate(mc.thePlayer.rotationYaw, 90F)
             scheduleTask(pearlClipDelay.value.toInt()) {

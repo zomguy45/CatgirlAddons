@@ -3,14 +3,18 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
-import catgirlroutes.utils.Item as RepoItem
+import com.google.gson.JsonArray
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
+import com.google.gson.JsonPrimitive
 import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.init.Blocks
-import net.minecraft.item.ItemStack
+import net.minecraft.init.Items
 import net.minecraft.item.Item
+import net.minecraft.item.ItemStack
 import net.minecraft.nbt.*
 import net.minecraft.util.*
 import net.minecraftforge.common.MinecraftForge
@@ -230,55 +234,109 @@ fun Event.postAndCatch(): Boolean { //THIS MAKES NO SENSE HELP
 }
 
 
-// modified schizo shit from neu
+// todo: cleanup, merge with neurepo similar shit
 private val itemStackCache: MutableMap<String, ItemStack> = HashMap()
-fun RepoItem.toStack(
+
+fun JsonObject.toItemStack(
     useCache: Boolean = true,
     copyStack: Boolean = false
 ): ItemStack {
     var cacheEnabled = useCache
+    if (this == null) return ItemStack(Items.painting, 1, 10)
 
-    if (this.skyblockID == "_") cacheEnabled = false
+    val internalName = this["internalname"]?.asString ?: return ItemStack(Items.painting, 1, 10)
+    if (internalName == "_") cacheEnabled = false
 
     if (cacheEnabled) {
-        itemStackCache[this.skyblockID]?.let { stack ->
-            return if (copyStack) stack.copy() else stack
+        itemStackCache[internalName]?.let { cachedStack ->
+            return if (copyStack) cachedStack.copy() else cachedStack
         }
     }
 
-    val stack = ItemStack(Item.itemRegistry.getObject(ResourceLocation(this.id)), 1, this.damage)
+    val itemId = this["itemid"]?.asString ?: "minecraft:stone"
+    var stack = ItemStack(Item.itemRegistry.getObject(ResourceLocation(itemId)))
+
+    if (this.has("count")) {
+        stack.stackSize = this["count"].asInt
+    }
 
     if (stack.item == null) {
-        return ItemStack(Item.getItemFromBlock(Blocks.stone), 0, 255) // Purple broken texture item
+        stack = ItemStack(Item.getItemFromBlock(Blocks.stone), 0, 255) // Purple broken texture item
     } else {
-        try {
-            val tag: NBTTagCompound = JsonToNBT.getTagFromJson(this.nbt)
-            stack.tagCompound = tag
-        } catch (ignored: NBTException) { }
-
-        val display = NBTTagCompound().apply {
-            if (stack.tagCompound != null && stack.tagCompound!!.hasKey("display")) {
-                this.merge(stack.tagCompound!!.getCompoundTag("display"))
-            }
-            this.setTag("Lore", this@toStack.lore.processLore())
+        if (this.has("damage")) {
+            stack.itemDamage = this["damage"].asInt
         }
-        val tag = stack.tagCompound ?: NBTTagCompound()
-        tag.setTag("display", display)
-        stack.tagCompound = tag
+
+        if (this.has("nbttag")) {
+            try {
+                val tag = JsonToNBT.getTagFromJson(this["nbttag"].asString)
+                stack.tagCompound = tag
+            } catch (ignored: NBTException) {
+            }
+        }
+
+        if (this.has("lore")) {
+            val display = stack.tagCompound?.getCompoundTag("display") ?: NBTTagCompound()
+            display.setTag("Lore", this["lore"].asJsonArray.processLore())
+            val tag = stack.tagCompound ?: NBTTagCompound()
+            tag.setTag("display", display)
+            stack.tagCompound = tag
+        }
     }
 
-    if (cacheEnabled) itemStackCache[this.id] = stack
+    if (cacheEnabled) itemStackCache[internalName] = stack
     return if (copyStack) stack.copy() else stack
 }
 
-fun List<String>.processLore(): NBTTagList {
+fun JsonArray.processLore(): NBTTagList {
     val nbtLore = NBTTagList()
     for (line in this) {
-        if (!line.contains("Click to view recipes!") &&
-            !line.contains("Click to view recipe!")) {
-            nbtLore.appendTag(NBTTagString(line))
+        val lineStr = line.asString
+        if (!lineStr.contains("Click to view recipes!") &&
+            !lineStr.contains("Click to view recipe!")) {
+            nbtLore.appendTag(NBTTagString(lineStr))
         }
     }
     return nbtLore
+}
+
+fun String.toJsonObject(): JsonObject {
+    val jsonElement = JsonParser().parse(this)
+    return jsonElement.asJsonObject
+}
+
+fun ItemStack.toJson(): JsonObject {
+    val tag = this.tagCompound ?: NBTTagCompound()
+
+    var lore = arrayOf<String>()
+    if (tag.hasKey("display", 10)) {
+        val display = tag.getCompoundTag("display")
+        if (display.hasKey("Lore", 9)) {
+            val list = display.getTagList("Lore", 8)
+            lore = Array(list.tagCount()) { list.getStringTagAt(it) }
+        }
+    }
+
+    if (this.displayName.endsWith(" Recipes")) {
+        this.setStackDisplayName(this.displayName.dropLast(8))
+    }
+
+    if (lore.isNotEmpty() && (lore.last().contains("Click to view recipes!") || lore.last().contains("Click to view recipe!"))) {
+        lore = lore.dropLast(2).toTypedArray()
+    }
+
+    val json = JsonObject()
+    json.addProperty("itemid", this.item.registryName.toString())
+    json.addProperty("displayname", this.displayName)
+    json.addProperty("nbttag", tag.toString())
+    json.addProperty("damage", this.itemDamage)
+
+    val jsonLore = JsonArray()
+    for (line in lore) {
+        jsonLore.add(JsonPrimitive(line))
+    }
+    json.add("lore", jsonLore)
+
+    return json
 }
 

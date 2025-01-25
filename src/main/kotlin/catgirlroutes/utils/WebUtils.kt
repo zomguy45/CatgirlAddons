@@ -110,6 +110,7 @@ suspend fun downloadImageFromServer(url: String, outputFile: File): Boolean {
 suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotEnoughUpdates-Repo/archive/master.zip"): Triple<List<JsonObject>, List<JsonObject>, List<JsonObject>>? {
     return withTimeoutOrNull(20000) {
         try {
+            println("Downloading NeuRepo")
             val items = mutableListOf<JsonObject>()
             val mobs = mutableListOf<JsonObject>()
             val constants = mutableListOf<JsonObject>()
@@ -127,11 +128,12 @@ suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotE
                     readTimeout = 5000
                     if (previousETag.isNotEmpty()) setRequestProperty("If-None-Match", previousETag)
                 }.run {
-                    if (responseCode == 304) "" else getHeaderField("ETag") ?: ""
+                    takeIf { responseCode != 304 }?.getHeaderField("ETag") ?: previousETag
                 }
             }
 
             if (currentETag != previousETag) {
+                println("ETags don't match. Updating")
                 withContext(Dispatchers.IO) {
                     val urlConnection = URL(url).openConnection() as HttpURLConnection
                     urlConnection.apply {
@@ -165,7 +167,7 @@ suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotE
                     DataManager.saveDataToFile(configPath.resolve("repo/constants.json"), constants)
                 }
             } else {
-                println("AMONGUS ETAG MATCHES")
+                println("ETags match")
                 withContext(Dispatchers.IO) {
                     items.addAll(DataManager.loadDataFromFile(configPath.resolve("repo/items.json")))
                     mobs.addAll(DataManager.loadDataFromFile(configPath.resolve("repo/mobs.json")))

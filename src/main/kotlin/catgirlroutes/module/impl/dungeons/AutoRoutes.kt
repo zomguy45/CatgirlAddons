@@ -316,7 +316,6 @@ object AutoRoutes : Module(
                 scheduleTask(0) {shouldClick = true}
             }
             "pearlclip" -> {
-                modMessage("Pearl clipping!")
                 if (node.depth == 0F) {
                     PearlClip.pearlClip()
                 } else {

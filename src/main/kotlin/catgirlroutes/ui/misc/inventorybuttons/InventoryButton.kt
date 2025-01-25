@@ -1,18 +1,14 @@
 package catgirlroutes.ui.misc.inventorybuttons
 
-import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
-import catgirlroutes.utils.ChatUtils
+import catgirlroutes.module.impl.misc.InventoryButtons.equipmentOverlay
+import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.NeuRepo.toStack
 import catgirlroutes.utils.render.HUDRenderUtils
-import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.ItemRenderer
 import net.minecraft.item.Item
 import net.minecraft.item.ItemStack
-import net.minecraft.util.ResourceLocation
-import net.minecraft.util.Tuple
-import org.lwjgl.opengl.GL11
+import net.minecraft.nbt.JsonToNBT
 import java.awt.Color
 
 
@@ -25,28 +21,35 @@ class InventoryButton(
 ) {
 
     inline val isActive: Boolean
-        get() = command.isNotEmpty()
+        get() = if (isEquipment) equipmentOverlay.enabled else command.isNotEmpty()
 
     inline val action: Unit
         get() = ChatUtils.commandAny(command)
 
-    fun render(xOff: Int, yOff: Int, c: Color = colour, bC: Color = borderColour) {
+    fun render(xOff: Double, yOff: Double, c: Color = colour, bC: Color = borderColour) {
         GlStateManager.pushMatrix()
-        GlStateManager.enableBlend()
-        GlStateManager.disableTexture2D()
-        GlStateManager.disableDepth()
 
-        HUDRenderUtils.drawRoundedBorderedRect((x + xOff).toDouble(), (y + yOff).toDouble(), 16.0, 16.0, 3.0, 2.0, c, bC)
+        HUDRenderUtils.drawRoundedBorderedRect(x + xOff, y + yOff, 16.0, 16.0, 3.0, 2.0, c, bC)
 
         if (icon.isNotEmpty()) {
-            Item.getByNameOrId(icon)?.let {
-                mc.renderItem.renderItemAndEffectIntoGUI(ItemStack(it), x + xOff, y + yOff)
+            val itemStack = when {
+                this.isEquipment && this.icon != "barrier" -> this.icon.toJsonObject().toItemStack()
+
+                else -> {
+                    val item = Item.getByNameOrId(icon.lowercase()) ?: NeuRepo.getItemFromID(icon.uppercase())
+                    item?.let {
+                        when (it) {
+                            is Item -> ItemStack(it)
+                            else -> (it as RepoItem).toStack()
+                        }
+                    }
+                }
+            }
+            itemStack?.let {
+                HUDRenderUtils.drawItemStackWithText(it, x + xOff, y + yOff)
             }
         }
 
-        GlStateManager.enableDepth()
-        GlStateManager.disableBlend()
-        GlStateManager.enableTexture2D()
         GlStateManager.popMatrix()
     }
 

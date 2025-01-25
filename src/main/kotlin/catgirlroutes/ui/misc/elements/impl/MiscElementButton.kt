@@ -7,6 +7,18 @@ import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
+/**
+ * A [MiscElement] element that triggers an action when clicked.
+ *
+ * @param name The name of the button.
+ * @param x The x-coordinate position (default is 0.0).
+ * @param y The y-coordinate position (default is 0.0).
+ * @param width The width of the button (default is 80.0).
+ * @param height The height of the button (default is 20.0).
+ * @param thickness The border thickness (default is 2.0).
+ * @param radius The radius of the corners (default is 5.0).
+ * @param action The function to be executed when the button is clicked.
+ */
 class MiscElementButton(
     var name: String,
     x: Double = 0.0,
