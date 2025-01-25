@@ -54,7 +54,7 @@ object PearlClip : Module(
         if (clipDepth == null) return
 
         posX = mc.thePlayer.posX
-        posY = mc.thePlayer.posY
+        posY = mc.thePlayer.posY + 1.0
         posZ = mc.thePlayer.posZ
 
         val swapResult = swapFromName("ender pearl")
