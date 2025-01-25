@@ -128,7 +128,7 @@ suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotE
                     readTimeout = 5000
                     if (previousETag.isNotEmpty()) setRequestProperty("If-None-Match", previousETag)
                 }.run {
-                    if (responseCode == 304) "" else getHeaderField("ETag") ?: ""
+                    takeIf { responseCode != 304 }?.getHeaderField("ETag") ?: previousETag
                 }
             }
 
