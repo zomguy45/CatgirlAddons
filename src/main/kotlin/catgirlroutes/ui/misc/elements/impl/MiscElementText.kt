@@ -41,6 +41,7 @@ class MiscElementText(
 ) : MiscElement(x, y, width, height) {
 
     var focus: Boolean = false
+    private var scrollOffset = 0.0
 
     private val textField: GuiTextField = GuiTextField(
         0, mc.fontRendererObj, 0,
@@ -58,17 +59,28 @@ class MiscElementText(
         textField.text = value
     }
 
-    private fun getCursorPos(mouseX: Int): Int {
-        val xComp = mouseX - x - getStringWidth(prependText)
+    private fun updateScrollOffset() {
         val renderText = prependText + textField.text
+        val cursorX = getStringWidth(renderText.substring(0, textField.cursorPosition + prependText.length))
 
-        val targetLine = renderText.lines().firstOrNull() ?: return renderText.length
+        val fieldWidth = this.width - 10
+        if (cursorX - scrollOffset > fieldWidth) {
+            scrollOffset = cursorX - fieldWidth
+        } else if (cursorX < scrollOffset) {
+            scrollOffset = cursorX.toDouble()
+        }
+        scrollOffset = scrollOffset.coerceAtLeast(0.0)
+    }
 
-        val padding = ((5).coerceAtMost(this.width.toInt() - strLenNoColor(targetLine))) / 2
-        val adjustedX = (xComp - padding).coerceAtLeast(0.0)
 
-        val trimmed = mc.fontRendererObj.trimStringToWidth(targetLine, adjustedX.toInt())
-        return strLenNoColor(trimmed).coerceAtMost(renderText.length)
+    private fun getCursorPos(mouseX: Int): Int {
+        val xComp = mouseX - x - getStringWidth(prependText) - 5
+        val adjustedX = (xComp + scrollOffset).coerceAtLeast(0.0)
+
+        val renderText = prependText + textField.text
+        val trimmed = mc.fontRendererObj.trimStringToWidth(renderText, adjustedX.toInt())
+
+        return trimmed.length.coerceAtMost(renderText.length)
     }
 
     private var lastClickTime: Long = 0
@@ -102,6 +114,7 @@ class MiscElementText(
         focus = true
         lastClickTime = currentTime
 
+        updateScrollOffset()
         return true
     }
 
@@ -140,28 +153,36 @@ class MiscElementText(
             if ((options and NUM_ONLY) != 0 && text.any { it !in "0-9." }) text = old
         }
 
+        updateScrollOffset()
         return true
     }
 
-    override fun render(mouseX: Int, mouseY: Int) { // todo fucking "scroll"
+    override fun render(mouseX: Int, mouseY: Int) {
         val renderText = prependText + textField.text
+
+        val maxScrollOffset = (getStringWidth(renderText) - (this.width - 10)).coerceAtLeast(0.0)
+        scrollOffset = scrollOffset.coerceIn(0.0, maxScrollOffset)
 
         GlStateManager.pushMatrix()
         GlStateManager.color(1.0f, 1.0f, 1.0f)
 
         drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, bgColour, if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor))
 
-//        val textX = if (getStringWidth(renderText) > this.width - 10) {
-//            x + this.width - getStringWidth(renderText) - 5
-//        } else {
-//            x + 5
-//        }
+        val visibleTextStartIndex = mc.fontRendererObj.trimStringToWidth(renderText, scrollOffset.toInt()).length
+        val visibleText = mc.fontRendererObj.trimStringToWidth(
+            renderText.substring(visibleTextStartIndex),
+            (this.width - 10).toInt() + getStringWidth(" ")
+        )
 
-        FontUtil.drawString(renderText, x + 5, y + (this.height - 8) / 2)
+        FontUtil.drawString(visibleText, x + 5, y + (this.height - 8) / 2)
 
         if (focus && System.currentTimeMillis() % 1000 > 500) {
             val cursorText = renderText.substring(0, textField.cursorPosition + prependText.length)
-            renderRect(x + 5 + getStringWidth(cursorText) - 0.5, y + (this.height - 8) / 2 - 1, 1.0, 10.0, Color.WHITE)
+
+            val cursorWidth = (getStringWidth(cursorText) - scrollOffset).coerceIn(0.0, this.width - 10)
+            val cursorX = x + 5 + cursorWidth
+
+            renderRect(cursorX, y + (this.height - 8) / 2 - 1, 1.0, 10.0, Color.WHITE)
         }
 
         if (textField.selectedText.isNotEmpty()) {
@@ -175,7 +196,11 @@ class MiscElementText(
             textNoColor.forEachIndexed { i, c ->
                 val len = getStringWidth(c.toString())
                 if (i in left!! until right!!) {
-                    renderRect(x + 5 + texX, y + (this.height - 8) / 2 - 1, len.toDouble(), 10.0, Color.WHITE.withAlpha(150))
+                    val currentTexX = texX - scrollOffset
+
+                    if (currentTexX + len > 0 && currentTexX < this.width - 10) {
+                        renderRect(x + 5 + currentTexX, y + (this.height - 8) / 2 - 1, len.toDouble(), 10.0, Color.WHITE.withAlpha(150))
+                    }
                 }
                 texX += len
             }
