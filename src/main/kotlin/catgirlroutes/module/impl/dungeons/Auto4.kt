@@ -131,6 +131,7 @@ object Auto4: Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
+        if (!inDungeons) return
         if (platePressed()) {
             drawSquare(63.5, 127.01, 35.5, 3.0, 3.0, Color.GREEN, phase = false)
             if (currentBlock != null && !doneBlocks.contains(currentBlock!!.toVec3())) doneBlocks.add(currentBlock!!.toVec3())
@@ -159,7 +160,7 @@ object Auto4: Module(
 
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
-        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !onDev() || mc.ingameGUI == null) return
+        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !onDev() || mc.ingameGUI == null || !inDungeons) return
 
         var text = "${deviceTextOff.value} ${doneBlocks.size}/9"
         var color = 0xFA5F55
@@ -177,7 +178,7 @@ object Auto4: Module(
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             //Ava is such a good girl
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null) return
+        if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || !inDungeons) return
         if (!onDev() || !autoPlate.value) return
         if (mc.thePlayer.posX == 63.5 && mc.thePlayer.posZ == 35.5) return
         if (movementKeysDown()) {
@@ -188,7 +189,7 @@ object Auto4: Module(
     }
 
     private fun shootBlock() {
-        if (currentBlock == null || !onDev()) return
+        if (currentBlock == null || !onDev() || !inDungeons) return
         val coords = aimCoords(currentBlock!!)
         val rotation = getYawAndPitch(coords.xCoord, coords.yCoord, coords.zCoord)
         if (aimSnap.value) snapTo(rotation.first, rotation.second)
