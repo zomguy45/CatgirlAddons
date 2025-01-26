@@ -146,6 +146,7 @@ suspend fun downloadRepo(url: String = "https://github.com/NotEnoughUpdates/NotE
                             var entry: ZipEntry? = zip.nextEntry
                             while (entry != null) {
                                 if (entry.name.endsWith(".json")) {
+                                    println("NeuRepo: ${entry.name}")
                                     val jsonContent = zip.bufferedReader().readText()
                                     val value = JsonParser().parse(jsonContent).asJsonObject
                                     when {

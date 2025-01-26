@@ -51,7 +51,7 @@ object ModuleManager {
         GhostBlocks,
         InstaMid,
         LavaClip,
-        SecretChime,
+        Secrets,
         SecretAura,
         Test,
         StormClip,

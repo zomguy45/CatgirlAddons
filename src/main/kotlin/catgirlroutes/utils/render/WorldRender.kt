@@ -93,8 +93,8 @@ object WorldRenderUtils {
      *
      * @param relocate Translates the coordinates to account for the camera position. See [WorldRenderUtils] for more information.
      */
-    fun drawBoxAtBlock (blockPos: BlockPos, color: Color, thickness: Float = 3f, relocate: Boolean = true) {
-        drawBoxAtBlock(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), color, thickness, relocate)
+    fun drawBoxAtBlock (blockPos: BlockPos, color: Color, thickness: Float = 3f, relocate: Boolean = true, filled: Boolean = false) {
+        drawBoxAtBlock(blockPos.x.toDouble(), blockPos.y.toDouble(), blockPos.z.toDouble(), color, thickness, relocate, filled)
     }
 
     /**
@@ -104,8 +104,8 @@ object WorldRenderUtils {
      *
      * @param relocate Translates the coordinates to account for the camera position. See [WorldRenderUtils] for more information.
      */
-    fun drawBoxAtBlock (x: Double, y: Double, z: Double, color: Color, thickness: Float = 3f, relocate: Boolean = true) {
-        drawCustomSizedBoxAt(x, y, z, 1.0, 1.0, 1.0, color, thickness, true, relocate)
+    fun drawBoxAtBlock (x: Double, y: Double, z: Double, color: Color, thickness: Float = 3f, relocate: Boolean = true, filled: Boolean = false) {
+        drawCustomSizedBoxAt(x, y, z, 1.0, 1.0, 1.0, color, thickness, true, relocate, filled)
     }
 
     /**
@@ -167,8 +167,6 @@ object WorldRenderUtils {
     }
 
     private fun drawOutlinedAABB(aabb: AxisAlignedBB, color: Color) {
-        val tessellator = Tessellator.getInstance()
-        val worldRenderer = tessellator.worldRenderer
         glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.begin(GL_LINE_STRIP, DefaultVertexFormats.POSITION)
@@ -196,8 +194,6 @@ object WorldRenderUtils {
     }
 
     private fun drawFilledAABB(aabb: AxisAlignedBB, color: Color) {
-        val tessellator = Tessellator.getInstance()
-        val worldRenderer = tessellator.worldRenderer
         glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)
@@ -399,6 +395,42 @@ object WorldRenderUtils {
         pos(x, y, z).normal(nx, ny, nz).endVertex()
     }
 
+    fun drawBlock(blockPos: BlockPos, colour: Color, thickness: Float = 3f, phase: Boolean = true, filled: Boolean = false) { // alpha no workie for some reason
+        val viewerPosX = renderManager.viewerPosX
+        val viewerPosY = renderManager.viewerPosY
+        val viewerPosZ = renderManager.viewerPosZ
+
+        val block = mc.theWorld.getBlockState(blockPos)
+        val blockAABB = block.block.getSelectedBoundingBox(mc.theWorld, blockPos)
+
+        val aabb = AxisAlignedBB(
+            blockAABB.minX - viewerPosX,
+            blockAABB.minY - viewerPosY,
+            blockAABB.minZ - viewerPosZ,
+            blockAABB.maxX - viewerPosX,
+            blockAABB.maxY - viewerPosY,
+            blockAABB.maxZ - viewerPosZ
+        )
+        GlStateManager.pushMatrix()
+
+        GlStateManager.disableBlend()
+        GlStateManager.disableTexture2D()
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        if (phase) GlStateManager.disableDepth()
+        if (filled) {
+            drawFilledAABB(aabb, colour)
+        } else {
+            glLineWidth(thickness)
+            drawOutlinedAABB(aabb, colour)
+        }
+        if (phase) GlStateManager.enableDepth()
+
+        GlStateManager.enableBlend()
+        GlStateManager.enableTexture2D()
+        GlStateManager.popMatrix()
+    }
+
     fun drawCustomSizedBoxAt(x: Double, y: Double, z: Double, xWidth: Double, yHeight: Double, zWidth: Double, color: Color, thickness: Float = 3f, phase: Boolean = true, relocate: Boolean = true, filled: Boolean = false) {
         GlStateManager.disableLighting()
         GlStateManager.enableBlend()
@@ -413,7 +445,7 @@ object WorldRenderUtils {
 
         ////worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
         GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
-            color.blue.toFloat() / 255f, 1f)
+            color.blue.toFloat() / 255f, color.alpha.toFloat() / 255f)
 
         if (filled) {
             worldRenderer.begin(7, DefaultVertexFormats.POSITION_NORMAL)

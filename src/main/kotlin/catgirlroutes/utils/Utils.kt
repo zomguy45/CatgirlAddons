@@ -7,7 +7,6 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
-import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
@@ -82,6 +81,9 @@ object Utils {
 
     val ItemStack?.unformattedName: String
         get() = this?.displayName?.noControlCodes ?: ""
+
+    val ItemStack?.extraAttributes: NBTTagCompound?
+        get() = this?.getSubCompound("ExtraAttributes", false)
 
     val ItemStack?.skyblockID: String
         get() = this?.extraAttributes?.getString("id") ?: ""

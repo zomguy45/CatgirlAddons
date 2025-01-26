@@ -17,6 +17,7 @@
     "MixinItemRenderer",
     "MixinMinecraft",
     "MixinNetworkManager",
+    "MixinRender",
     "accessors.AccessorGuiContainer",
     "accessors.AccessorGuiEditSign",
     "accessors.IEntityPlayerSPAccessor",
