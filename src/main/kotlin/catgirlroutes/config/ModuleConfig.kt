@@ -62,9 +62,10 @@ class ModuleConfig(path: File) {
                 )
             }
             configModules.forEach { configModule ->
+                println("CONFIG MODULE: ${configModule.name}")
                 ModuleManager.getModuleByName(configModule.name).run updateModule@{
-                    // If the module was not found check whether it can be a keybind
-                    val module = this!!
+                    if (this == null) return@updateModule
+                    val module = this
                     println("MODULE: $module")
                     if (module.enabled != configModule.enabled) module.toggle()
 //                    module.keyCode = configModule.keyCode
