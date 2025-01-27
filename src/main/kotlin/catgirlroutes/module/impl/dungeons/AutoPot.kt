@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes
+import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -8,7 +9,6 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import me.odinmain.events.impl.PacketReceivedEvent
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
@@ -48,7 +48,7 @@ object AutoPot: Module(
     }
 
     @SubscribeEvent
-    fun onS2D(event: PacketReceivedEvent) {
+    fun onS2D(event: PacketReceiveEvent) {
         if (event.packet !is S2DPacketOpenWindow || !awaitPot) return
         if ((event.packet as S2DPacketOpenWindow).windowTitle?.unformattedText != "Potion Bag") return
         awaitPot = false

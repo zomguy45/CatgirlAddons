@@ -2,17 +2,12 @@ package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.BlockChangeEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.utils.BlockAura.BlockAuraAction
-import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
@@ -22,7 +17,6 @@ import net.minecraft.block.Block
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
-import net.minecraft.network.play.server.S23PacketBlockChange
 import net.minecraft.util.BlockPos
 import net.minecraft.util.MovingObjectPosition
 import net.minecraft.util.Vec3
@@ -31,9 +25,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent
-import org.lwjgl.Sys
-import org.lwjgl.input.Keyboard
 import java.awt.Color
 import kotlin.random.Random
 

@@ -19,6 +19,7 @@ import catgirlroutes.utils.PlayerUtils.isHolding
 import catgirlroutes.utils.Utils
 import catgirlroutes.utils.Utils.lore
 import catgirlroutes.utils.Utils.removeFormatting
+import catgirlroutes.utils.VecUtils.toVec3
 import catgirlroutes.utils.dungeon.DungeonClass
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
@@ -29,7 +30,6 @@ import catgirlroutes.utils.render.WorldRenderUtils.drawSquare
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
-import me.odinmain.utils.toVec3
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.server.S08PacketPlayerPosLook

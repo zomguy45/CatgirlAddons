@@ -58,6 +58,12 @@ object VecUtils {
         return BlockPos(this.xCoord + add, this.yCoord + add, this.zCoord + add)
     }
 
+    fun BlockPos.toVec3(): Vec3 =
+        Vec3(x.toDouble(), y.toDouble(), z.toDouble())
+
+    fun fastEyeHeight(): Float =
+        if (mc.thePlayer?.isSneaking == true) 1.54f else 1.62f
+
     fun BlockPos.addRotationCoords(rotation: Rotations, x: Int, z: Int): BlockPos =
         when (rotation) {
             Rotations.NORTH -> BlockPos(this.x + x, this.y, this.z + z)

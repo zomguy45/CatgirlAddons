@@ -12,12 +12,12 @@ import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.EntityAura
 import catgirlroutes.utils.EntityAura.entityArray
 import catgirlroutes.utils.PlayerUtils.swapFromName
+import catgirlroutes.utils.VecUtils.toVec3
+import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
+import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils
-import me.odinmain.utils.skyblock.dungeon.DungeonUtils.getRelativeCoords
-import me.odinmain.utils.toVec3
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntitySlime
 import net.minecraft.entity.passive.EntityHorse
