@@ -14,7 +14,6 @@ public class MixinFontRenderer {
     private String modifyRenderStringAtPos(String text) {
         String modifiedText = CatMode.replaceText(text);
         modifiedText = NickHider.replaceText(modifiedText);
-        modifiedText = NickHider.replaceTextEly(modifiedText);
         modifiedText = NickHider.replaceTextTeam(modifiedText);
         return modifiedText;
     }
@@ -23,7 +22,6 @@ public class MixinFontRenderer {
     private String modifyGetStringWidth(String text) {
         String modifiedText = CatMode.replaceText(text);
         modifiedText = NickHider.replaceText(modifiedText);
-        modifiedText = NickHider.replaceTextEly(modifiedText);
         modifiedText = NickHider.replaceTextTeam(modifiedText);
         return modifiedText;
     }
