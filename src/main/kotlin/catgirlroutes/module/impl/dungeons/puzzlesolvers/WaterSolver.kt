@@ -1,28 +1,22 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
-import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Utils.addVec
-import catgirlroutes.utils.VecUtils.fastEyeHeight
-import catgirlroutes.utils.VecUtils.renderVec
 import catgirlroutes.utils.VecUtils.toBlockPos
-import catgirlroutes.utils.VecUtils.toVec3
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.getBlockAt
-import catgirlroutes.utils.render.WorldRenderUtils.drawLine
-import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import me.odinmain.utils.equal
 import me.odinmain.utils.render.Renderer
+import me.odinmain.utils.toVec3
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
-import java.awt.Color
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -84,25 +78,23 @@ object WaterSolver {
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
             Renderer.drawTracer(firstSolution.leverPos.addVector(.5, .5, .5), color = me.odinmain.utils.render.Color.GREEN, depth = true)
-            drawLine(mc.thePlayer.renderVec.addVec(y = fastEyeHeight()), firstSolution.leverPos.addVector(.5, .5, .5), Color.GREEN, phase = true)
 
             if (solutionList.size > 1 && firstSolution.leverPos != solutionList[1].first.leverPos) {
-                drawLine(
-                    firstSolution.leverPos.addVector(.5, .5, .5),
-                    solutionList[1].first.leverPos.addVector(.5, .5, .5),
-                    Color.RED,  1.5f,  true
+                Renderer.draw3DLine(
+                    listOf(firstSolution.leverPos.addVector(.5, .5, .5), solutionList[1].first.leverPos.addVector(.5, .5, .5)),
+                    me.odinmain.utils.render.Color.RED, lineWidth = 1.5f, depth = true
                 )
             }
         }
 
         solutions.forEach { (lever, times) ->
             times.drop(lever.i).forEachIndexed { index, time ->
-                drawStringInWorld(when {
+                Renderer.drawStringInWorld(when {
                     openedWater == -1L && time == 0.0 -> "§a§lCLICK ME!"
                     openedWater == -1L -> "§e${time}s"
                     else ->
                         (openedWater + time * 1000L - System.currentTimeMillis()).takeIf { it > 0 }?.let { "§e${String.format(Locale.US, "%.2f", it / 1000)}s" } ?: "§a§lCLICK ME!"
-                }, lever.leverPos.addVector(0.5, (index + lever.i) * 0.5 + 1.5, 0.5), Color.WHITE, scale = 0.04f)
+                }, lever.leverPos.addVector(0.5, (index + lever.i) * 0.5 + 1.5, 0.5), me.odinmain.utils.render.Color.WHITE, scale = 0.04f)
             }
         }
     }
@@ -133,7 +125,7 @@ object WaterSolver {
 
     fun waterInteract(event: C08PacketPlayerBlockPlacement) {
         if (solutions.isEmpty()) return
-        LeverBlock.entries.find { it.leverPos == event.position.toVec3() }?.let {
+        LeverBlock.entries.find { it.leverPos.equal(event.position.toVec3()) }?.let {
             if (it == LeverBlock.WATER && openedWater == -1L) openedWater = System.currentTimeMillis()
             it.i++
         }
