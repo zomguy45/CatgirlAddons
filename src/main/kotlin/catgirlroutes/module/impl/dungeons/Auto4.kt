@@ -10,7 +10,6 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.clearBlocks
 import catgirlroutes.utils.MovementUtils.moveToBlock
 import catgirlroutes.utils.MovementUtils.movementKeysDown
@@ -227,14 +226,12 @@ object Auto4: Module(
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet is S23PacketBlockChange) {
             if (!devBlocks.contains(event.packet.blockPosition) || event.packet.blockState.block != Blocks.emerald_block) return
-            modMessage("S23")
             currentBlock = event.packet.blockPosition
             shootBlock()
             return
         } else if (event.packet is S22PacketMultiBlockChange) {
             event.packet.changedBlocks.forEach {block ->
                 if (!devBlocks.contains(block.pos) || block.blockState.block != Blocks.emerald_block) return@forEach
-                modMessage("S22")
                 currentBlock = block.pos
                 shootBlock()
                 return

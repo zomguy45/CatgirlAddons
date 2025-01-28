@@ -94,13 +94,12 @@ object ModuleManager {
         // Render
         ClickGui,
         CgaUser,
-        DungeonESP,
         BossESP,
         TerminalEsp,
         ModuleList,
         EditHud,
         Trail,
-        DungeonESPNew,
+        DungeonESP,
         ScreenImage,
 
         // temp

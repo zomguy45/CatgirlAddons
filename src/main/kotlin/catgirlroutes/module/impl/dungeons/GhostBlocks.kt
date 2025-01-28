@@ -14,8 +14,7 @@ import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.SwapState
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
-import net.minecraft.block.Block
-import net.minecraft.init.Blocks
+import catgirlroutes.utils.dungeon.DungeonUtils.isSecret
 import net.minecraft.util.BlockPos
 import org.lwjgl.input.Keyboard
 
@@ -64,15 +63,12 @@ object GhostBlocks : Module(  // todo: add delay, range, option to gkey skulls m
         Executor(gKeyDelay.value.toLong()) {
             if (!gKeyKeyBind.value.isDown() || !gKey.enabled || !this.enabled || mc.currentScreen != null) return@Executor
             val blockPos = mc.objectMouseOver.blockPos
-            val block = mc.theWorld.getBlockState(blockPos).block
 
-            if (ignoredBlockTypes.contains(block)) return@Executor
+            if (isSecret(mc.theWorld.getBlockState(blockPos), blockPos)) return@Executor
             if (swingHand.value) mc.thePlayer.swingItem()
             toAir(blockPos)
         }.register()
     }
-
-    private val ignoredBlockTypes: List<Block> = listOf(Blocks.skull, Blocks.chest, Blocks.lever) // todo: use DungeonUtils.isSecret maybeidk
 
     private fun toAir(blockPos: BlockPos?): Boolean {
         if (blockPos != null) {

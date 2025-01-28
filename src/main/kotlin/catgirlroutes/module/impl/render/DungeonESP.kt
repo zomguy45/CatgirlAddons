@@ -5,217 +5,145 @@ import catgirlroutes.events.impl.RenderEntityModelEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.*
+import catgirlroutes.utils.clock.Executor
+import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
-import catgirlroutes.utils.render.OutlineUtils
+import catgirlroutes.utils.render.OutlineUtils.outlineESP
 import catgirlroutes.utils.render.WorldRenderUtils.draw2DBoxByEntity
-import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
+import catgirlroutes.utils.render.WorldRenderUtils.drawEntityBox
+import me.odinmain.utils.isOtherPlayer
 import net.minecraft.client.entity.EntityOtherPlayerMP
 import net.minecraft.entity.Entity
 import net.minecraft.entity.boss.EntityWither
 import net.minecraft.entity.item.EntityArmorStand
-import net.minecraft.entity.monster.EntityEnderman
 import net.minecraft.entity.passive.EntityBat
-import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.util.StringUtils
 import net.minecraftforge.client.event.RenderWorldLastEvent
+import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
 object DungeonESP: Module(
     "Dungeon ESP",
-    category = Category.RENDER,
-    description = "Esp for anything in dungeons."
-){
-    private val boxWidth = NumberSetting("Box Width",0.9,0.1,2.0,0.05, "Width of the esp box in units of blocks.")
-    private val defaultLineWidth = NumberSetting("Default LW",1.0,0.1,10.0,0.1, "Default line width of the esp box.")
-    private val specialLineWidth = NumberSetting("Special Mob LW",2.0,0.1,10.0,0.1, "Line width of the esp box for special mobs like Fel and Withermancer.")
-    private val miniLineWidth = NumberSetting("Mini Boss LW",3.0,0.1,10.0,0.1, "Line width of the esp box for Mini Bosses.")
+    Category.RENDER
+) {
 
     private val espStyle = StringSelectorSetting("Esp style","3D", arrayListOf("3D", "2D", "Outline"), "Esp render style to be used.")
+    private val espFill = BooleanSetting("Esp fill", false).withDependency { espStyle.selected == "3D"}
+    private val lineWidth = NumberSetting("Line width", 4.0, 0.0, 8.0, 1.0)
 
-    private val showStarMobs = BooleanSetting("Star Mobs", false, "Render star mob ESP.")
-    private val showFelHead = BooleanSetting("Fel Head", false,"Render a box around Fel heads. This box can not be seen through walls.")
-    private val showBat = BooleanSetting("Bat ESP", false, "Render the bat ESP")
-    private val showKey = BooleanSetting("Key ESP", false, "Render key ESP")
+    private val colorDropdown = DropdownSetting("Colors")
+    private val colorStar = ColorSetting("Star Color", Color(255, 0, 0), true, "ESP color for star mobs.").withDependency { colorDropdown.value }
+    private val colorSA = ColorSetting("Shadow Color", Color(255, 0, 0), true, "ESP color for shadow assassins.").withDependency { colorDropdown.value }
+    private val colorBat = ColorSetting("Bat Color", Color(255, 0, 0), true, "ESP color for bats.").withDependency { colorDropdown.value }
 
-    private val colorStar = ColorSetting("Star Mob Color", Color(255, 0, 0), false, "ESP color for star mobs.").withDependency { showStarMobs.enabled }
-    private val colorMini = ColorSetting("Mini Boss Color", Color(255, 255, 0), false, "ESP color for all Mini Bosses except Shadow Assassins.").withDependency { showStarMobs.enabled }
-    private val colorShadowAssassin = ColorSetting("SA Color", Color(255, 0, 255), false, "ESP color for Shadow Assassins.").withDependency { showStarMobs.enabled }
-    private val colorFel = ColorSetting("Fel Color", Color(0, 255, 255), false, "ESP color for star Fel.").withDependency { showStarMobs.enabled }
-    private val colorWithermancer = ColorSetting("Withermancer Color", Color(255, 255, 0), false, "ESP color for star Withermancer.").withDependency { showStarMobs.enabled }
+    private val fillDropdown = DropdownSetting("Fill").withDependency { espFill.value }
+    private val colorStarFill = ColorSetting("Star Fill", Color(255, 0, 0), true, "ESP color for star mobs.").withDependency { espFill.value && fillDropdown.value }
+    private val colorSAFill = ColorSetting("Shadow Fill", Color(255, 0, 0), true, "ESP color for shadow assassins.").withDependency { espFill.value && fillDropdown.value }
+    private val colorBatFill = ColorSetting("Bat Fill", Color(255, 0, 0), true, "ESP color for bats.").withDependency { espFill.value && fillDropdown.value }
 
-    private val colorFelHead = ColorSetting("Fel Head Color", Color(0, 0, 255), false, "ESP color for Fel heads on the floor.").withDependency { showFelHead.enabled }
-    private val colorBat = ColorSetting("Bat Color", Color(0, 255, 0), false, "ESP color for bats.").withDependency { showBat.enabled }
-    private val colorKey = ColorSetting("Key Color", Color(0, 0, 0), false, "ESP color for wither and blood key.").withDependency { showKey.enabled }
+    private var currentEntities = mutableSetOf<ESPEntity>()
 
     init {
-        this.addSettings(
-            boxWidth,
-            defaultLineWidth,
-            specialLineWidth,
-            miniLineWidth,
+        Executor(500) {
+            if (!inDungeons || !this.enabled) return@Executor
+            getEntities()
+        }.register()
 
+        addSettings(
             espStyle,
+            espFill,
+            lineWidth,
 
-            showStarMobs,
-            showFelHead,
-            showBat,
-            showKey,
-
+            colorDropdown,
             colorStar,
-            colorMini,
-            colorShadowAssassin,
-            colorFel,
-            colorWithermancer,
-
-            colorFelHead,
+            colorSA,
             colorBat,
-            colorKey,
+
+            fillDropdown,
+            colorStarFill,
+            colorSAFill,
+            colorBatFill,
         )
+    }
+
+    data class ESPEntity (
+        val entity: Entity,
+        val color: Color,
+        val fillcolor: Color
+    )
+
+    @SubscribeEvent
+    fun onWorldUnload(event: WorldEvent.Unload) {
+        currentEntities = mutableSetOf()
     }
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (!this.enabled || !inDungeons || espStyle.selected == "Outline") return
-        mc.theWorld.loadedEntityList.stream()
-            .forEach { entity ->
-                val entityName = entity.customNameTag?.let { StringUtils.stripControlCodes(it) } ?: return@forEach
-                when (entity) {
-                    is EntityArmorStand -> handleArmorStand(entity, entityName, event.partialTicks)
-                    is EntityEnderman -> handleEnderman(entity, event.partialTicks)
-                    is EntityOtherPlayerMP -> handleOtherPlayer(entity, event.partialTicks)
-                    is EntityBat -> handleBat(entity, event.partialTicks)
-                }
+        if (!inDungeons || !this.enabled) return
+        val entitiesToRemove = mutableListOf<ESPEntity>()
+        currentEntities.forEach{espEntity ->
+            if (espEntity.entity.isDead) {
+                entitiesToRemove.add(espEntity)
+                return@forEach
             }
+            if (espStyle.selected == "Outline") return@forEach
+            when (espStyle.selected) {
+                "2D" -> draw2DBoxByEntity(espEntity.entity, espEntity.color, event.partialTicks, lineWidth.value.toFloat(), true)
+                "3D" -> drawEntityBox(espEntity.entity, espEntity.color, espEntity.fillcolor, true, espFill.value, event.partialTicks, lineWidth.value.toFloat())
+            }
+        }
+        currentEntities.removeAll(entitiesToRemove.toSet())
     }
 
     @SubscribeEvent
-    fun onRenderEntityModel (event: RenderEntityModelEvent) {
-        if (espStyle.selected == "Outline") {
-            if (!this.enabled || !inDungeons) return
-            val entityName = event.entity.customNameTag?.let { StringUtils.stripControlCodes(it) } ?: return
-            when (event.entity) {
-                is EntityArmorStand -> handleArmorStand(event.entity as EntityArmorStand, entityName, event = event)
-                is EntityEnderman -> handleEnderman(event.entity as EntityEnderman, event = event)
-                is EntityOtherPlayerMP -> handleOtherPlayer(event.entity as EntityOtherPlayerMP, event = event)
-                is EntityBat -> handleBat(event.entity as EntityBat, event = event)
+    fun onRenderModel(event: RenderEntityModelEvent) {
+        if (!inDungeons || !this.enabled || espStyle.selected != "Outline") return
+        currentEntities.forEach{espEntity ->
+            if (espEntity.entity.isDead) {
+                currentEntities.remove(espEntity)
+                return@forEach
+            }
+            if (event.entity != espEntity.entity) return@forEach
+            outlineESP(event, lineWidth.value.toFloat(), espEntity.color, true)
+        }
+    }
+
+    private fun getEntities() {
+        mc.theWorld.loadedEntityList.stream().forEach {entity ->
+            if (currentEntities.any { it.entity == entity }) return@forEach
+            when (entity) {
+                is EntityArmorStand -> handleStands(entity)
+                is EntityOtherPlayerMP -> handlePlayer(entity)
+                is EntityBat -> handleBat(entity)
             }
         }
     }
 
-    private fun handleArmorStand(entity: EntityArmorStand, entityName: String, partialTicks: Float = 0f, event: RenderEntityModelEvent? = null) {
-        if (showStarMobs.enabled) {
-            val correspondingMob = getCorrespondingStand(entity) ?: return
-            drawMobBox(entity, entityName, partialTicks)
-        } else if (showKey.enabled && (entityName == "Wither Key" || entityName == "Blood Key")) {
-            if (espStyle.selected == "2D") {
-                draw2DBoxByEntity(entity, colorKey.value, boxWidth.value, 1.0, partialTicks, miniLineWidth.value, true)
-            } else if (espStyle.selected == "3D") {
-                drawBoxByEntity(entity, colorKey.value, boxWidth.value, 1.0, partialTicks, miniLineWidth.value, true, 0.0, 1.0, 0.0)
-            } else {
-                OutlineUtils.outlineESP(event!!, miniLineWidth.value.toFloat(), colorKey.value, true)
-            }
+    private fun handleStands(entity: Entity) {
+        val entityName = entity.customNameTag?.let { StringUtils.stripControlCodes(it) } ?: return
+        if (entity.name.startsWith("§6✯ ") && entity.name.endsWith("§c❤")) {
+            val correspondingEntity = getMobEntity(entity) ?: return
+            currentEntities.add(ESPEntity(correspondingEntity, colorStar.value, colorStarFill.value))
         }
     }
 
-    private fun handleEnderman(entity: EntityEnderman, partialTicks: Float = 0f, event: RenderEntityModelEvent? = null) {
-        if (showFelHead.enabled) {
-            if (espStyle.selected == "2D") {
-                draw2DBoxByEntity(entity, colorFelHead.value, boxWidth.value, 1.0, partialTicks, specialLineWidth.value, false)
-            } else if (espStyle.selected == "3D") {
-                drawBoxByEntity(entity, colorFelHead.value, boxWidth.value, 1.0, partialTicks, specialLineWidth.value, false)
-            } else {
-                OutlineUtils.outlineESP(event!!, specialLineWidth.value.toFloat(), colorFelHead.value, true)
-            }
-        }
-    }
-
-    private fun handleOtherPlayer(entity: EntityOtherPlayerMP, partialTicks: Float = 0f, event: RenderEntityModelEvent? = null) {
+    private fun handlePlayer(entity: Entity) {
         if (entity.name.contains("Shadow Assassin")) {
-            if (espStyle.selected == "2D") {
-                draw2DBoxByEntity(entity, colorKey.value, boxWidth.value, 2.0, partialTicks, miniLineWidth.value, true)
-            } else if (espStyle.selected == "3D") {
-                drawBoxByEntity(entity, colorShadowAssassin.value, boxWidth.value, 2.0, partialTicks, miniLineWidth.value, true)
-            }
+            currentEntities.add(ESPEntity(entity, colorSA.value, colorSAFill.value))
         } else if (entity.name == "Diamond Guy" || entity.name == "Lost Adventurer") {
-            if (espStyle.selected == "2D") {
-                draw2DBoxByEntity(entity, colorKey.value, boxWidth.value, 2.0, partialTicks, miniLineWidth.value, true)
-            } else if (espStyle.selected == "3D") {
-                drawBoxByEntity(entity, colorMini.value, boxWidth.value, 2.0, partialTicks, miniLineWidth.value, true)
-            } else {
-                OutlineUtils.outlineESP(event!!, miniLineWidth.value.toFloat(), colorMini.value, true)
-            }
+            currentEntities.add(ESPEntity(entity, colorStar.value, colorStarFill.value))
         }
     }
 
-    private fun handleBat(entity: EntityBat, partialTicks: Float = 0f, event: RenderEntityModelEvent? = null) {
-        if (showBat.enabled && !entity.isInvisible) {
-            if (espStyle.selected == "2D") {
-                //modMessage("2D")
-                draw2DBoxByEntity(entity, colorKey.value, entity.width.toDouble(), entity.height.toDouble(), partialTicks, defaultLineWidth.value, true)
-            } else if (espStyle.selected == "3D") {
-                drawBoxByEntity(entity, colorBat.value, entity.width, entity.height, partialTicks, defaultLineWidth.value.toFloat(), true)
-            } else {
-                OutlineUtils.outlineESP(event!!, defaultLineWidth.value.toFloat(), colorBat.value, true)
-            }
-        }
+    private fun handleBat(entity: Entity) {
+        currentEntities.add(ESPEntity(entity, colorBat.value, colorBatFill.value))
     }
 
-    private fun isExcludedMob(entityName: String): Boolean {
-        return entityName.contains("Angry Archeologist") ||
-                entityName.contains("Frozen Adventurer") ||
-                entityName.contains("Lost Adventurer")
-    }
-
-    private fun drawMobBox(mob: Entity, entityName: String, partialTicks: Float = 0f, event: RenderEntityModelEvent? = null) {
-        val color = when {
-            entityName.contains("Fel") -> colorFel.value
-            entityName.contains("Withermancer") -> colorWithermancer.value
-            else -> colorStar.value
-        }
-        val lineWidth = when {
-            entityName.contains("Fel") || entityName.contains("Withermancer") -> specialLineWidth.value
-            else -> defaultLineWidth.value
-        }
-        val size = when {
-            entityName.contains("Fel") -> 3.0
-            entityName.contains("Withermancer") -> 2.4
-            else -> 2.0
-        }
-        if (espStyle.selected == "2D") {
-            draw2DBoxByEntity(mob, color, boxWidth.value, size, partialTicks, lineWidth, true)
-        } else if (espStyle.selected == "3D") {
-            drawBoxByEntity(mob, color, boxWidth.value, size, partialTicks, lineWidth, true)
-        } else {
-            OutlineUtils.outlineESP(event!!, boxWidth.value.toFloat(), color, true)
-        }
-    }
-
-    private fun getCorrespondingMob(entity: Entity): Entity? {
-        val possibleEntities = entity.entityWorld.getEntitiesInAABBexcluding(
-            entity, entity.entityBoundingBox.offset(0.0, -1.0, 0.0)
-        ) { it !is EntityArmorStand }
-
-        return possibleEntities.find {
-            when (it) {
-                is EntityPlayer -> !it.isInvisible() && it.getUniqueID()
-                    .version() == 2 && it != mc.thePlayer
-                is EntityWither -> false
-                else -> true
-            }
-        }
-    }
-
-    private fun getCorrespondingStand(entity: Entity): EntityArmorStand? {
-        val nearbyEntities = entity.entityWorld.getEntitiesInAABBexcluding(
-            entity, entity.entityBoundingBox.offset(0.0, 1.0, 0.0)
-        ) { it is EntityArmorStand }
-        return nearbyEntities.find {
-            it is EntityArmorStand && it.customNameTag.contains("✯", ignoreCase = true)
-        } as? EntityArmorStand
+    private fun getMobEntity(entity: Entity): Entity? {
+        return mc.theWorld?.getEntitiesWithinAABBExcludingEntity(entity, entity.entityBoundingBox.offset(0.0, -1.0, 0.0))
+            ?.filter { it !is EntityArmorStand && mc.thePlayer != it && !(it is EntityWither && it.isInvisible) && !(it is EntityOtherPlayerMP && it.isOtherPlayer()) }
+            ?.minByOrNull { entity.getDistanceToEntity(it) }
     }
 }
