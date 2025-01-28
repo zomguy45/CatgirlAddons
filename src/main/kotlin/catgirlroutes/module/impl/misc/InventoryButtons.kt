@@ -113,10 +113,10 @@ object InventoryButtons : Module(
         debugMessage(shouldScanEq)
     }
 
-    @SubscribeEvent
-    fun onS2EPacketCloseWindow(event: PacketReceiveEvent) {
-        if (this.equipmentOverlay.enabled && event.packet is S2EPacketCloseWindow) shouldScanEq = false
-    }
+//    @SubscribeEvent
+//    fun onS2EPacketCloseWindow(event: PacketReceiveEvent) {
+//        if (this.equipmentOverlay.enabled && event.packet is S2EPacketCloseWindow) shouldScanEq = false
+//    }
 
     @SubscribeEvent
     fun S2FPacketSetSlot(event: PacketReceiveEvent) {
@@ -139,6 +139,7 @@ object InventoryButtons : Module(
             }
 
             InventoryButtonsConfig.save()
+            this.shouldScanEq = false
         }
     }
 
