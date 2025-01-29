@@ -62,7 +62,7 @@ object AutoWardrobe : Module(
         val title = event.packet.windowTitle.unformattedText
         cwid = event.packet.windowId
 
-        if (!title.contains("Wardrobe")) return
+        if (!title.contains("Wardrobe") || !active) return
         event.isCanceled = true
     }
 
