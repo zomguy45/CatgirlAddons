@@ -103,7 +103,7 @@ object ModuleManager {
         ScreenImage,
 
         // temp
-        SearchOverlay
+        Inventory
     )
 
     /**

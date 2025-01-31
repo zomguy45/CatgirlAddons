@@ -1,8 +1,8 @@
 package catgirlroutes.ui.misc.searchoverlay
 
 import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
-import catgirlroutes.module.impl.misc.SearchOverlay.ahHistory
-import catgirlroutes.module.impl.misc.SearchOverlay.bzHistory
+import catgirlroutes.module.impl.misc.Inventory.ahHistory
+import catgirlroutes.module.impl.misc.Inventory.bzHistory
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.elements.impl.MiscElementBoolean
