@@ -8,13 +8,12 @@ import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraftforge.client.event.RenderGameOverlayEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
 //TODO: Maybe box idk. I would personally not. Maybe add a switch to modules for showing in list.
@@ -25,43 +24,56 @@ object ModuleList : Module(
     category = Category.RENDER,
     description = "ArrayList"
 ) {
-    val colorText = ColorSetting("String color", Color.PINK, true)
+    val textColour = ColorSetting("Text colour", Color.PINK)
 
     init {
-        this.addSettings(colorText)
+        this.addSettings(textColour)
     }
-    var activeModuleList = mutableListOf<String>()
+
+    val activeModuleList: List<String>
+        get() = modules.mapNotNull {
+            if (it.enabled && it.settings.any { setting -> setting is BooleanSetting && setting.value && setting.name == "Show in List" }) it.name else null
+        }
 
     @RegisterHudElement
-    object ArrayHud : HudElement(
-        this,
-        6,
-        12
-    ) {
+    object ArrayHud : HudElement(this, 0, 0) {
         override fun renderHud() {
-            activeModuleList.clear()
-            for (module in modules) {
-                module.settings.filterIsInstance<BooleanSetting>()
-                    .filter { it.value && it.name == "Show in List" && module.enabled }
-                    .forEach { activeModuleList.add(module.name) }
-            }
-            activeModuleList.sortByDescending { mc.fontRendererObj.getStringWidth(it) }
-            val isLeft = this.x < ScaledResolution(mc).scaledWidth / 2
-            val isTop = this.y < ScaledResolution(mc).scaledHeight / 2
-            if (activeModuleList.isEmpty()) return
-            var y = 0.0
-            for (active in activeModuleList) {
-                val startLine = if (isLeft) 5.0 else 3.0
-                val startBox = if (isLeft) 5.0 else -mc.fontRendererObj.getStringWidth(active) - 1.0
-                val startText = if (isLeft) 9.0 else -mc.fontRendererObj.getStringWidth(active) + 1.0
+            val modules = activeModuleList
+            if (modules.isEmpty()) return
+
+            val sr = ScaledResolution(mc)
+            val isLeft = x < sr.scaledWidth / 2
+            val isTop = y < sr.scaledHeight / 2
+
+            val maxWidth = modules.maxOf { FontUtil.getStringWidth(it) }.toDouble()
+            val sortedModules = modules.sortedBy { if (isTop) -FontUtil.getStringWidth(it) else FontUtil.getStringWidth(it) }
+
+            var yOffset = 0.0
+            for (module in sortedModules) {
+                val width = FontUtil.getStringWidth(module)
+                val xOffset = if (isLeft) 0.0 else maxWidth - width
+
+                // some schizophrenic shit tbh
+                val bgX = xOffset + if (isLeft) 0.0 else -1.0
+                val textX = xOffset + if (isLeft) 3.0 else 0.0
+                val stickX = if (isLeft) -2.0 else maxWidth + 2.0
+
                 GlStateManager.pushMatrix()
-                GlStateManager.translate(0f,0f,-10f)
-                HUDRenderUtils.renderRect(startBox, y - 2.0, mc.fontRendererObj.getStringWidth(active) + 4.0, 11.0, Color(0, 0, 0, 128))
+
+                HUDRenderUtils.renderRect(bgX, yOffset - 2.0, width + 4.0, 11.0, Color(0, 0, 0, 128)) // bg
+                FontUtil.drawStringWithShadow(module, textX, yOffset, textColour.value.rgb) // module name
+                HUDRenderUtils.renderRect(stickX, yOffset - 2.0, 2.0, 11.0, textColour.value) // stick
+
                 GlStateManager.popMatrix()
-                HUDRenderUtils.renderRect(startLine, y - 2.0, 2.0, 11.0, colorText.value)
-                mc.fontRendererObj.drawStringWithShadow(active, (startText).toFloat(), y.toFloat(), colorText.value.rgb)
-            y += if (isTop) 11.0 else -11.0
+
+                yOffset += 11.0
             }
+        }
+
+        override fun setDimensions() {
+            val modules = activeModuleList
+            this.width =  (modules.maxOfOrNull { FontUtil.getStringWidth(it) } ?: 0) + 3
+            this.height = modules.size * 11
         }
     }
 }
