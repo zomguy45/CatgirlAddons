@@ -59,7 +59,13 @@ object InvincibilityTimer : Module(
         this,
         0, 0,
         mc.fontRendererObj.getStringWidth("Phoenix: 30.2") + 6,
-        (mc.fontRendererObj.FONT_HEIGHT + 2) * 3
+        (mc.fontRendererObj.FONT_HEIGHT + 2) * 3,
+        preview = {
+            mc.fontRendererObj.drawStringWithShadow("Bonzo: §a✔", 6.0F, 0.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow("Spirit: §a✔", 6.0F, 10.0f, Color.PINK.rgb)
+            mc.fontRendererObj.drawStringWithShadow("Phoenix: §c30.2", 6.0F, 20.0f, Color.PINK.rgb)
+            renderRect(0.0, 2.0, 3.0, 3.0, Color.PINK)
+        }
     ) {
         override fun renderHud() {
             if ((dungeonOnly.enabled && !inDungeons) || (bossOnly.enabled && !inBoss)) return
