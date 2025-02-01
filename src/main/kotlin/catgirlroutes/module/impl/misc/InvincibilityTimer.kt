@@ -5,7 +5,6 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss

@@ -113,7 +113,7 @@ object Inventory : Module(
 
     // dummy HudElement to move search bar position
     @RegisterHudElement
-    object SearchBar : HudElement(barX, barY, 250, 25, barScale) { override fun renderHud() {  } }
+    object SearchBar : HudElement(this, barX, barY, 250, 25, barScale) { override fun renderHud() {  } }
 
     @SubscribeEvent
     fun onS2DPacketOpenWindow(event: PacketReceiveEvent) {

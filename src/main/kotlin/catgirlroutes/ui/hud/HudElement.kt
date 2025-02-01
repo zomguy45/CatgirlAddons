@@ -4,6 +4,8 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.module.impl.misc.Test.TestHud
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -18,12 +20,18 @@ import kotlin.math.floor
  */
 abstract class HudElement{
 
+    private var parentModule: Module
+    val enabled: Boolean
+        get() = parentModule.enabled
+
     private val xSett: NumberSetting
     private val ySett: NumberSetting
     val scale: NumberSetting
 
     var width: Int
     var height: Int
+
+    private var preview: () -> Unit
 
     private val zoomIncrement = 0.05
 
@@ -47,13 +55,23 @@ abstract class HudElement{
      * This constructor takes care of creating the [NumberSetting]s required to save the position and scale of the hud
      * element to the config.
      */
-    constructor(module: Module, xDefault: Int = 0, yDefault: Int = 0, width: Int = 10, height: Int = 10, defaultScale: Double = 1.0) {
+    constructor(
+        module: Module,
+        xDefault: Int = 0,
+        yDefault: Int = 0,
+        width: Int = 10,
+        height: Int = 10,
+        defaultScale: Double = 1.0,
+        preview: () -> Unit = { FontUtil.drawStringWithShadow(module.name, 0.0, 0.0) }
+    ) {
         val id = module.settings.count { it.name.startsWith("xHud") }
         val xHud = NumberSetting("xHud_$id", default = xDefault.toDouble(), visibility = Visibility.HIDDEN)
         val yHud = NumberSetting("yHud_$id", default = yDefault.toDouble(), visibility = Visibility.HIDDEN)
-        val scaleHud = NumberSetting("scaleHud_$id",defaultScale,0.1,4.0, 0.01, visibility = Visibility.HIDDEN)
+        val scaleHud = NumberSetting("scaleHud_$id", defaultScale, 0.1, 4.0, 0.01, visibility = Visibility.HIDDEN)
 
         module.addSettings(xHud, yHud, scaleHud)
+
+        this.parentModule = module
 
         this.xSett = xHud
         this.ySett = yHud
@@ -61,18 +79,32 @@ abstract class HudElement{
 
         this.width = width
         this.height = height
+
+        this.preview = preview
     }
 
     /**
      * It is advised to use the other constructor unless this one is required.
      */
-    constructor(xHud: NumberSetting, yHud: NumberSetting, width: Int = 10, height: Int = 10, scale: NumberSetting) {
+    constructor(
+        module: Module,
+        xHud: NumberSetting,
+        yHud: NumberSetting,
+        width: Int = 10,
+        height: Int = 10,
+        scale: NumberSetting,
+        preview: () -> Unit = { FontUtil.drawStringWithShadow(module.name, 0.0, 0.0) }
+    ) {
+        this.parentModule = module
+
         this.xSett = xHud
         this.ySett = yHud
         this.scale = scale
 
         this.width = width
         this.height = height
+
+        this.preview = preview
     }
 
     /**
@@ -118,10 +150,18 @@ abstract class HudElement{
     abstract fun renderHud()
 
     /**
+     * Use this method to dynamically update [HudElement] dimensions
+     * (I couldn't come up with anything else without putting a lot of effort)
+     * @see [TestHud]
+     */
+    open fun setDimensions() = Unit
+
+    /**
      * Used for moving the hud element.
-     * Draws a rectangle in place of the actual element // todo: make it so it doesn't render elements from disabled modules (and so you can't interact with them)
+     * Draws a rectangle in place of the actual element
      */
     fun renderPreview(isDragging: Boolean) {
+        if (!this.enabled) return
         GlStateManager.pushMatrix()
         GlStateManager.translate(x.toFloat(), y.toFloat(), 0f)
         val scaleValue = scale.value
@@ -135,13 +175,18 @@ abstract class HudElement{
 
             val w = mc.fontRendererObj.getStringWidth(text) + 4
 
-            val x2 = 4 + if (sr.scaledWidth * scaleValue < (x + (width + w) * scaleValue) * scaleValue) -w else width
-            val y2 = -1 + if (y - 12 * scaleValue < 5 * scaleValue) height else -12
-            // todo: fix it going big/smol (pushing new matrix no work :sob:)
-            HUDRenderUtils.renderRect((x2 - 2).toDouble(), (y2 - 2).toDouble(), w.toDouble(), 12.0, Color(21, 21, 21, 200))
-            mc.fontRendererObj.drawStringWithShadow(text, x2.toFloat(), y2.toFloat(), Color.WHITE.rgb)
+            val x2 = 4.0 + if (sr.scaledWidth * scaleValue < (x + (width + w) * scaleValue) * scaleValue) -w else width
+            val y2 = -1.0 + if (y - 12 * scaleValue < 5 * scaleValue) height else -12
+
+            val adjX = x2 * scaleValue // still schizo but Idgaf
+            GlStateManager.pushMatrix()
+            GlStateManager.scale(1.0 / scaleValue, 1.0 / scaleValue, 1.0)
+            HUDRenderUtils.renderRect(adjX - 2, y2 - 2, w.toDouble(), 12.0, Color(21, 21, 21, 200))
+            FontUtil.drawStringWithShadow(text, adjX, y2, Color.WHITE.rgb)
+            GlStateManager.popMatrix()
         } else {
             HUDRenderUtils.renderRect(-2.0, -2.0, width.toDouble() + 3, height.toDouble(), Color(21, 21, 21, 200)) // bg
+            this.preview()
         }
 
         // border
@@ -153,8 +198,6 @@ abstract class HudElement{
             0.5,
             Color(208, 208, 208)
         )
-
-        // todo: preview render (text)
 
         GlStateManager.popMatrix()
     }

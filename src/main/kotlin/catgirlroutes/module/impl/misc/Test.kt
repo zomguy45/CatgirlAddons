@@ -9,14 +9,17 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.DropdownSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
 import catgirlroutes.utils.ChatUtils
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.dungeon.tiles.Room
 import catgirlroutes.utils.Notifications
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
+import kotlin.random.Random
 
 object Test : Module(
     "Test",
@@ -34,8 +37,26 @@ object Test : Module(
     private val colourTest = ColorSetting("Colour", Color.BLUE)
     private val colourTest2 = ColorSetting("Colour2", Color.BLUE, false)
 
+    private val slider = NumberSetting("Slider", 20.0, 0.0, 100.0, 5.0)
+    private val getHudWidth = ActionSetting("Get hud width") {
+        debugMessage(TestHud.width)
+    }
+
     init {
-        addSettings(notifDropDown, notif, notifWarning, notifErr, notifErr2, notifIcon, colourTest, colourTest2)
+        addSettings(
+            this.notifDropDown,
+            this.notif,
+            this.notifWarning,
+            this.notifErr,
+            this.notifErr2,
+            this.notifIcon,
+
+            this.colourTest,
+            this.colourTest2,
+
+            this.slider,
+            this.getHudWidth
+        )
     }
 
     @SubscribeEvent
@@ -53,11 +74,15 @@ object Test : Module(
     @RegisterHudElement
     object TestHud : HudElement(
         this,
-        width = mc.fontRendererObj.getStringWidth("Test"),
+        width = mc.fontRendererObj.getStringWidth("Test") + slider.value.toInt(),
         height = mc.fontRendererObj.FONT_HEIGHT + 2
     ) {
         override fun renderHud() {
             FontUtil.drawStringWithShadow("Test", 0.0, 0.0)
+        }
+
+        override fun setDimensions() {
+            this.width = mc.fontRendererObj.getStringWidth("Test") + slider.value.toInt()
         }
     }
 

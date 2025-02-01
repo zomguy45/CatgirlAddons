@@ -1,16 +1,12 @@
 package catgirlroutes.ui.hud
 
 import catgirlroutes.CatgirlRoutes
-import catgirlroutes.ui.clickgui.util.ColorUtil
-import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.utils.render.HUDRenderUtils
+import catgirlroutes.ui.misc.elements.impl.MiscElementButton
+import catgirlroutes.utils.ChatUtils.modMessage
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import org.lwjgl.input.Mouse
-import org.lwjgl.opengl.GL11
-import java.awt.Color
 import java.io.IOException
-
 
 /**
  * The GUI for editing the positions and scale of HUD elements.
@@ -19,16 +15,29 @@ import java.io.IOException
  */
 object EditHudGUI : GuiScreen() {
 
-    private val hudElements: ArrayList<HudElement> = arrayListOf(
-
-    )
+    private val hudElements: ArrayList<HudElement> = arrayListOf()
     private var draggingElement: HudElement? = null
     private var startOffsetX = 0
     private var startOffsetY = 0
 
+    private lateinit var resetButton: MiscElementButton
+
     fun addHUDElements(newElements: List<HudElement>) {
         val nonDuplicate = newElements.filter { !hudElements.contains(it) }
         hudElements.addAll(0, nonDuplicate)
+    }
+
+    override fun initGui() {
+        val sr = ScaledResolution(mc)
+        this.resetButton = MiscElementButton(
+            "Reset HUD",
+            sr.scaledWidth_double / 2.0 - 60.0 / 2.0,
+            sr.scaledHeight_double - 40.0,
+            60.0, 20.0
+        ) { modMessage("Resetting elements") }
+
+        hudElements.forEach { it.setDimensions() }
+        super.initGui()
     }
 
     /**
@@ -36,8 +45,8 @@ object EditHudGUI : GuiScreen() {
      */
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
 
-        // Render a reset Button
-        renderRestButton(mouseX, mouseY, partialTicks)
+        // Render a reset Button if not dragging elements
+        if (this.draggingElement == null) resetButton.render(mouseX, mouseY)
 
         for (element in hudElements) {
             element.renderPreview(element == draggingElement)
@@ -46,37 +55,6 @@ object EditHudGUI : GuiScreen() {
         mouseDrag(mouseX, mouseY)
 
         super.drawScreen(mouseX, mouseY, partialTicks)
-    }
-
-    private fun renderRestButton(mouseX: Int, mouseY: Int, @Suppress("UNUSED_PARAMETER") partialTicks: Float) { // todo: stop rendering when dragging element
-        val resetText = "Rest HUD"
-        val scaledResolution = ScaledResolution(mc)
-
-        GL11.glPushMatrix()
-        GL11.glTranslated(
-            scaledResolution.scaledWidth.toDouble() / 2.0,
-            scaledResolution.scaledHeight.toDouble(),
-            0.0
-        )
-        // Note: if you change these values they also have to be changed in isCursorOnReset
-        val textWidth = FontUtil.getStringWidth(resetText)
-        val textHeight = FontUtil.fontHeight.toDouble()
-        val textX = -textWidth/2.0
-        val textY = -textHeight -25
-        val boxX = textX -20
-        val boxY = textY -5
-        val boxHeight = textHeight + 10
-        val boxWidth = textWidth + 40.0
-
-        val buttonColor = if (isCursorOnReset(mouseX, mouseY)) {
-            Color(-0x00000000, false)
-        }else {
-            Color(-0x44eaeaeb, true).darker()
-        }
-        HUDRenderUtils.renderRect(boxX, boxY, boxWidth, boxHeight, buttonColor)
-
-        FontUtil.drawString(resetText, textX, textY, ColorUtil.clickGUIColor.rgb)
-        GL11.glPopMatrix()
     }
 
     @Throws(IOException::class)
@@ -101,7 +79,7 @@ object EditHudGUI : GuiScreen() {
             /** Check all hud elements for scroll action. this is used to change the scale
              * Reversed order is used to guarantee that the panel rendered on top will be handled first. */
             for (element in hudElements.reversed()) {
-                if (isCursorOnElement(mouseX, mouseY, element)) {
+                if (isCursorOnElement(mouseX, mouseY, element) && element.enabled) {
                     element.scroll(i)
                     return
                 }
@@ -110,20 +88,20 @@ object EditHudGUI : GuiScreen() {
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        if (mouseButton == 0) {
-            if (isCursorOnReset(mouseX, mouseY)) {
-                for (element in hudElements.reversed()) {
-                    element.resetElement()
+        if (mouseButton != 0) return
+        if (resetButton.mouseClicked(mouseX, mouseY, mouseButton) && !isCursorOnElement(mouseX, mouseY)) {
+            for (element in hudElements.reversed()) {
+                if (element.enabled) element.resetElement()
+            }
+        } else {
+            for (element in hudElements.reversed()) {
+                if (isCursorOnElement(mouseX, mouseY, element) && element.enabled) {
+                    draggingElement = element
+                    startOffsetX = mouseX - element.x
+                    startOffsetY = mouseY - element.y
+                    break
                 }
-            }else
-                for (element in hudElements.reversed()) {
-                    if (isCursorOnElement(mouseX, mouseY, element)) {
-                        draggingElement = element
-                        startOffsetX = mouseX - element.x
-                        startOffsetY = mouseY - element.y
-                        break
-                    }
-                }
+            }
         }
         super.mouseClicked(mouseX, mouseY, mouseButton)
     }
@@ -154,18 +132,10 @@ object EditHudGUI : GuiScreen() {
                 && mouseY > (element.y - 2 * scale) && mouseY < (element.y + element.height * scale - 2 * scale) // to minus 2 bottom, plus 2 top
     }
 
-    private fun isCursorOnReset(mouseX: Int, mouseY: Int) : Boolean {
-        val resetText = "Rest HUD"
-        val scaledResolution = ScaledResolution(mc)
-        // Note: if you change these values they also have to be changed in isCursorOnReset
-        val textWidth = FontUtil.getStringWidth(resetText)
-        val textHeight = FontUtil.fontHeight.toDouble()
-        val textX = -textWidth/2.0 + scaledResolution.scaledWidth.toDouble() / 2.0
-        val textY = -textHeight -25 + scaledResolution.scaledHeight.toDouble()
-        val boxX = textX -20
-        val boxY = textY -5
-        val boxHeight = textHeight + 10
-        val boxWidth = textWidth + 40.0
-        return mouseX >= boxX && mouseX < (boxX + boxWidth) && mouseY >= boxY && mouseY < (boxY + boxHeight)
+    private fun isCursorOnElement(mouseX: Int, mouseY: Int): Boolean {
+        for (element in hudElements) {
+            return isCursorOnElement(mouseX, mouseY, element)
+        }
+        return false
     }
 }
