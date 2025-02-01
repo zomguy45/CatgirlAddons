@@ -68,7 +68,8 @@ class CatgirlRoutes {
             BlockAura,
             LeapUtils,
             CgaUsers,
-            NeuRepo
+            NeuRepo,
+            SkyblockPlayer
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

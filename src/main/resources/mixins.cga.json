@@ -14,6 +14,7 @@
   "client": [
     "MixinFontRenderer",
     "MixinGuiContainer",
+    "MixinGuiIngame",
     "MixinItemRenderer",
     "MixinMinecraft",
     "MixinNetworkManager",
