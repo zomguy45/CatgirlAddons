@@ -6,9 +6,7 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.debugMessage
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
-import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
@@ -18,15 +16,15 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import java.awt.Color
 import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.floor
 import kotlin.math.sin
 
 object DojoHelper: Module(
-    name = "Dojo Helper",
-    category = Category.MISC
+    name = "Dojo Helper (DO NOT USE)",
+    category = Category.MISC,
+    tag = Module.TagType.HARAM
 ) {
     var swiftnessBlocks = arrayListOf<Vec3>()
     var airTicks = 0
