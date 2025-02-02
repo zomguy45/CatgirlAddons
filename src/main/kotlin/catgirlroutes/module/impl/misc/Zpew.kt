@@ -8,7 +8,10 @@ import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.*
+import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
@@ -34,6 +37,8 @@ object Zpew : Module(
     name = "Zpew",
     category = Category.MISC
 ) {
+
+    private val zpewOffset: BooleanSetting = BooleanSetting("Offset", false, "Offsets your position onto the block instead of 0.05 blocks above it")
     private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
 
     private val soundOptions = arrayListOf(
@@ -50,7 +55,7 @@ object Zpew : Module(
     private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding.enabled }
 
     init {
-        addSettings(dingdingding, soundSelector, customSound, pitch)
+        addSettings(zpewOffset, dingdingding, soundSelector, customSound, pitch)
     }
 
     private const val FAILWATCHPERIOD: Int = 20
@@ -105,7 +110,7 @@ object Zpew : Module(
 //        val pos = BlockPos(etherBlock)
 
         val x: Double = pos.x.toDouble() + 0.5
-        val y: Double = pos.y.toDouble() + 1.05
+        var y: Double = pos.y.toDouble() + 1.05
         val z: Double = pos.z.toDouble() + 0.5
 
         var yaw = lastYaw
@@ -126,6 +131,7 @@ object Zpew : Module(
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
+            if (zpewOffset.value) y -= 0.05
             mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
             updatePosition = true
