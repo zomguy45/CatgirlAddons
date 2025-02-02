@@ -150,6 +150,8 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) :
             } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
                 hexString = ""
                 hexString += GuiScreen.getClipboardString()
+            } else if (GuiScreen.isKeyComboCtrlC(keyCode)) {
+                GuiScreen.setClipboardString(hexString)
             } else if (keyCode == Keyboard.KEY_BACK) {
                 hexString = hexString.dropLast(1)
             } else if (!ElementTextField.keyBlackList.contains(keyCode)) {

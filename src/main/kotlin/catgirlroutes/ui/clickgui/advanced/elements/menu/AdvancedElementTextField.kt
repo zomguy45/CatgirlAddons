@@ -362,6 +362,8 @@ class AdvancedElementTextField(
                 listening = false
             } else if (GuiScreen.isKeyComboCtrlV(keyCode)) {
                 setting.text += GuiScreen.getClipboardString()
+            } else if (GuiScreen.isKeyComboCtrlC(keyCode)) {
+                GuiScreen.setClipboardString(setting.text)
             } else if (keyCode == Keyboard.KEY_BACK) {
                 setting.text = setting.text.dropLast(1)
             }else if (!keyBlackList.contains(keyCode)) {
