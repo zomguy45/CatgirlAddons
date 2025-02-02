@@ -37,7 +37,7 @@ object CgaUser : Module(
 
     val updateUser = ActionSetting("Update User Data") {
         scope.launch {
-            var c = cape.value
+            var c = cape.value.takeIf { it.isNotEmpty() } ?: "XkdcuPO"
             // https://regex101.com/r/dZ971v/2
             c = Regex("(https://imgur\\.com/)?([a-zA-Z0-9]+)(?:\\.png)?").find(c)?.groups?.get(2)?.value ?: c // fuck regex it dosen't work
             val jsonString = """
@@ -52,7 +52,7 @@ object CgaUser : Module(
                     "cape": "$c"
                 }
                 """
-            modMessage(sendDataToServer(body = jsonString))
+            modMessage(sendDataToServer(jsonString))
             CgaUsers.updateUsers()
         }
     }

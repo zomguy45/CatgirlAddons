@@ -8,7 +8,6 @@ import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.render.HUDRenderUtils

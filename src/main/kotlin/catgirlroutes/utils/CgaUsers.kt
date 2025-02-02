@@ -88,7 +88,7 @@ object CgaUsers { // todo: add capes with gif
                 val imageUrl = "https://i.imgur.com/$capeId.png"
                 if (!downloadImageFromServer(imageUrl, capeFile)) {
                     println("Failed to download cape: $imageUrl")
-                    if (mc.theWorld != null) ChatUtils.modMessage("Failed to download cape: $imageUrl")
+//                    if (mc.theWorld != null) ChatUtils.modMessage("Failed to download cape: $imageUrl")
                     return@run ResourceLocation(RESOURCE_DOMAIN, "default_cape.png")
                 }
             }

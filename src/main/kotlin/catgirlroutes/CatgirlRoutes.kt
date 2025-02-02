@@ -83,8 +83,6 @@ class CatgirlRoutes {
         InventoryButtonsConfig.load()
         ModuleManager.initializeModules()
 
-        CgaUsers.updateUsers() // kinda suboptimal to do 2 requests on launch, but idrc rn
-
         clickGUI = ClickGUI()
     }
     @SubscribeEvent
