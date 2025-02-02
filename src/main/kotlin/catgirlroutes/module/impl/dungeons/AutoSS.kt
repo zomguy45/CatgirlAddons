@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.BlockChangeEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.dungeons.AutoSS.smoothRotate
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
@@ -13,6 +14,9 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
+import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
+import catgirlroutes.utils.rotation.RotationUtils.rotateSmoothly
+import catgirlroutes.utils.rotation.RotationUtils.targets
 import net.minecraft.block.Block
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.init.Blocks
@@ -41,10 +45,12 @@ object AutoSS : Module(
     private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
     private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
     private val triggerBot: BooleanSetting = BooleanSetting("Triggerbot", false)
+    private val smoothRotate: BooleanSetting = BooleanSetting("Rotate", false)
+    private val time: NumberSetting = NumberSetting("Rotation Speed", 200.0, 0.0, 500.0, 10.0)
 
 
     init {
-        this.addSettings(delay, forceDevice, resetSS, autoStart, triggerBot)
+        this.addSettings(delay, forceDevice, resetSS, autoStart, triggerBot, smoothRotate, time)
     }
 
     var next = false
@@ -85,6 +91,10 @@ object AutoSS : Module(
     fun start() {
         allButtons.clear()
         val startButton: BlockPos = BlockPos(110, 121, 91)
+        val (yaw, pitch) = getYawAndPitch(110.875, 121.5, 91.5)
+        if (smoothRotate.value && !triggerBot.value) {
+            rotateSmoothly(yaw, pitch, time.value.toInt())
+        }
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (!clicked) {
             debugMessage("Starting SS")
@@ -123,6 +133,7 @@ object AutoSS : Module(
 
     @SubscribeEvent
     fun triggerBot(event: RenderWorldLastEvent) {
+        if (!triggerBot.value) return
         if (mc.theWorld == null) return
 
         if(!doneFirst) {
@@ -210,6 +221,10 @@ object AutoSS : Module(
                 if (progress < clicks.size) {
                     val next: BlockPos = clicks[progress]
                     if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
+                        if (smoothRotate.value && !triggerBot.value) {
+                            val (yaw, pitch) = getYawAndPitch(next.x.toDouble() + 0.875, next.y.toDouble() + 0.5, next.z.toDouble() + 0.5)
+                            targets.add(Vec3(yaw.toDouble(), pitch.toDouble(), time.value))
+                        }
                         clickButton(next.x, next.y, next.z)
                         progress++
                         delayTick = delay.value.toInt() / 50

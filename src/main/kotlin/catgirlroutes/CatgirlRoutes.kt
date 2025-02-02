@@ -14,6 +14,8 @@ import catgirlroutes.utils.dungeon.LeapUtils
 import catgirlroutes.utils.dungeon.ScanUtils
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
+import catgirlroutes.utils.rotation.RotationUtils
+import catgirlroutes.utils.rotation.rotationDebug
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,8 +47,7 @@ class CatgirlRoutes {
         registerCommands(
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
-            autoP3Commands, autoRoutesCommands,
-            thisshit,
+            autoP3Commands, autoRoutesCommands, rotationDebug
         )
 
         listOf(
@@ -60,6 +61,7 @@ class CatgirlRoutes {
             FakeRotater,
             Rotater,
             MovementUtils,
+            RotationUtils,
             EventDispatcher,
             VecUtils,
             Notifications,

@@ -78,6 +78,7 @@ object ModuleManager {
         AutoDialogue,
         AutoClicker,
         DojoHelper,
+        AutoWardrobe,
         // SearchOverlay,
 
         // Player
