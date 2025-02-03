@@ -17,6 +17,7 @@ import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
+import catgirlroutes.utils.render.StencilUtils
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -162,15 +163,18 @@ class AhBzSearch(
                 }
                 searchResults.add(resultButton)
 
-                if (posY in visibleRange) {
-                    val itemStack = it.toStack()
-                    resultButton.render(mouseX, mouseY)
-                    FontUtil.drawString(it.name, x + 25.0, posY + 7.0)
-                    HUDRenderUtils.drawItemStackWithText(itemStack, x + 7.0, posY + 3.0)
-                    if (resultButton.isHovered(mouseX, mouseY)) {
-                        tooltips.add(Pair(itemStack.getTooltip(mc.thePlayer, false), Pair(mouseX, mouseY)))
-                    }
+                StencilUtils.write(false)
+                drawRoundedBorderedRect(x, y + 26.0, overlayWidth, overlayHeight - 27.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+                StencilUtils.erase(true)
+
+                val itemStack = it.toStack()
+                resultButton.render(mouseX, mouseY)
+                FontUtil.drawString(it.name, x + 25.0, posY + 7.0)
+                HUDRenderUtils.drawItemStackWithText(itemStack, x + 7.0, posY + 3.0)
+                if (resultButton.isHovered(mouseX, mouseY) && mouseY.toDouble() in visibleRange) {
+                    tooltips.add(Pair(itemStack.getTooltip(mc.thePlayer, false), Pair(mouseX, mouseY)))
                 }
+                StencilUtils.dispose()
                 offset += 25.0
             }
         } else {
