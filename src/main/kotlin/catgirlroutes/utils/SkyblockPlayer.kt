@@ -11,12 +11,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 object SkyblockPlayer { // todo account for absorption
     val health: Int
         get() = if (mc.thePlayer != null) (this.maxHealth * mc.thePlayer.health / mc.thePlayer.maxHealth).toInt() else 0
-    var maxHealth = 0
+    var maxHealth: Int = 0
 
-    var defence = 0
+    var defence: Int = 0
 
-    var mana = 0
-    var maxMana = 0
+    var mana: Int = 0
+    var maxMana: Int = 0
 
     var overflowMana: Int = 0
     var stacks: String = ""
@@ -26,6 +26,11 @@ object SkyblockPlayer { // todo account for absorption
     val speed: Int
         get() = if (mc.thePlayer != null) (mc.thePlayer.capabilities.walkSpeed * 1000).toInt() else 0
 
+    var manaUsage: String = ""
+
+    var currentSecrets: Int = -1
+    var maxSecrets: Int = -1
+
     val HP_REGEX = "([\\d,]+)/([\\d,]+)❤".toRegex()
     val DEF_REGEX = "([\\d|,]+)❈ Defense".toRegex()
     val MANA_REGEX = "([\\d,]+)/([\\d,]+)✎( Mana)?".toRegex()
@@ -33,6 +38,9 @@ object SkyblockPlayer { // todo account for absorption
     val OVERFLOW_REGEX = "([\\d,]+)ʬ".toRegex()
     val STACKS_REGEX = "[0-9]+([ᝐ⁑Ѫ])".toRegex()
     val SALVATION_REGEX = "T([1-3])!".toRegex()
+
+    val MANA_USAGE_REGEX = "-\\d+ Mana (.+)".toRegex()
+    val SECRETS_REGEX = "(\\d+)/(\\d+) Secrets".toRegex()
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: PacketReceiveEvent) {
@@ -75,6 +83,22 @@ object SkyblockPlayer { // todo account for absorption
         if (salvationMatch != null) {
             val groups = salvationMatch.groupValues
             this.salvation = groups[1].toInt()
+        }
+
+        val manaUsageMatch = MANA_USAGE_REGEX.find(message)
+        if (manaUsageMatch != null) {
+            val groups = manaUsageMatch.groupValues
+            this.manaUsage = groups[1]
+        }
+
+        val secretsMatch = SECRETS_REGEX.find(message)
+        if (secretsMatch != null) {
+            val groups = secretsMatch.groupValues
+            this.currentSecrets = groups[1].toInt()
+            this.maxSecrets = groups[2].toInt()
+        } else {
+            this.currentSecrets = -1
+            this.maxSecrets = -1
         }
 
     }
