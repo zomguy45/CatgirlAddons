@@ -27,6 +27,8 @@ class MiscElementButton(
     height: Double = 20.0,
     var thickness: Double = 2.0,
     var radius: Double = 5.0,
+    var outlineColour: Color = Color(ColorUtil.outlineColor),
+    var outlineHoverColour: Color = ColorUtil.clickGUIColor,
     var action: () -> Unit
 ) : MiscElement(x, y, width, height) {
 
@@ -34,7 +36,7 @@ class MiscElementButton(
         GlStateManager.pushMatrix()
         HUDRenderUtils.drawRoundedBorderedRect(
             this.x, this.y, this.width, this.height, this.radius, this.thickness,
-            Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
+            Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) outlineHoverColour else outlineColour
         )
         FontUtil.drawTotalCenteredString(name, x + width / 2.0, y + height / 2.0)
         GlStateManager.popMatrix()
