@@ -1,5 +1,6 @@
 package catgirlroutes.module.impl.misc
 
+import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.module.Category
@@ -11,6 +12,7 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.DropdownSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickguinew.ClickGUI
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
 import catgirlroutes.utils.ChatUtils
@@ -42,6 +44,10 @@ object Test : Module(
         debugMessage(TestHud.width)
     }
 
+    private val newclickGui = ActionSetting("New click gui") {
+        display = ClickGUI()
+    }
+
     init {
         addSettings(
             this.notifDropDown,
@@ -55,7 +61,9 @@ object Test : Module(
             this.colourTest2,
 
             this.slider,
-            this.getHudWidth
+            this.getHudWidth,
+
+            this.newclickGui
         )
     }
 

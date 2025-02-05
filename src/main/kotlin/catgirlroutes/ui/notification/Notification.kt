@@ -6,6 +6,7 @@ import catgirlroutes.ui.clickgui.util.ColorUtil
 //import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.utils.Notifications
 import catgirlroutes.utils.render.HUDRenderUtils
+import catgirlroutes.utils.wrapText
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
@@ -66,23 +67,5 @@ class Notification(
         GlStateManager.color(1.0f, 1.0f, 1.0f, 1.0f)
         GlStateManager.disableBlend()
         GlStateManager.popMatrix()
-    }
-
-    fun wrapText(text: String, maxWidth: Double): List<String> { // shit to split long description
-        val lines = mutableListOf<String>()
-        var currentLine = ""
-
-        text.split(" ").forEach { word ->
-            val testLine = if (currentLine.isEmpty()) word else "$currentLine $word"
-            if (mc.fontRendererObj.getStringWidth(testLine) <= maxWidth) {
-                currentLine = testLine
-            } else {
-                lines.add(currentLine)
-                currentLine = word
-            }
-        }
-
-        if (currentLine.isNotEmpty()) lines.add(currentLine)
-        return lines
     }
 }
