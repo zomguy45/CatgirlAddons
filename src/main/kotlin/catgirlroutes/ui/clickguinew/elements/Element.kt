@@ -11,10 +11,10 @@ abstract class Element<S: Setting<*>>(
 ) {
     val clickGui: ClickGUI = parent.window.clickGui
 
-    var x = 0.0
+    var x = 7.0
     var y = 0.0
 
-    val width = this.parent.width
+    val width = this.parent.width - 15.0
     var height: Double
 
     var displayName: String = this.setting.name
@@ -30,10 +30,11 @@ abstract class Element<S: Setting<*>>(
 
     init {
         this.height = when (this.type) {
-            ElementType.TEXT_FIELD -> 12.0
-            ElementType.KEY_BIND -> 11.0
-            ElementType.ACTION -> 11.0
-            else -> 20.0
+            ElementType.TEXT_FIELD -> 30.0
+//            ElementType.KEY_BIND -> 11.0
+//            ElementType.ACTION -> 11.0
+            ElementType.SLIDER -> 25.0
+            else -> 15.0
         }
     }
 
@@ -60,6 +61,8 @@ abstract class Element<S: Setting<*>>(
     open fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {}
 
     open fun keyTyped(typedChar: Char, keyCode: Int): Boolean { return false }
+
+    open fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {  }
 
     private fun isHovered(mouseX: Int, mouseY: Int): Boolean {
         return mouseX >= this.xAbsolute && mouseX <= this.xAbsolute + this.width && mouseY >= this.yAbsolute && mouseY <= this.yAbsolute + this.height

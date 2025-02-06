@@ -152,6 +152,7 @@ object HUDRenderUtils {
     // todo: change those numbers in GL11.glEnable(3553)..
     fun drawRoundedRect(x: Double, y: Double, width: Double, height: Double, radius: Double, colour: Color) {
         if (colour.alpha == 0) return
+        GlStateManager.pushMatrix()
         GlStateManager.enableBlend();
         GlStateManager.disableTexture2D();
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
@@ -193,9 +194,11 @@ object HUDRenderUtils {
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+        GlStateManager.popMatrix()
     }
 
     fun drawOutlinedRectBorder(x: Double, y: Double, width: Double, height: Double, radius: Double, thickness: Double, colour: Color) {
+        GlStateManager.pushMatrix()
         GlStateManager.enableBlend()
         GlStateManager.disableTexture2D()
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
@@ -231,6 +234,7 @@ object HUDRenderUtils {
         GL11.glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
         GlStateManager.enableTexture2D();
         GlStateManager.disableBlend();
+        GlStateManager.popMatrix()
     }
 
     private fun drawArc(centerX: Double, centerY: Double, radiusX: Double, radiusY: Double, startAngle: Int, endAngle: Int, step: Int) {
