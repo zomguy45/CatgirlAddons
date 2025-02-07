@@ -2,40 +2,37 @@ package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.ui.clickgui.util.ColorUtil
-import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
-import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
-import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
+import catgirlroutes.ui.misc.elements.impl.MiscElementBoolean
 import java.awt.Color
 
 class ElementBoolean(parent: ModuleButton, setting: BooleanSetting) :
     Element<BooleanSetting>(parent, setting, ElementType.BOOLEAN) {
 
+    private val booleanElement = MiscElementBoolean(
+        text = displayName,
+        enabled = this.setting.enabled,
+        width = 10.0,
+        height = 10.0,
+        thickness = 1.0,
+        radius = 3.0,
+        gap = 0.0,
+        colour = Color(ColorUtil.buttonColor)
+    )
+
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
-        val buttonColor = if (this.setting.enabled) ColorUtil.clickGUIColor else Color(ColorUtil.buttonColor)
-        drawRoundedBorderedRect(
-            width - 10.0, 0.0, 10.0, 10.0, 3.0, 1.0,
-            Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
-        )
-
-        if (this.setting.enabled) drawRoundedRect(width - 10.0, 0.0, 10.0, 10.0, 3.0, ColorUtil.clickGUIColor)
-
-        FontUtil.drawString(displayName, 0.0, 0.0)
+        this.booleanElement.render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton == 0 && this.isHovered(mouseX, mouseY)) {
+        if (this.booleanElement.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)) {
             this.setting.toggle()
             return true
         }
         return super.mouseClicked(mouseX, mouseY, mouseButton)
-    }
-
-    private fun isHovered(mouseX: Int, mouseY: Int): Boolean {
-        return mouseX >= xAbsolute + width - 10 && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + 10.0
     }
 
 }

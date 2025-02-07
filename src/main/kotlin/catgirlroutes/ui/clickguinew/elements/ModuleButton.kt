@@ -2,18 +2,32 @@ package catgirlroutes.ui.clickguinew.elements
 
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.*
+import catgirlroutes.ui.animations.impl.ColorAnimation
 import catgirlroutes.ui.animations.impl.EaseInOutAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickguinew.Window
 import catgirlroutes.ui.clickguinew.elements.menu.*
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import catgirlroutes.utils.wrapText
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
+
+/*
+    TODO: height shit
+        account for description in expand animation
+        animate description text
+        animate elements
+        animate
+        animate
+        animate
+        finish elements
+        change selector element
+ */
 class ModuleButton(val module: Module, val window: Window) {
     val menuElements: ArrayList<Element<*>> = ArrayList()
 
@@ -22,14 +36,12 @@ class ModuleButton(val module: Module, val window: Window) {
 
     val width = window.width / 2
     val height: Double
-        get() = if (extended) 25.0 else 25.0
+        get() = 25.0 + if (extended) 0.0 else (fontHeight * description.size).toDouble()
 
-    val length: Double
-        get() = if (extended) {
-            menuElements.sumOf { it.height }
-        } else {
-            (fontHeight * description.size).toDouble()
-        }
+    val actualHeight: Double
+        get() = this.height + if (extended) this.length - 25.0 else 0.0
+
+    var length = 0.0
 
     var extended = false
 
@@ -39,7 +51,12 @@ class ModuleButton(val module: Module, val window: Window) {
         get() = y + window.y
 
     private val description: List<String> = wrapText(this.module.description, this.width - 50.0)
-    private val extendAnimation = EaseInOutAnimation(200)
+    private val extendAnimation = EaseInOutAnimation(500)
+    private val lineAnimation = EaseInOutAnimation(1000)
+    private val colourAnimation = ColorAnimation(100)
+
+    val animatedHeight: Double
+        get() = this.height + extendAnimation.get(0.0, this.height + getSettingHeight(), !extended)
 
     init {
         updateElements()
@@ -54,7 +71,7 @@ class ModuleButton(val module: Module, val window: Window) {
                 val newElement = when (setting) {
                     is BooleanSetting ->    ElementBoolean(this, setting)
                     is NumberSetting ->     ElementSlider(this, setting)
-                    is StringSelectorSetting ->   ElementStringSelector(this, setting)
+                    is StringSelectorSetting ->   ElementSelector(this, setting)
                     is StringSetting ->     ElementTextField(this, setting)
 //                    is ColorSetting ->      ElementColor(this, setting)
                     is ActionSetting ->     ElementAction(this, setting)
@@ -78,9 +95,11 @@ class ModuleButton(val module: Module, val window: Window) {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x, y, 0.0)
 
-        val borderColour = if (module.enabled) Color.GREEN else Color(ColorUtil.outlineColor)
-
-        drawOutlinedRectBorder(0.0, 0.0, this.width, this.height + this.length, 3.0, 1.0, borderColour)
+        val colour = this.colourAnimation.get(Color.GREEN, Color(ColorUtil.outlineColor), this.module.enabled)
+//        val extendOffs = this.extendAnimation.get(this.height, this.actualHeight, !this.extended)
+//        val lineOffs = this.lineAnimation.get(0.0, this.width - 10.0, !this.extended)
+//        drawRoundedRect(5.0, this.height - 1.0, lineOffs, 1.0, 1.0, Color.LIGHT_GRAY)
+        drawOutlinedRectBorder(0.0, 0.0, this.width, this.animatedHeight, 3.0, 1.0, colour)
 
         FontUtil.drawStringWithShadow(module.name, 5.0, 7.0, scale = 1.4)
         if (!this.extended) this.description.forEachIndexed { i, it ->
@@ -89,25 +108,32 @@ class ModuleButton(val module: Module, val window: Window) {
 
         if (this.extended) drawRoundedRect(5.0, this.height - 1.0, this.width - 10.0, 1.0, 1.0, Color.LIGHT_GRAY)
 
-        var offs = this.height + 5.0
-        if (this.extended && this.menuElements.isNotEmpty()) this.menuElements.forEach {
-            it.y = offs
-            it.update()
-            offs += it.drawScreen(mouseX, mouseY, partialTicks)
+        this.length = this.height + 5.0
+        if (this.extended || this.extendAnimation.isAnimating() && this.menuElements.isNotEmpty()) {
+            this.menuElements.forEach {
+                it.y = this.length
+                it.update()
+                this.length += it.drawScreen(mouseX, mouseY, partialTicks)
+            }
         }
+        if (this.extended) debugMessage("${this.height + getSettingHeight()} | ${this.actualHeight}")
 
         GlStateManager.popMatrix()
 
-        return this.height + this.length + 5.0
+        return this.animatedHeight + 5.0
     }
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         return when {
             this.isButtonHovered(mouseX, mouseY) -> when (mouseButton) {
-                0 -> this.module.toggle().let { true }
+                0 -> this.module.toggle().let { true }.also {
+                    this.colourAnimation.start()
+                }
                 1 -> {
                     if (this.menuElements.isNotEmpty()) {
                         this.extended = !this.extended
+                        this.extendAnimation.start()
+//                        this.lineAnimation.start()
                         if (!this.extended) this.menuElements.forEach { it.listening = false }
                     }
                     true
@@ -130,6 +156,11 @@ class ModuleButton(val module: Module, val window: Window) {
     }
 
     fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
+        if (this.extended) {
+            this.menuElements.reversed().forEach {
+                if (it.keyTyped(typedChar, keyCode)) return true
+            }
+        }
         return false
     }
 
@@ -138,9 +169,16 @@ class ModuleButton(val module: Module, val window: Window) {
     }
 
     private fun isMouseUnderButton(mouseX: Int, mouseY: Int): Boolean {
-        if (!extended) return false
+        if (!this.extended) return false
         return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY > yAbsolute + height
     }
 
+    private fun getSettingHeight(): Double {
+        var totalHeight = 5.0
+        for (i in menuElements) {
+            totalHeight += i.height + 5.0
+        }
+        return totalHeight
+    }
 
 }

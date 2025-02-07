@@ -1,7 +1,6 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.StringSetting
-import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickguinew.elements.Element
@@ -9,7 +8,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import org.lwjgl.input.Keyboard
-import java.awt.Color
 
 class ElementTextField(parent: ModuleButton, setting: StringSetting) :
     Element<StringSetting>(parent, setting, ElementType.TEXT_FIELD) {
@@ -18,24 +16,24 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
         0.0,
         fontHeight + 3.0,
         width,
-        12.0,
+        13.0,
         this.setting.text,
         thickness = 1.0,
-        bgColour = Color(ColorUtil.bgColor)
+        radius = 3.0
     )
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         FontUtil.drawString(displayName, 0.0, 0.0)
-        this.textField.render(mouseX, mouseY)
+        this.textField.render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        return this.textField.mouseClicked(mouseX, mouseY, mouseButton)
+        return this.textField.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)
     }
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
-        this.textField.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
+        this.textField.mouseClickMove(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), clickedMouseButton, timeSinceLastClick)
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 

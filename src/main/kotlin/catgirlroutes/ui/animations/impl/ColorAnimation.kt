@@ -20,12 +20,12 @@ class ColorAnimation(duration: Long) {
         return anim.getPercent()
     }
 
-    fun get(start: Color, end: Color, reverse: Boolean): JavaColor {
+    fun get(start: JavaColor, end: JavaColor, reverse: Boolean): JavaColor {
         return Color(
-            anim.get(start.r, end.r, reverse),
-            anim.get(start.g, end.g, reverse),
-            anim.get(start.b, end.b, reverse),
-            anim.get(start.a, end.a, reverse) / 255f,
+            anim.get(start.red, end.red, reverse),
+            anim.get(start.green, end.green, reverse),
+            anim.get(start.blue, end.blue, reverse),
+            anim.get(start.alpha, end.alpha, reverse) / 255f,
         ).javaColor
     }
 }

@@ -1,6 +1,9 @@
 package catgirlroutes.ui.clickguinew.elements
 
 import catgirlroutes.module.settings.Setting
+import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.ClickGUI
 import net.minecraft.client.renderer.GlStateManager
 
@@ -30,16 +33,24 @@ abstract class Element<S: Setting<*>>(
 
     init {
         this.height = when (this.type) {
-            ElementType.TEXT_FIELD -> 30.0
-//            ElementType.KEY_BIND -> 11.0
-//            ElementType.ACTION -> 11.0
-            ElementType.SLIDER -> 25.0
-            else -> 15.0
+            ElementType.TEXT_FIELD -> 25.0
+            ElementType.SELECTOR -> 13.0
+            ElementType.SLIDER -> 18.0
+            else -> 11.0
         }
     }
 
     fun update() {
-
+        this.displayName = this.setting.name
+//        when (type) {
+//            ElementType.SELECTOR -> {
+//                height = if (extended)
+//                    (((setting as? StringSelectorSetting)?.options?.size ?: (setting as SelectorSetting<*>).options.size) * (FontUtil.fontHeight + 2) + 13.0)
+//                else
+//                    13.0
+//            }
+//            else -> {}
+//        }
     }
 
     fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) : Double {
@@ -49,7 +60,7 @@ abstract class Element<S: Setting<*>>(
         val elementLength = renderElement(mouseX, mouseY, partialTicks)
 
         GlStateManager.popMatrix()
-        return elementLength
+        return elementLength + 5.0
     }
 
     protected open fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float) : Double { return this.height }

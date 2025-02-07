@@ -39,7 +39,7 @@ object Test : Module(
     private val colourTest = ColorSetting("Colour", Color.BLUE)
     private val colourTest2 = ColorSetting("Colour2", Color.BLUE, false)
 
-    private val slider = NumberSetting("Slider", 20.0, 0.0, 100.0, 5.0)
+    private val slider = NumberSetting("Slider", 20.0, 0.0, 100.0, 5.0, unit = "px")
     private val getHudWidth = ActionSetting("Get hud width") {
         debugMessage(TestHud.width)
     }
