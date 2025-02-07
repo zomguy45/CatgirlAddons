@@ -1,8 +1,10 @@
 package catgirlroutes.ui.misc.elements.impl
 
+import catgirlroutes.ui.animations.impl.ColorAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.elements.MiscElement
+import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import java.awt.Color
@@ -27,21 +29,29 @@ class MiscElementBoolean(
     var text: String = "",
     var enabled: Boolean = false,
     var thickness: Double = 2.0,
-    var radius: Double = 5.0
+    var radius: Double = 5.0,
+    var gap: Double = 1.0,
+    var colour: Color = Color(ColorUtil.bgColor)
 ): MiscElement(x, y, width, height) {
 
-    override fun render(mouseX: Int, mouseY: Int) {
-        drawRoundedBorderedRect(
-            this.x, this.y, this.width, this.height, this.radius, this.thickness,
-            Color(ColorUtil.elementColor), if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
-        )
-        if (this.enabled) drawRoundedRect(this.x + 1.0, this.y + 1.0, this.width - 2.0, this.height - 2.0, this.radius, ColorUtil.clickGUIColor)
+    private val colourAnimation = ColorAnimation(250)
 
-        FontUtil.drawString(this.text, this.x + this.width + 5.0, this.y + this.height / 2 - FontUtil.fontHeight / 2)
+    override fun render(mouseX: Int, mouseY: Int) {
+        val colour = colourAnimation.get(ColorUtil.clickGUIColor, this.colour, this.enabled)
+        drawRoundedBorderedRect(x + this.gap, y + this.gap, width - this.gap * 2, height - this.gap * 2, this.radius, this.thickness, colour, colour)
+        drawOutlinedRectBorder(
+            x, y, width, height, this.radius, this.thickness,
+            if (this.isHovered(mouseX, mouseY)) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor)
+        )
+
+        FontUtil.drawString(this.text, x + width + 5.0, y + height / 2 - FontUtil.fontHeight / 2)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (this.isHovered(mouseX, mouseY) && mouseButton == 0) this.enabled = !this.enabled
+        if (this.isHovered(mouseX, mouseY) && mouseButton == 0 && colourAnimation.start()) {
+            this.enabled = !this.enabled
+            return true
+        }
         return super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
