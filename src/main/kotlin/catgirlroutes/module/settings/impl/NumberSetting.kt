@@ -19,6 +19,7 @@ class NumberSetting(
     val increment: Double = 1.0,
     description: String? = null,
     visibility: Visibility = Visibility.VISIBLE,
+    val unit: String = ""
 ) : Setting<Double>(name, description, visibility) {
 
     override var value: Double = default
