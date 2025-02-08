@@ -615,7 +615,6 @@ object WorldRenderUtils {
         colour: Color,
         layers: Int = 3
     ) {
-        if (layers < 3) return
 
         val gap = height / (layers - 1)
         for (i in 1 until layers - 1) {
@@ -623,6 +622,7 @@ object WorldRenderUtils {
         }
 
         drawSquareTwo(x, y + 0.01, z, width, width, colour, 4f, false)
+        if (layers == 1) return
         drawSquareTwo(x, y + height, z, width, width, colour, 4f, false)
     }
 

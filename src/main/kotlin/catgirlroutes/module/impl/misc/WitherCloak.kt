@@ -15,6 +15,7 @@ import net.minecraft.entity.monster.EntityCreeper
 import net.minecraft.util.StringUtils
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.client.event.RenderLivingEvent
+import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
@@ -70,6 +71,13 @@ object WitherCloak: Module(
         } else if (message == "Creeper Veil Activated!") {
             inCloak = true
         }
+    }
+
+    @SubscribeEvent
+    fun onWorldUnload(event: WorldEvent.Unload) {
+        inCloak = false
+        lastCloak = 0
+        cloakCd = 0
     }
 
     @SubscribeEvent
