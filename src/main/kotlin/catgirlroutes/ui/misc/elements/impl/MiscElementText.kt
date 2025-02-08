@@ -27,7 +27,7 @@ import java.awt.Color
  * @param radius The radius of the corners (default is 5.0).
  * @param bgColour The background color of the element (default is `ColorUtil.buttonColor`).
  */
-class MiscElementText(
+class MiscElementText( // todo: add placeholder, size
     x: Double = 0.0,
     y: Double = 0.0,
     width: Double = 100.0,
@@ -37,7 +37,9 @@ class MiscElementText(
     var prependText: String = "",
     var thickness: Double = 2.0,
     var radius: Double = 5.0,
-    val bgColour: Color = Color(ColorUtil.buttonColor)
+    val bgColour: Color = Color(ColorUtil.buttonColor),
+    var outlineColour: Color = Color(ColorUtil.outlineColor),
+    var outlineFocusColour: Color = ColorUtil.clickGUIColor
 ) : MiscElement(x, y, width, height) {
 
     var focus: Boolean = false
@@ -166,7 +168,7 @@ class MiscElementText(
         GlStateManager.pushMatrix()
         GlStateManager.color(1.0f, 1.0f, 1.0f)
 
-        drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, bgColour, if (focus) ColorUtil.clickGUIColor else Color(ColorUtil.outlineColor))
+        drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, bgColour, if (focus) outlineFocusColour else outlineColour)
 
         val visibleTextStartIndex = mc.fontRendererObj.trimStringToWidth(renderText, scrollOffset.toInt()).length
         val visibleText = mc.fontRendererObj.trimStringToWidth(
