@@ -7,7 +7,10 @@ import catgirlroutes.commands.impl.RingManager.loadRings
 import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.blinkEditMode
 import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.*
+import catgirlroutes.events.impl.MotionUpdateEvent
+import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.events.impl.TermOpenEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.impl.dungeons.Blink.packetArray
@@ -49,7 +52,6 @@ import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S12PacketEntityVelocity
-import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -90,7 +92,7 @@ object AutoP3 : Module(
     private val layers = NumberSetting(
         "Ring layers amount",
         3.0,
-        3.0,
+        1.0,
         5.0,
         1.0,
         "Amount of ring layers to render"
@@ -179,12 +181,6 @@ object AutoP3 : Module(
                 cooldownMap[key] = false
             }
         }
-    }
-
-    @SubscribeEvent
-    fun onPacketS2D(event: PacketReceiveEventReturn) {
-        if (event.packet !is S2DPacketOpenWindow) return
-        debugMessage("window opened lol")
     }
 
     @SubscribeEvent

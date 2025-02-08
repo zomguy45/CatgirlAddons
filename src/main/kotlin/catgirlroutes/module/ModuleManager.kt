@@ -80,6 +80,7 @@ object ModuleManager {
         DojoHelper,
         AutoKick,
         AutoWardrobe,
+        WitherCloak,
         // SearchOverlay,
 
         // Player

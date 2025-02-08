@@ -19,22 +19,22 @@ object Animations: Module(
     Category.PLAYER
 ){
 
-    val customSize = NumberSetting("Size", 0.0, -1.5, 1.5, 0.1)
-    val scaleSwing = BooleanSetting("Scale swing")
+    private val customSize = NumberSetting("Size", 0.0, -1.5, 1.5, 0.05)
+    private val scaleSwing = BooleanSetting("Scale swing")
 
-    val customX = NumberSetting("X", 0.0, -1.5, 1.5, 0.1)
-    val customY = NumberSetting("Y", 0.0, -1.5, 1.5, 0.1)
-    val customZ = NumberSetting("Z", 0.0, -1.5, 1.5, 0.1)
+    private val customX = NumberSetting("X", 0.0, -1.5, 1.5, 0.05)
+    private val customY = NumberSetting("Y", 0.0, -1.5, 1.5, 0.05)
+    private val customZ = NumberSetting("Z", 0.0, -1.5, 1.5, 0.05)
 
-    val customYaw = NumberSetting("Yaw", 0.0, -180.0, 180.0, 1.0)
-    val customPitch = NumberSetting("Pitch", 0.0, -180.0, 180.0, 1.0)
-    val customRoll = NumberSetting("Roll", 0.0, -180.0, 180.0, 1.0)
+    private val customYaw = NumberSetting("Yaw", 0.0, -180.0, 180.0, 1.0)
+    private val customPitch = NumberSetting("Pitch", 0.0, -180.0, 180.0, 1.0)
+    private val customRoll = NumberSetting("Roll", 0.0, -180.0, 180.0, 1.0)
 
-    val customSpeed = NumberSetting("Speed", 0.0, -2.0, 1.0, 0.1)
+    val customSpeed = NumberSetting("Speed", 0.0, -2.0, 1.0, 0.05)
 
     val ignoreHaste = BooleanSetting("Ignore haste")
 
-    val drinkingMode = StringSelectorSetting("Drinking mode", "None", arrayListOf("None", "Rotationless", "Fixed"))
+    private val drinkingMode = StringSelectorSetting("Drinking mode", "None", arrayListOf("None", "Rotationless", "Fixed"))
 
     init {
         addSettings(
@@ -53,6 +53,7 @@ object Animations: Module(
     }
 
     fun itemTransforHook(equipProgress: Float, swingProgress: Float): Boolean {
+        if (!this.enabled) return false
         val newSize = (0.4f * exp(customSize.value))
         val newX = (0.56f * (1 + customX.value))
         val newY = (-0.52f * (1 - customY.value))
@@ -77,7 +78,7 @@ object Animations: Module(
     }
 
     fun scaledSwing(swingProgress: Float): Boolean {
-        if (!scaleSwing.value) return false
+        if (!scaleSwing.value || !this.enabled) return false
         val scale = exp(customSize.value)
         val f = -0.4f * sin(sqrt_float(swingProgress) * Math.PI.toFloat()) * scale
         val f1 = 0.2f * sin(sqrt_float(swingProgress) * Math.PI.toFloat() * 2.0f) * scale
@@ -87,7 +88,7 @@ object Animations: Module(
     }
 
     fun rotationlessDrink(clientPlayer: AbstractClientPlayer, partialTicks: Float): Boolean {
-        if (drinkingMode.index != 1) return false
+        if (drinkingMode.index != 1 || !this.enabled) return false
         val f: Float = clientPlayer.itemInUseCount.toFloat() - partialTicks + 1.0f
         val f1: Float = f / mc.thePlayer.heldItem.maxItemUseDuration.toFloat()
         var f2 = abs(cos(f / 4.0f * 3.1415927f) * 0.1f)
@@ -99,7 +100,7 @@ object Animations: Module(
     }
 
     fun scaledDrinking(clientPlayer: AbstractClientPlayer, partialTicks: Float, itemToRender: ItemStack): Boolean {
-        if (drinkingMode.index != 2) return false
+        if (drinkingMode.index != 2 || !this.enabled) return false
         val f: Float = clientPlayer.itemInUseCount.toFloat() - partialTicks + 1.0f
         val f1: Float = f / itemToRender.maxItemUseDuration.toFloat()
         var f2 = abs(cos(f / 4.0f * Math.PI.toFloat()) * 0.1f)
