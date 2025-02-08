@@ -13,8 +13,8 @@ object StencilUtils {
         GlStateManager.disableBlend()
     }
 
-    fun erase(invert: Boolean) {
-        GL11.glStencilFunc(if (invert) GL11.GL_EQUAL else GL11.GL_NOTEQUAL, 1, 65535)
+    fun erase(invert: Boolean, ref: Int = 1) {
+        GL11.glStencilFunc(if (invert) GL11.GL_EQUAL else GL11.GL_NOTEQUAL, ref, 65535)
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE)
         GlStateManager.colorMask(true, true, true, true)
         GlStateManager.enableAlpha()
@@ -22,22 +22,22 @@ object StencilUtils {
         GL11.glAlphaFunc(GL11.GL_GREATER, 0.0f)
     }
 
-    fun write(renderClipLayer: Boolean) {
+    fun write(renderClipLayer: Boolean, ref: Int = 1) {
         checkSetupFBO()
         GL11.glClearStencil(0)
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT)
         GL11.glEnable(GL11.GL_STENCIL_TEST)
-        GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 65535)
+        GL11.glStencilFunc(GL11.GL_ALWAYS, ref, 65535)
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE)
         if (!renderClipLayer) GlStateManager.colorMask(false, false, false, false)
     }
 
-    fun write(renderClipLayer: Boolean, fb: Framebuffer?) {
+    fun write(renderClipLayer: Boolean, fb: Framebuffer?, ref: Int = 1) {
         checkSetupFBO(fb)
         GL11.glClearStencil(0)
         GL11.glClear(GL11.GL_STENCIL_BUFFER_BIT)
         GL11.glEnable(GL11.GL_STENCIL_TEST)
-        GL11.glStencilFunc(GL11.GL_ALWAYS, 1, 65535)
+        GL11.glStencilFunc(GL11.GL_ALWAYS, ref, 65535)
         GL11.glStencilOp(GL11.GL_KEEP, GL11.GL_KEEP, GL11.GL_REPLACE)
         if (!renderClipLayer) GlStateManager.colorMask(false, false, false, false)
     }
