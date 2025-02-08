@@ -2,14 +2,23 @@ package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.ui.clickgui.util.ColorUtil.hex
+import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
+import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.Utils.equalsOneOf
+import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedHueBox
+import catgirlroutes.utils.render.HUDRenderUtils.drawSBBox
+import net.minecraft.util.MathHelper
+import org.lwjgl.input.Keyboard
 import java.awt.Color
 
-class ElementColor(parent: ModuleButton, setting: ColorSetting) :
+class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shadows, rounded boxes, favourite colours, extending prob
     Element<ColorSetting>(parent, setting, ElementType.COLOR) {
 
     var dragging: Int? = null
@@ -17,32 +26,149 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) :
     private inline val colorValue: Color
         get() = this.setting.value
 
-    private var hexString = "#${colorValue.hex}"
-    private var hexPrev = hexString
-    private var listeningHex = false
-
-    private val hMultiplier = if (this.setting.allowAlpha) 8 else 7 // for hex
+    private val hexTextField = MiscElementText(
+        FontUtil.getStringWidth("Hex") + 5.0,
+        DEFAULT_HEIGHT * 7 + 5.0,
+        width / 2.0 - (FontUtil.getStringWidth("Hex") + 5.0) + 27.0,
+        DEFAULT_HEIGHT,
+        "#${colorValue.hex}",
+        thickness = 1.0,
+        radius = 5.0,
+        outlineColour = colorValue.hsbMax(setting).withAlpha(255).darker(),
+        outlineFocusColour = colorValue.hsbMax(setting).withAlpha(255).darker()
+    )
+    private var hexPrev = this.hexTextField.text
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
+        FontUtil.drawString(displayName, 0.0, 0.0)
+
+        /**
+         * SB BOX
+         */
+//        drawRoundedSBBox(0.0, DEFAULT_HEIGHT, width / 2.0, DEFAULT_HEIGHT * 6, 3.0, this.colorValue.hsbMax(this.setting).rgb)
+        drawSBBox(1.0, DEFAULT_HEIGHT + 1.0, width / 2.0 - 2.0, DEFAULT_HEIGHT * 6 - 2.0, this.colorValue.hsbMax(this.setting).rgb)
+        drawOutlinedRectBorder(0.0, DEFAULT_HEIGHT, width / 2.0, DEFAULT_HEIGHT * 6, 3.0, 1.0, this.colorValue.hsbMax(this.setting))
+        drawRoundedBorderedRect(
+            this.setting.saturation * width / 2.0 - 3.0,
+            (1 - this.setting.brightness) * DEFAULT_HEIGHT * 6 + DEFAULT_HEIGHT - 3.0,
+            6.0, 6.0, 6.0, 2.0,
+            this.colorValue.withAlpha(255), Color.WHITE
+        )
+
+        /**
+         * HUE
+         */
+        drawRoundedHueBox(width / 2.0 + 3.5 + 1.0, DEFAULT_HEIGHT + 1.0, 8.0, DEFAULT_HEIGHT * 6 - 2.0, 3.0, true)
+        drawOutlinedRectBorder(width / 2.0 + 3.5, DEFAULT_HEIGHT, 10.0, DEFAULT_HEIGHT * 6, 3.0, 1.0, this.colorValue.hsbMax(this.setting))
+        drawRoundedBorderedRect(
+            width / 2.0 + 3.5 + 2.0,
+            this.setting.hue * DEFAULT_HEIGHT * 6 + DEFAULT_HEIGHT - 3.0,
+            6.0, 6.0, 6.0, 2.0,
+            this.colorValue.hsbMax(this.setting).withAlpha(255).darker(),
+            Color.WHITE
+        )
+
+        /**
+         * ALPHA
+         */
+        if (this.setting.allowAlpha) {
+//            drawRoundedSBBox(
+//                width / 2.0 + DEFAULT_HEIGHT + 3.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 6, 3.0,
+//                this.colorValue.withAlpha(255).rgb, Color.black.rgb, this.colorValue.withAlpha(255).rgb, Color.black.rgb
+//            )
+            drawSBBox(
+                width / 2.0 + DEFAULT_HEIGHT + 3.5 + 1.0, DEFAULT_HEIGHT + 1.0, 8.0, DEFAULT_HEIGHT * 6 - 2.0,
+                this.colorValue.withAlpha(255).rgb, this.colorValue.withAlpha(255).rgb, Color.black.rgb, Color.black.rgb
+            )
+            drawOutlinedRectBorder(width / 2.0 + DEFAULT_HEIGHT + 3.5, DEFAULT_HEIGHT, 10.0, DEFAULT_HEIGHT * 6, 3.0, 1.0, this.colorValue.hsbMax(this.setting))
+            drawRoundedBorderedRect(
+                width / 2.0 + DEFAULT_HEIGHT + 3.5 + 2.0,
+                (1.0 - this.setting.alpha) * (DEFAULT_HEIGHT * 6) + DEFAULT_HEIGHT - 3.0,
+                6.0, 6.0, 6.0, 2.0,
+                Color.WHITE.withAlpha(this.setting.alpha), Color.WHITE
+            )
+        }
+
+        /**
+         * DRAGGING
+         */
+        when (this.dragging) {
+            0 -> {
+                this.setting.saturation = MathHelper.clamp_float(((mouseX - xAbsolute) / (width / 2.0)).toFloat(), 0.0f, 1.0f)
+                this.setting.brightness = MathHelper.clamp_float((-(mouseY - yAbsolute - DEFAULT_HEIGHT * 7) / (DEFAULT_HEIGHT * 6)).toFloat(), 0.0f, 1.0f)
+            }
+            1 -> this.setting.hue = MathHelper.clamp_float((((mouseY - yAbsolute - DEFAULT_HEIGHT - 2.0) / (DEFAULT_HEIGHT * 6.0 - 2.0)).toFloat()), 0.0f, 1.0f)
+            2 -> this.setting.alpha = MathHelper.clamp_float(1f - ((mouseY - yAbsolute - DEFAULT_HEIGHT - 2.0) / (DEFAULT_HEIGHT * 6.0 - 2.0)).toFloat(), 0.0f, 1.0f)
+        }
+
+        /**
+         * HEX STRING
+         */
+
+        if (dragging != null) {
+            this.hexTextField.apply {
+                text = "#${colorValue.hex}"
+                outlineColour = colorValue.hsbMax(setting).withAlpha(255).darker()
+                outlineFocusColour = colorValue.hsbMax(setting).withAlpha(255).darker()
+            }
+            hexPrev = this.hexTextField.text
+
+        }
+
+        FontUtil.drawString("Hex", 0.0, DEFAULT_HEIGHT * 7 + 7.0)
+        this.hexTextField.render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
+
+        /**
+         * FAVOURITE
+         */
+        val favX = if (this.setting.allowAlpha) width / 2.0 + DEFAULT_HEIGHT * 2 + 3.5 else width / 2.0 + DEFAULT_HEIGHT + 3.5
+        drawOutlinedRectBorder(favX, DEFAULT_HEIGHT, 15.0, 15.0, 3.0, 1.0, this.colorValue)
+        drawRoundedBorderedRect(favX + 1.0, DEFAULT_HEIGHT + 1.0, 13.0, 13.0, 3.0, 1.0, this.colorValue, this.colorValue)
+
+        for (i in 0..2) { // temp
+            drawOutlinedRectBorder(favX, DEFAULT_HEIGHT * 2 + 5.0 + (i * (15.0 + 3.0)), 15.0, 15.0, 3.0, 1.0, Color.WHITE.darker())
+        }
+
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
+        if (mouseButton != 0) return false
+        dragging = when {
+            isHovered(mouseX, mouseY, 0.0, 0.0, width / 2, DEFAULT_HEIGHT * 7) -> 0 // SB box
+            isHovered(mouseX, mouseY, width / 2.0 + 4.5, 1.0, 8.0, DEFAULT_HEIGHT * 7 - 2.0) -> 1 // hue
+            isHovered(mouseX, mouseY, width / 2.0 + DEFAULT_HEIGHT + 4.5, 1.0, 8.0, DEFAULT_HEIGHT * 7 - 2.0) && this.setting.allowAlpha -> 2 // alpha
+            else -> null
+        }
+        if (this.hexTextField.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)) {
+            if (this.hexTextField.focus) {
+                this.hexTextField.text = this.hexTextField.text.completeHexString()
+            } // else this.listeningHex = true
+        }
         return super.mouseClicked(mouseX, mouseY, mouseButton)
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
-        dragging = null
+        this.dragging = null
         super.mouseReleased(mouseX, mouseY, state)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
+        if (this.hexTextField.keyTyped(typedChar, keyCode)) {
+            if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
+                this.hexTextField.text = this.hexTextField.text.completeHexString()
+                this.hexTextField.focus = false
+            }
+//            this.hexTextField.text = this.hexString
+//            debugMessage(this.hexTextField.text)
+            return true
+        }
         return super.keyTyped(typedChar, keyCode)
     }
 
-    private fun completeHexString() {
-        if (hexString.isEmpty()) return
-        val stringWithoutHash = hexString.removePrefix("#")
+    private fun String.completeHexString(): String {
+        if (this.isEmpty()) return this
+        val stringWithoutHash = this.removePrefix("#")
         if (stringWithoutHash.length.equalsOneOf(6, 8)) {
             try {
                 val alpha = if (stringWithoutHash.length == 8) stringWithoutHash.substring(6, 8).toInt(16) / 255f else 1f
@@ -57,22 +183,19 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) :
                 setting.saturation = hsb[1]
                 setting.brightness = hsb[2]
 
-                hexPrev = hexString
+                hexPrev = this
+                return this
             } catch (e: Exception) {
                 debugMessage(e.toString())
-                hexString = hexPrev
+                 return hexPrev
             }
         } else {
-            hexString = hexPrev
+            return hexPrev
         }
     }
 
-    private fun isButtonHovered(mouseX: Int, mouseY: Int): Boolean {
-        return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + 15
-    }
-
-    private fun isHovered(mouseX: Int, mouseY: Int, x: Int, y: Int, width: Int, height: Int): Boolean {
-        return mouseX >= xAbsolute + x && mouseX <= xAbsolute + width && mouseY >= yAbsolute + y && mouseY <= yAbsolute + height
+    private fun isHovered(mouseX: Int, mouseY: Int, x: Double, y: Double, width: Double, height: Double): Boolean {
+        return mouseX >= xAbsolute + x && mouseX <= xAbsolute + x + width && mouseY >= yAbsolute + y && mouseY <= yAbsolute + y + height
     }
 
     private fun Color.hsbMax(setting: ColorSetting): Color { // the dumbest fix ever

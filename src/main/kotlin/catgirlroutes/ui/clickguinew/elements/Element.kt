@@ -32,13 +32,13 @@ abstract class Element<S: Setting<*>>( // TODO: CHANGE COLOURS IN SOME ELEMENTS
 
 
     init {
-        this.height = when (this.type) { // todo change default height to 13.0 I think?
+        this.height = when (this.type) {
             ElementType.TEXT_FIELD -> 25.0
-            ElementType.SELECTOR -> 13.0
-            ElementType.ACTION -> 13.0
-            ElementType.DROPDOWN -> 13.0
             ElementType.SLIDER -> 18.0
-            else -> 11.0
+            ElementType.BOOLEAN -> 11.0
+            ElementType.KEY_BIND -> 11.0
+            ElementType.COLOR -> DEFAULT_HEIGHT * 8 + 5.0
+            else -> DEFAULT_HEIGHT
         }
     }
 
@@ -47,9 +47,9 @@ abstract class Element<S: Setting<*>>( // TODO: CHANGE COLOURS IN SOME ELEMENTS
         when (type) {
             ElementType.SELECTOR -> {
                 height = if (extended)
-                    ((setting as StringSelectorSetting).options.size * 13.0 + 13.0)
+                    ((setting as StringSelectorSetting).options.size * DEFAULT_HEIGHT + DEFAULT_HEIGHT)
                 else
-                    13.0
+                    DEFAULT_HEIGHT
             }
 //            ElementType.COLOR -> {
 //                height = if ((setting as ColorSetting).allowAlpha)
@@ -88,7 +88,7 @@ abstract class Element<S: Setting<*>>( // TODO: CHANGE COLOURS IN SOME ELEMENTS
     }
 
     companion object {
-        const val DEFAULT_HEIGHT = 11.0
+        const val DEFAULT_HEIGHT = 13.0
     }
 }
 

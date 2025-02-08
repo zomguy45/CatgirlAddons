@@ -388,12 +388,82 @@ object HUDRenderUtils {
         GlStateManager.popMatrix()
     }
 
+    fun drawRoundedSBBox( // todo: fix
+        x: Double, y: Double, width: Double, height: Double,
+        radius: Double,
+        topRight: Int, topLeft: Int = Color.WHITE.rgb,
+        botRight: Int = Color.BLACK.rgb, botLeft: Int = Color.BLACK.rgb
+    ) {
+        val x2: Double = x + width
+        val y2: Double = y + height
+
+        // Extract color components
+        val a1 = (topRight shr 24 and 0xFF) / 255.0f
+        val r1 = (topRight shr 16 and 0xFF) / 255.0f
+        val g1 = (topRight shr 8 and 0xFF) / 255.0f
+        val b1 = (topRight and 0xFF) / 255.0f
+
+        val a2 = (topLeft shr 24 and 0xFF) / 255.0f
+        val r2 = (topLeft shr 16 and 0xFF) / 255.0f
+        val g2 = (topLeft shr 8 and 0xFF) / 255.0f
+        val b2 = (topLeft and 0xFF) / 255.0f
+
+        val a3 = (botRight shr 24 and 0xFF) / 255.0f
+        val r3 = (botRight shr 16 and 0xFF) / 255.0f
+        val g3 = (botRight shr 8 and 0xFF) / 255.0f
+        val b3 = (botRight and 0xFF) / 255.0f
+
+        val a4 = (botLeft shr 24 and 0xFF) / 255.0f
+        val r4 = (botLeft shr 16 and 0xFF) / 255.0f
+        val g4 = (botLeft shr 8 and 0xFF) / 255.0f
+        val b4 = (botLeft and 0xFF) / 255.0f
+
+        GlStateManager.pushMatrix()
+        GlStateManager.disableTexture2D()
+        GlStateManager.enableBlend()
+        GlStateManager.disableAlpha()
+        GL11.glShadeModel(GL11.GL_SMOOTH)
+
+        drawRoundedRect(x, y, width, height, radius, Color(r1, g1, b1, a1))
+        drawRoundedRect(x, y, width, height, radius, Color(r2, g2, b2, a2))
+        drawRoundedRect(x, y, width, height, radius, Color(r3, g3, b3, a3))
+        drawRoundedRect(x, y, width, height, radius, Color(r4, g4, b4, a4))
+
+        GL11.glShadeModel(GL11.GL_FLAT)
+        GlStateManager.disableBlend()
+        GlStateManager.enableDepth()
+        GlStateManager.enableTexture2D()
+        GlStateManager.popMatrix()
+    }
+
     fun drawHueBox(x: Int, y: Int, width: Int, height: Int) {
         for (i in 0 until width) {
             val ratio = i.toFloat() / width.toFloat()
             val color = Color.HSBtoRGB(ratio, 1.0f, 1.0f)
             Gui.drawRect(x + i, y, x + i + 1, y + height, color)
         }
+    }
+
+    fun drawRoundedHueBox(x: Double, y: Double, width: Double, height: Double, radius: Double, vertical: Boolean = false) { // todo fix
+//        StencilUtils.write(false)
+//        drawRoundedRect(x, y, width, height, radius, Color.WHITE)
+//        StencilUtils.erase(false)
+
+        if (vertical) {
+            for (i in 0 until height.toInt()) {
+                val ratio = i.toFloat() / height.toFloat()
+                val color = Color.HSBtoRGB(ratio, 1.0f, 1.0f)
+                renderRect(x, y + i, width, 1.0, Color(color))
+            }
+        } else {
+            for (i in 0 until width.toInt()) {
+                val ratio = i.toFloat() / width.toFloat()
+                val color = Color.HSBtoRGB(ratio, 1.0f, 1.0f)
+                renderRect(x + i, y, 1.0, height, Color(color))
+            }
+        }
+
+//        StencilUtils.dispose()
     }
 
     fun drawItemStackWithText(stack: ItemStack?, x: Double, y: Double, text: String? = null) {
