@@ -1,13 +1,13 @@
 package catgirlroutes.ui.clickguinew.elements
 
 import catgirlroutes.module.settings.Setting
-import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.ClickGUI
+import catgirlroutes.utils.render.StencilUtils
 import net.minecraft.client.renderer.GlStateManager
 
-abstract class Element<S: Setting<*>>(
+abstract class Element<S: Setting<*>>( // TODO: CHANGE COLOURS IN SOME ELEMENTS
     val parent: ModuleButton,
     val setting: S,
     val type: ElementType
@@ -32,25 +32,33 @@ abstract class Element<S: Setting<*>>(
 
 
     init {
-        this.height = when (this.type) {
+        this.height = when (this.type) { // todo change default height to 13.0 I think?
             ElementType.TEXT_FIELD -> 25.0
             ElementType.SELECTOR -> 13.0
+            ElementType.ACTION -> 13.0
+            ElementType.DROPDOWN -> 13.0
             ElementType.SLIDER -> 18.0
             else -> 11.0
         }
     }
 
     fun update() {
-        this.displayName = this.setting.name
-//        when (type) {
-//            ElementType.SELECTOR -> {
-//                height = if (extended)
-//                    (((setting as? StringSelectorSetting)?.options?.size ?: (setting as SelectorSetting<*>).options.size) * (FontUtil.fontHeight + 2) + 13.0)
-//                else
-//                    13.0
+        displayName = setting.name
+        when (type) {
+            ElementType.SELECTOR -> {
+                height = if (extended)
+                    ((setting as StringSelectorSetting).options.size * 13.0 + 13.0)
+                else
+                    13.0
+            }
+//            ElementType.COLOR -> {
+//                height = if ((setting as ColorSetting).allowAlpha)
+//                        DEFAULT_HEIGHT * 5
+//                    else
+//                        DEFAULT_HEIGHT * 4
 //            }
-//            else -> {}
-//        }
+            else -> {}
+        }
     }
 
     fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) : Double {
@@ -80,7 +88,7 @@ abstract class Element<S: Setting<*>>(
     }
 
     companion object {
-        const val DEFAULT_HEIGHT = 15
+        const val DEFAULT_HEIGHT = 11.0
     }
 }
 

@@ -1,14 +1,13 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.ui.animations.impl.EaseInOutAnimation
+import catgirlroutes.ui.animations.impl.EaseInOutCubicAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import net.minecraft.util.MathHelper
 import java.awt.Color
@@ -20,7 +19,7 @@ class ElementSlider(parent: ModuleButton, setting: NumberSetting) :
     private var dragging: Boolean = false
 
     private var currentPos = 0.0
-    private val posAnimation = EaseInOutAnimation(50)
+    private val posAnimation = EaseInOutCubicAnimation(50)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         val displayValue = "" + (this.setting.value * 100.0).roundToInt() / 100.0
@@ -32,7 +31,8 @@ class ElementSlider(parent: ModuleButton, setting: NumberSetting) :
         drawRoundedBorderedRect(0.0, fontHeight + 5.0, percentBar * width, 2.0, 2.0, 1.0, ColorUtil.clickGUIColor,  ColorUtil.clickGUIColor)
 
 //        val pos = this.posAnimation.get(this.currentPos, percentBar * width)
-        drawRoundedBorderedRect(percentBar * width - 3.0, fontHeight + 3.0, 6.0, 6.0, 3.0, 1.0, Color(ColorUtil.buttonColor),  ColorUtil.clickGUIColor)
+        val knobX = (percentBar * width - 3.0) - (percentBar - 0.5) * 4.5
+        drawRoundedBorderedRect(knobX, fontHeight + 3.0, 6.0, 6.0, 3.0, 1.0, Color(ColorUtil.buttonColor),  ColorUtil.clickGUIColor)
 
         if (this.dragging) {
             val diff = this.setting.max - this.setting.min

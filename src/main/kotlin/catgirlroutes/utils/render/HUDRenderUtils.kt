@@ -1,7 +1,6 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -90,6 +89,36 @@ object HUDRenderUtils {
         tessellator.draw()
     }
 
+    data class Scissor(val x: Double, val y: Double, val width: Double, val height: Double, val context: Int)
+    private val scissorList = mutableListOf(Scissor(0.0, 0.0, 16000.0, 16000.0, 0))
+
+    fun scissor(x: Double, y: Double, width: Double, height: Double): Scissor {
+        val scale = mc.displayHeight / ScaledResolution(mc).scaledHeight.toDouble()
+        GL11.glEnable(GL11.GL_SCISSOR_TEST)
+        GL11.glScissor(
+            (x * scale).toInt(),
+            (mc.displayHeight - (height + y) * scale).toInt() ,
+            (width * scale).toInt(),
+            (height * scale).toInt()
+        )
+        val scissor = Scissor(x, y, width, height, scissorList.size)
+        scissorList.add(scissor)
+        return scissor
+    }
+
+    fun resetScissor(scissor: Scissor) {
+        val nextScissor = scissorList[scissor.context - 1]
+        val scale = mc.displayHeight / ScaledResolution(mc).scaledHeight.toDouble()
+        GL11.glScissor(
+            (nextScissor.x * scale).toInt(),
+            (nextScissor.y * scale).toInt(),
+            (nextScissor.width * scale).toInt(),
+            (nextScissor.height * scale).toInt()
+        )
+        GL11.glDisable(GL11.GL_SCISSOR_TEST)
+        scissorList.removeLast()
+    }
+
     /**
      * Sets up a GL scissor test for the specified region of the screen.
      *
@@ -129,6 +158,10 @@ object HUDRenderUtils {
             (height * scale).toInt()
         )
         GL11.glEnable(GL11.GL_SCISSOR_TEST)
+    }
+
+    fun setUpScissor(x: Double, y: Double, width: Double, height: Double) {
+        this.setUpScissor(x.toInt(), y.toInt(), width.toInt(), height.toInt())
     }
 
     /**

@@ -3,8 +3,9 @@ package catgirlroutes.ui.clickguinew.elements
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.animations.impl.ColorAnimation
-import catgirlroutes.ui.animations.impl.EaseInOutAnimation
+import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickguinew.Window
@@ -12,36 +13,36 @@ import catgirlroutes.ui.clickguinew.elements.menu.*
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
+import catgirlroutes.utils.render.StencilUtils
 import catgirlroutes.utils.wrapText
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
 
 /*
-    TODO: height shit
-        account for description in expand animation
-        animate description text
-        animate elements
-        animate
-        animate
-        animate
+    TODO: height with animation shit for selectors
         finish elements
-        change selector element
+        figure font alpha
  */
 class ModuleButton(val module: Module, val window: Window) {
-    val menuElements: ArrayList<Element<*>> = ArrayList()
+    private val menuElements: ArrayList<Element<*>> = ArrayList()
 
     var x = 0.0
     var y = 0.0
 
-    val width = window.width / 2
-    val height: Double
-        get() = 25.0 + if (extended) 0.0 else (fontHeight * description.size).toDouble()
+    val width = this.window.width / 2
+    val height: Double = 25.0
 
-    val actualHeight: Double
-        get() = this.height + if (extended) this.length - 25.0 else 0.0
+    private val description: List<String> = wrapText(this.module.description, this.width - 50.0)
+    private val descHeight = fontHeight * this.description.size.toDouble()
 
-    var length = 0.0
+    val elementsHeight get() = this.menuElements.sumOf { it.height + 5.0 }
+    private val animatedHeight get() = this.height + this.extendAnimation.get(0.0, this.extraHeight + 5.0, !this.extended)
+    private val extraHeight get() = run {
+            this.extraHeightAnimation.get(this.prevHeight, this.elementsHeight, this.prevHeight == this.elementsHeight)
+    }
+    private val totalHeight get() = this.height + this.extendAnimation.get(0.0, this.descHeight, this.extended)
+    var prevHeight = elementsHeight
 
     var extended = false
 
@@ -50,19 +51,18 @@ class ModuleButton(val module: Module, val window: Window) {
     val yAbsolute: Double
         get() = y + window.y
 
-    private val description: List<String> = wrapText(this.module.description, this.width - 50.0)
-    private val extendAnimation = EaseInOutAnimation(500)
-    private val lineAnimation = EaseInOutAnimation(1000)
+    private val extendAnimation = EaseOutQuadAnimation(500)
+    private val lineAnimation = EaseOutQuadAnimation(750)
     private val colourAnimation = ColorAnimation(100)
+    private val extraHeightAnimation = EaseOutQuadAnimation(500)
 
-    val animatedHeight: Double
-        get() = this.height + extendAnimation.get(0.0, this.height + getSettingHeight(), !extended)
 
     init {
         updateElements()
     }
 
     fun updateElements() {
+        val oldHeight = elementsHeight
         var position = -1
         for (setting in module.settings) {
             if (setting.visibility.visibleInClickGui && setting.shouldBeVisible) run addElement@{
@@ -88,60 +88,77 @@ class ModuleButton(val module: Module, val window: Window) {
                 this.menuElements.removeIf { it.setting === setting }
             }
         }
-    }
 
+        if (elementsHeight != oldHeight) {
+            this.extraHeightAnimation.start()
+            debugMessage("height: $oldHeight -> $elementsHeight")
+            this.prevHeight = oldHeight
+        }
+    }
 
     fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) : Double {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x, y, 0.0)
 
         val colour = this.colourAnimation.get(Color.GREEN, Color(ColorUtil.outlineColor), this.module.enabled)
-//        val extendOffs = this.extendAnimation.get(this.height, this.actualHeight, !this.extended)
-//        val lineOffs = this.lineAnimation.get(0.0, this.width - 10.0, !this.extended)
-//        drawRoundedRect(5.0, this.height - 1.0, lineOffs, 1.0, 1.0, Color.LIGHT_GRAY)
-        drawOutlinedRectBorder(0.0, 0.0, this.width, this.animatedHeight, 3.0, 1.0, colour)
 
+        drawOutlinedRectBorder(0.0, 0.0, this.width, this.animatedHeight + this.totalHeight - this.height, 3.0, 1.0, colour)
         FontUtil.drawStringWithShadow(module.name, 5.0, 7.0, scale = 1.4)
-        if (!this.extended) this.description.forEachIndexed { i, it ->
-                FontUtil.drawStringWithShadow(it, 7.0, 10.0 + fontHeight * (i + 1), Color.LIGHT_GRAY.rgb)
-        }
 
-        if (this.extended) drawRoundedRect(5.0, this.height - 1.0, this.width - 10.0, 1.0, 1.0, Color.LIGHT_GRAY)
-
-        this.length = this.height + 5.0
-        if (this.extended || this.extendAnimation.isAnimating() && this.menuElements.isNotEmpty()) {
-            this.menuElements.forEach {
-                it.y = this.length
-                it.update()
-                this.length += it.drawScreen(mouseX, mouseY, partialTicks)
+        val descVisibility = extendAnimation.get(0.0, 1.0, this.extended)
+        val yOffset = (1.0 - descVisibility) * 10.0
+        if (descVisibility > 0.0) {
+            this.description.forEachIndexed { i, it ->
+                FontUtil.drawStringWithShadow(it, 7.0, 10.0 + fontHeight * (i + 1) + yOffset, Color.LIGHT_GRAY.rgb)
             }
         }
-        if (this.extended) debugMessage("${this.height + getSettingHeight()} | ${this.actualHeight}")
+
+        val lineWidth = this.lineAnimation.get(0.0, this.width - 10.0, !this.extended)
+        val alpha = this.lineAnimation.get(0.0, 1.0, !this.extended)
+        val lineColor = Color.LIGHT_GRAY.withAlpha((alpha * 255).toInt())
+        drawRoundedRect(5.0, this.height - 1.0, lineWidth, 1.0, 1.0, lineColor)
+
+        val offset = this.animatedHeight + this.extendAnimation.get(0.0, this.descHeight, this.extended)
+
+        if (this.extendAnimation.isAnimating() && this.extended || this.menuElements.isNotEmpty()) {
+            StencilUtils.write(false) // no fucking clue why scissors don't work here (they just override each other for no fucking reason (same with stencil :sob:))
+            drawRoundedRect(0.0, 0.0, this.width, offset, 3.0, Color.WHITE)
+            StencilUtils.erase(true)
+
+            var drawY = this.totalHeight + 5.0
+            this.menuElements.forEach {
+                it.y = drawY
+                it.update()
+                drawY += it.drawScreen(mouseX, mouseY, partialTicks)
+            }
+            StencilUtils.dispose()
+        }
 
         GlStateManager.popMatrix()
 
-        return this.animatedHeight + 5.0
+        return offset + 5.0
     }
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         return when {
-            this.isButtonHovered(mouseX, mouseY) -> when (mouseButton) {
-                0 -> this.module.toggle().let { true }.also {
+            isButtonHovered(mouseX, mouseY) -> when (mouseButton) {
+                0 -> {
+                    this.module.toggle()
                     this.colourAnimation.start()
-                }
-                1 -> {
-                    if (this.menuElements.isNotEmpty()) {
-                        this.extended = !this.extended
-                        this.extendAnimation.start()
-//                        this.lineAnimation.start()
-                        if (!this.extended) this.menuElements.forEach { it.listening = false }
-                    }
                     true
                 }
+                1 -> this.menuElements.takeIf { it.isNotEmpty() }?.let { elements ->
+                    if (this.extendAnimation.start()) {
+                        this.extended = !this.extended
+                        this.lineAnimation.start(true)
+                    }
+                    if (!this.extended) elements.forEach { it.listening = false }
+                    true
+                } ?: false
                 else -> false
             }
             this.isMouseUnderButton(mouseX, mouseY) -> this.menuElements.reversed().any {
-                it.mouseClicked(mouseX, mouseY, mouseButton).also { if (it) updateElements() }
+                it.mouseClicked(mouseX, mouseY, mouseButton).also { clicked -> if (clicked) updateElements() }
             }
             else -> false
         }
@@ -165,20 +182,11 @@ class ModuleButton(val module: Module, val window: Window) {
     }
 
     private fun isButtonHovered(mouseX: Int, mouseY: Int): Boolean {
-        return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + height
+        return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + this.height + if (!extended) this.descHeight else 0.0
     }
 
     private fun isMouseUnderButton(mouseX: Int, mouseY: Int): Boolean {
         if (!this.extended) return false
-        return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY > yAbsolute + height
+        return mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY > yAbsolute + this.height + if (!extended) this.descHeight else 0.0
     }
-
-    private fun getSettingHeight(): Double {
-        var totalHeight = 5.0
-        for (i in menuElements) {
-            totalHeight += i.height + 5.0
-        }
-        return totalHeight
-    }
-
 }

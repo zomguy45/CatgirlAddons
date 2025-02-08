@@ -6,7 +6,7 @@ import catgirlroutes.utils.clock.Clock
  * Simple class that calculates a "point" between two values and a percentage.
  * @author Stivais
  */
-abstract class Animation<T>(private var duration: Long) {
+abstract class Animation<T>(private var duration: Long) { // todo recode
 
     private var animating = false
     private val clock = Clock(duration)

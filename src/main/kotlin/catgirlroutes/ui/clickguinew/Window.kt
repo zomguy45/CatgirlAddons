@@ -7,11 +7,11 @@ import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.utils.ChatUtils.debugMessage
 import net.minecraft.client.renderer.GlStateManager
 
-class Window(
+class Window( // todo: scroll shit
     val category: Category,
     val clickGui: ClickGUI
 ) {
-    val moduleButtons: ArrayList<ModuleButton> = ArrayList()
+    private val moduleButtons: ArrayList<ModuleButton> = ArrayList()
 
     val x = this.clickGui.x + this.clickGui.categoryWidth + 10.0
     val y = this.clickGui.y + 25.0 + 5.0
@@ -28,7 +28,6 @@ class Window(
     private var scrollOffset = 0.0
 
     private val scrollAnimation = LinearAnimation<Double>(200)
-    private val animation = LinearAnimation<Double>(200)
 
     init {
         for (module in ModuleManager.modules) {
@@ -95,7 +94,7 @@ class Window(
     fun scroll(amount: Int, mouseX: Int, mouseY: Int): Boolean {
         if (isHovered(mouseX, mouseY)) {
             debugMessage(amount)
-            this.scrollTarget = (this.scrollTarget + amount * 16).coerceIn(-this.length + this.scrollOffset + 72.0, 0.0)
+            this.scrollTarget = (this.scrollTarget + amount * SCROLL_DISTANCE).coerceIn(-this.length + this.scrollOffset + 72.0, 0.0)
             this.scrollAnimation.start(true)
             return true
         }
@@ -108,6 +107,6 @@ class Window(
     }
 
     companion object {
-        private const val SCROLL_DISTANCE = 11
+        private const val SCROLL_DISTANCE = 16
     }
 }

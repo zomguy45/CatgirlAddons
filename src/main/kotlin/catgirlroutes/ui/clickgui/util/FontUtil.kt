@@ -52,7 +52,7 @@ object FontUtil {
 
     fun drawStringWithShadow(text: String, x: Double, y: Double, color: Int = ColorUtil.textcolor, scale: Double = 1.0) {
         GlStateManager.pushMatrix()
-        GlStateManager.translate(x.toDouble(), y.toDouble(), 0.0)
+        GlStateManager.translate(x, y, 0.0)
         GlStateManager.scale(scale.toFloat(), scale.toFloat(), 1.0f)
         fontRenderer?.drawStringWithShadow(text, 0f, 0f, color)
         GlStateManager.popMatrix()

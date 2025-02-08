@@ -15,8 +15,6 @@ import java.awt.Color
 class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
     Element<KeyBindSetting>(parent, setting, ElementType.KEY_BIND) {
 
-    private val keyBlackList = intArrayOf()
-
     private val colourAnimation = ColorAnimation(100)
     private val stringWidth = FontUtil.getStringWidth(displayName)
     private var keyWidth = 0.0
