@@ -3,9 +3,9 @@ package catgirlroutes.ui.animations.impl
 import catgirlroutes.ui.animations.Animation
 
 
-class EaseOutAnimation(duration: Long): Animation<Float>(duration) {
+class EaseOutQuadAnimation(duration: Long): Animation<Double>(duration) {
 
-    override fun get(start: Float, end: Float, reverse: Boolean): Float {
+    override fun get(start: Double, end: Double, reverse: Boolean): Double {
         val startVal = if (reverse) end else start
         val endVal = if (reverse) start else end
         if (!isAnimating()) return endVal

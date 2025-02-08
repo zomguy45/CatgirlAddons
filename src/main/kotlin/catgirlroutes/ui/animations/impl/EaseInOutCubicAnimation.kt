@@ -3,7 +3,7 @@ package catgirlroutes.ui.animations.impl
 import catgirlroutes.ui.animations.Animation
 import kotlin.math.pow
 
-class EaseInOutAnimation(duration: Long): Animation<Double>(duration) {
+class EaseInOutCubicAnimation(duration: Long): Animation<Double>(duration) {
     override fun get(start: Double, end: Double, reverse: Boolean): Double {
         if (!isAnimating()) return if (reverse) start else end
         return if (reverse) end + (start - end) * easeInOutCubic() else start + (end - start) * easeInOutCubic()
