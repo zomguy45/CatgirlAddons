@@ -14,13 +14,13 @@ import java.awt.Color
 
 class InventoryButtonEditor : GuiScreen() {
 
-    private val invWidth: Int = 176;
-    private val invHeight: Int = 166;
+    private val invWidth: Int = 176
+    private val invHeight: Int = 166
 
     private var invX: Int = 0
     private var invY: Int = 0
 
-    private var editingButton: InventoryButton? = null;
+    private var editingButton: InventoryButton? = null
 
     private val editorWidth = 150.0
     private val editorHeight = 78.0
@@ -34,8 +34,8 @@ class InventoryButtonEditor : GuiScreen() {
         super.drawScreen(mouseX, mouseY, partialTicks)
         this.drawDefaultBackground()
 
-        invX = width / 2 - invWidth / 2;
-        invY = height / 2 - invHeight / 2;
+        invX = width / 2 - invWidth / 2
+        invY = height / 2 - invHeight / 2
 
         GlStateManager.pushMatrix()
         GlStateManager.enableDepth()
