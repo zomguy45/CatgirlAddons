@@ -60,7 +60,7 @@ object SkyblockPlayer {
             this.maxMana = maxMana.toInt()
         }
 
-        OVERFLOW_REGEX.find(message)?.destructured?.let { (_, overflow) -> this.overflowMana = overflow.toInt() }
+        OVERFLOW_REGEX.find(message)?.destructured?.let { (overflow) -> this.overflowMana = overflow.toInt() }
 
         STACKS_REGEX.find(message)?.destructured?.let { (stacks) -> this.stacks = stacks }
 
