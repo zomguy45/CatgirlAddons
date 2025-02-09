@@ -449,6 +449,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onS12(event: PacketReceiveEvent) {
+        if (mc.thePlayer == null) return
         if (event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
         if (event.packet.motionY == 28000) {
             onlyHorizontal = true

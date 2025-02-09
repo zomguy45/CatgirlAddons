@@ -12,6 +12,8 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager
+import catgirlroutes.utils.clock.Executor
+import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
@@ -44,65 +46,58 @@ object AutoSS : Module(
     private val forceDevice: BooleanSetting = BooleanSetting("Force Device", false, visibility = Visibility.ADVANCED_ONLY)
     private val resetSS: ActionSetting = ActionSetting("Reset SS") {reset(); doingSS = false; clicked = false}
     private val autoStart: NumberSetting = NumberSetting("Autostart delay", 125.0, 50.0, 200.0, 1.0)
-    private val triggerBot: BooleanSetting = BooleanSetting("Triggerbot", false)
     private val smoothRotate: BooleanSetting = BooleanSetting("Rotate", false)
     private val time: NumberSetting = NumberSetting("Rotation Speed", 200.0, 0.0, 500.0, 10.0)
 
 
     init {
-        this.addSettings(delay, forceDevice, resetSS, autoStart, triggerBot, smoothRotate, time)
+        ssLoop()
+        this.addSettings(delay, forceDevice, resetSS, autoStart, smoothRotate, time)
     }
 
+    var lastClickAdded = System.currentTimeMillis()
     var next = false
     var progress = 0
-    var delayTick = 0
     var doneFirst = false
     var doingSS = false
     var clicked = false
     var clicks = ArrayList<BlockPos>()
-    var lastClick = System.currentTimeMillis()
     var wtflip = System.currentTimeMillis()
     var clickedButton: Vec3? = null
     var allButtons = ArrayList<Vec3>()
-    var lastClickAdded = System.currentTimeMillis()
 
     fun reset() {
         allButtons.clear()
         clicks.clear()
         next = false
         progress = 0
-        delayTick = 0
         doneFirst = false
         debugMessage("Reset!")
     }
 
     override fun onKeyBind() {
-        clicked = false
-        doingSS = false
         start()
     }
 
     @SubscribeEvent
     fun onWorldChange(event: WorldEvent.Load) {
         reset()
-        allButtons.clear()
     }
 
     fun start() {
         allButtons.clear()
         val startButton: BlockPos = BlockPos(110, 121, 91)
         val (yaw, pitch) = getYawAndPitch(110.875, 121.5, 91.5)
-        if (smoothRotate.value && !triggerBot.value) {
+        if (smoothRotate.value) {
             rotateSmoothly(yaw, pitch, time.value.toInt())
         }
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (!clicked) {
             debugMessage("Starting SS")
             debugMessage(System.currentTimeMillis())
+            reset()
             clicked = true
             doingSS = true
-            reset()
-            if (triggerBot.value) return
             Thread{
                 try {
                     for (i in 0 until 2) {
@@ -125,37 +120,58 @@ object AutoSS : Module(
         if (msg.contains("Device")) {
             debugMessage(System.currentTimeMillis())
         }
-        if (!msg.contains("[BOSS] Goldor: Who dares trespass into my domain?")) return
+        if (!msg.contains("Who dares trespass into my domain")) return
+        debugMessage("Starting SS")
         start()
     }
 
-    var ling = System.currentTimeMillis()
+    private fun ssLoop() {
+        Executor(delay.value.toLong()) {
+            if (mc.theWorld == null) return@Executor
+            if (!this.enabled) return@Executor
+            if (!LocationManager.inSkyblock && !forceDevice.value) return@Executor
+            val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
+            val startButton: BlockPos = BlockPos(110, 121, 91)
 
-    @SubscribeEvent
-    fun triggerBot(event: RenderWorldLastEvent) {
-        if (!triggerBot.value) return
-        if (mc.theWorld == null) return
+            if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return@Executor
 
-        if(!doneFirst) {
-            if (clicks.size == 3) {
-                clicks.removeAt(0)
-                allButtons.removeAt(0)
-                doneFirst = true
+            var device = false
+
+            mc.theWorld.loadedEntityList
+                .filterIsInstance<EntityArmorStand>()
+                .filter { it.getDistanceToEntity(mc.thePlayer) < 6 && it.displayName.unformattedText.contains("Device") }
+                .forEach { _ ->
+                    device = true
+                }
+
+            if (forceDevice.value) device = true
+
+            if (!device) {
+                clicked = false
+                return@Executor
             }
-        }
 
-        val mop = mc.objectMouseOver?: return
-
-        val click = clicks.getOrNull(progress) ?: return
-
-        if (mop.blockPos == click) {
-            if (System.currentTimeMillis() - ling < 50) return
-            ling = System.currentTimeMillis()
-            clickButton(click.x, click.y, click.z)
-            progress++
-            doneFirst = true
-            debugMessage("RAH")
-        }
+            if (detect == Blocks.air) {
+                progress = 0
+            } else if (detect == Blocks.stone_button && doingSS) {
+                if (!doneFirst && clicks.size == 3) {
+                    clicks.removeAt(0)
+                    allButtons.removeAt(0)
+                }
+                doneFirst = true
+                if (progress < clicks.size) {
+                    val next: BlockPos = clicks[progress]
+                    if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
+                        if (smoothRotate.value) {
+                            val (yaw, pitch) = getYawAndPitch(next.x.toDouble() + 0.875, next.y.toDouble() + 0.5, next.z.toDouble() + 0.5)
+                            targets.add(Vec3(yaw.toDouble(), pitch.toDouble(), time.value))
+                        }
+                        clickButton(next.x, next.y, next.z)
+                        progress++
+                    }
+                }
+            }
+        }.register()
     }
 
     @SubscribeEvent
@@ -163,12 +179,10 @@ object AutoSS : Module(
         if (!this.enabled) return
         if (!LocationManager.inSkyblock && !forceDevice.value) return
         if (mc.theWorld == null) return
-        val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
+
         val startButton: BlockPos = BlockPos(110, 121, 91)
 
-        if (System.currentTimeMillis() - lastClickAdded > delay.value) {
-            clickedButton = null
-        }
+        if (System.currentTimeMillis() - lastClickAdded > delay.value) clickedButton = null
 
         if (mc.thePlayer.getDistanceSqToCenter(startButton) < 1600) {
             if (clickedButton != null) {
@@ -176,60 +190,6 @@ object AutoSS : Module(
             }
             allButtons.forEachIndexed{index, location ->
                 drawStringInWorld((index + 1).toString(), Vec3(location.xCoord - 0.0625, location.yCoord + 0.5625, location.zCoord + 0.5), scale = 0.02f, shadow = true, depthTest = false)
-            }
-        }
-
-        if (triggerBot.value) return
-
-        if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
-
-        var device = false
-
-        if (forceDevice.value) {
-            device = true
-        }
-
-        mc.theWorld.loadedEntityList
-            .filterIsInstance<EntityArmorStand>()
-            .filter { it.getDistanceToEntity(mc.thePlayer) < 6 && it.displayName.unformattedText.contains("Device") }
-            .forEach { _ ->
-                device = true
-            }
-
-        if (!device) {
-            clicked = false
-            return
-        }
-
-        if (!clicked) return
-
-        if (detect == Blocks.air) {
-            progress = 0
-        } else if (detect == Blocks.stone_button && doingSS) {
-            if (System.currentTimeMillis() - lastClick < delay.value) {
-                return
-            } else {
-                lastClick = System.currentTimeMillis()
-                if (!doneFirst) {
-                    if (clicks.size == 3) {
-                        clicks.removeAt(0)
-                        allButtons.removeAt(0)
-                    }
-                    doneFirst = true
-                    debugMessage("First Phase")
-                }
-                if (progress < clicks.size) {
-                    val next: BlockPos = clicks[progress]
-                    if (mc.theWorld.getBlockState(next).block == Blocks.stone_button) {
-                        if (smoothRotate.value && !triggerBot.value) {
-                            val (yaw, pitch) = getYawAndPitch(next.x.toDouble() + 0.875, next.y.toDouble() + 0.5, next.z.toDouble() + 0.5)
-                            targets.add(Vec3(yaw.toDouble(), pitch.toDouble(), time.value))
-                        }
-                        clickButton(next.x, next.y, next.z)
-                        progress++
-                        delayTick = delay.value.toInt() / 50
-                    }
-                }
             }
         }
     }
@@ -242,8 +202,7 @@ object AutoSS : Module(
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
-            doingSS = false
-            doneFirst = false
+            reset()
             start()
         }
     }
