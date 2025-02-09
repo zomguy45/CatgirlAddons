@@ -17,6 +17,8 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
         width,
         13.0,
         this.setting.text,
+        this.setting.length,
+        this.setting.placeholder,
         thickness = 1.0,
         radius = 3.0
     )
