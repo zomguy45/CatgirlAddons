@@ -76,6 +76,7 @@ object AutoSS : Module(
     }
 
     override fun onKeyBind() {
+        clicked = false
         start()
     }
 
@@ -217,6 +218,13 @@ object AutoSS : Module(
                     progress = 0
                     clicks.add(button)
                     allButtons.add(Vec3(event.pos.x.toDouble(), event.pos.y.toDouble(), event.pos.z.toDouble()))
+                }
+                if (clicks.size == 2) {
+                    if (clicks[0] == button && !doneFirst) {
+                        doneFirst = true
+                        clicks.removeFirst()
+                        allButtons.removeFirst()
+                    }
                 }
             }
         }
