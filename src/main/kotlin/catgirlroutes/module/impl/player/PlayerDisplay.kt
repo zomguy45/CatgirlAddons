@@ -23,7 +23,6 @@ import catgirlroutes.utils.SkyblockPlayer.SECRETS_REGEX
 import catgirlroutes.utils.SkyblockPlayer.STACKS_REGEX
 import catgirlroutes.utils.SkyblockPlayer.currentSecrets
 import catgirlroutes.utils.SkyblockPlayer.maxSecrets
-import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.HUDRenderUtils.drawItemStackWithText
@@ -50,14 +49,14 @@ object PlayerDisplay: Module(
 
     private val healthDropdown = DropdownSetting("Health dropdown")
     private val health = BooleanSetting("Health").withDependency { healthDropdown.enabled }
-    private val healthColour = ColorSetting("Health colour", Color(255,85,85)).withDependency { healthDropdown.enabled && health.enabled }
+    private val healthColour = ColorSetting("Health colour", Color(255,85,85), false).withDependency { healthDropdown.enabled && health.enabled }
     private val healthBar = BooleanSetting("Health bar").withDependency { healthDropdown.enabled }
     private val healthBarColour = ColorSetting("Health bar colour", Color(255,85,85)).withDependency { healthDropdown.enabled && healthBar.enabled }
     private val effectiveHealth = BooleanSetting("Effective health").withDependency { healthDropdown.enabled }
 
     private val manaDropdown = DropdownSetting("Mana dropdown")
     private val mana = BooleanSetting("Mana").withDependency { manaDropdown.enabled }
-    private val manaColour = ColorSetting("Mana colour", Color(85, 85, 255)).withDependency { manaDropdown.enabled && mana.enabled }
+    private val manaColour = ColorSetting("Mana colour", Color(85, 85, 255), false).withDependency { manaDropdown.enabled && mana.enabled }
     private val manaBar = BooleanSetting("Mana bar").withDependency { manaDropdown.enabled }
     private val manaBarColour = ColorSetting("Mana bar colour", Color(85, 85, 255)).withDependency { manaDropdown.enabled && manaBar.enabled }
     private val manaUsage = BooleanSetting("Mana usage").withDependency { manaDropdown.enabled }
@@ -65,7 +64,7 @@ object PlayerDisplay: Module(
 
     private val otherDropdown = DropdownSetting("Other")
     private val defence = BooleanSetting("Defence").withDependency { otherDropdown.enabled }
-    private val defenceColour = ColorSetting("Defence colour", Color( 85, 255, 85)).withDependency { otherDropdown.enabled && defence.enabled }
+    private val defenceColour = ColorSetting("Defence colour", Color( 85, 255, 85), false).withDependency { otherDropdown.enabled && defence.enabled }
     private val speed = BooleanSetting("Speed").withDependency { otherDropdown.enabled }
     private val stacks = BooleanSetting("Crimson stacks").withDependency { otherDropdown.enabled }
     private val salvation = BooleanSetting("Salvation").withDependency { otherDropdown.enabled }
@@ -121,7 +120,8 @@ object PlayerDisplay: Module(
     }
 
     fun modifyActionBar(text: String): String {
-        var toReturn = text.noControlCodes
+        if (!this.enabled) return text
+        var toReturn = text
 
         if (health.enabled) {
             toReturn = toReturn.replace(HP_REGEX, "")
@@ -160,7 +160,7 @@ object PlayerDisplay: Module(
     ) {
         override fun renderHud() {
             if (!inSkyblock || !health.enabled) return
-            FontUtil.drawStringWithShadow("${SkyblockPlayer.health.commas()}/${SkyblockPlayer.maxHealth.commas()}", 0.0, 0.0, healthColour.value.rgb)
+            FontUtil.drawStringWithShadow("${(SkyblockPlayer.health + SkyblockPlayer.absorption).commas()}/${SkyblockPlayer.maxHealth.commas()}", 0.0, 0.0, healthColour.value.rgb)
         }
     }
 
@@ -231,14 +231,14 @@ object PlayerDisplay: Module(
     @RegisterHudElement
     object ManaUsageHud : HudElement(
         this, 0, 0,
-        mc.fontRendererObj.getStringWidth("-50 Mana (some random ability)"),
+        mc.fontRendererObj.getStringWidth("§b-50 Mana (§6Speed Boost§b)"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("-50 Mana (some random ability)".formatMana(), 0.0, 0.0) }
+        preview = { FontUtil.drawStringWithShadow("§b-50 Mana (§6Speed Boost§b)", 0.0, 0.0) }
 
     ) {
         override fun renderHud() {
-            if (!inSkyblock || !manaUsage.enabled || SkyblockPlayer.manaUsage.isNotEmpty()) return
-            FontUtil.drawStringWithShadow(SkyblockPlayer.manaUsage.formatMana(), 0.0, 0.0)
+            if (!inSkyblock || !manaUsage.enabled || SkyblockPlayer.manaUsage.isEmpty()) return
+            FontUtil.drawStringWithShadow(SkyblockPlayer.manaUsage, 0.0, 0.0)
         }
     }
 

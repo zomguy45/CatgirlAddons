@@ -2,17 +2,16 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
-import jdk.nashorn.internal.ir.annotations.Ignore
 import net.minecraft.network.play.server.S02PacketChat
-import net.minecraft.util.StringUtils
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 // taken from kp which is inspired by odon clint
-object SkyblockPlayer { // todo account for absorption
+object SkyblockPlayer {
     val health: Int
         get() = if (mc.thePlayer != null) (this.maxHealth * mc.thePlayer.health / mc.thePlayer.maxHealth).toInt() else 0
     var maxHealth: Int = 0
+    var absorption: Int = 0
 
     var defence: Int = 0
 
@@ -32,76 +31,49 @@ object SkyblockPlayer { // todo account for absorption
     var currentSecrets: Int = -1
     var maxSecrets: Int = -1
 
-    val HP_REGEX = "([\\d,]+)/([\\d,]+)❤".toRegex()
-    val DEF_REGEX = "([\\d|,]+)❈ Defense".toRegex()
-    val MANA_REGEX = "([\\d,]+)/([\\d,]+)✎( Mana)?".toRegex()
+    val HP_REGEX = Regex("§[c6]([\\d,]+)/([\\d,]+)❤") // §c1389/1390❤ , §62181/1161❤
+    val DEF_REGEX = Regex("§a([\\d,]+)§a❈ Defense") // §a593§a❈ Defense
+    val MANA_REGEX = Regex("§b([\\d,]+)/([\\d,]+)✎( Mana)?") // §b550/550✎ Mana§r
 
-    val OVERFLOW_REGEX = "([\\d,]+)ʬ".toRegex()
-    val STACKS_REGEX = "[0-9]+([ᝐ⁑Ѫ])".toRegex()
-    val SALVATION_REGEX = "T([1-3])!".toRegex()
+    val OVERFLOW_REGEX = Regex("§3([\\d,]+)ʬ") // §3100ʬ
+    val STACKS_REGEX = Regex("§6([0-9]+[ᝐ⁑Ѫ])") // §610⁑
+    val SALVATION_REGEX = Regex("T([1-3])!") // no idea
 
-    val MANA_USAGE_REGEX = "-\\d+ Mana (.+)".toRegex()
-    val SECRETS_REGEX = "(\\d+)/(\\d+) Secrets".toRegex()
+    val MANA_USAGE_REGEX = Regex("§b-[\\d,]+ Mana \\(§6.+?§b\\)|§c§lNOT ENOUGH MANA") // §b-50 Mana (§6Speed Boost§b) , §c§lNOT ENOUGH MANA
+    val SECRETS_REGEX = Regex("§7(\\d+)/(\\d+) Secrets§r") // §76/10 Secrets§r
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: PacketReceiveEvent) {
         if (event.packet !is S02PacketChat || event.packet.type.toInt() != 2) return
-        val message = StringUtils.stripControlCodes(event.packet.chatComponent.unformattedText).replace(",", "")
+        val message = event.packet.chatComponent.formattedText.replace(",", "")
 
-        try { // temp
-            val hpMatch = HP_REGEX.find(message)
-            if (hpMatch != null) {
-                val groups = hpMatch.groupValues
-                this.maxHealth = groups[2].toInt()
-                this.effectiveHealth = (this.maxHealth * (1 + this.defence / 100))
-            }
+        HP_REGEX.find(message)?.destructured?.let { (abs, max) ->
+            this.maxHealth = max.toInt()
+            this.absorption = (abs.toInt() - max.toInt()).coerceAtLeast(0)
+            this.effectiveHealth = this.maxHealth * (1 + this.defence / 100)
+        }
 
-            val defMatch = DEF_REGEX.find(message)
-            if (defMatch != null) {
-                val groups = defMatch.groupValues
-                this.defence = groups[1].toInt()
-            }
+        DEF_REGEX.find(message)?.groupValues?.get(1)?.let { this.defence = it.toIntOrNull() ?: this.defence }
 
-            val manaMatch = MANA_REGEX.find(message)
-            if (manaMatch != null) {
-                val groups = manaMatch.groupValues
-                this.mana = groups[1].toInt()
-                this.maxMana = groups[2].toInt()
-            }
+        MANA_REGEX.find(message)?.destructured?.let { (mana, maxMana) ->
+            this.mana = mana.toInt()
+            this.maxMana = maxMana.toInt()
+        }
 
-            val overflowMatch = OVERFLOW_REGEX.find(message)
-            if (overflowMatch != null) {
-                val groups = overflowMatch.groupValues
-                this.overflowMana = groups[2].toInt()
-            }
+        OVERFLOW_REGEX.find(message)?.destructured?.let { (_, overflow) -> this.overflowMana = overflow.toInt() }
 
-            val stacksMatch = STACKS_REGEX.find(message)
-            if (stacksMatch != null) {
-                val groups = stacksMatch.groupValues
-                this.stacks = groups[1]
-            }
+        STACKS_REGEX.find(message)?.destructured?.let { (stacks) -> this.stacks = stacks }
 
-            val salvationMatch = SALVATION_REGEX.find(message)
-            if (salvationMatch != null) {
-                val groups = salvationMatch.groupValues
-                this.salvation = groups[1].toInt()
-            }
+        SALVATION_REGEX.find(message)?.destructured?.let { (salvation) -> this.salvation = salvation.toInt() }
 
-            val manaUsageMatch = MANA_USAGE_REGEX.find(message)
-            if (manaUsageMatch != null) {
-                val groups = manaUsageMatch.groupValues
-                this.manaUsage = groups[1]
-            }
+        MANA_USAGE_REGEX.find(message)?.let { this.manaUsage = it.value } ?: run { this.manaUsage = "" }
 
-            val secretsMatch = SECRETS_REGEX.find(message)
-            if (secretsMatch != null) {
-                val groups = secretsMatch.groupValues
-                this.currentSecrets = groups[1].toInt()
-                this.maxSecrets = groups[2].toInt()
-            } else {
-                this.currentSecrets = -1
-                this.maxSecrets = -1
-            }
-        } catch (e: IndexOutOfBoundsException) {}
+        SECRETS_REGEX.find(message)?.destructured?.let { (current, max) ->
+            this.currentSecrets = current.toInt()
+            this.maxSecrets = max.toInt()
+        } ?: run {
+            this.currentSecrets = -1
+            this.maxSecrets = -1
+        }
     }
 }
