@@ -53,7 +53,7 @@ class InventoryButtonEditor : GuiScreen() {
                 InventoryButton.colour to InventoryButton.borderColour
             }
             button.render(invX.toDouble(), invY.toDouble(), colour, borderColour)
-            if (!button.isActive) FontUtil.drawString("+", x + 6, y + 5)
+            if (!button.isActive && !button.isEquipment) FontUtil.drawString("+", x + 6, y + 5)
         }
 
         editingButton?.let {
@@ -102,9 +102,11 @@ class InventoryButtonEditor : GuiScreen() {
             if (iconTextField.mouseClicked(mouseX, mouseY, mouseButton)) it.icon = iconTextField.text
         }
 
+        if (isHoveringEditor(mouseX, mouseY)) return
+
         allButtons.filter { !it.isEquipment && it.isHovered(mouseX - invX, mouseY - invY) }
             .forEach { button ->
-                if (editingButton == button && !isHoveringEditor(mouseX, mouseY)) {
+                if (editingButton == button) {
                     editingButton = null
                 } else {
                     editingButton = button
