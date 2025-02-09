@@ -146,7 +146,6 @@ object Doorless: Module(
         var distance = mc.thePlayer.capabilities.walkSpeed * 1000 * 0.0085
         if (mc.theWorld.getBlockState(BlockPos(floor(posX), floor(posY - 1), floor(posZ))).block == Blocks.cobblestone_wall) {
             distance = mc.thePlayer.capabilities.walkSpeed * 1000 * 0.0032
-            setBlockAt(posX, posY - 1, posZ, 0)
             setBlockAt(posX + xOffset, posY - 1, posZ + zOffset, 0);
             setBlockAt(posX + xOffset * 2, posY - 1, posZ + zOffset * 2, 0);
             setBlockAt(posX + xOffset * 3, posY - 1, posZ + zOffset * 3, 0);
