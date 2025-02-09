@@ -1,6 +1,7 @@
 package catgirlroutes.ui.misc.elements
 
 import catgirlroutes.ui.clickgui.elements.Element
+import catgirlroutes.ui.misc.elements.impl.MiscElementText
 
 /**
  * The base class for all [MiscElement]'s
@@ -49,5 +50,9 @@ abstract class MiscElement(
     open fun isHovered(mouseX: Int, mouseY: Int, xOff: Int = 0, yOff: Int = 0): Boolean {
         return mouseX >= x + xOff && mouseX <= x + width + xOff &&
                 mouseY >= y + yOff && mouseY <= y + height + yOff
+    }
+
+    companion object {
+        var currentlyFocused: MiscElementText? = null
     }
 }

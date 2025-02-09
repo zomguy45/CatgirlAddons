@@ -50,7 +50,7 @@ class LeapOrganiser : GuiScreen() {
         sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0, vertical = false
     )
 
-    private val textField = MiscElementText(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 160.0, 200.0)
+    private val textField = MiscElementText(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 160.0, 200.0, size = 50, placeholder = "Placeholder")
 
     override fun initGui() {
         if (boxes.isNotEmpty()) return
