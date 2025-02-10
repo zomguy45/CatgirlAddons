@@ -58,10 +58,49 @@ object ColorUtil {
         return Color.getHSBColor(hsb[0], 1f, 1f)
     }
 
+    /**
+     * Mixes two colours together
+     * keeps this.alpha
+     */
+    fun Color.mix(colour: Color): Color {
+        val c1 = this.rgb
+        val c2 = colour.rgb
+
+        val red1 = (c1 shr 16) and 0xFF
+        val green1 = (c1 shr 8) and 0xFF
+        val blue1 = c1 and 0xFF
+
+        val red2 = (c2 shr 16) and 0xFF
+        val green2 = (c2 shr 8) and 0xFF
+        val blue2 = c2 and 0xFF
+
+        val mixedRed = (red1 + red2) / 2
+        val mixedGreen = (green1 + green2) / 2
+        val mixedBlue = (blue1 + blue2) / 2
+
+        val originalAlpha = (this.rgb shr 24) and 0xFF
+
+        return Color((originalAlpha shl 24) or (mixedRed shl 16) or (mixedGreen shl 8) or mixedBlue)
+    }
+
     val Color.hex: String
         get() {
             val rgba = (red shl 24) or (green shl 16) or (blue shl 8) or alpha
             return String.format("%08X", rgba)
+        }
+
+    val Color.invert: Color
+        get() {
+            val alpha = (this.rgb shr 24) and 0xFF
+            val red = (this.rgb shr 16) and 0xFF
+            val green = (this.rgb shr 8) and 0xFF
+            val blue = this.rgb and 0xFF
+
+            val invertedRed = 255 - red
+            val invertedGreen = 255 - green
+            val invertedBlue = 255 - blue
+
+            return Color((alpha shl 24) or (invertedRed shl 16) or (invertedGreen shl 8) or invertedBlue)
         }
 
     const val jellyColor = -0x44eaeaeb
