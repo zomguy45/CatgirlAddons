@@ -25,7 +25,7 @@ object PearlClip : Module(
     description = "Clips you down selected blocks using an ender pearl."
 ){
     private val pearlClipDistance: NumberSetting = NumberSetting("Distance", 20.0, 0.0, 80.0, 1.0, description = "Distance to clip down")
-    private val pearlClipDelay: NumberSetting = NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0, description = "Pearl clip delay")
+    private val pearlClipDelay: NumberSetting = NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0, description = "Pearl clip delay", unit = "ms")
     private val legacyDetection: BooleanSetting = BooleanSetting("Legacy detection")
 
 

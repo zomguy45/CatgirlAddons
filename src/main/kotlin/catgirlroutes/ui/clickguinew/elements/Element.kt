@@ -7,7 +7,7 @@ import catgirlroutes.ui.clickguinew.ClickGUI
 import catgirlroutes.utils.render.StencilUtils
 import net.minecraft.client.renderer.GlStateManager
 
-abstract class Element<S: Setting<*>>( // TODO: CHANGE COLOURS IN SOME ELEMENTS
+abstract class Element<S: Setting<*>>(
     val parent: ModuleButton,
     val setting: S,
     val type: ElementType

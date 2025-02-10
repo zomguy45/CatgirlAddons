@@ -16,7 +16,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 object CatMode: Module( // todo: add cat model mode from skytils april fools!!!?!
     "Cat mode",
     category = Category.MISC,
-    description = "MEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOWMEOW"
+    description = "MEOWMEOWMEOWMEOWMEOWMEOWMEOW"
 ) {
 
     private val sound: BooleanSetting = BooleanSetting("Meowound", false, "Meow sound everywhere")
@@ -24,7 +24,7 @@ object CatMode: Module( // todo: add cat model mode from skytils april fools!!!?
     private val fallingCats: BooleanSetting = BooleanSetting("Catocalypsis", false, "THEY'RE EVERYWHERE")
     private val darken: BooleanSetting = BooleanSetting("Darken", false, "Makes the kittens darker so they don't distract you").withDependency { fallingCats.enabled }
     private val catTexture: StringSelectorSetting = StringSelectorSetting("Type", "trans", arrayListOf("trans", "flushed", "bread", "cut", "toast")).withDependency { fallingCats.enabled }
-    private val catSize: NumberSetting = NumberSetting("Size", 15.0, 10.0, 50.0, 1.0).withDependency { fallingCats.enabled }
+    private val catSize: NumberSetting = NumberSetting("Size", 15.0, 10.0, 50.0, 1.0, unit = "px").withDependency { fallingCats.enabled }
     private val catSpeed: NumberSetting = NumberSetting("Speed", 1.0, 0.5, 3.0, 0.1).withDependency { fallingCats.enabled }
 
     init {

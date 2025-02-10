@@ -18,7 +18,7 @@ import net.minecraft.util.MathHelper
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
-class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shadows, rounded boxes, favourite colours, extending prob
+class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shadows, rounded boxes, favourite colours, extending prob, extend and shit
     Element<ColorSetting>(parent, setting, ElementType.COLOR) {
 
     var dragging: Int? = null

@@ -19,7 +19,7 @@ object AutoExcavator : Module(
     name = "Auto Excavator",
     category = Category.MISC
 ) {
-    val clickDelay = NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0)
+    val clickDelay = NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0, unit = "ms")
     init {
         this.addSettings(
             clickDelay

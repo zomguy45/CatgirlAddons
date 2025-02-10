@@ -33,9 +33,9 @@ object ClickGui: Module(
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
     val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.")
 
-    val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", description = "Name that will be rendered in the gui.")
+    val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", 15, description = "Name that will be rendered in the gui.")
     val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
-    val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.")
+    val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  description = "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.").withDependency { this.prefixStyle.index == 2 }
 
     private val devSettings: DropdownSetting = DropdownSetting("Dev Settings", false)
     val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency { devSettings.enabled }

@@ -25,7 +25,7 @@ object WitherCloak: Module(
 ){
 
     private val enabledText = StringSetting("Title")
-    private val textColor = ColorSetting("Title color", Color.PINK)
+    private val textColor = ColorSetting("Title color", Color.PINK, false)
     private val timer = BooleanSetting("Timer")
     private val hideCloak = BooleanSetting("Hide cloak")
 
@@ -38,13 +38,12 @@ object WitherCloak: Module(
     var cloakCd: Long = 0
 
     @RegisterHudElement
-    object ImageHud : HudElement(
+    object CloakHud : HudElement(
         this,
         width = mc.fontRendererObj.getStringWidth(enabledText.value),
         height = mc.fontRendererObj.FONT_HEIGHT + 2
     ) {
         override fun renderHud() {
-            width = mc.fontRendererObj.getStringWidth(enabledText.value)
             if (inCloak) {
                 drawStringWithShadow(enabledText.value, 0.0, 0.0, textColor.value.rgb)
                 return
@@ -53,6 +52,10 @@ object WitherCloak: Module(
                 val xPad = mc.fontRendererObj.getStringWidth(enabledText.value) / 2 - (mc.fontRendererObj.getStringWidth(String.format("%.1f", timeLeft)) / 2)
                 drawStringWithShadow(String.format("%.1f", timeLeft), xPad.toDouble(), 0.0, textColor.value.rgb)
             }
+        }
+
+        override fun setDimensions() {
+            this.width = mc.fontRendererObj.getStringWidth(enabledText.value)
         }
     }
 

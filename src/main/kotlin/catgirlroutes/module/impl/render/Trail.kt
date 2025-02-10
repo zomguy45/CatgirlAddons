@@ -25,9 +25,9 @@ object Trail: Module(
     Category.RENDER
 ){
 
-    private var trailTicks = NumberSetting("Ticks", 20.0, 1.0, 400.0)
+    private var trailTicks = NumberSetting("Ticks", 20.0, 1.0, 400.0, unit = "t")
     private var trailStyle = StringSelectorSetting("Style", "Color", arrayListOf("Color", "Trans", "Lesbian"))
-    private var trailColor = ColorSetting("Color", java.awt.Color.PINK).withDependency { trailStyle.selected == "Color"}
+    private var trailColor = ColorSetting("Color", Color.PINK).withDependency { trailStyle.selected == "Color"}
     private var segmentSize = NumberSetting("Segment size", 3.0, 2.0, 10.0).withDependency { trailStyle.selected.equalsOneOf("Trans", "Lesbian")}
     private var trailThickness = NumberSetting("Thickness", 3.0, 1.0, 5.0)
     private var trailStay = BooleanSetting("Stay", true)
@@ -47,7 +47,7 @@ object Trail: Module(
 
     private var posToRender = mutableListOf<Vec3>()
 
-    val transColors = mutableListOf(Color(91, 206, 250), Color(245, 169, 184), Color(255, 255, 255), Color(245, 169, 184))
+    val transColors = mutableListOf(Color(91, 206, 250), Color(245, 169, 184), Color(255, 255, 255), Color(245, 169, 184)) // todo: move to ColorUtil prob
     val lesbianColors = mutableListOf(Color(213, 45, 0), Color(239, 118, 39), Color(255, 154, 86), Color(255, 255, 255), Color(209, 98, 164), Color(181, 86, 144), Color(163, 2, 98))
 
     @SubscribeEvent
