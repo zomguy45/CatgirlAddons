@@ -31,7 +31,8 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
         DEFAULT_HEIGHT * 7 + 5.0,
         width / 2.0 - (FontUtil.getStringWidth("Hex") + 5.0) + 27.0,
         DEFAULT_HEIGHT,
-        "#${colorValue.hex}",
+        colorValue.hex,
+        prependText = "§7#§r",
         thickness = 1.0,
         radius = 5.0,
         outlineColour = colorValue.hsbMax(setting).withAlpha(255).darker(),
@@ -107,7 +108,7 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
 
         if (dragging != null) {
             this.hexTextField.apply {
-                text = "#${colorValue.hex}"
+                text = colorValue.hex
                 outlineColour = colorValue.hsbMax(setting).withAlpha(255).darker()
                 outlineFocusColour = colorValue.hsbMax(setting).withAlpha(255).darker()
             }
@@ -133,19 +134,20 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton != 0) return false
-        dragging = when {
-            isHovered(mouseX, mouseY, 0.0, 0.0, width / 2, DEFAULT_HEIGHT * 7) -> 0 // SB box
-            isHovered(mouseX, mouseY, width / 2.0 + 4.5, 1.0, 8.0, DEFAULT_HEIGHT * 7 - 2.0) -> 1 // hue
-            isHovered(mouseX, mouseY, width / 2.0 + DEFAULT_HEIGHT + 4.5, 1.0, 8.0, DEFAULT_HEIGHT * 7 - 2.0) && this.setting.allowAlpha -> 2 // alpha
-            else -> null
+        if (mouseButton == 0) {
+            dragging = when {
+                isHovered(mouseX, mouseY, 0.0, DEFAULT_HEIGHT, width / 2, DEFAULT_HEIGHT * 7) -> 0 // SB box
+                isHovered(mouseX, mouseY, width / 2.0 + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 7 - 2.0) -> 1 // hue
+                isHovered(mouseX, mouseY, width / 2.0 + DEFAULT_HEIGHT + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 7) && this.setting.allowAlpha -> 2 // alpha
+                else -> null
+            }
         }
-        if (this.hexTextField.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)) {
-            if (this.hexTextField.focus) {
-                this.hexTextField.text = this.hexTextField.text.completeHexString()
-            } // else this.listeningHex = true
-        }
-        return super.mouseClicked(mouseX, mouseY, mouseButton)
+        return this.hexTextField.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)
+    }
+
+    override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
+        this.hexTextField.mouseClickMove(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), clickedMouseButton, timeSinceLastClick)
+        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
@@ -156,11 +158,9 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (this.hexTextField.keyTyped(typedChar, keyCode)) {
             if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
-                this.hexTextField.text = this.hexTextField.text.completeHexString()
+                this.hexTextField.text = this.hexTextField.text.completeHexString().removePrefix("#")
                 this.hexTextField.focus = false
             }
-//            this.hexTextField.text = this.hexString
-//            debugMessage(this.hexTextField.text)
             return true
         }
         return super.keyTyped(typedChar, keyCode)

@@ -2,6 +2,7 @@ package catgirlroutes.ui.clickguinew
 
 import catgirlroutes.module.Category
 import catgirlroutes.module.ModuleManager
+import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
 import catgirlroutes.ui.animations.impl.LinearAnimation
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.utils.ChatUtils.debugMessage
@@ -26,8 +27,11 @@ class Window( // todo: scroll shit
 
     private var scrollTarget = 0.0
     private var scrollOffset = 0.0
+    private var prevScrollPosition: Double? = null // todo: zzz
+    private var whatToScroll: ModuleButton? = null
 
     private val scrollAnimation = LinearAnimation<Double>(200)
+    private val addScrollAnimation = EaseOutQuadAnimation(500) // todo: impl
 
     init {
         for (module in ModuleManager.modules) {
@@ -58,9 +62,26 @@ class Window( // todo: scroll shit
                     button.y = startYRight
                     startYRight += button.drawScreen(mouseX, mouseY, partialTicks)
                 }
+                if (button.extendAnimation.isAnimating() || button.extraHeightAnimation.isAnimating()) {
+                    if (button.extended) {
+                        this.prevScrollPosition = this.prevScrollPosition ?: this.scrollOffset
+                        val buttonBot = button.y + button.elementsHeight + button.height
+                        val newScrollTarget = this.scrollOffset - if (button.elementsHeight + button.height < this.height) buttonBot - this.height + 15.0 else button.y
+
+                        if (newScrollTarget < this.scrollTarget) {
+                            this.scrollTarget = newScrollTarget
+                            if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
+                        }
+                    }
+//                    else if (this.prevScrollPosition != null) {
+//                        this.scrollTarget = this.prevScrollPosition!!
+//                        this.prevScrollPosition = null
+//                        if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
+//                    }
+                }
             }
         }
-        this.length += startYLeft.coerceAtLeast(startYRight)
+        this.length = startYLeft.coerceAtLeast(startYRight)
 
         GlStateManager.popMatrix()
     }

@@ -5,6 +5,8 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.animations.impl.ColorAnimation
 import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.ui.clickgui.util.ColorUtil.invert
+import catgirlroutes.ui.clickgui.util.ColorUtil.mix
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
@@ -18,12 +20,6 @@ import catgirlroutes.utils.wrapText
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
-
-/*
-    TODO: height with animation shit for selectors
-        finish elements
-        figure font alpha
- */
 class ModuleButton(val module: Module, val window: Window) {
     private val menuElements: ArrayList<Element<*>> = ArrayList()
 
@@ -38,9 +34,7 @@ class ModuleButton(val module: Module, val window: Window) {
 
     val elementsHeight get() = this.menuElements.sumOf { it.height + 5.0 }
     private val animatedHeight get() = this.height + this.extendAnimation.get(0.0, this.extraHeight + 5.0, !this.extended)
-    private val extraHeight get() = run {
-            this.extraHeightAnimation.get(this.prevHeight, this.elementsHeight, this.prevHeight == this.elementsHeight)
-    }
+    private val extraHeight get() = this.extraHeightAnimation.get(this.prevHeight, this.elementsHeight, this.prevHeight == this.elementsHeight)
     private val totalHeight get() = this.height + this.extendAnimation.get(0.0, this.descHeight, this.extended)
     var prevHeight = elementsHeight
 
@@ -51,10 +45,10 @@ class ModuleButton(val module: Module, val window: Window) {
     val yAbsolute: Double
         get() = y + window.y
 
-    private val extendAnimation = EaseOutQuadAnimation(500)
+    val extendAnimation = EaseOutQuadAnimation(500)
     private val lineAnimation = EaseOutQuadAnimation(750)
     private val colourAnimation = ColorAnimation(100)
-    private val extraHeightAnimation = EaseOutQuadAnimation(500)
+    val extraHeightAnimation = EaseOutQuadAnimation(500)
 
 
     init {
@@ -100,22 +94,24 @@ class ModuleButton(val module: Module, val window: Window) {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x, y, 0.0)
 
-        val colour = this.colourAnimation.get(Color.GREEN, Color(ColorUtil.outlineColor), this.module.enabled)
-
+        val colour = this.colourAnimation.get(ColorUtil.clickGUIColor.invert.mix(Color.GREEN), Color(ColorUtil.outlineColor), this.module.enabled)
         drawOutlinedRectBorder(0.0, 0.0, this.width, this.animatedHeight + this.totalHeight - this.height, 3.0, 1.0, colour)
         FontUtil.drawStringWithShadow(module.name, 5.0, 7.0, scale = 1.4)
 
         val descVisibility = extendAnimation.get(0.0, 1.0, this.extended)
-        val yOffset = (1.0 - descVisibility) * 10.0
         if (descVisibility > 0.0) {
+            val descColour = Color.LIGHT_GRAY.withAlpha(descVisibility.coerceAtLeast(0.04).toFloat()).rgb // 0.04f is min otherwise text is rendered with alpha 1.0f (mc is weird)
+            val descOffset = (1.0 - descVisibility) * 10.0
             this.description.forEachIndexed { i, it ->
-                FontUtil.drawStringWithShadow(it, 7.0, 10.0 + fontHeight * (i + 1) + yOffset, Color.LIGHT_GRAY.rgb)
+                GlStateManager.enableBlend()
+                FontUtil.drawStringWithShadow(it, 7.0, 10.0 + fontHeight * (i + 1) + descOffset, descColour)
+                GlStateManager.disableBlend()
             }
         }
 
         val lineWidth = this.lineAnimation.get(0.0, this.width - 10.0, !this.extended)
-        val alpha = this.lineAnimation.get(0.0, 1.0, !this.extended)
-        val lineColor = Color.LIGHT_GRAY.withAlpha((alpha * 255).toInt())
+        val alpha = this.lineAnimation.get(0.0, 1.0, !this.extended).toFloat()
+        val lineColor = Color.LIGHT_GRAY.withAlpha(alpha)
         drawRoundedRect(5.0, this.height - 1.0, lineWidth, 1.0, 1.0, lineColor)
 
         val offset = this.animatedHeight + this.extendAnimation.get(0.0, this.descHeight, this.extended)
@@ -152,7 +148,10 @@ class ModuleButton(val module: Module, val window: Window) {
                         this.extended = !this.extended
                         this.lineAnimation.start(true)
                     }
-                    if (!this.extended) elements.forEach { it.listening = false }
+                    if (!this.extended) elements.forEach {
+                        it.listening = false
+                        if (it is ElementSelector) it.extended = false
+                    }
                     true
                 } ?: false
                 else -> false

@@ -1,6 +1,5 @@
 package catgirlroutes.ui.misc.elements
 
-import catgirlroutes.ui.clickgui.elements.Element
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 
 /**

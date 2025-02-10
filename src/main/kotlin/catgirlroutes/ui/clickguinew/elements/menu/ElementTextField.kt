@@ -1,12 +1,14 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
+import java.awt.Color
 
 class ElementTextField(parent: ModuleButton, setting: StringSetting) :
     Element<StringSetting>(parent, setting, ElementType.TEXT_FIELD) {
@@ -25,7 +27,11 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         FontUtil.drawString(displayName, 0.0, 0.0)
-        this.textField.render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
+        this.textField.apply {
+            outlineColour = Color(ColorUtil.outlineColor) // todo do something about this cuz it doesn't seem like meta
+            outlineFocusColour = ColorUtil.clickGUIColor
+            render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
+        }
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 

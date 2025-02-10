@@ -1,11 +1,13 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeOnlyFirst
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementButton
+import java.awt.Color
 
 class ElementAction(parent: ModuleButton, setting: ActionSetting) :
     Element<ActionSetting>(parent, setting, ElementType.ACTION) {
@@ -21,7 +23,11 @@ class ElementAction(parent: ModuleButton, setting: ActionSetting) :
     }
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
-        this.actionButton.render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
+        this.actionButton.apply {
+            outlineColour = Color(ColorUtil.outlineColor) // todo do something about this cuz it doesn't seem like meta
+            outlineHoverColour = ColorUtil.clickGUIColor
+            render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
+        }
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 

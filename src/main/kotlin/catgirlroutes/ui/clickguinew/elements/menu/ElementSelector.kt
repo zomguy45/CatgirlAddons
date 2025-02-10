@@ -10,8 +10,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
-import catgirlroutes.utils.render.HUDRenderUtils.endScissor
-import catgirlroutes.utils.render.HUDRenderUtils.setUpScissor
 import catgirlroutes.utils.render.StencilUtils
 import java.awt.Color
 
@@ -21,15 +19,14 @@ class ElementSelector(parent: ModuleButton, setting: StringSelectorSetting) : //
     private val extendAnimation = EaseOutQuadAnimation(500)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
-        val height = this.extendAnimation.get(13.0, this.setting.options.size * 13.0 + 13.0, !extended)
+        height = this.extendAnimation.get(13.0, this.setting.options.size * 13.0 + 13.0, !extended)
         val displayValue = "$displayName: ${this.setting.selected}"
 
-        drawRoundedBorderedRect(0.0, 0.0, width, height, 3.0, 1.0, Color(ColorUtil.bgColor),  ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(0.0, 0.0, width, height, 3.0, 1.0, Color(ColorUtil.bgColor).darker(),  ColorUtil.clickGUIColor)
         drawRoundedBorderedRect(0.0, 0.0, width, 13.0, 3.0, 1.0, Color(ColorUtil.buttonColor),  ColorUtil.clickGUIColor)
         FontUtil.drawTotalCenteredString(displayValue, width / 2.0, 13.0 / 2.0)
 
-        // schizo way to stop rendering when invisible (needed cuz of stencil)
-        if (!extended && yAbsolute > this.parent.yAbsolute) return height
+        if (!extended && !this.extendAnimation.isAnimating()) return height
 
         StencilUtils.write(false, 3)
         drawRoundedRect(0.0, 0.0, width, height, 3.0, Color.WHITE)
@@ -37,7 +34,7 @@ class ElementSelector(parent: ModuleButton, setting: StringSelectorSetting) : //
         this.setting.options.forEachIndexed { i, option ->
             val yOff = (i + 1) * 13.0
             if (this.isHovered(mouseX, mouseY, yOff = yOff.toInt())) {
-                drawRoundedBorderedRect(0.0, yOff, width, 13.0, 3.0, 1.0, Color(ColorUtil.outlineColor), ColorUtil.clickGUIColor)
+                drawRoundedBorderedRect(0.0, yOff, width, 13.0, 3.0, 1.0, Color(ColorUtil.outlineColor).darker(), Color(ColorUtil.outlineColor))
             }
             FontUtil.drawTotalCenteredString(option.capitalizeOnlyFirst(), width / 2.0, yOff + 13.0 / 2.0)
         }

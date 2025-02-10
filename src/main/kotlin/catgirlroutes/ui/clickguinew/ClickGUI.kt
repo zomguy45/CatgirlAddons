@@ -38,6 +38,7 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
     private val searchBar = MiscElementText(
         width = guiWidth - categoryWidth - 5.0,
         height = 20.0,
+        placeholder = "Search...",
         radius = 3.0,
         bgColour = Color(ColorUtil.bgColor)
     )
@@ -81,7 +82,11 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
         val titleWidth = FontUtil.getStringWidth(ClickGui.clientName.text, scale = 1.1)
         FontUtil.drawStringWithShadow(ClickGui.clientName.text, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0, scale = 1.1)
 
-        this.searchBar.render(scaledMouseX, scaledMouseY)
+        this.searchBar.apply {
+            outlineColour = Color(ColorUtil.outlineColor)
+            outlineFocusColour = ColorUtil.clickGUIColor
+            render(scaledMouseX, scaledMouseY)
+        }
 //        debugMessage(selectedWindow.category.name)
         categoryButtons.clear()
 
@@ -106,7 +111,7 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
             window.drawScreen(scaledMouseX, scaledMouseY, partialTicks)
 
             if (this.selectedWindow == window) {
-                drawRoundedBorderedRect(x + 5.0, y + offset + 2.0, categoryWidth - 9.0, 20.0, 3.0, 1.0, ColorUtil.clickGUIColor, ColorUtil.clickGUIColor)
+                drawRoundedBorderedRect(x + 5.0, y + offset + 2.0, categoryWidth - 9.0, 20.0, 3.0, 1.0, Color(ColorUtil.outlineColor), Color(ColorUtil.outlineColor))
             }
             FontUtil.drawStringWithShadow(window.category.name.capitalizeOnlyFirst(), x + 10.0, y + offset + 8.0, scale = 1.1)
 
