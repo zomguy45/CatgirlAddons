@@ -127,7 +127,8 @@ object AutoSS : Module(
     }
 
     private fun ssLoop() {
-        Executor(delay.value.toLong()) {
+        Executor(10) {
+            if (System.currentTimeMillis() - lastClickAdded + 1 < delay.value) return@Executor
             if (mc.theWorld == null) return@Executor
             if (!this.enabled) return@Executor
             if (!LocationManager.inSkyblock && !forceDevice.value) return@Executor
@@ -213,18 +214,18 @@ object AutoSS : Module(
         if (event.pos.x == 111 && event.pos.y >= 120 && event.pos.y <= 123 && event.pos.z >= 92 && event.pos.z <= 95) {
             val button: BlockPos = BlockPos(110, event.pos.y, event.pos.z)
             if (event.update.block == Blocks.sea_lantern) {
-                if (!clicks.contains(button)) {
-                    debugMessage("Added to clicks: x: ${event.pos.x}, y: ${event.pos.y}, z: ${event.pos.z}")
-                    progress = 0
-                    clicks.add(button)
-                    allButtons.add(Vec3(event.pos.x.toDouble(), event.pos.y.toDouble(), event.pos.z.toDouble()))
-                }
                 if (clicks.size == 2) {
                     if (clicks[0] == button && !doneFirst) {
                         doneFirst = true
                         clicks.removeFirst()
                         allButtons.removeFirst()
                     }
+                }
+                if (!clicks.contains(button)) {
+                    debugMessage("Added to clicks: x: ${event.pos.x}, y: ${event.pos.y}, z: ${event.pos.z}")
+                    progress = 0
+                    clicks.add(button)
+                    allButtons.add(Vec3(event.pos.x.toDouble(), event.pos.y.toDouble(), event.pos.z.toDouble()))
                 }
             }
         }
