@@ -150,7 +150,7 @@ class ModuleButton(val module: Module, val window: Window) {
                     }
                     if (!this.extended) elements.forEach {
                         it.listening = false
-                        if (it is ElementSelector) it.extended = false
+                        if (it is ElementSelector || (it is ElementColor && it.setting.collapsible)) it.extended = false
                     }
                     true
                 } ?: false

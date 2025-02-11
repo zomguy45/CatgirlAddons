@@ -12,7 +12,7 @@ class Window( // todo: scroll shit
     val category: Category,
     val clickGui: ClickGUI
 ) {
-    private val moduleButtons: ArrayList<ModuleButton> = ArrayList()
+    val moduleButtons: ArrayList<ModuleButton> = ArrayList()
 
     val x = this.clickGui.x + this.clickGui.categoryWidth + 10.0
     val y = this.clickGui.y + 25.0 + 5.0
@@ -51,35 +51,36 @@ class Window( // todo: scroll shit
         var startYLeft = this.scrollOffset
         var startYRight = this.scrollOffset
 
-        this.moduleButtons.chunked(2).forEach { row ->
-            row.forEachIndexed { i, button ->
-                if (i == 0) {
-                    button.x = 0.0
-                    button.y = startYLeft
-                    startYLeft += button.drawScreen(mouseX, mouseY, partialTicks)
-                } else {
-                    button.x = row[0].width + 5.0
-                    button.y = startYRight
-                    startYRight += button.drawScreen(mouseX, mouseY, partialTicks)
-                }
-                if (button.extendAnimation.isAnimating() || button.extraHeightAnimation.isAnimating()) {
-                    if (button.extended) {
-                        this.prevScrollPosition = this.prevScrollPosition ?: this.scrollOffset
-                        val buttonBot = button.y + button.elementsHeight + button.height
-                        val newScrollTarget = this.scrollOffset - if (button.elementsHeight + button.height < this.height) buttonBot - this.height + 15.0 else button.y
-
-                        if (newScrollTarget < this.scrollTarget) {
-                            this.scrollTarget = newScrollTarget
-                            if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
-                        }
+        this.moduleButtons.filter{ it.module.name.contains(clickGui.searchBar.text, true) }
+            .chunked(2).forEach { row ->
+                row.forEachIndexed { i, button ->
+                    if (i == 0) {
+                        button.x = 0.0
+                        button.y = startYLeft
+                        startYLeft += button.drawScreen(mouseX, mouseY, partialTicks)
+                    } else {
+                        button.x = row[0].width + 5.0
+                        button.y = startYRight
+                        startYRight += button.drawScreen(mouseX, mouseY, partialTicks)
                     }
-//                    else if (this.prevScrollPosition != null) {
-//                        this.scrollTarget = this.prevScrollPosition!!
-//                        this.prevScrollPosition = null
-//                        if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
-//                    }
+                    if (button.extendAnimation.isAnimating() || button.extraHeightAnimation.isAnimating()) {
+                        if (button.extended) {
+                            this.prevScrollPosition = this.prevScrollPosition ?: this.scrollOffset
+                            val buttonBot = button.y + button.elementsHeight + button.height
+                            val newScrollTarget = this.scrollOffset - if (button.elementsHeight + button.height < this.height) buttonBot - this.height + 15.0 else button.y
+
+                            if (newScrollTarget < this.scrollTarget) {
+                                this.scrollTarget = newScrollTarget
+                                if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
+                            }
+                        }
+    //                    else if (this.prevScrollPosition != null) {
+    //                        this.scrollTarget = this.prevScrollPosition!!
+    //                        this.prevScrollPosition = null
+    //                        if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
+    //                    }
+                    }
                 }
-            }
         }
         this.length = startYLeft.coerceAtLeast(startYRight)
 
@@ -128,6 +129,6 @@ class Window( // todo: scroll shit
     }
 
     companion object {
-        private const val SCROLL_DISTANCE = 16
+        private const val SCROLL_DISTANCE = 25
     }
 }

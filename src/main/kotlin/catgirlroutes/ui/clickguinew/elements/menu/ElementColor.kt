@@ -1,6 +1,7 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
 import catgirlroutes.module.settings.impl.ColorSetting
+import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil.hex
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -13,12 +14,14 @@ import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedHueBox
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawSBBox
+import catgirlroutes.utils.render.StencilUtils
 import net.minecraft.util.MathHelper
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
-class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shadows, rounded boxes, favourite colours, extending prob, extend and shit
+class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shadows, rounded boxes, favourite colours
     Element<ColorSetting>(parent, setting, ElementType.COLOR) {
 
     var dragging: Int? = null
@@ -39,9 +42,29 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
         outlineFocusColour = colorValue.hsbMax(setting).withAlpha(255).darker()
     )
     private var hexPrev = this.hexTextField.text
+    private val extendAnimation = EaseOutQuadAnimation(500)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
+        height = this.extendAnimation.get(if (this.setting.collapsible) DEFAULT_HEIGHT else DEFAULT_HEIGHT * 8 + 5.0, DEFAULT_HEIGHT * 8 + 5.0, !extended)
         FontUtil.drawString(displayName, 0.0, 0.0)
+        drawRoundedBorderedRect(
+            FontUtil.getStringWidth(displayName) + 5.0,
+            0.0,
+            20.0,
+            9.0,
+            3.0,
+            1.0,
+            this.colorValue,
+            this.colorValue.darker()
+        )
+
+        if (!(extended || !this.setting.collapsible) && !this.extendAnimation.isAnimating()) return height
+
+        if (this.setting.collapsible) {
+            StencilUtils.write(false)
+            drawRoundedRect(-3.0, 0.0, width, height, 3.0, Color.WHITE)
+            StencilUtils.erase(true)
+        }
 
         /**
          * SB BOX
@@ -130,16 +153,31 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
             drawOutlinedRectBorder(favX, DEFAULT_HEIGHT * 2 + 5.0 + (i * (15.0 + 3.0)), 15.0, 15.0, 3.0, 1.0, Color.WHITE.darker())
         }
 
-        return super.renderElement(mouseX, mouseY, partialTicks)
+        if (this.setting.collapsible) StencilUtils.dispose()
+
+        return height
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         if (mouseButton == 0) {
+
+            if (isHovered(mouseX, mouseY, FontUtil.getStringWidth(displayName) + 5.0, 0.0, 20.0, 9.0) && this.setting.collapsible) {
+                if (this.extendAnimation.start()) extended = !extended
+                return true
+            }
+
+            if (!extended && this.setting.collapsible) return false
+
             dragging = when {
-                isHovered(mouseX, mouseY, 0.0, DEFAULT_HEIGHT, width / 2, DEFAULT_HEIGHT * 7) -> 0 // SB box
-                isHovered(mouseX, mouseY, width / 2.0 + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 7 - 2.0) -> 1 // hue
-                isHovered(mouseX, mouseY, width / 2.0 + DEFAULT_HEIGHT + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 7) && this.setting.allowAlpha -> 2 // alpha
+                isHovered(mouseX, mouseY, 0.0, DEFAULT_HEIGHT, width / 2, DEFAULT_HEIGHT * 6) -> 0 // SB box
+                isHovered(mouseX, mouseY, width / 2.0 + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 6 - 2.0) -> 1 // hue
+                isHovered(mouseX, mouseY, width / 2.0 + DEFAULT_HEIGHT + 4.5, DEFAULT_HEIGHT, 8.0, DEFAULT_HEIGHT * 6) && this.setting.allowAlpha -> 2 // alpha
                 else -> null
+            }
+        } else if (mouseButton == 1) {
+            if (isHovered(mouseX, mouseY, FontUtil.getStringWidth(displayName) + 5.0, 0.0, 20.0, 9.0) && this.setting.collapsible) {
+                if (this.extendAnimation.start()) extended = !extended
+                return true
             }
         }
         return this.hexTextField.mouseClicked(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), mouseButton)

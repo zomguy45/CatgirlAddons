@@ -4,7 +4,6 @@ import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.ui.clickguinew.ClickGUI
-import catgirlroutes.utils.render.StencilUtils
 import net.minecraft.client.renderer.GlStateManager
 
 abstract class Element<S: Setting<*>>(
@@ -37,7 +36,6 @@ abstract class Element<S: Setting<*>>(
             ElementType.SLIDER -> 18.0
             ElementType.BOOLEAN -> 11.0
             ElementType.KEY_BIND -> 11.0
-            ElementType.COLOR -> DEFAULT_HEIGHT * 8 + 5.0
             else -> DEFAULT_HEIGHT
         }
     }
@@ -51,12 +49,18 @@ abstract class Element<S: Setting<*>>(
                 else
                     DEFAULT_HEIGHT
             }
-//            ElementType.COLOR -> {
-//                height = if ((setting as ColorSetting).allowAlpha)
-//                        DEFAULT_HEIGHT * 5
-//                    else
-//                        DEFAULT_HEIGHT * 4
-//            }
+            ElementType.COLOR -> {
+                height =
+                    if ((setting as ColorSetting).collapsible) {
+                        if(extended) {
+                            DEFAULT_HEIGHT * 8 + 5.0
+                        } else {
+                            DEFAULT_HEIGHT
+                        }
+                    } else {
+                        DEFAULT_HEIGHT * 8 + 5.0
+                    }
+            }
             else -> {}
         }
     }

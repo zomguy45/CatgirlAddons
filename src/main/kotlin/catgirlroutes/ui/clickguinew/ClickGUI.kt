@@ -22,7 +22,7 @@ import org.lwjgl.opengl.GL11
 import java.awt.Color
 import java.io.IOException
 
-class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded modules, save current window, add searchbar functionality
+class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded modules, save current window
     var scale = 2.0
 
     var x: Double = 0.0
@@ -35,7 +35,7 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
 
     var selectedWindow: Window? = null
 
-    private val searchBar = MiscElementText(
+    val searchBar = MiscElementText(
         width = guiWidth - categoryWidth - 5.0,
         height = 20.0,
         placeholder = "Search...",
@@ -105,6 +105,16 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
                 3.0,
                 outlineColour = Color.WHITE.withAlpha(0)
             ) { this.selectedWindow = window }
+
+
+
+            if (this.searchBar.text.isNotEmpty()) {
+                val containsSearch = window.moduleButtons.any { it.module.name.contains(this.searchBar.text, true) }
+                if (!containsSearch) {
+                    continue
+                }
+            }
+
             categoryButton.render(scaledMouseX, scaledMouseY)
             categoryButtons.add(categoryButton)
 
@@ -162,6 +172,7 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
+        this.searchBar.keyTyped(typedChar, keyCode)
         windows.reversed().forEach { if (it.keyTyped(typedChar, keyCode)) return }
 //        if (keyCode == ClickGui.settings.last().value && System.currentTimeMillis() - openedTime > 200) {
 //            mc.displayGuiScreen(null as GuiScreen?)

@@ -27,7 +27,9 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         FontUtil.drawString(displayName, 0.0, 0.0)
+        this.setting.text = this.textField.text
         this.textField.apply {
+            text = setting.text
             outlineColour = Color(ColorUtil.outlineColor) // todo do something about this cuz it doesn't seem like meta
             outlineFocusColour = ColorUtil.clickGUIColor
             render(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
@@ -41,14 +43,10 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
         this.textField.mouseClickMove(mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt(), clickedMouseButton, timeSinceLastClick)
-        super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
-        if (this.textField.keyTyped(typedChar, keyCode)) {
-            this.setting.text = this.textField.text
-        }
-        return super.keyTyped(typedChar, keyCode)
+        return this.textField.keyTyped(typedChar, keyCode)
     }
 
 }
