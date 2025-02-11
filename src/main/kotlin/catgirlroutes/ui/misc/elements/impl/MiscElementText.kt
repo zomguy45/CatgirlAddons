@@ -10,10 +10,11 @@ import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import me.odinmain.utils.noControlCodes
 import net.minecraft.client.gui.GuiScreen
-import net.minecraft.client.gui.GuiTextField
 import net.minecraft.client.renderer.GlStateManager
-import org.lwjgl.input.Keyboard
+import net.minecraft.util.ChatAllowedCharacters
+import net.minecraft.util.MathHelper
 import java.awt.Color
+import kotlin.math.abs
 
 /**
  * A [MiscElement] that displays and optionally allows input for a string value with customizable options and style.
@@ -29,13 +30,13 @@ import java.awt.Color
  * @param radius The radius of the corners (default is 5.0).
  * @param bgColour The background color of the element (default is `ColorUtil.buttonColor`).
  */
-class MiscElementText( // todo: prob add undo redo in the future
+class MiscElementText( // todo: CLEAN UP/RECODE (mc code is ass); redo/undo
     x: Double = 0.0,
     y: Double = 0.0,
     width: Double = 100.0,
     height: Double = 20.0,
     val value: String = "",
-    var size: Int = 0,
+    var size: Int = 9999,
     var placeholder: String = "",
     var options: Int = 0,
     var prependText: String = "",
@@ -49,29 +50,42 @@ class MiscElementText( // todo: prob add undo redo in the future
     var focus: Boolean = false
     private var scrollOffset = 0.0
 
-    private val textField: GuiTextField = GuiTextField(
-        0, mc.fontRendererObj, 0,
-        0, 0, 0
-    )
+    private var selectionEnd = 0
+    private var cursorPosition = 0
+        set(i) {
+            field = i
+            field = MathHelper.clamp_int(this.cursorPosition, 0, this.text.length)
+            this.selectionPos = this.cursorPosition
+        }
+    private val selectedText get() = this.text.substring(minOf(cursorPosition, selectionEnd), maxOf(cursorPosition, selectionEnd))
+    private var selectionPos: Int
+        get() = selectionEnd
+        set(i) {
+            selectionEnd = i.coerceIn(0, text.length)
+            scrollOffset = scrollOffset.coerceAtMost(text.length.toDouble())
 
-    var text: String
-        get() = this.textField.text
-        set(value) { this.textField.text = value }
+            val l = mc.fontRendererObj.trimStringToWidth(this.text.substring(scrollOffset.toInt()), -8).length + scrollOffset.toInt()
+            if (i.toDouble() == scrollOffset) scrollOffset -= mc.fontRendererObj.trimStringToWidth(text, -8, true).length
+            scrollOffset += (if (i > l) i - l else if (i <= scrollOffset) i - scrollOffset else 0).toDouble()
+            scrollOffset = MathHelper.clamp_int(scrollOffset.toInt(), 0, text.length).toDouble()
+        }
 
-    private var cursorPosition: Int
-        get() = this.textField.cursorPosition
-        set(value) { this.textField.cursorPosition = value }
+
+    var text: String = value
+        set(string) {
+            field = if (string.length > this.size) {
+                string.substring(0, this.size)
+            } else {
+                string
+            }
+            if (this.cursorPosition > field.length) {
+                this.cursorPosition = MathHelper.clamp_int(this.cursorPosition, 0, this.text.length)
+            }
+        }
 
     private val renderText get() = this.prependText + text
-    private val sizeText get() = if (this.size > 0) "${renderText.length}/${this.size}" else ""
+    private val sizeText get() = if (this.size != 9999) "${renderText.length}/${this.size}" else ""
     private val fieldWidth get() = this.width - 10 - getStringWidth(sizeText)
-
-    init {
-        textField.isFocused = true
-        textField.setCanLoseFocus(false)
-        textField.maxStringLength = 9999
-        textField.text = value
-    }
 
     private fun updateScrollOffset() {
         val cursorX = getStringWidth(renderText.substring(0, cursorPosition + prependText.length))
@@ -100,14 +114,14 @@ class MiscElementText( // todo: prob add undo redo in the future
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         if (!isHovered(mouseX, mouseY)) {
             focus = false
-            textField.setSelectionPos(cursorPosition)
+            this.selectionPos = cursorPosition
             return false
         }
 
         // in new click gui text fields don't get unfocused if you click on another element for whatever (this.mouseClicked is processed if I click within the element or smt) reason this is an easy fix (kinda)
         // if it's still going to bother I'll actually fix it I guess
         currentlyFocused?.focus = false
-        currentlyFocused?.cursorPosition?.let { currentlyFocused?.textField?.setSelectionPos(it) }
+        currentlyFocused?.cursorPosition?.let { currentlyFocused?.selectionPos = it }
         currentlyFocused = this
 
         val currentTime = System.currentTimeMillis()
@@ -121,7 +135,7 @@ class MiscElementText( // todo: prob add undo redo in the future
                     doubleClickEnd = wordBounds.second
 
                     cursorPosition = doubleClickStart
-                    textField.setSelectionPos(doubleClickEnd)
+                    this.selectionPos = doubleClickEnd
                 } else cursorPosition = cursorPos
             }
             1 -> text = ""
@@ -136,53 +150,21 @@ class MiscElementText( // todo: prob add undo redo in the future
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
         if (!focus || !this.isHovered(mouseX, mouseY)) return
-        this.textField.setSelectionPos(getCursorPos(mouseX))
+        this.selectionPos = getCursorPos(mouseX)
         return super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (!focus) return false
 
-        val isSpecialKey = GuiScreen.isKeyComboCtrlA(keyCode) ||
-                keyCode == Keyboard.KEY_BACK ||
-                keyCode == Keyboard.KEY_RIGHT ||
-                keyCode == Keyboard.KEY_LEFT
-                GuiScreen.isCtrlKeyDown()
-
-        if (this.size > 0 && !isSpecialKey && this.size == this.text.length) return false
-
         var typedChar2 = typedChar
-
-        when {
-            GuiScreen.isKeyComboCtrlV(keyCode) -> {
-                textField.setEnabled(false)
-                val clipboardText = GuiScreen.getClipboardString() ?: return false
-                val (start, end) = listOf(this.cursorPosition, this.textField.selectionEnd).sorted()
-
-                val pasteText = if (this.size > 0) {
-                    val remainingSpace = this.size - (this.text.length - (end - start))
-                    clipboardText.substring(0, minOf(clipboardText.length, remainingSpace))
-                } else {
-                    clipboardText
-                }
-
-                if (pasteText.isNotEmpty()) {
-                    this.text = StringBuilder(this.text).replace(start, end, pasteText).toString()
-                    this.cursorPosition = start + pasteText.length
-                }
-            }
-            else -> this.textField.setEnabled(true)
-        }
 
         val old = this.text
         if ((options and FORCE_CAPS) != 0) typedChar2 = typedChar2.uppercaseChar()
         if ((options and NO_SPACE) != 0 && typedChar2 == ' ') return false
 
-        textField.apply {
-            isFocused = true
-            textboxKeyTyped(typedChar2, keyCode)
-            if ((options and NUM_ONLY) != 0 && text.any { it !in "0-9." }) text = old
-        }
+        textboxKeyTyped(typedChar2, keyCode)
+        if ((options and NUM_ONLY) != 0 && this.text.any { it !in "0-9." }) this.text = old
 
         updateScrollOffset()
         return true
@@ -190,46 +172,46 @@ class MiscElementText( // todo: prob add undo redo in the future
 
     override fun render(mouseX: Int, mouseY: Int) {
         val yPos = y + (this.height - 8) / 2
-        val maxScrollOffset = (getStringWidth(renderText) - this.fieldWidth).coerceAtLeast(0.0)
-        scrollOffset = scrollOffset.coerceIn(0.0, maxScrollOffset)
+        val maxScrollOffset = (getStringWidth(this.renderText) - this.fieldWidth).coerceAtLeast(0.0)
+        this.scrollOffset = this.scrollOffset.coerceIn(0.0, maxScrollOffset)
 
         GlStateManager.pushMatrix()
         GlStateManager.color(1.0f, 1.0f, 1.0f)
 
-        drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, bgColour, if (focus) outlineFocusColour else outlineColour)
+        drawRoundedBorderedRect(x, y, this.width, this.height, this.radius, this.thickness, this.bgColour, if (this.focus) this.outlineFocusColour else this.outlineColour)
 
-        val sizeColour = if (renderText.length == this.size) Color.RED else Color.LIGHT_GRAY
-        FontUtil.drawString(sizeText, x + this.fieldWidth + 8.0, yPos, sizeColour.rgb)
+        val sizeColour = if (this.renderText.length == this.size) Color.RED else Color.LIGHT_GRAY
+        FontUtil.drawString(this.sizeText, x + this.fieldWidth + 8.0, yPos, sizeColour.rgb)
 
-        val visibleTextStartIndex = mc.fontRendererObj.trimStringToWidth(renderText, scrollOffset.toInt()).length
+        val visibleTextStartIndex = mc.fontRendererObj.trimStringToWidth(this.renderText, this.scrollOffset.toInt()).length
         val visibleText = mc.fontRendererObj.trimStringToWidth(
-            renderText.substring(visibleTextStartIndex),
+            this.renderText.substring(visibleTextStartIndex),
             this.fieldWidth.toInt() + getStringWidth(" ")
         )
 
         FontUtil.drawString(visibleText, x + 5, yPos)
 
-        if (this.text.isEmpty()) FontUtil.drawString(this.placeholder, x + 5, yPos, Color.LIGHT_GRAY.rgb)
+        if (this.text.isEmpty()) FontUtil.drawString(this.placeholder, x + 5 + getStringWidth(this.prependText), yPos, Color.LIGHT_GRAY.rgb)
 
-        if (focus && System.currentTimeMillis() % 1000 > 500) {
-            val cursorText = renderText.substring(0, cursorPosition + prependText.length)
+        if (this.focus && System.currentTimeMillis() % 1000 > 500) {
+            val cursorText = this.renderText.substring(0, this.cursorPosition + this.prependText.length)
 
-            val cursorWidth = (getStringWidth(cursorText) - scrollOffset).coerceIn(0.0, this.fieldWidth)
+            val cursorWidth = (getStringWidth(cursorText) - this.scrollOffset).coerceIn(0.0, this.fieldWidth)
             val cursorX = x + 5 + cursorWidth
 
             drawRoundedRect(cursorX, yPos - 1, 1.0, 10.0, 1.0, Color.WHITE)
         }
 
-        if (textField.selectedText.isNotEmpty()) {
-            val (left, right) = listOf(cursorPosition, textField.selectionEnd)
-                .map { it + prependText.noControlCodes.length }
+        if (this.selectedText.isNotEmpty()) {
+            val (left, right) = listOf(this.cursorPosition, this.selectionEnd)
+                .map { it + this.prependText.noControlCodes.length }
                 .let { it.minOrNull() to it.maxOrNull() }
 
             var texX = 0.0
-            renderText.noControlCodes.forEachIndexed { i, c ->
+            this.renderText.noControlCodes.forEachIndexed { i, c ->
                 val len = getStringWidth(c.toString())
                 if (i in left!! until right!!) {
-                    val currentTexX = texX - scrollOffset
+                    val currentTexX = texX - this.scrollOffset
 
                     if (currentTexX + len > 0 && currentTexX < this.fieldWidth) {
                         drawRoundedRect(x + 5 + currentTexX, yPos - 1, len.toDouble(), 10.0, 0.1, Color.WHITE.withAlpha(150))
@@ -259,6 +241,149 @@ class MiscElementText( // todo: prob add undo redo in the future
         }
 
         return Pair(start, end)
+    }
+
+    private fun textboxKeyTyped(c: Char, i: Int): Boolean {
+        if (!this.focus) return false
+        when {
+            GuiScreen.isKeyComboCtrlA(i) -> {
+                this.cursorPosition = this.text.length
+                this.selectionPos = 0
+                return true
+            }
+            GuiScreen.isKeyComboCtrlC(i) -> {
+                GuiScreen.setClipboardString(this.selectedText)
+                return true
+            }
+            GuiScreen.isKeyComboCtrlV(i) -> {
+                this.writeText(GuiScreen.getClipboardString())
+                return true
+            }
+            GuiScreen.isKeyComboCtrlX(i) -> {
+                GuiScreen.setClipboardString(this.selectedText)
+                this.writeText("")
+                return true
+            }
+            else -> {
+                when (i) {
+                    14 -> { // backspace
+                        if (GuiScreen.isCtrlKeyDown()) this.deleteWords(-1) else this.deleteFromCursor(-1)
+                        return true
+                    }
+
+                    199 -> { // home
+                        if (GuiScreen.isShiftKeyDown()) this.selectionPos = 0 else this.cursorPosition = 0
+                        return true
+                    }
+
+                    203 -> { // left
+                        when {
+                            GuiScreen.isShiftKeyDown() -> this.selectionPos = if (GuiScreen.isCtrlKeyDown()) this.getNthWordFromPos(-1, this.selectionEnd) else this.selectionEnd - 1
+                            GuiScreen.isCtrlKeyDown() -> this.cursorPosition = this.getNthWordFromCursor(-1)
+                            else -> this.cursorPosition = this.selectionEnd - 1
+                        }
+                        return true
+                    }
+
+                    205 -> { // right
+                        when {
+                            GuiScreen.isShiftKeyDown() ->
+                                if (GuiScreen.isCtrlKeyDown()) this.selectionPos = this.getNthWordFromPos(1, this.selectionEnd)
+                                else this.cursorPosition = this.selectionEnd + 1
+                            GuiScreen.isCtrlKeyDown() -> this.cursorPosition = this.getNthWordFromCursor(1)
+                            else -> this.cursorPosition = this.selectionEnd + 1
+                        }
+                        return true
+                    }
+
+                    207 -> { // end
+                        if (GuiScreen.isShiftKeyDown()) this.selectionPos = this.text.length else this.cursorPosition = this.text.length
+                        return true
+                    }
+
+                    211 -> { // another backspace?
+                        if (GuiScreen.isCtrlKeyDown()) this.deleteWords(1) else this.deleteFromCursor(1)
+                        return true
+                    }
+
+                    else -> if (ChatAllowedCharacters.isAllowedCharacter(c)) {
+                        this.writeText(c.toString())
+                        return true
+                    } else {
+                        return false
+                    }
+                }
+            }
+        }
+    }
+
+    private fun deleteFromCursor(i: Int) {
+        if (this.text.isNotEmpty()) {
+            if (this.selectionEnd != this.cursorPosition) {
+                writeText("")
+            } else {
+                val (start, end) = if (i < 0) this.cursorPosition + i to this.cursorPosition else this.cursorPosition to this.cursorPosition + i
+                val newText = this.text.takeIf { start >= 0 }?.take(start).orEmpty() + this.text.drop(end)
+
+                val oldSelection = this.selectionEnd
+                this.text = newText
+                if (i < 0) this.cursorPosition = oldSelection + i
+            }
+        }
+    }
+
+    private fun writeText(string: String?) {
+        val allowed = ChatAllowedCharacters.filterAllowedCharacters(string)
+        val (start, end) = listOf(this.cursorPosition, this.selectionEnd).sorted()
+        val maxInsert = this.size - this.text.length - (start - end)
+        val newText = this.text.take(start) + allowed.take(maxInsert) + this.text.drop(end)
+        this.text = newText
+        this.cursorPosition = this.selectionEnd + (start - this.selectionEnd + allowed.take(maxInsert).length)
+    }
+
+    private fun deleteWords(i: Int) {
+        if (this.text.isNotEmpty()) {
+            if (this.selectionEnd != this.cursorPosition) this.writeText("")
+            else deleteFromCursor(getNthWordFromCursor(i) - this.cursorPosition)
+        }
+    }
+
+    private fun getNthWordFromCursor(i: Int): Int {
+        return this.getNthWordFromPos(i, this.cursorPosition)
+    }
+
+    private fun getNthWordFromPos(i: Int, j: Int): Int {
+        return this.func_146197_a(i, j, true)
+    }
+
+    private fun func_146197_a(i: Int, j: Int, bl: Boolean): Int { // I think it's this.findWordBounds but a lil different or smt IDK
+        var k = j
+        val bl2 = i < 0
+        val l = abs(i.toDouble()).toInt()
+
+        for (m in 0 until l) {
+            if (!bl2) {
+                val n = text.length
+                k = text.indexOf(32.toChar(), k)
+                if (k == -1) {
+                    k = n
+                } else {
+                    while (bl && k < n && text[k] == ' ') {
+                        ++k
+                    }
+                }
+            } else {
+                while (bl && k > 0 && text[k - 1] == ' ') {
+                    --k
+                }
+
+                while (k > 0 && text[k - 1] != ' ') {
+                    --k
+                }
+            }
+        }
+
+        return k
     }
 
     companion object { // todo: change
