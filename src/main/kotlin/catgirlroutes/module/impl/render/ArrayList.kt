@@ -18,7 +18,7 @@ import java.awt.Color
 //TODO: Maybe box idk. I would personally not. Maybe add a switch to modules for showing in list.
 
 @NoShowInList
-object aaa : Module(
+object ArrayList : Module(
     name = "Array List",
     category = Category.RENDER,
     description = "ArrayList"

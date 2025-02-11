@@ -99,7 +99,7 @@ object ModuleManager {
         CgaUser,
         BossESP,
         TerminalEsp,
-        ModuleList,
+        ArrayList,
         EditHud,
         Trail,
         DungeonESP,
