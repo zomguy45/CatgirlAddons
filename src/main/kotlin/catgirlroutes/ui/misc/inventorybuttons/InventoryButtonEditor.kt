@@ -73,19 +73,17 @@ class InventoryButtonEditor : GuiScreen() {
 
             FontUtil.drawString("Command", editorX + 7, editorY + 7, 0xffa0a0a0.toInt())
             commandTextField.apply {
-//                text = text.replace("^ +", "")
                 prependText = if (text.startsWith("/")) "" else "§7/§r"
-                render(mouseX, mouseY)
                 this.x = editorX + 7.0
                 this.y = editorY + 19.0
+                render(mouseX, mouseY)
             }
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
             iconTextField.apply {
-//                text = text.replace("^ +", "")
-                render(mouseX, mouseY)
                 this.x = editorX + 7.0
                 this.y = editorY + 55.0
+                render(mouseX, mouseY)
             }
             GlStateManager.popMatrix()
         }
