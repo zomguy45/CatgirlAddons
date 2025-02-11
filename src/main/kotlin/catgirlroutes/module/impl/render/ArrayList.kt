@@ -18,12 +18,12 @@ import java.awt.Color
 //TODO: Maybe box idk. I would personally not. Maybe add a switch to modules for showing in list.
 
 @NoShowInList
-object ModuleList : Module(
+object ArrayList : Module(
     name = "Array List",
     category = Category.RENDER,
     description = "ArrayList"
 ) {
-    val textColour = ColorSetting("Text colour", Color.PINK)
+    val textColour = ColorSetting("Text colour", Color.PINK, false, collapsible = false)
 
     init {
         this.addSettings(textColour)

@@ -17,7 +17,7 @@ object TerminalEsp : Module (
     category = Category.RENDER,
     description = "Shows undone terminals."
 ){
-    private val color = ColorSetting("Terminal ESP color", Color(0,0,255), description = "Color for the Terminal ESP")
+    private val color = ColorSetting("Terminal ESP color", Color(0,0,255), collapsible = false, description = "Color for the Terminal ESP")
 
     init{
         this.addSettings(

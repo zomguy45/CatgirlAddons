@@ -31,7 +31,7 @@ object ClickGui: Module(
     val design: StringSelectorSetting
     val notifications: BooleanSetting = BooleanSetting("Notifications", true, "Send notifications instead of chat messages")
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
-    val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.")
+    val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.", false)
 
     val clientName: StringSetting = StringSetting("Name", "CatgirlAddons", 15, description = "Name that will be rendered in the gui.")
     val prefixStyle: StringSelectorSetting = StringSelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")

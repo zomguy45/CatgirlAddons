@@ -10,6 +10,7 @@ class ColorSetting(
     override val default: Color,
     var allowAlpha: Boolean = true,
     description: String? = null,
+    val collapsible: Boolean = true,
     visibility: Visibility = Visibility.VISIBLE,
 ) : Setting<Color>(name, description, visibility) {
 

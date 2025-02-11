@@ -24,7 +24,7 @@ object BossESP : Module( // todo: outline
 ) {
     private val style = StringSelectorSetting("Style","Box", arrayListOf("Box", "Outline", "2D"), "Esp render style to be used.")
     private val lineWidth = NumberSetting("Line width", 4.0, 1.0, 8.0, 1.0)
-    private val color = ColorSetting("Boss ESP color", Color(0,0,255), description = "Color for the Boss ESP")
+    private val color = ColorSetting("Boss ESP color", Color(0,0,255), collapsible = false, description = "Color for the Boss ESP")
 
     init{
         this.addSettings(
