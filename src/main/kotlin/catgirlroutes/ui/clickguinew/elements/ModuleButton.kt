@@ -50,10 +50,10 @@ class ModuleButton(val module: Module, val window: Window) {
     val yAbsolute: Double
         get() = y + window.y
 
-    val extendAnimation = EaseOutQuadAnimation(500)
-    private val lineAnimation = EaseOutQuadAnimation(750)
+    val extendAnimation = EaseOutQuadAnimation(300)
+    private val lineAnimation = EaseOutQuadAnimation(450)
     private val colourAnimation = ColorAnimation(100)
-    val extraHeightAnimation = EaseOutQuadAnimation(500)
+    val extraHeightAnimation = EaseOutQuadAnimation(300)
 
     init {
         updateElements()

@@ -19,7 +19,7 @@ class ElementDropdown(parent: ModuleButton, setting: DropdownSetting) : // todo 
     Element<DropdownSetting>(parent, setting, ElementType.DROPDOWN) {
 
     private var extraHeight = 0.0
-    private var arrowAnimation = EaseOutQuadAnimation(500)
+    private var arrowAnimation = EaseOutQuadAnimation(300)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         drawRoundedBorderedRect(-3.0, 0.0, width + 6.0, height + this.extraHeight, 3.0, 1.0, Color(ColorUtil.outlineColor).darker(), ColorUtil.clickGUIColor)

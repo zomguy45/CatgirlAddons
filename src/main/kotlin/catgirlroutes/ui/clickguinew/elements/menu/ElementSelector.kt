@@ -16,7 +16,7 @@ import java.awt.Color
 class ElementSelector(parent: ModuleButton, setting: StringSelectorSetting) : // todo use misc element
     Element<StringSelectorSetting>(parent, setting, ElementType.SELECTOR) {
 
-    private val extendAnimation = EaseOutQuadAnimation(500)
+    private val extendAnimation = EaseOutQuadAnimation(300)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         height = this.extendAnimation.get(13.0, this.setting.options.size * 13.0 + 13.0, !extended)

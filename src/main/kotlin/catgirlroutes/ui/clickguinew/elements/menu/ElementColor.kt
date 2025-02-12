@@ -42,7 +42,7 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
         outlineFocusColour = colorValue.hsbMax(setting).withAlpha(255).darker()
     )
     private var hexPrev = this.hexTextField.text
-    private val extendAnimation = EaseOutQuadAnimation(500)
+    private val extendAnimation = EaseOutQuadAnimation(300)
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
         height = this.extendAnimation.get(if (this.setting.collapsible) DEFAULT_HEIGHT else DEFAULT_HEIGHT * 8 + 5.0, DEFAULT_HEIGHT * 8 + 5.0, !extended)
