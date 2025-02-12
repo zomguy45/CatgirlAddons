@@ -7,6 +7,7 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import org.lwjgl.input.Keyboard
@@ -18,6 +19,7 @@ import java.awt.Color
  */
 @AlwaysActive
 @NoShowInList
+@SettingsCategory
 object ClickGui: Module(
     "ClickGUI",
     Keyboard.KEY_RSHIFT,

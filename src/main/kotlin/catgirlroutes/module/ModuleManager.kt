@@ -43,7 +43,7 @@ object ModuleManager {
     /**
      * All modules have to be added to this list to function!
      */
-    val modules: ArrayList<Module> = arrayListOf(
+    val modules: java.util.ArrayList<Module> = arrayListOf(
         // Dungeons
         AutoP3,
         AutoP3ConfigOverlay,

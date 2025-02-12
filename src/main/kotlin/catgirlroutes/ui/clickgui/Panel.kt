@@ -3,6 +3,7 @@ package catgirlroutes.ui.clickgui
 import catgirlroutes.module.Category
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.module.impl.render.ClickGui
+import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.ui.clickgui.elements.ModuleButton
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -10,6 +11,7 @@ import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeOnlyFirst
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
+import kotlin.reflect.full.hasAnnotation
 
 /**
  * Provides a category panel for the click gui.
@@ -44,10 +46,9 @@ class Panel(
     private var y2 = 0
 
     init {
-        for (module in ModuleManager.modules) {
-            if (module.category != this.category) continue
-            moduleButtons.add(ModuleButton(module, this))
-        }
+        ModuleManager.modules
+            .filter { (this.category == Category.SETTINGS && it::class.hasAnnotation<SettingsCategory>()) || it.category == this.category }
+            .forEach { this.moduleButtons.add(ModuleButton(it, this)) }
     }
 
     /**

@@ -2,11 +2,12 @@ package catgirlroutes.ui.clickguinew
 
 import catgirlroutes.module.Category
 import catgirlroutes.module.ModuleManager
-import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
+import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.ui.animations.impl.LinearAnimation
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.utils.ChatUtils.debugMessage
 import net.minecraft.client.renderer.GlStateManager
+import kotlin.reflect.full.hasAnnotation
 
 class Window( // todo: scroll shit
     val category: Category,
@@ -34,10 +35,9 @@ class Window( // todo: scroll shit
     private val addScrollAnimation = EaseOutQuadAnimation(500) // todo: impl
 
     init {
-        for (module in ModuleManager.modules) {
-            if (module.category != this.category) continue
-            this.moduleButtons.add(ModuleButton(module, this))
-        }
+        ModuleManager.modules
+            .filter { (this.category == Category.SETTINGS && it::class.hasAnnotation<SettingsCategory>()) || it.category == this.category }
+            .forEach { this.moduleButtons.add(ModuleButton(it, this)) }
     }
 
 

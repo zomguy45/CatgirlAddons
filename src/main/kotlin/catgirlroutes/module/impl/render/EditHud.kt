@@ -4,8 +4,10 @@ import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.NoShowInList
+import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.ui.hud.EditHudGUI
 
+@SettingsCategory
 @NoShowInList
 object EditHud : Module(
     "Edit Hud",

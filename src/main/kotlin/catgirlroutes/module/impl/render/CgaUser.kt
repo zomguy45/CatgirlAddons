@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.scope
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
+import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSetting
@@ -19,6 +20,7 @@ import net.minecraft.util.ResourceLocation
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable
 
 @AlwaysActive
+@SettingsCategory
 object CgaUser : Module(
     "Cga User",
     Category.RENDER,
