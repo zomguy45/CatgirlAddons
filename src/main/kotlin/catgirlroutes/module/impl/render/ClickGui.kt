@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.render
 
-import catgirlroutes.CatgirlRoutes
+import catgirlroutes.CatgirlRoutes.Companion.clickGUI
+import catgirlroutes.CatgirlRoutes.Companion.clickGUINew
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -30,7 +31,8 @@ object ClickGui: Module(
             "§00...§ff§r are colors, l is §lBold§r, n is §nUnderlined§r, o is §oItalic§r, m is §mStrikethrough§r, k is §kObfuscated§r, r is Reset."
 ) {
 
-    val design: StringSelectorSetting
+    private val clickGui: StringSelectorSetting = StringSelectorSetting("ClickGui", "Cga", arrayListOf("Cga", "Flopper"))
+    val design: StringSelectorSetting = StringSelectorSetting("Design","JellyLike", arrayListOf("JellyLike", "New"), "Design theme of the gui.")
     val notifications: BooleanSetting = BooleanSetting("Notifications", true, "Send notifications instead of chat messages")
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
     val color = ColorSetting("Color", Color(255,200,0), false, "Color theme in the gui.", false)
@@ -65,12 +67,8 @@ object ClickGui: Module(
     val advancedRelY = NumberSetting("Advanced_RelY",(1 - advancedRelHeight)/2.0,0.0, (1- advancedRelHeight), 0.0001, visibility = Visibility.HIDDEN)
 
     init {
-        val options = java.util.ArrayList<String>()
-        options.add("JellyLike")
-        options.add("New")
-        design = StringSelectorSetting("Design","JellyLike", options, "Design theme of the gui.")
-
         addSettings(
+            clickGui,
             design,
             notifications,
             blur,
@@ -136,14 +134,16 @@ object ClickGui: Module(
      * Overridden to prevent the chat message from being sent.
      */
     override fun onKeyBind() {
-        display = CatgirlRoutes.clickGUI
+        if (this.clickGui.index == 0) design.selected = "New"
+        display = if (this.clickGui.index == 0) clickGUINew else clickGUI
     }
 
     /**
      * Automatically disable it again and open the gui
      */
     override fun onEnable() {
-        display = CatgirlRoutes.clickGUI
+        if (this.clickGui.index == 0) design.selected = "New"
+        display = if (this.clickGui.index == 0) clickGUINew else clickGUI
         super.onEnable()
         toggle()
     }

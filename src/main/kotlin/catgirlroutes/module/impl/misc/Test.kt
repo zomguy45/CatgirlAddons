@@ -1,5 +1,6 @@
 package catgirlroutes.module.impl.misc
 
+import catgirlroutes.CatgirlRoutes.Companion.clickGUINew
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
@@ -12,16 +13,14 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.DropdownSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.ui.clickguinew.ClickGUI
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.debugMessage
-import catgirlroutes.utils.dungeon.tiles.Room
 import catgirlroutes.utils.Notifications
+import catgirlroutes.utils.dungeon.tiles.Room
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
-import kotlin.random.Random
 
 object Test : Module(
     "Test",
@@ -45,7 +44,7 @@ object Test : Module(
     }
 
     private val newclickGui = ActionSetting("New click gui") {
-        display = ClickGUI()
+        display = clickGUINew
     }
 
     init {

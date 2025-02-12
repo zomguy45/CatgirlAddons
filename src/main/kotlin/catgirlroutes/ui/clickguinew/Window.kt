@@ -15,8 +15,8 @@ class Window( // todo: scroll shit
 ) {
     val moduleButtons: ArrayList<ModuleButton> = ArrayList()
 
-    val x = this.clickGui.x + this.clickGui.categoryWidth + 10.0
-    val y = this.clickGui.y + 25.0 + 5.0
+    var x = this.clickGui.x + this.clickGui.categoryWidth + 10.0
+    var y = this.clickGui.y + 25.0 + 5.0
 
     val width = this.clickGui.guiWidth - this.clickGui.categoryWidth - 20.0
     val height = this.clickGui.guiHeight - 25.0
@@ -28,11 +28,8 @@ class Window( // todo: scroll shit
 
     private var scrollTarget = 0.0
     private var scrollOffset = 0.0
-    private var prevScrollPosition: Double? = null // todo: zzz
-    private var whatToScroll: ModuleButton? = null
 
     private val scrollAnimation = LinearAnimation<Double>(200)
-    private val addScrollAnimation = EaseOutQuadAnimation(500) // todo: impl
 
     init {
         ModuleManager.modules
@@ -65,7 +62,6 @@ class Window( // todo: scroll shit
                     }
                     if (button.extendAnimation.isAnimating() || button.extraHeightAnimation.isAnimating()) {
                         if (button.extended) {
-                            this.prevScrollPosition = this.prevScrollPosition ?: this.scrollOffset
                             val buttonBot = button.y + button.elementsHeight + button.height
                             val newScrollTarget = this.scrollOffset - if (button.elementsHeight + button.height < this.height) buttonBot - this.height + 15.0 else button.y
 
@@ -74,11 +70,6 @@ class Window( // todo: scroll shit
                                 if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
                             }
                         }
-    //                    else if (this.prevScrollPosition != null) {
-    //                        this.scrollTarget = this.prevScrollPosition!!
-    //                        this.prevScrollPosition = null
-    //                        if (!this.scrollAnimation.isAnimating()) this.scrollAnimation.start()
-    //                    }
                     }
                 }
         }

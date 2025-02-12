@@ -14,7 +14,6 @@ import java.util.*
  *
  * @author Aton
  */
-@Deprecated("Use enum version instead")
 class ElementStringSelector(parent: ModuleButton, setting: StringSelectorSetting) :
     Element<StringSelectorSetting>(parent, setting, ElementType.SELECTOR) {
 

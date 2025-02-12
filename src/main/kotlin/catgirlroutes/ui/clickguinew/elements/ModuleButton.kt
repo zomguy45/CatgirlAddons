@@ -1,9 +1,13 @@
 package catgirlroutes.ui.clickguinew.elements
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.animations.impl.ColorAnimation
 import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
+import catgirlroutes.ui.clickgui.elements.ModuleButton.Companion.haramIcon
+import catgirlroutes.ui.clickgui.elements.ModuleButton.Companion.whipIcon
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.ColorUtil.invert
 import catgirlroutes.ui.clickgui.util.ColorUtil.mix
@@ -15,6 +19,7 @@ import catgirlroutes.ui.clickguinew.elements.menu.*
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawOutlinedRectBorder
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
+import catgirlroutes.utils.render.HUDRenderUtils.drawTexturedRect
 import catgirlroutes.utils.render.StencilUtils
 import catgirlroutes.utils.wrapText
 import net.minecraft.client.renderer.GlStateManager
@@ -49,7 +54,6 @@ class ModuleButton(val module: Module, val window: Window) {
     private val lineAnimation = EaseOutQuadAnimation(750)
     private val colourAnimation = ColorAnimation(100)
     val extraHeightAnimation = EaseOutQuadAnimation(500)
-
 
     init {
         updateElements()
@@ -130,6 +134,18 @@ class ModuleButton(val module: Module, val window: Window) {
             StencilUtils.dispose()
         }
 
+        when (this.module.tag) {
+            Module.TagType.HARAM -> {
+                mc.textureManager.bindTexture(haramIcon)
+                drawTexturedRect(this.width - 25.0, 2.5, 20.0, 20.0)
+            }
+            Module.TagType.WHIP -> {
+                mc.textureManager.bindTexture(whipIcon)
+                drawTexturedRect(this.width - 25.0, 2.5, 20.0, 20.0)
+            }
+            Module.TagType.NONE -> {}
+        }
+
         GlStateManager.popMatrix()
 
         return offset + 5.0
@@ -157,7 +173,14 @@ class ModuleButton(val module: Module, val window: Window) {
                 else -> false
             }
             this.isMouseUnderButton(mouseX, mouseY) -> this.menuElements.reversed().any {
-                it.mouseClicked(mouseX, mouseY, mouseButton).also { clicked -> if (clicked) updateElements() }
+                it.mouseClicked(mouseX, mouseY, mouseButton).also { clicked ->
+                    if (clicked) {
+                        if (it.parent.module.name == "ClickGUI" && it.displayName == "ClickGui") {
+                            ClickGui.onEnable()
+                        }
+                        updateElements()
+                    }
+                }
             }
             else -> false
         }

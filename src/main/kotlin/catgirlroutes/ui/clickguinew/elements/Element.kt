@@ -11,7 +11,7 @@ abstract class Element<S: Setting<*>>(
     val setting: S,
     val type: ElementType
 ) {
-    val clickGui: ClickGUI = parent.window.clickGui
+    private val clickGui: ClickGUI = parent.window.clickGui
 
     var x = 7.0
     var y = 0.0
@@ -29,6 +29,8 @@ abstract class Element<S: Setting<*>>(
     val yAbsolute: Double
         get() = this.y + this.parent.y + this.parent.window.y
 
+    private var hoverStartTime: Long? = null
+    private var description = ClickGUI.Description(null, 0.0, 0.0)
 
     init {
         this.height = when (this.type) {
@@ -71,6 +73,18 @@ abstract class Element<S: Setting<*>>(
 
         val elementLength = renderElement(mouseX, mouseY, partialTicks)
 
+        if (isHoveredTemp(mouseX, mouseY) && this.setting.description != null && this.parent.extended) {
+            if (hoverStartTime == null) hoverStartTime = System.currentTimeMillis()
+
+            if (System.currentTimeMillis() - hoverStartTime!! >= 1000) {
+                clickGui.description[this.setting.name] = ClickGUI.Description(this.setting.description!!, mouseX.toDouble(), mouseY.toDouble())
+            }
+        } else {
+            clickGui.description[this.setting.name] = ClickGUI.Description("", 0.0, 0.0)
+            hoverStartTime = null
+
+        }
+
         GlStateManager.popMatrix()
         return elementLength + 5.0
     }
@@ -89,6 +103,10 @@ abstract class Element<S: Setting<*>>(
 
     private fun isHovered(mouseX: Int, mouseY: Int): Boolean {
         return mouseX >= this.xAbsolute && mouseX <= this.xAbsolute + this.width && mouseY >= this.yAbsolute && mouseY <= this.yAbsolute + this.height
+    }
+
+    private fun isHoveredTemp(mouseX: Int, mouseY: Int): Boolean {
+        return mouseX >= this.xAbsolute && mouseX <= this.xAbsolute + this.width && mouseY >= this.yAbsolute && mouseY <= this.yAbsolute + 13
     }
 
     companion object {

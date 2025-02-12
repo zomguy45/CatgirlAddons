@@ -278,6 +278,20 @@ object HUDRenderUtils {
     }
 
     fun drawTexturedRect(
+        x: Double,
+        y: Double,
+        width: Double,
+        height: Double,
+        uMin: Double = 0.0,
+        uMax: Double = 1.0,
+        vMin: Double = 0.0,
+        vMax: Double = 1.0,
+        filter: Int = GL11.GL_NEAREST
+    ) {
+       drawTexturedRect(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat(), uMin.toFloat(), uMax.toFloat(), vMin.toFloat(), vMax.toFloat(), filter)
+    }
+
+    fun drawTexturedRect(
         x: Float,
         y: Float,
         width: Float,
@@ -301,7 +315,7 @@ object HUDRenderUtils {
         GlStateManager.disableBlend()
     }
 
-    fun drawTexturedRectNoBlend(
+    private fun drawTexturedRectNoBlend(
         x: Float,
         y: Float,
         width: Float,

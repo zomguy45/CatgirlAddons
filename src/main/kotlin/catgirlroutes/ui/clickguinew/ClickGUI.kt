@@ -7,12 +7,14 @@ import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeOnlyFirst
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.misc.elements.impl.MiscElementButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.resetScissor
 import catgirlroutes.utils.render.HUDRenderUtils.scissor
+import catgirlroutes.utils.wrapText
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -22,7 +24,7 @@ import org.lwjgl.opengl.GL11
 import java.awt.Color
 import java.io.IOException
 
-class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded modules, save current window
+class ClickGUI : GuiScreen() { // todo: fix font rendering, gui scale shit
     var scale = 2.0
 
     var x: Double = 0.0
@@ -44,21 +46,32 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
     )
     private val categoryButtons: ArrayList<MiscElementButton> = ArrayList()
 
-    override fun initGui() {
-        val sr = ScaledResolution(mc)
-        x = sr.scaledWidth_double / 2.0 - guiWidth / 2.0
-        y = sr.scaledHeight_double / 2.0 - guiHeight / 2.0
+    val description: MutableMap<String, Description> = mutableMapOf()
 
-        searchBar.x = this.x + categoryWidth + 5.0
-        searchBar.y = this.y
+    private lateinit var sr: ScaledResolution
 
+    init {
         windows = ArrayList()
         for (category in Category.entries) {
             windows.add(Window(category, this))
         }
 
         if (selectedWindow == null) {
-            selectedWindow = windows[0]
+            selectedWindow = windows[1] // render
+        }
+    }
+
+    override fun initGui() {
+        sr = ScaledResolution(mc)
+        x = sr.scaledWidth_double / 2.0 - guiWidth / 2.0
+        y = sr.scaledHeight_double / 2.0 - guiHeight / 2.0
+
+        searchBar.x = this.x + categoryWidth + 5.0
+        searchBar.y = this.y
+
+        windows.forEach {
+            it.x = x + categoryWidth + 10.0
+            it.y = y + 25.0 + 5.0
         }
 
         super.initGui()
@@ -66,11 +79,12 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         GlStateManager.pushMatrix()
-        val sr = ScaledResolution(mc)
         val prevScale = mc.gameSettings.guiScale
         scale = CLICK_GUI_SCALE / sr.scaleFactor
         mc.gameSettings.guiScale = 2
+//        GL11.glTranslated(sr.scaledWidth_double / 2.0, sr.scaledHeight_double / 2.0, 0.0)
         GL11.glScaled(scale, scale, scale)
+//        GL11.glTranslated(-(sr.scaledWidth_double / 2.0), -(sr.scaledHeight_double / 2.0), 0.0)
 
         var categoryOffset = 25.0
 
@@ -106,8 +120,6 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
                 outlineColour = Color.WHITE.withAlpha(0)
             ) { this.selectedWindow = window }
 
-
-
             if (this.searchBar.text.isNotEmpty()) {
                 val containsSearch = window.moduleButtons.any { it.module.name.contains(this.searchBar.text, true) }
                 if (!containsSearch) {
@@ -128,6 +140,8 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
             if (window.category != Category.SETTINGS) categoryOffset += 20.0 + 2.0
         }
         resetScissor(scissor)
+
+        this.description.forEach { (_, desc) -> desc.draw() }
 
         GlStateManager.popMatrix()
         mc.gameSettings.guiScale = prevScale
@@ -199,6 +213,31 @@ class ClickGUI : GuiScreen() { // todo: fix font rendering, save expanded module
 
     val scaledMouseX get() = MathHelper.ceiling_double_int(Mouse.getX() / CLICK_GUI_SCALE)
     val scaledMouseY get() = MathHelper.ceiling_double_int( (mc.displayHeight - Mouse.getY()) / CLICK_GUI_SCALE)
+
+    data class Description(var text: String?, var x: Double, var y: Double) {
+        private val shouldRender: Boolean
+            get() = text != null && text != ""
+
+        fun draw() {
+            if (!shouldRender) return
+            val description = wrapText(text!!, 150.0)
+            y -= description.size * fontHeight + 6.0
+            x += 6.0
+            drawRoundedBorderedRect(
+                x - 3.0,
+                y - 3.0,
+                description.maxOf { FontUtil.getStringWidth(it).toDouble() } + 6.0,
+                description.size * fontHeight + 6.0,
+                3.0,
+                1.0,
+                Color(ColorUtil.bgColor).darker(),
+                ColorUtil.clickGUIColor
+            )
+            description.forEachIndexed { i, it ->
+                FontUtil.drawString(it, x, y + fontHeight * i)
+            }
+        }
+    }
 
     companion object {
         const val CLICK_GUI_SCALE = 2.0

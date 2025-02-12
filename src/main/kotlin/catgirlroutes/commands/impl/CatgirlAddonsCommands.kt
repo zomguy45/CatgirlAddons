@@ -1,8 +1,8 @@
 package catgirlroutes.commands.impl
 
-import catgirlroutes.CatgirlRoutes.Companion.clickGUI
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.commands.commodore
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.ui.misc.searchoverlay.AhBzSearch
 import catgirlroutes.ui.misc.searchoverlay.OverlayType
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -10,7 +10,7 @@ import catgirlroutes.utils.LocationManager.inSkyblock
 
 val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
     runs {
-        display = clickGUI
+        ClickGui.onEnable()
     }
 
     literal("help").runs { // todo: add description

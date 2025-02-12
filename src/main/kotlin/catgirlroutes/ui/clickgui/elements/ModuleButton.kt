@@ -133,7 +133,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
                     0f, 0f, 12, 12, 12f, 12f
                 )
             }
-            Module.TagType.NONE -> null
+            Module.TagType.NONE -> {}
         }
 
         GlStateManager.popMatrix()
@@ -171,6 +171,9 @@ class ModuleButton(val module: Module, val panel: Panel) {
         }else if (isMouseUnderButton(mouseX, mouseY)) {
             for (menuElement in menuElements.reversed()) {
                 if (menuElement.mouseClicked(mouseX, mouseY, mouseButton)) {
+                    if (menuElement.parent.module.name == "ClickGUI" && menuElement.displayName == "ClickGui") {
+                        ClickGui.onEnable()
+                    }
                     updateElements()
                     return true
                 }
@@ -221,7 +224,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
     }
 
     companion object {
-        private val haramIcon = ResourceLocation(RESOURCE_DOMAIN, "haram.png")
-        private val whipIcon = ResourceLocation(RESOURCE_DOMAIN, "whip.png")
+        val haramIcon = ResourceLocation(RESOURCE_DOMAIN, "haram.png")
+        val whipIcon = ResourceLocation(RESOURCE_DOMAIN, "whip.png")
     }
 }

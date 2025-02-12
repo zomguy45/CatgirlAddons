@@ -7,6 +7,7 @@ import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
+import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
@@ -86,6 +87,7 @@ class CatgirlRoutes {
         ModuleManager.initializeModules()
 
         clickGUI = ClickGUI()
+        clickGUINew = ClickGUINew()
     }
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
@@ -123,6 +125,7 @@ class CatgirlRoutes {
         val scope = CoroutineScope(EmptyCoroutineContext)
 
         lateinit var clickGUI: ClickGUI
+        lateinit var clickGUINew: ClickGUINew
         val configPath = File(mc.mcDataDir, "config/$CONFIG_DOMAIN")
         val moduleConfig = ModuleConfig(configPath)
         val onHypixel: Boolean  by LocationManager::onHypixel
