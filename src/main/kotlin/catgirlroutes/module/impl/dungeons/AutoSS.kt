@@ -72,11 +72,12 @@ object AutoSS : Module(
         next = false
         progress = 0
         doneFirst = false
+        doingSS = false
+        clicked = false
         debugMessage("Reset!")
     }
 
     override fun onKeyBind() {
-        clicked = false
         start()
     }
 
@@ -102,9 +103,11 @@ object AutoSS : Module(
             Thread{
                 try {
                     for (i in 0 until 2) {
+                        reset()
                         clickButton(startButton.x, startButton.y, startButton.z)
                         Thread.sleep(Random.nextInt(delay.value.toInt(), delay.value.toInt() * 1136 / 1000).toLong())
                     }
+                    doingSS = true
                     clickButton(startButton.x, startButton.y, startButton.z)
                 } catch (e: Exception) {
                     modMessage("NIGGER")
@@ -199,7 +202,7 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onPlayerInteract(event: PlayerInteractEvent) {
         val mop: MovingObjectPosition = mc.objectMouseOver ?: return
-        if (System.currentTimeMillis() - wtflip < 2500) return
+        if (System.currentTimeMillis() - wtflip < 1000) return
         wtflip = System.currentTimeMillis()
         val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
