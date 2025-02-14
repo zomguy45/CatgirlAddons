@@ -125,7 +125,7 @@ object WorldRenderUtils {
         drawBoxByEntity(entity, color, width.toFloat(), height.toFloat(), partialTicks, lineWidth.toFloat(),phase,xOffset, yOffset, zOffset)
     }
 
-    fun drawEntityBox(entity: Entity, color: Color, fillcolor: Color, outline: Boolean, fill: Boolean, partialTicks: Float, lineWidth: Float) {
+    fun drawEntityBox(entity: Entity, color: Color, fillcolor: Color, outline: Boolean, fill: Boolean, partialTicks: Float, lineWidth: Float, offset: Float = 0.0f) {
         if (!outline && !fill) return
         val renderManager = mc.renderManager
         val x = entity.lastTickPosX + (entity.posX - entity.lastTickPosX) * partialTicks - renderManager.viewerPosX
@@ -135,12 +135,12 @@ object WorldRenderUtils {
         var axisAlignedBB: AxisAlignedBB
         entity.entityBoundingBox.run {
             axisAlignedBB = AxisAlignedBB(
-                minX - entity.posX,
-                minY - entity.posY,
-                minZ - entity.posZ,
-                maxX - entity.posX,
-                maxY - entity.posY,
-                maxZ - entity.posZ
+                minX - entity.posX - offset,
+                minY - entity.posY - offset,
+                minZ - entity.posZ - offset,
+                maxX - entity.posX + offset,
+                maxY - entity.posY + offset,
+                maxZ - entity.posZ + offset
             ).offset(x, y, z)
         }
 

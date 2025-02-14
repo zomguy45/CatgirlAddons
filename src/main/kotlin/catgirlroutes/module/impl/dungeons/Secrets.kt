@@ -130,7 +130,7 @@ object Secrets : Module( // todo: use secretevent
                         playLoudSound(getSound(isHighlight = true), this.volume.value.toFloat() * 0.2f, this.pitch.value.toFloat())
                         colour = closeColour.value
                     }
-                    drawEntityBox(it, colour, colour, false, true, event.partialTicks, 0.0f)
+                    drawEntityBox(it, colour, colour, false, true, event.partialTicks, 0.0f, 0.1f)
                 }
         }
     }

@@ -31,6 +31,7 @@ object DungeonESP: Module(
 
     private val espStyle = StringSelectorSetting("Esp style","3D", arrayListOf("3D", "2D", "Outline"), "Esp render style to be used.")
     private val espFill = BooleanSetting("Esp fill", false).withDependency { espStyle.selected == "3D"}
+    private val boxOffset = NumberSetting("Box size offset", 0.0, -1.0, 1.0, 0.05, "Change box size offset").withDependency { this.espStyle.selected == "3D" }
     private val lineWidth = NumberSetting("Line width", 4.0, 0.0, 8.0, 1.0)
 
     private val colorDropdown = DropdownSetting("Colors")
@@ -54,6 +55,7 @@ object DungeonESP: Module(
         addSettings(
             espStyle,
             espFill,
+            boxOffset,
             lineWidth,
 
             colorDropdown,
@@ -71,7 +73,7 @@ object DungeonESP: Module(
     data class ESPEntity (
         val entity: Entity,
         val color: Color,
-        val fillcolor: Color
+        val fillColor: Color
     )
 
     @SubscribeEvent
@@ -91,7 +93,7 @@ object DungeonESP: Module(
             if (espStyle.selected == "Outline") return@forEach
             when (espStyle.selected) {
                 "2D" -> draw2DBoxByEntity(espEntity.entity, espEntity.color, event.partialTicks, lineWidth.value.toFloat(), true)
-                "3D" -> drawEntityBox(espEntity.entity, espEntity.color, espEntity.fillcolor, true, espFill.value, event.partialTicks, lineWidth.value.toFloat())
+                "3D" -> drawEntityBox(espEntity.entity, espEntity.color, espEntity.fillColor, true, espFill.value, event.partialTicks, lineWidth.value.toFloat(), this.boxOffset.value.toFloat())
             }
         }
         currentEntities.removeAll(entitiesToRemove.toSet())

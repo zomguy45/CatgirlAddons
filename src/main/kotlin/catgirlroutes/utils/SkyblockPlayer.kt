@@ -40,7 +40,7 @@ object SkyblockPlayer {
     val SALVATION_REGEX = Regex("T([1-3])!") // no idea
 
     val MANA_USAGE_REGEX = Regex("§b-[\\d,]+ Mana \\(§6.+?§b\\)|§c§lNOT ENOUGH MANA") // §b-50 Mana (§6Speed Boost§b) , §c§lNOT ENOUGH MANA
-    val SECRETS_REGEX = Regex("§7(\\d+)/(\\d+) Secrets§r") // §76/10 Secrets§r
+    val SECRETS_REGEX = Regex("\\s*§7(\\d+)/(\\d+) Secrets") // §76/10 Secrets§r
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     fun onChat(event: PacketReceiveEvent) {
