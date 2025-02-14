@@ -335,10 +335,11 @@ object PlayerDisplay: Module(
             if (sbaStyle.enabled) {
                 drawItemStackWithText(ItemStack(Blocks.chest), 0.0, 0.0)
                 FontUtil.drawStringWithShadow("§7Secrets", 16.0, 0.0)
+                val secretsText = if (currentSecrets > -1) "$colour$currentSecrets§7/$colour$maxSecrets" else "§7Unknown"
                 val textWidth = FontUtil.getStringWidth("Secrets")
-                val totalWidth = FontUtil.getStringWidth("$currentSecrets/$maxSecrets")
-                FontUtil.drawStringWithShadow("$colour$currentSecrets§7/$colour$maxSecrets", 16.0 + 2.0 + textWidth / 2.0 - totalWidth / 2.0, 11.0)
-            } else {
+                val totalWidth = FontUtil.getStringWidth(secretsText)
+                FontUtil.drawStringWithShadow(secretsText, 16.0 + 2.0 + textWidth / 2.0 - totalWidth / 2.0, 11.0)
+            } else if (currentSecrets > -1) {
                 FontUtil.drawStringWithShadow("$colour$currentSecrets/$maxSecrets Secrets", 0.0, 0.0)
             }
         }
