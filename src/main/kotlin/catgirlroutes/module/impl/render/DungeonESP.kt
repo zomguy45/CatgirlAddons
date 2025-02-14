@@ -139,7 +139,8 @@ object DungeonESP: Module(
         }
     }
 
-    private fun handleBat(entity: Entity) {
+    private fun handleBat(entity: EntityBat) {
+        if (!listOf(100F, 200F, 400F, 800F).contains(entity.maxHealth)) return
         currentEntities.add(ESPEntity(entity, colorBat.value, colorBatFill.value))
     }
 
