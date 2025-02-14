@@ -63,7 +63,7 @@ class ModuleButton(val module: Module, val window: Window) {
         val oldHeight = elementsHeight
         var position = -1
         for (setting in module.settings) {
-            if (setting.shouldBeVisible) run addElement@{
+            if ((setting.visibility.visibleInClickGui || setting.visibility.visibleInAdvanced) && setting.shouldBeVisible) run addElement@{
                 position++
                 if (this.menuElements.any { it.setting === setting }) return@addElement
                 val newElement = when (setting) {

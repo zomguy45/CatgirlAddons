@@ -272,13 +272,13 @@ object PlayerDisplay: Module(
     @RegisterHudElement
     object SpeedHud : HudElement(
         this, 0, 0,
-        mc.fontRendererObj.getStringWidth("500✦"),
+        mc.fontRendererObj.getStringWidth("✦500"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("500✦", 0.0, 0.0) }
+        preview = { FontUtil.drawStringWithShadow("✦500", 0.0, 0.0) }
     ) {
         override fun renderHud() {
             if (!inSkyblock || !speed.enabled) return
-            FontUtil.drawStringWithShadow("${SkyblockPlayer.speed}✦", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("✦${SkyblockPlayer.speed}", 0.0, 0.0)
         }
     }
 
