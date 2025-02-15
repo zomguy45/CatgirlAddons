@@ -55,11 +55,9 @@ object InventoryButtons : Module(
         allButtons.filter { it.isActive }
             .forEach { button ->
                 GlStateManager.pushMatrix()
-                GlStateManager.disableLighting()
 
                 button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble())
 
-                GlStateManager.enableLighting()
                 GlStateManager.popMatrix()
             }
 
