@@ -6,9 +6,9 @@ import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.getStringWidth
 import catgirlroutes.ui.misc.elements.MiscElement
+import catgirlroutes.utils.Utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
-import me.odinmain.utils.noControlCodes
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ChatAllowedCharacters

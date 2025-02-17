@@ -11,6 +11,7 @@ import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.EntityAura
 import catgirlroutes.utils.EntityAura.entityArray
+import catgirlroutes.utils.NeuRepo
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.VecUtils.toVec3
 import catgirlroutes.utils.dungeon.DungeonUtils
@@ -128,5 +129,17 @@ val devCommands = commodore("dev") {
     }
     literal("ystop").runs {
         mc.thePlayer.motionY = 0.0
+    }
+
+    literal("repoinfo").runs {
+        ChatUtils.chatMessage("""
+            ---------------
+            Items: ${NeuRepo.repoItems.size}
+            |Bazaar: ${NeuRepo.repoItems.filter { it.bazaar }.size}
+            |Auction: ${NeuRepo.repoItems.filter { it.auction }.size}
+            Mobs: ${NeuRepo.mobs.size}
+            Constants: ${NeuRepo.constants.size}
+            ---------------
+        """.trimIndent())
     }
 }

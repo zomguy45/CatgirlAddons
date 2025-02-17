@@ -2,8 +2,8 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.Utils.extraAttributes
 import catgirlroutes.utils.Utils.unformattedName
-import me.odinmain.utils.skyblock.extraAttributes
 import net.minecraft.block.BlockAir
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding

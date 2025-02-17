@@ -31,7 +31,7 @@ import java.awt.Color
 import java.io.IOException
 import java.util.*
 
-class AhBzSearch(
+class AhBzSearch( // todo: recode some day
     val type: OverlayType,
     private val sign: TileEntitySign? = null, // if null then run command instead
 ) : GuiScreen() {
@@ -55,7 +55,7 @@ class AhBzSearch(
     )
     private val forcePetLvl = MiscElementBoolean(text = "Lvl 100 Pets", radius = 3.0, thickness = 1.0)
     private val petLvl: String
-        get() = if (forcePetLvl.enabled) "[Lvl 100]" else ""
+        get() = if (forcePetLvl.enabled) "[Lvl 100] " else ""
 
 
     private var resHistorySetting = if (type == OverlayType.AUCTION) ahHistory else bzHistory
@@ -309,7 +309,7 @@ class AhBzSearch(
         }
 
         sign?.let {
-            sign.signText[0] = ChatComponentText("$petLvl ${searchBar.text}")
+            sign.signText[0] = ChatComponentText("$petLvl${searchBar.text}")
         }
 
         super.keyTyped(typedChar, keyCode)

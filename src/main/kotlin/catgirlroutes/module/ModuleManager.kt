@@ -81,6 +81,7 @@ object ModuleManager {
         AutoKick,
         AutoWardrobe,
         WitherCloak,
+        CopyChat,
         // SearchOverlay,
 
         // Player

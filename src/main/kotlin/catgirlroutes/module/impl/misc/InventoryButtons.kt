@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.InventoryButtonsConfig.allButtons
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketReceiveEventReturn
 import catgirlroutes.mixins.accessors.AccessorGuiContainer
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -21,15 +22,18 @@ import catgirlroutes.utils.toJson
 import catgirlroutes.utils.toJsonObject
 import com.google.gson.JsonPrimitive
 import net.minecraft.client.gui.ScaledResolution
+import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.init.Items
 import net.minecraft.network.play.server.S2DPacketOpenWindow
-import net.minecraft.network.play.server.S2EPacketCloseWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
+import net.minecraft.network.play.server.S30PacketWindowItems
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.client.config.GuiUtils
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Mouse
+
 
 object InventoryButtons : Module(
     "Inventory buttons",
@@ -42,6 +46,8 @@ object InventoryButtons : Module(
     val editMode: ActionSetting = ActionSetting("Edit") { display = InventoryButtonEditor() }
 
     private var shouldScanEq = false
+    private val equipmentSlots = listOf(10, 19, 28, 37)
+    private val eqStacks get() = equipmentSlots.map { (mc.currentScreen as? GuiChest)?.inventorySlots?.getSlot(it)?.stack }
 
     init {
         addSettings(this.equipmentOverlay, this.editMode)
@@ -108,25 +114,15 @@ object InventoryButtons : Module(
     fun onS2DPacketOpenWindow(event: PacketReceiveEvent) {
         if (!inSkyblock || !this.equipmentOverlay.enabled || event.packet !is S2DPacketOpenWindow) return
         shouldScanEq = event.packet.windowTitle.unformattedText == "Your Equipment and Stats"
-        debugMessage(shouldScanEq)
     }
 
-//    @SubscribeEvent
-//    fun onS2EPacketCloseWindow(event: PacketReceiveEvent) {
-//        if (this.equipmentOverlay.enabled && event.packet is S2EPacketCloseWindow) shouldScanEq = false
-//    }
-
     @SubscribeEvent
-    fun S2FPacketSetSlot(event: PacketReceiveEvent) {
-        if (!shouldScanEq || event.packet !is S2FPacketSetSlot) return
+    fun onS30PacketWindowItems(event: PacketReceiveEvent) {
+        if (!shouldScanEq || event.packet !is S30PacketWindowItems) return
         val buttons = allButtons.filter { it.isEquipment }
-        val equipmentSlots = listOf(10, 19, 28, 37)
-
-        buttons.zip(equipmentSlots).forEach { (button, slot) ->
-            if (event.packet.func_149173_d() != slot) return@forEach
-            val itemStack = event.packet.func_149174_e()
-
-            button.icon = if (itemStack.displayName.noControlCodes == "Empty Equipment Slot") {
+        this.equipmentSlots.forEachIndexed { i, slot ->
+            val itemStack = event.packet.itemStacks[slot]
+            buttons[i].icon = if (itemStack.displayName.noControlCodes == "Empty Equipment Slot") {
                 "barrier"
             } else {
                 val tagString = itemStack.toJson()
@@ -135,10 +131,9 @@ object InventoryButtons : Module(
                 }
                 tagString.toString()
             }
-
             InventoryButtonsConfig.save()
-            this.shouldScanEq = false
         }
+        this.shouldScanEq = false
     }
 
     private fun calculateTooltipXOffset(tooltipToDisplay: List<String>?): Int {

@@ -1,6 +1,9 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.utils.Utils.addVec
+import catgirlroutes.utils.VecUtils.fastEyeHeight
+import catgirlroutes.utils.VecUtils.renderVec
 import catgirlroutes.utils.WorldToScreen
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
@@ -54,6 +57,10 @@ object WorldRenderUtils {
      */
     fun drawLine(start: Vec3, finish: Vec3, color: Color, thickness: Float = 3f, phase: Boolean = true) {
         drawLine(start.xCoord, start.yCoord, start.zCoord, finish.xCoord, finish.yCoord, finish.zCoord, color, thickness, phase)
+    }
+
+    fun drawTracer(goal: Vec3, color: Color, thickness: Float = 3f, phase: Boolean = true) {
+        drawLine(mc.thePlayer.renderVec.addVec(y = fastEyeHeight()), goal, color, thickness, phase)
     }
 
     /**

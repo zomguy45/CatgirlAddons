@@ -3,20 +3,23 @@ package catgirlroutes.module.impl.dungeons.puzzlesolvers
 import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.VecUtils.equal
 import catgirlroutes.utils.VecUtils.toBlockPos
+import catgirlroutes.utils.VecUtils.toVec3
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.getBlockAt
+import catgirlroutes.utils.render.WorldRenderUtils.drawLine
+import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
+import catgirlroutes.utils.render.WorldRenderUtils.drawTracer
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
-import me.odinmain.utils.equal
-import me.odinmain.utils.render.Renderer
-import me.odinmain.utils.toVec3
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
+import java.awt.Color
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import java.util.*
@@ -77,24 +80,21 @@ object WaterSolver {
 
         if (showTracer) {
             val firstSolution = solutionList.firstOrNull()?.first ?: return
-            Renderer.drawTracer(firstSolution.leverPos.addVector(.5, .5, .5), color = me.odinmain.utils.render.Color.GREEN, depth = true)
+            drawTracer(firstSolution.leverPos.addVector(.5, .5, .5), Color.GREEN)
 
             if (solutionList.size > 1 && firstSolution.leverPos != solutionList[1].first.leverPos) {
-                Renderer.draw3DLine(
-                    listOf(firstSolution.leverPos.addVector(.5, .5, .5), solutionList[1].first.leverPos.addVector(.5, .5, .5)),
-                    me.odinmain.utils.render.Color.RED, lineWidth = 1.5f, depth = true
-                )
+                drawLine(firstSolution.leverPos.addVector(.5, .5, .5), solutionList[1].first.leverPos.addVector(.5, .5, .5), Color.RED, 1.5f)
             }
         }
 
         solutions.forEach { (lever, times) ->
             times.drop(lever.i).forEachIndexed { index, time ->
-                Renderer.drawStringInWorld(when {
+                drawStringInWorld(when {
                     openedWater == -1L && time == 0.0 -> "§a§lCLICK ME!"
                     openedWater == -1L -> "§e${time}s"
                     else ->
                         (openedWater + time * 1000L - System.currentTimeMillis()).takeIf { it > 0 }?.let { "§e${String.format(Locale.US, "%.2f", it / 1000)}s" } ?: "§a§lCLICK ME!"
-                }, lever.leverPos.addVector(0.5, (index + lever.i) * 0.5 + 1.5, 0.5), me.odinmain.utils.render.Color.WHITE, scale = 0.04f)
+                }, lever.leverPos.addVector(0.5, (index + lever.i) * 0.5 + 1.5, 0.5), scale = 0.04f)
             }
         }
     }

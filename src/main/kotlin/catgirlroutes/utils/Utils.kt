@@ -8,6 +8,7 @@ import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import com.google.gson.JsonPrimitive
 import net.minecraft.client.renderer.GlStateManager
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.init.Blocks
@@ -77,6 +78,10 @@ object Utils {
                 (mc.renderManager.viewerPosY - y) * (mc.renderManager.viewerPosY - y) +
                 (mc.renderManager.viewerPosZ - z) * (mc.renderManager.viewerPosZ - z)
         )
+    }
+
+    fun EntityPlayer?.isOtherPlayer(): Boolean {
+        return this != null && this != mc.thePlayer && this.uniqueID.version() != 2
     }
 
     val ItemStack?.unformattedName: String

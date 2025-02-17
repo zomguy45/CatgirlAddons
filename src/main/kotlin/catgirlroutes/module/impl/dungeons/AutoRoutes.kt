@@ -26,6 +26,7 @@ import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.SwapState
+import catgirlroutes.utils.Utils.distanceToPlayer
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
@@ -42,6 +43,7 @@ import kotlinx.coroutines.*
 import net.minecraft.block.Block
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.settings.KeyBinding
+import net.minecraft.entity.passive.EntityBat
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
@@ -101,6 +103,20 @@ object AutoRoutes : Module(
             secretPickedUpDeferred = null
         }
     }
+
+//    @SubscribeEvent
+//    fun onBat(event: TickEvent.ClientTickEvent) {
+//        mc.theWorld.loadedEntityList
+//            .filterIsInstance<EntityBat>()
+//            .filter { distanceToPlayer(it.posX, it.posY, it.posZ) < 10 }
+//            .forEach {
+//
+//                scheduleTask(1) {
+//                    secretPickedUpDeferred?.complete(Unit)
+//                    secretPickedUpDeferred = null
+//                }
+//            }
+//    }
 
     @SubscribeEvent
     fun onMouse(event: MouseEvent) {

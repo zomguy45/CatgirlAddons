@@ -6,13 +6,13 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.*
+import catgirlroutes.utils.Utils.isOtherPlayer
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.render.OutlineUtils.outlineESP
 import catgirlroutes.utils.render.WorldRenderUtils.draw2DBoxByEntity
 import catgirlroutes.utils.render.WorldRenderUtils.drawEntityBox
-import me.odinmain.utils.isOtherPlayer
 import net.minecraft.client.entity.EntityOtherPlayerMP
 import net.minecraft.entity.Entity
 import net.minecraft.entity.boss.EntityWither

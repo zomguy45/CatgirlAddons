@@ -34,6 +34,9 @@ object VecUtils {
         return Vec3(this.xCoord * factor.toDouble(), this.yCoord * factor.toDouble(), this.zCoord * factor.toDouble())
     }
 
+    fun Vec3.equal(other: Vec3): Boolean =
+        this.xCoord == other.xCoord && this.yCoord == other.yCoord && this.zCoord == other.zCoord
+
     var partialTicks = 0f
 
     val Entity.renderX: Double
