@@ -6,6 +6,7 @@ import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.restartMovement
@@ -14,7 +15,11 @@ import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
+import com.mojang.authlib.GameProfile
+import com.mojang.authlib.properties.Property
 import net.minecraft.block.Block
+import net.minecraft.block.BlockSkull
+import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.item.Item
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -24,6 +29,7 @@ import net.minecraft.tileentity.TileEntitySkull
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import java.util.*
 import kotlin.math.*
 
 object Doorless: Module(
@@ -33,11 +39,13 @@ object Doorless: Module(
 ){
     private var doorClip = BooleanSetting("Clip", false)
     private var doorMotion = BooleanSetting("Motion", false)
+    private val regenDelay = NumberSetting("Skulls regeneration delay", 10.0, 0.0, 20.0, 1.0, unit = "t")
 
     init {
         this.addSettings(
             doorClip,
-            doorMotion
+            doorMotion,
+            regenDelay
         )
     }
 
@@ -151,7 +159,7 @@ object Doorless: Module(
             setBlockAt(posX + xOffset * 3, posY - 1, posZ + zOffset * 3, 0);
             setBlockAt(posX + xOffset * 2 + if (zOffset != 0) 1 else 0, posY - 1, posZ + zOffset * 2 + if (xOffset != 0) 1 else 0, 20)
             setBlockAt(posX + xOffset * 2 - if (zOffset != 0) 1 else 0, posY - 1, posZ + zOffset * 2 - if (xOffset != 0) 1 else 0, 20)
-            setBlockAt(posX + xOffset * 4, posY - 1, posZ + zOffset * 4, 0);
+            setBlockAt(posX + xOffset * 4, posY - 1, posZ + zOffset * 4, 0)
         }
         stopMovement()
         scheduleTask(0) {
@@ -185,6 +193,11 @@ object Doorless: Module(
         setBlockAt(posX + xOffset * 2 + (if (zOffset != 0) 1 else 0), posY + 1, posZ + zOffset * 2 + (if (xOffset != 0) 1 else 0), 20)
         setBlockAt(posX + xOffset * 2 - (if (zOffset != 0) 1 else 0), posY, posZ + zOffset * 2 - (if (xOffset != 0) 1 else 0), 20)
         setBlockAt(posX + xOffset * 2 - (if (zOffset != 0) 1 else 0), posY + 1, posZ + zOffset * 2 - (if (xOffset != 0) 1 else 0), 20)
+
+        scheduleTask(regenDelay.value.toInt()) {
+            setBlockAt(posX + xOffset * 4, posY, posZ + zOffset * 4)
+        }
+
         waitingForS08 = false
     }
 
@@ -215,5 +228,21 @@ object Doorless: Module(
         val blockPos = getBlockPosFloor(x, y, z)
         mc.theWorld.setBlockState(blockPos, Block.getStateById(id))
         mc.theWorld.markBlockForUpdate(blockPos)
+    }
+
+    private fun setBlockAt(x: Double, y: Double, z: Double) {
+        val blockPos = getBlockPosFloor(x, y, z)
+        val skullBlockState: IBlockState = Blocks.skull.defaultState
+            .withProperty(BlockSkull.FACING, net.minecraft.util.EnumFacing.DOWN) // doesn't really change anything visually. cba to fix
+        mc.theWorld.setBlockState(blockPos, skullBlockState)
+
+        val tileEntity = mc.theWorld.getTileEntity(blockPos) as? TileEntitySkull
+        if (tileEntity != null) {
+            val gameProfile = GameProfile(UUID.randomUUID(), null)
+            gameProfile.properties.put("textures", Property("textures", skullIds[0]))
+            tileEntity.playerProfile = gameProfile
+            tileEntity.markDirty()
+            mc.theWorld.markBlockForUpdate(blockPos)
+        }
     }
 }

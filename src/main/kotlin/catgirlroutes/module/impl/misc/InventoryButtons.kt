@@ -47,7 +47,6 @@ object InventoryButtons : Module(
 
     private var shouldScanEq = false
     private val equipmentSlots = listOf(10, 19, 28, 37)
-    private val eqStacks get() = equipmentSlots.map { (mc.currentScreen as? GuiChest)?.inventorySlots?.getSlot(it)?.stack }
 
     init {
         addSettings(this.equipmentOverlay, this.editMode)
