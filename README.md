@@ -1,3 +1,1 @@
- kill yourself -serenity
-
-meow
+https://discord.gg/8NMEAhNRgd
