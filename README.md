@@ -1,5 +1,3 @@
  kill yourself -serenity
 
-
- 
 meow
