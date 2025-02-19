@@ -118,7 +118,7 @@ object CgaUsers { // todo: add capes with gif
     }
 
     init {
-        updateUsers()
+        //updateUsers()
     }
 
 }
