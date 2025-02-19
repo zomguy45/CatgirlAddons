@@ -60,7 +60,7 @@ class AdvancedElementKeyBind(parent: AdvancedMenu, module: Module, setting: KeyB
      */
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (listening) {
-            if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_BACK) {
+            if (keyCode == Keyboard.KEY_ESCAPE) {
                 setting.value.key = Keyboard.KEY_NONE
                 listening = false
             } else if (keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {

@@ -49,7 +49,7 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (listening) {
-            if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_BACK) {
+            if (keyCode == Keyboard.KEY_ESCAPE) {
                 this.setting.value.key = Keyboard.KEY_NONE
                 if (this.colourAnimation.start()) listening = false
             } else if (keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
