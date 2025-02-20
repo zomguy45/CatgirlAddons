@@ -9,7 +9,7 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import net.minecraft.client.renderer.GlStateManager
 import kotlin.reflect.full.hasAnnotation
 
-class Window( // todo: scroll shit
+class Window(
     val category: Category,
     val clickGui: ClickGUI
 ) {
@@ -48,7 +48,7 @@ class Window( // todo: scroll shit
         var startYLeft = this.scrollOffset
         var startYRight = this.scrollOffset
 
-        this.moduleButtons.filter{ it.module.name.contains(clickGui.searchBar.text, true) }
+        this.moduleButtons.filtered().reversed()
             .chunked(2).forEach { row ->
                 row.forEachIndexed { i, button ->
                     if (i == 0) {
@@ -80,7 +80,7 @@ class Window( // todo: scroll shit
 
     fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
         if (this.isHovered(mouseX, mouseY)) {
-            this.moduleButtons.reversed().forEach {
+            this.moduleButtons.filtered().forEach {
                 if (it.mouseClicked(mouseX, mouseY, mouseButton)) return true
             }
         }
@@ -88,12 +88,12 @@ class Window( // todo: scroll shit
     }
 
     fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
-        if (this.selected) this.moduleButtons.reversed().forEach { it.mouseReleased(mouseX, mouseY, state) }
+        if (this.selected) this.moduleButtons.filtered().forEach { it.mouseReleased(mouseX, mouseY, state) }
     }
 
     fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (this.selected) {
-            this.moduleButtons.reversed().forEach {
+            this.moduleButtons.filtered().forEach {
                 if (it.keyTyped(typedChar, keyCode)) return true
             }
         }
@@ -101,11 +101,11 @@ class Window( // todo: scroll shit
     }
 
     fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
-        if (this.selected) this.moduleButtons.reversed().forEach { it.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) }
+        if (this.selected) this.moduleButtons.filtered().forEach { it.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) }
     }
 
     fun scroll(amount: Int, mouseX: Int, mouseY: Int): Boolean {
-        if (isHovered(mouseX, mouseY)) {
+        if (isHovered(mouseX, mouseY) && clickGui.searchBar.text.isEmpty()) {
             debugMessage(amount)
             this.scrollTarget = (this.scrollTarget + amount * SCROLL_DISTANCE).coerceIn(-this.length + this.scrollOffset + 72.0, 0.0)
             this.scrollAnimation.start(true)
@@ -118,6 +118,8 @@ class Window( // todo: scroll shit
         if (!this.selected) return false
         return mouseX >= this.x && mouseX <= this.x + this.width && mouseY >= this.y && mouseY <= this.y + this.height
     }
+
+    private fun List<ModuleButton>.filtered() = filter { it.module.name.contains(clickGui.searchBar.text, true) }.reversed()
 
     companion object {
         private const val SCROLL_DISTANCE = 25
