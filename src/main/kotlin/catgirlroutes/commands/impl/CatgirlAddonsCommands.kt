@@ -11,6 +11,7 @@ import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.LocationManager.inSkyblock
 import catgirlroutes.utils.Notifications
+import com.github.stivais.commodore.utils.GreedyString
 
 val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
     runs {
@@ -45,8 +46,8 @@ val catgirlAddonsCommands = commodore("catgirladdons", "cataddons", "cga") {
         } else modMessage("You're not in skyblock")
     }
 
-    literal("toggle").runs { moduleName: String ->
-        val module = ModuleManager.getModuleByName(moduleName) ?: return@runs
+    literal("toggle").runs { moduleName: GreedyString ->
+        val module = ModuleManager.getModuleByName(moduleName.toString()) ?: return@runs
         module.toggle()
         if (ClickGui.notifications.value) Notifications.send("${if (module.enabled) "Enabled" else "Disabled"} ${module.name}", "", icon = if (module.enabled) "check.png" else "x.png")
         else modMessage("${module.name} ${if (module.enabled) "§aenabled" else "§cdisabled"}.")
