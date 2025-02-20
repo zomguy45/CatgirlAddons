@@ -384,7 +384,7 @@ object AutoP3 : Module(
             }
             "movement" -> {
                 dir = null
-                if (ring.packets.size == 0) return
+                if (ring.packets.size == 0 || movementOn) return
                 movementList = ring.packets.toMutableList()
                 movementOn = true
             }
