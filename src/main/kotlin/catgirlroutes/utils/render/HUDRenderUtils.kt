@@ -386,19 +386,28 @@ object HUDRenderUtils {
         GlStateManager.disableTexture2D()
         GlStateManager.enableBlend()
         GlStateManager.disableAlpha()
+        GlStateManager.disableDepth()
+        GL11.glBlendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA)
         GL11.glShadeModel(GL11.GL_SMOOTH)
 
-        worldRenderer.begin(GL11.GL_QUADS, DefaultVertexFormats.POSITION_COLOR)
-        worldRenderer.pos(x, y, 0.0).color(r2, g2, b2, a2).endVertex() // top LEFT
+        worldRenderer.begin(GL11.GL_TRIANGLES, DefaultVertexFormats.POSITION_COLOR)
+
+        // 1st
         worldRenderer.pos(x, y2, 0.0).color(r4, g4, b4, a4).endVertex() // bot left
         worldRenderer.pos(x2, y2, 0.0).color(r3, g3, b3, a3).endVertex() // bot right
-        worldRenderer.pos(x2, y, 0.0).color(r1, g1, b1, a1).endVertex() // top RIGHT (COLOUR)
+        worldRenderer.pos(x2, y, 0.0).color(r1, g1, b1, a1).endVertex() // top right
+
+        // 2nd
+        worldRenderer.pos(x, y, 0.0).color(r2, g2, b2, a2).endVertex() // top left
+        worldRenderer.pos(x, y2, 0.0).color(r4, g4, b4, a4).endVertex() // bot left
+        worldRenderer.pos(x2, y, 0.0).color(r1, g1, b1, a1).endVertex() // top right
 
         tessellator.draw()
 
         GL11.glShadeModel(GL11.GL_FLAT)
         GlStateManager.disableBlend()
         GlStateManager.enableDepth()
+        GlStateManager.enableAlpha()
         GlStateManager.enableTexture2D()
         GlStateManager.popMatrix()
     }
