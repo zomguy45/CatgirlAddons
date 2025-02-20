@@ -5,7 +5,6 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.InventoryButtonsConfig.allButtons
 import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.PacketReceiveEventReturn
 import catgirlroutes.mixins.accessors.AccessorGuiContainer
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -13,7 +12,6 @@ import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.inventorybuttons.InventoryButtonEditor
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.LocationManager.inSkyblock
 import catgirlroutes.utils.Utils.lore
 import catgirlroutes.utils.Utils.noControlCodes
@@ -22,12 +20,9 @@ import catgirlroutes.utils.toJson
 import catgirlroutes.utils.toJsonObject
 import com.google.gson.JsonPrimitive
 import net.minecraft.client.gui.ScaledResolution
-import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.init.Items
 import net.minecraft.network.play.server.S2DPacketOpenWindow
-import net.minecraft.network.play.server.S2FPacketSetSlot
 import net.minecraft.network.play.server.S30PacketWindowItems
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.client.config.GuiUtils
@@ -56,16 +51,8 @@ object InventoryButtons : Module(
     fun onDrawScreenPost(event: GuiScreenEvent.DrawScreenEvent.Post) {
         if (!inSkyblock || mc.currentScreen !is GuiInventory) return
         val accessor = event.gui as AccessorGuiContainer
-
-        allButtons.filter { it.isActive }
-            .forEach { button ->
-                GlStateManager.pushMatrix()
-
-                button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble())
-
-                GlStateManager.popMatrix()
-            }
-
+        GlStateManager.pushMatrix()
+        allButtons.filter { it.isActive }.forEach { button -> button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble()) }
         // different loop so hovering text is always above the buttons
         allButtons.filter { it.isActive }
             .forEach { button ->
@@ -93,6 +80,8 @@ object InventoryButtons : Module(
                     )
                 }
             }
+
+        GlStateManager.popMatrix()
     }
 
     @SubscribeEvent

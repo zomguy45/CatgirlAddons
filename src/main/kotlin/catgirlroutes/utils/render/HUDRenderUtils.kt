@@ -8,6 +8,7 @@ import net.minecraft.client.renderer.RenderHelper
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
+import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
@@ -492,5 +493,18 @@ object HUDRenderUtils {
         RenderHelper.disableStandardItemLighting()
     }
 
-
+    fun Slot.highlight(color: Color) {
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(0.0, 0.0, -10.0)
+        GlStateManager.disableBlend()
+        Gui.drawRect(
+            xDisplayPosition,
+            yDisplayPosition,
+            xDisplayPosition + 16,
+            yDisplayPosition + 16,
+            color.rgb
+        )
+        GlStateManager.enableBlend()
+        GlStateManager.popMatrix()
+    }
 }

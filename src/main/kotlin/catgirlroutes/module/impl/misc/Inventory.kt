@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.GuiContainerEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.mixins.accessors.AccessorGuiEditSign
@@ -17,21 +18,27 @@ import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.ui.misc.searchoverlay.AhBzSearch
 import catgirlroutes.ui.misc.searchoverlay.OverlayType
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.LocationManager.inSkyblock
+import catgirlroutes.utils.Utils.lore
+import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.render.HUDRenderUtils.highlight
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.gui.inventory.GuiChest
 import net.minecraft.client.gui.inventory.GuiEditSign
 import net.minecraft.client.gui.inventory.GuiInventory
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.init.Items
+import net.minecraft.inventory.Slot
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraftforge.client.event.GuiOpenEvent
 import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
+import java.awt.Color
 
 
 object Inventory : Module(
@@ -41,7 +48,7 @@ object Inventory : Module(
     tag = TagType.WHIP
 ) { // todo: neu type shit search overlay (jei shit on the side)
 
-    private val searchBar = BooleanSetting("Search bar")
+    private val searchBar = BooleanSetting("Search bar", description = "Use \",\" separator to search for things like attributes")
     private val itemList = BooleanSetting("Item list").withDependency { searchBar.enabled }
 
     private val ahDropdown = DropdownSetting("Auction house")
@@ -56,12 +63,14 @@ object Inventory : Module(
     val bzHistory = StringSetting("BZ_SEARCH", "[\"\"]", 5000, visibility = Visibility.HIDDEN)
     val barX = NumberSetting("SEARCH_BAR_X", visibility = Visibility.HIDDEN)
     val barY = NumberSetting("SEARCH_BAR_Y", visibility = Visibility.HIDDEN)
-    val barScale = NumberSetting("SEARCH_BAR_SCALE", 1.0,0.1,4.0,0.02, visibility = Visibility.HIDDEN)
+    val barScale = NumberSetting("SEARCH_BAR_SCALE", 1.0,1.0,1.0,0.02, visibility = Visibility.HIDDEN)
 
     private var overlay: OverlayType = OverlayType.NONE
     private var clickedSearch = false
 
-    private var bar = MiscElementText(width = 250.0, height = 25.0) // temp
+    private var textField = MiscElementText(width = 225.0, height = 20.0) // temp // todo calc
+    private var highlightSlots = mutableMapOf<Int, HighlightSlot>()
+    private val stupid get() = mc.theWorld == null || !inSkyblock || !this.searchBar.enabled || (mc.currentScreen !is GuiInventory && mc.currentScreen !is GuiChest)
 
     init {
         addSettings(
@@ -85,37 +94,6 @@ object Inventory : Module(
     }
 
     @SubscribeEvent
-    fun onDrawScreenPost(event: GuiScreenEvent.DrawScreenEvent.Post) {
-        if (!inSkyblock || !this.searchBar.enabled ||  mc.currentScreen !is GuiInventory) return // mc.currentScreen !is GuiChest
-        GlStateManager.pushMatrix()
-        GlStateManager.scale(barScale.value, barScale.value, barScale.value)
-
-        bar.apply {
-            x = barX.value
-            y = barY.value
-            render(0, 0)
-        }
-
-        GlStateManager.popMatrix()
-    }
-
-    @SubscribeEvent
-    fun onGuiScreenKeyboard2(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
-        if (!inSkyblock || !this.searchBar.enabled ||  mc.currentScreen !is GuiInventory) return
-        bar.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey())
-    }
-
-    @SubscribeEvent
-    fun onGuiScreenMouse(event: GuiScreenEvent.MouseInputEvent.Pre) {
-        if (!inSkyblock || !this.searchBar.enabled ||  mc.currentScreen !is GuiInventory) return
-        bar.mouseClicked(Mouse.getX(), Mouse.getY(), Mouse.getEventButton())
-    }
-
-    // dummy HudElement to move search bar position
-    @RegisterHudElement
-    object SearchBar : HudElement(this, barX, barY, 250, 25, barScale) { override fun renderHud() {  } }
-
-    @SubscribeEvent
     fun onS2DPacketOpenWindow(event: PacketReceiveEvent) {
         if (!inSkyblock || event.packet !is S2DPacketOpenWindow) return
         val title = event.packet.windowTitle.unformattedText
@@ -135,7 +113,6 @@ object Inventory : Module(
         val name = event.packet.clickedItem?.displayName
         val slot = event.packet.slotId
         clickedSearch = (registry == "minecraft:sign" && name == "§aSearch" && slot in listOf(48, 45))
-        debugMessage(clickedSearch)
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -166,4 +143,80 @@ object Inventory : Module(
             event.gui = AhBzSearch(overlay, sign)
         }
     }
+
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.END) return
+        if (mc.theWorld == null || !inSkyblock || !this.searchBar.enabled || mc.currentScreen == null || this.textField.text.isEmpty()) {
+            this.highlightSlots.clear()
+            return
+        }
+
+        this.highlightSlots.entries.removeIf { (_, hs) -> hs.string != this.textField.text }
+
+        mc.thePlayer?.openContainer?.inventorySlots?.forEachIndexed { i, slot ->
+            slot.stack?.let {
+                val name = slot.stack.displayName.noControlCodes.lowercase()
+                val lore = slot.stack.lore.joinToString().lowercase()
+
+                this.textField.text.split(",").map(String::trim).map(String::lowercase).forEach {
+                    when (matchType(name, lore, it)) {
+                        1 -> this.highlightSlots[i] = HighlightSlot(slot, this.textField.text, Color.WHITE)
+                        2 -> this.highlightSlots[i] = HighlightSlot(slot, this.textField.text, Color.MAGENTA)
+                    }
+                }
+            }
+        }
+    }
+
+    @SubscribeEvent
+    fun onDrawScreenPost(event: GuiScreenEvent.DrawScreenEvent.Post) {
+        if (this.stupid) return
+        GlStateManager.pushMatrix()
+        GlStateManager.disableLighting()
+        this.textField.apply {
+            x = barX.value
+            y = barY.value
+            render(0, 0)
+        }
+        GlStateManager.enableLighting()
+        GlStateManager.popMatrix()
+    }
+
+    @SubscribeEvent
+    fun onDrawSlot(event: GuiContainerEvent.DrawSlotEvent) {
+        if (this.stupid) return
+        this.highlightSlots.values.forEach { it.slot.highlight(it.colour) }
+    }
+
+    @SubscribeEvent
+    fun onGuiScreenKeyboard2(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
+        if (!inSkyblock || !this.searchBar.enabled || !this.textField.focus || !Keyboard.getEventKeyState()) return
+        this.textField.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey())
+
+        event.isCanceled = true
+        if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
+            this.textField.focus = false
+        }
+    }
+
+    @SubscribeEvent
+    fun onGuiScreenMouse(event: GuiScreenEvent.MouseInputEvent.Pre) {
+        if (this.stupid || !Mouse.getEventButtonState()) return
+        val sr = ScaledResolution(mc)
+        this.textField.mouseClicked(Mouse.getX() / 2, sr.scaledHeight - (Mouse.getY() / 2), Mouse.getEventButton())
+    }
+
+    // dummy HudElement to move search bar position
+    @RegisterHudElement
+    object SearchBar : HudElement(this, this.barX, this.barY, 225, 25, this.barScale) { override fun renderHud() {  } }
+
+    private fun matchType(name: String, lore: String, string: String) = when {
+        name.isEmpty() || lore.isEmpty() || string.isEmpty() -> 0
+        name.contains(string.lowercase()) -> 1
+        lore.contains(string.lowercase()) -> 2
+        else -> 0
+    }
+
+    data class HighlightSlot(var slot: Slot, var string: String, val colour: Color)
 }
