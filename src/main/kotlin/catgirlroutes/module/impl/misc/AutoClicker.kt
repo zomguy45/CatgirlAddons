@@ -63,7 +63,7 @@ object AutoClicker: Module(
         if (event.button != 0 && event.button != 1) return
 
         if (event.buttonstate) {
-            if (event.button == 0 && leftClick.value) {
+            if (event.button == 0 && leftClick.value && !breakBlock()) {
                 event.isCanceled = true
                 leftClicking = true
                 leftClickJob?.cancel()
