@@ -216,7 +216,7 @@ object AutoP3 : Module(
                         Color.PINK, 4.0f, false
                     )
                 }
-                drawStringInWorld((ring.packets.size - 1).toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
+                drawStringInWorld(ring.packets.size.toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
             }
         }
     }
@@ -358,7 +358,7 @@ object AutoP3 : Module(
             "blink" -> {
                 dir = null
                 if (ring.packets.size == 0 || blinkEditMode) return
-                if (packetArray.size > ring.packets.size && !blinkCd) {
+                if (packetArray >= ring.packets.size && !blinkCd) {
                     scheduleTask(0) {
                         blinkCd = true
                         ring.packets.forEach { packet ->
@@ -370,6 +370,7 @@ object AutoP3 : Module(
                                     packet.onGround
                                 )
                             )
+                            packetArray -= 1
                         }
                         mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
                     }

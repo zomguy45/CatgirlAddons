@@ -150,7 +150,7 @@ object Relics: Module(
         val posZ = mc.thePlayer.posZ
 
         if (posX in 90.0..90.7 && posY == 6.0 && posZ in 55.0..55.7) {
-            if (Blink.packetArray.size > orangePackets.size && relicBlink.value) {
+            if (Blink.packetArray >= orangePackets.size && relicBlink.value) {
                 modMessage("Blinking orange")
                 snapTo(111F, 0F)
                 swapToSlot(8)
@@ -158,6 +158,7 @@ object Relics: Module(
                 scheduleTask(0) {
                     orangePackets.forEach{packet ->
                         mc.netHandler.networkManager.sendPacket(C04PacketPlayerPosition(packet.x, packet.y, packet.z, packet.onGround))
+                        Blink.packetArray -= 1
                     }
                     mc.thePlayer.setPosition(orangePackets.last().x, orangePackets.last().y, orangePackets.last().z)
                 }
@@ -168,7 +169,7 @@ object Relics: Module(
                 blockArray.add(BlockAura.BlockAuraAction(BlockPos(57.0, 7.0, 42.0), 6.0))
             }
         } else if (posX in 22.3..23.0 && posY == 6.0 && posZ in 58.0..58.7) {
-            if (relicBlink.value && Blink.packetArray.size > redPackets.size) {
+            if (relicBlink.value && Blink.packetArray >= redPackets.size) {
                 modMessage("Blinking red")
                 snapTo(-120F, 0F)
                 swapToSlot(8)
@@ -176,6 +177,7 @@ object Relics: Module(
                 scheduleTask(0) {
                     redPackets.forEach{packet ->
                         mc.netHandler.networkManager.sendPacket(C04PacketPlayerPosition(packet.x, packet.y, packet.z, packet.onGround))
+                        Blink.packetArray -= 1
                     }
                     mc.thePlayer.setPosition(redPackets.last().x, redPackets.last().y, redPackets.last().z)
                 }

@@ -10,6 +10,7 @@ import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
+import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -48,12 +49,13 @@ object Blink : Module(
                 }
             }
         }
+    private val clearPackets = ActionSetting("Clear packets") { packetArray = 0 }
 
     init {
-        this.addSettings(this.recordBind, recordLength)
+        this.addSettings(this.recordBind, recordLength, clearPackets)
     }
 
-    val packetArray = mutableListOf<Long>()
+    var packetArray = 0
     private var recorderActive = false
     private var currentRing: Ring? = null
 
@@ -82,42 +84,45 @@ object Blink : Module(
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
-        packetArray.clear()
+        packetArray = 0
     }
 
-    var lastX = 0.0
-    var lastY = 0.0
-    var lastZ = 0.0
+    private var lastX = 0.0
+    private var lastY = 0.0
+    private var lastZ = 0.0
+    private var lastYaw = 0f
+    private var lastPitch = 0f
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer) return
+        if (event.packet !is C03PacketPlayer || !this.enabled) return
         val currentTime = System.currentTimeMillis()
-        if ((event.packet is C04PacketPlayerPosition || event.packet is C06PacketPlayerPosLook)) {
-            if (packetArray.isNotEmpty()) {
-                packetArray.removeFirst()
-            }
-        } else if (this.enabled) {
-            packetArray.add(currentTime)
-            event.isCanceled = true
-        } else {
-            if (packetArray.isNotEmpty()) {
-                packetArray.removeFirst()
-            }
+        var dontCancel = false
+        if (event.packet.rotating) {
+            if (lastYaw != event.packet.yaw || lastPitch != event.packet.pitch) dontCancel = true
+            lastYaw = event.packet.yaw
+            lastPitch = event.packet.pitch
         }
-
-        packetArray.removeIf { currentTime - it > 20000 }
+        if (event.packet.isMoving) {
+            if (lastX != event.packet.positionX || lastY != event.packet.positionY || lastZ != event.packet.positionZ) dontCancel = true
+            lastX = event.packet.positionX
+            lastY = event.packet.positionY
+            lastZ = event.packet.positionZ
+        }
+        if (dontCancel) return
+        event.isCanceled = true
+        packetArray += 1
     }
 
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
-        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || mc.ingameGUI == null || packetArray.size == 0) return
+        if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || mc.ingameGUI == null || packetArray == 0) return
 
-        val text = packetArray.size.toString()
+        val text = packetArray
 
         val sr = ScaledResolution(mc)
-        val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
+        val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text.toString()) / 2
         val y = sr.scaledHeight / 2 + -20
-        Utils.renderText(text, x + 1, y)
+        Utils.renderText(text.toString(), x + 1, y)
     }
 }
