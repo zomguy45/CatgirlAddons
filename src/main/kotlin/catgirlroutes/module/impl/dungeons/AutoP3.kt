@@ -28,6 +28,7 @@ import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.MovementUtils.stopMovement
 import catgirlroutes.utils.MovementUtils.stopVelo
+import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.Utils.equalsOneOf
@@ -35,6 +36,7 @@ import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
@@ -49,6 +51,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraft.network.play.client.C0EPacketClickWindow
 import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S12PacketEntityVelocity
@@ -99,8 +102,9 @@ object AutoP3 : Module(
     ).withDependency { style.selected == "Normal" }
     private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
     private val colour2 = ColorSetting("Ring colour (active)", Color.white, false, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
-    private val disableLength = NumberSetting("Recording length", 50.0, 1.0, 100.0)
+    private val disableLength = NumberSetting("Disable length", 50.0, 1.0, 100.0)
     private val recordLength = NumberSetting("Recording length", 50.0, 1.0, 999.0)
+    private val packetMovement = BooleanSetting("Packet movement")
     private val recordBind: KeyBindSetting = KeyBindSetting(
         "Movement record",
         Keyboard.KEY_NONE,
@@ -143,6 +147,7 @@ object AutoP3 : Module(
             colour2,
             disableLength,
             recordLength,
+            packetMovement,
             recordBind,
             stupid2
         )
@@ -433,7 +438,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onTickMovement(event: MotionUpdateEvent.Pre) {
-        if (!movementOn) return
+        if (!movementOn || packetMovement.value) return
         if (movementList.isEmpty()) {
             movementOn = false
             return
@@ -445,6 +450,43 @@ object AutoP3 : Module(
         if (onlyHorizontal) y = 0.0
         movementList.removeFirst()
         mc.thePlayer.moveEntity(x, y, z)
+    }
+
+    var ignoreNextC03 = false
+    var lastMoveX = 0.0
+    var lastMoveY = 0.0
+    var lastMoveZ = 0.0
+
+    @SubscribeEvent
+    fun onPacketC03(event: PacketSentEvent) {
+        if (!movementOn || !packetMovement.value || event.packet !is C03PacketPlayer) return
+        if (ignoreNextC03) {
+            ignoreNextC03 = false
+            return
+        }
+        if (movementList.isEmpty()) {
+            mc.thePlayer.setPosition(lastMoveX, lastMoveY, lastMoveZ)
+            movementOn = false
+            return
+        }
+        val move = movementList.first()
+        val x = move.x - mc.thePlayer.posX
+        val y = move.y - mc.thePlayer.posY
+        val z = move.z - mc.thePlayer.posZ
+        movementList.removeFirst()
+        event.isCanceled = true
+        ignoreNextC03 = true
+        sendPacket(C06PacketPlayerPosLook(move.x, move.y, move.z, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, move.onGround))
+        lastMoveX = move.x
+        lastMoveY = move.y
+        lastMoveZ = move.z
+        //mc.thePlayer.moveEntity(x, y, z)
+    }
+
+    @SubscribeEvent
+    fun renderWorldMovement(event: RenderWorldLastEvent) {
+        if (!movementOn || !packetMovement.value) return
+        drawCustomSizedBoxAt(lastMoveX - mc.thePlayer.width / 2, lastMoveY, lastMoveZ - mc.thePlayer.width / 2, mc.thePlayer.width.toDouble(), mc.thePlayer.height.toDouble(), mc.thePlayer.width.toDouble(), Color.PINK)
     }
 
     @SubscribeEvent
