@@ -104,7 +104,7 @@ object AutoSS : Module(
                     for (i in 0 until 2) {
                         reset()
                         clickButton(startButton.x, startButton.y, startButton.z)
-                        Thread.sleep(Random.nextInt(delay.value.toInt(), delay.value.toInt() * 1136 / 1000).toLong())
+                        Thread.sleep(Random.nextInt(autoStart.value.toInt(), autoStart.value.toInt() * 1136 / 1000).toLong())
                     }
                     doingSS = true
                     clickButton(startButton.x, startButton.y, startButton.z)
