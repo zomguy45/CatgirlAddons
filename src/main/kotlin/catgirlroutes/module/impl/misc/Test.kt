@@ -8,10 +8,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.ActionSetting
-import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.module.settings.impl.DropdownSetting
-import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
