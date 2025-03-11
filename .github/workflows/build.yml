@@ -45,5 +45,5 @@ jobs:
       - name: Upload JAR file
         uses: actions/upload-artifact@v4.3.0
         with:
-          name: cga-${{ github.ref_name }}-${{ github.run_number }}
+          name: cga-${{ github.ref_name }}-${{ github.run_number }}.jar
           path: build/libs/cga-${{ github.ref_name }}-${{ github.run_number }}.jar
