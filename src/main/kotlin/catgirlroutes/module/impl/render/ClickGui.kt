@@ -42,11 +42,11 @@ object ClickGui: Module(
     val customPrefix = StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  description = "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.").withDependency { this.prefixStyle.index == 2 }
 
     private val devSettings: DropdownSetting = DropdownSetting("Dev Settings", false)
-    val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency { devSettings.enabled }
-    val debugMode: BooleanSetting = BooleanSetting("Debug Mode", false, "Toggles debug mode").withDependency { devSettings.enabled }
-    val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel").withDependency { devSettings.enabled }
-    val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock").withDependency { devSettings.enabled }
-    val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency { devSettings.enabled }
+    val devMode: BooleanSetting = BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency(devSettings)
+    val debugMode: BooleanSetting = BooleanSetting("Debug Mode", false, "Toggles debug mode").withDependency(devSettings)
+    val forceHypixel: BooleanSetting = BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel").withDependency(devSettings)
+    val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock").withDependency(devSettings)
+    val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency(devSettings)
 
     val showUsageInfo = BooleanSetting("Usage Info", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
 

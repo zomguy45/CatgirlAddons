@@ -52,10 +52,10 @@ object Inventory : Module(
     private val itemList = BooleanSetting("Item list").withDependency { searchBar.enabled }
 
     private val ahDropdown = DropdownSetting("Auction house")
-    private val auctionOverlay = BooleanSetting("Auction search").withDependency { ahDropdown.enabled }
+    private val auctionOverlay = BooleanSetting("Auction search").withDependency(ahDropdown)
 
     private val bzDropdown = DropdownSetting("Bazaar")
-    private val bazaarOverlay = BooleanSetting("Bazaar search").withDependency { bzDropdown.enabled }
+    private val bazaarOverlay = BooleanSetting("Bazaar search").withDependency(bzDropdown)
 
     private val ctrlF = BooleanSetting("Ctrl + F to search") // todo: Make it click on signs in other guis (price, quantity, etc)
 
