@@ -67,10 +67,7 @@ object Test : Module(
             this.colourTest2,
 
             this.slider,
-            this.getHudWidth,
-
-            this.newclickGui
-            this.newClickGui,
+            this.getHudWidth
         )
     }
 
