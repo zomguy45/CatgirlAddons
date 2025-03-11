@@ -48,7 +48,7 @@ object ClickGui: Module(
     val forceSkyblock: BooleanSetting = BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock").withDependency(devSettings)
     val forceDungeon: BooleanSetting = BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency(devSettings)
 
-    val showUsageInfo = BooleanSetting("Usage Info", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
+    val showUsageInfo = BooleanSetting("Usage Information", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
 
     val panelX: MutableMap<Category, NumberSetting> = mutableMapOf()
     val panelY: MutableMap<Category, NumberSetting> = mutableMapOf()
@@ -77,6 +77,7 @@ object ClickGui: Module(
             clientName,
             prefixStyle,
             customPrefix,
+            showUsageInfo,
 
             devSettings,
             devMode,
@@ -84,8 +85,6 @@ object ClickGui: Module(
             forceHypixel,
             forceSkyblock,
             forceDungeon,
-
-            showUsageInfo,
             advancedRelX,
             advancedRelY
         )

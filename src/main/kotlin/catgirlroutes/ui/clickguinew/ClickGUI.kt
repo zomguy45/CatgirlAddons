@@ -85,6 +85,8 @@ class ClickGUI : GuiScreen() { // todo: module description, fix element descript
 
         var categoryOffset = 25.0
 
+        if (ClickGui.showUsageInfo.enabled) renderUsage()
+
         drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
         drawRoundedBorderedRect(x, y, categoryWidth, guiHeight, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
 
@@ -208,6 +210,26 @@ class ClickGUI : GuiScreen() { // todo: module description, fix element descript
 
     val scaledMouseX get() = MathHelper.ceiling_double_int(Mouse.getX() / CLICK_GUI_SCALE)
     val scaledMouseY get() = MathHelper.ceiling_double_int( (mc.displayHeight - Mouse.getY()) / CLICK_GUI_SCALE)
+
+    private fun renderUsage() {
+        val lines = listOf("GUI Usage:",
+            "Left click Module Buttons to toggle the Module.",
+            "Right click Module Buttons to open settings.",
+            "Middle click or Shift click Module Buttons to change the Module key bind.",
+            "Disable this Overlay in the Click Gui Module in the Render Category.",
+            "You can change Click GUI style in settings"
+        )
+
+        lines.forEachIndexed { i, text ->
+            FontUtil.drawString(
+                text,
+                100.0,
+                100.0 + FontUtil.getScaledFontHeight(2.0).toDouble() * i,
+                ColorUtil.clickGUIColor.rgb,
+                scale = 2.0
+            )
+        }
+    }
 
     data class Description(var text: String = "", var x: Double, var y: Double) {
         fun draw() {
