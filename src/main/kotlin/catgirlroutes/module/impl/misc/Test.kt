@@ -70,6 +70,7 @@ object Test : Module(
             this.getHudWidth,
 
             this.newclickGui
+            this.newClickGui,
         )
     }
 
