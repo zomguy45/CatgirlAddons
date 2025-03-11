@@ -1,7 +1,12 @@
 name: Run Gradle Build
+
 on:
-  - push
-  - pull_request
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   gradle:
@@ -22,8 +27,19 @@ jobs:
       - name: Execute Gradle build
         run: ./gradlew build
 
-      - name: Upload built mod JAR
+      - name: Rename JAR and ZIP files
+        run: |
+          BRANCH_NAME=${GITHUB_REF_NAME//\//-} # Replace slashes with dashes
+          BUILD_NUMBER=$GITHUB_RUN_NUMBER
+          for file in build/libs/*.jar build/libs/*.zip; do
+            filename=$(basename "$file")
+            extension="${filename##*.}"
+            new_name="${filename%.*}-$BRANCH_NAME-$BUILD_NUMBER.$extension"
+            mv "$file" "build/libs/$new_name"
+          done
+
+      - name: Upload built artifacts
         uses: actions/upload-artifact@v4.3.0
         with:
-          name: CatgirlAddons Build
-          path: build/libs/*.jar
+          name: CatgirlAddons-${{ github.ref_name }}-${{ github.run_number }}
+          path: build/libs/*-${{ github.ref_name }}-${{ github.run_number }}.*
