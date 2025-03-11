@@ -32,8 +32,6 @@ object ClickGui: Module(
 ) {
 
     private val clickGui: StringSelectorSetting = StringSelectorSetting("ClickGui", "Cga", arrayListOf("Cga", "Flopper"))
-    val design: StringSelectorSetting = StringSelectorSetting("Design","JellyLike", arrayListOf("JellyLike", "New"), "Design theme of the gui.")
-    val design: StringSelectorSetting = StringSelectorSetting("Design","New", arrayListOf("JellyLike", "New"), "Design theme of the gui.")
     val design: StringSelectorSetting = StringSelectorSetting("Design", "New", arrayListOf("JellyLike", "New"), "Design theme of the gui.")
     val notifications: BooleanSetting = BooleanSetting("Notifications", true, "Send notifications instead of chat messages")
     val blur: BooleanSetting = BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
