@@ -39,7 +39,11 @@ object FontUtil {
     }
 
     fun drawString(text: String, x: Double, y: Double, color: Int = ColorUtil.textcolor, scale: Double = 1.0) {
-        drawString(text, x.toInt(), y.toInt(), color, scale)
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(x, y, 0.0)
+        GlStateManager.scale(scale.toFloat(), scale.toFloat(), 1.0f)
+        fontRenderer!!.drawString(text, 0f, 0f, color, false)
+        GlStateManager.popMatrix()
     }
 
     fun drawString(text: String, x: Int, y: Int, color: Int = ColorUtil.textcolor, scale: Double = 1.0) {
