@@ -13,6 +13,7 @@ import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ChatAllowedCharacters
 import net.minecraft.util.MathHelper
+import org.lwjgl.input.Keyboard
 import java.awt.Color
 import kotlin.math.abs
 
@@ -156,6 +157,14 @@ class MiscElementText( // todo: CLEAN UP/RECODE (mc code is ass); redo/undo
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
         if (!focus) return false
+        if (keyCode == Keyboard.KEY_ESCAPE) {
+            if (this.selectedText.isNotEmpty()) {
+                this.cursorPosition = this.text.length
+                return true
+            }
+            this.focus = false
+            return true
+        }
 
         var typedChar2 = typedChar
 
