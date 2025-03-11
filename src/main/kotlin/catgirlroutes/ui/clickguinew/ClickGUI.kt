@@ -223,10 +223,10 @@ class ClickGUI : GuiScreen() { // todo: module description, fix element descript
         lines.forEachIndexed { i, text ->
             FontUtil.drawString(
                 text,
-                100.0,
-                100.0 + FontUtil.getScaledFontHeight(2.0).toDouble() * i,
+                10.0,
+                10.0 + FontUtil.getScaledFontHeight(1.3).toDouble() * i,
                 ColorUtil.clickGUIColor.rgb,
-                scale = 2.0
+                scale = 1.3
             )
         }
     }
