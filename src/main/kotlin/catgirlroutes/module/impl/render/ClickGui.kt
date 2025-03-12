@@ -70,7 +70,6 @@ object ClickGui: Module(
         addSettings(
             clickGui,
             design,
-            customFont,
             notifications,
             blur,
             color,
