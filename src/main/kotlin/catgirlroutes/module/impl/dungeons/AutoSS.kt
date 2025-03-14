@@ -156,9 +156,7 @@ object AutoSS : Module(
                 return@Executor
             }
 
-            if (detect == Blocks.air) {
-                progress = 0
-            } else if ((detect == Blocks.stone_button || (dontCheck.value && doneFirst)) && doingSS) {
+            if ((detect == Blocks.stone_button || (dontCheck.value && doneFirst)) && doingSS) {
                 if (!doneFirst && clicks.size == 3) {
                     clicks.removeAt(0)
                     allButtons.removeAt(0)
