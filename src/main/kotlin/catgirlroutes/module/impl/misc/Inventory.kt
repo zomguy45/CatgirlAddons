@@ -236,7 +236,7 @@ object Inventory : Module(
             if (!invHUD.enabled) return
 
             this.width = 2 + if (playerModel.enabled) 22 * 11 else 22 * 9
-            drawRoundedBorderedRect(0.0, 0.0, this.width.toDouble(), this.height.toDouble(), 5.0, 2.0, Color.LIGHT_GRAY.withAlpha(100), Color.GRAY)
+            drawRoundedBorderedRect(0.0, 0.0, this.width.toDouble(), this.height.toDouble(), 5.0, 2.0, Color(139, 139, 139, 155), Color(250, 250, 250, 155))
             if (playerModel.enabled) drawPlayerOnScreen(this.width - 22.5, 62.5, this.partialTicks, 30.0)
 
             val stacks = mc.thePlayer.inventory.mainInventory.drop(9)
@@ -244,7 +244,7 @@ object Inventory : Module(
             stacks.forEachIndexed { i, stack ->
                 if (i % 9 == 0) y += 22.0
                 val x = 2 + 22.0 * (i % 9)
-                drawRoundedBorderedRect(x, y, 20.0, 20.0, 5.0, 2.0, Color.LIGHT_GRAY.withAlpha(150), Color.GRAY)
+                drawRoundedBorderedRect(x, y, 20.0, 20.0, 5.0, 2.0, Color(139, 139, 139, 155), Color(250, 250, 250, 155))
                 stack?.let { HUDRenderUtils.drawItemStackWithText(it, x + 2.5, y + 2.5) }
             }
         }
