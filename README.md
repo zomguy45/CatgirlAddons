@@ -1,5 +1,3 @@
 itheserenity was here (certified ratter)
 
-https://discord.gg/8NMEAhNRgd
- 
- 
+use actions tab to install https://github.com/WompWatr/CatgirlAddons/actions
