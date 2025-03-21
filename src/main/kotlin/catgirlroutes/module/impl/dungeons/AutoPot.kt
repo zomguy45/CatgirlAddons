@@ -23,10 +23,10 @@ object AutoPot: Module(
     description = "Automatically gets a potion from your potion bag."
 ){
     private val potOnStart = BooleanSetting("On start", false, "Gets a pot on dungeon start.")
-    private val m7Only = BooleanSetting("M7 only").withDependency { this.potOnStart.enabled }
+    private val m7Only = BooleanSetting("M7 only")
 
     init {
-        potOnStart
+        addSettings(this.potOnStart, this.m7Only)
     }
 
     @SubscribeEvent
