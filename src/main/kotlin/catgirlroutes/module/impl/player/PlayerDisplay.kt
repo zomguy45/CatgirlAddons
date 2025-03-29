@@ -53,6 +53,7 @@ object PlayerDisplay: Module(
     private val healthBar = BooleanSetting("Health bar").withDependency(healthDropdown)
     private val healthBarColour = ColorSetting("Health bar colour", Color(255,85,85)).withDependency(healthDropdown) { healthBar.enabled }
     private val effectiveHealth = BooleanSetting("Effective health").withDependency(healthDropdown)
+    private val effectiveHealthColour = ColorSetting("Effective health colour", Color(0, 170, 0)).withDependency(healthDropdown) { effectiveHealth.enabled }
 
     private val manaDropdown = DropdownSetting("Mana dropdown")
     private val mana = BooleanSetting("Mana").withDependency(manaDropdown)
@@ -61,11 +62,13 @@ object PlayerDisplay: Module(
     private val manaBarColour = ColorSetting("Mana bar colour", Color(85, 85, 255)).withDependency(manaDropdown) { manaBar.enabled }
     private val manaUsage = BooleanSetting("Mana usage").withDependency(manaDropdown)
     private val overflowMana = BooleanSetting("Overflow mana").withDependency(manaDropdown)
+    private val overflowManaColour = ColorSetting("Overflow mana colour", Color(0, 170, 170), false).withDependency(manaDropdown) { overflowMana.enabled }
 
     private val otherDropdown = DropdownSetting("Other")
     private val defence = BooleanSetting("Defence").withDependency(otherDropdown)
     private val defenceColour = ColorSetting("Defence colour", Color( 85, 255, 85), false).withDependency(otherDropdown) { defence.enabled }
     private val speed = BooleanSetting("Speed").withDependency(otherDropdown)
+    private val speedColour = ColorSetting("Speed colour", Color.WHITE, false).withDependency(otherDropdown) { speed.enabled }
     private val stacks = BooleanSetting("Crimson stacks").withDependency(otherDropdown)
     private val salvation = BooleanSetting("Salvation").withDependency(otherDropdown)
     private val secrets = BooleanSetting("Secret display").withDependency(otherDropdown)
@@ -86,6 +89,7 @@ object PlayerDisplay: Module(
             this.healthBar,
             this.healthBarColour,
             this.effectiveHealth,
+            this.effectiveHealthColour,
 
             this.manaDropdown,
             this.mana,
@@ -94,11 +98,13 @@ object PlayerDisplay: Module(
             this.manaBarColour,
             this.manaUsage,
             this.overflowMana,
+            this.overflowManaColour,
 
             this.otherDropdown,
             this.defence,
             this.defenceColour,
             this.speed,
+            this.speedColour,
             this.stacks,
             this.salvation,
             this.secrets,
@@ -204,11 +210,11 @@ object PlayerDisplay: Module(
 
         override fun renderHud() {
             if (!inSkyblock) return
-            FontUtil.drawStringWithShadow(SkyblockPlayer.effectiveHealth.commas(), 0.0, 0.0)
+            FontUtil.drawStringWithShadow(SkyblockPlayer.effectiveHealth.commas(), 0.0, 0.0, effectiveHealthColour.value.rgb)
         }
 
         override fun preview() {
-            FontUtil.drawStringWithShadow("54,879", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("54,879", 0.0, 0.0, effectiveHealthColour.value.rgb)
         }
     }
 
@@ -284,11 +290,11 @@ object PlayerDisplay: Module(
 
         override fun renderHud() {
             if (!inSkyblock || SkyblockPlayer.overflowMana == 0) return
-            FontUtil.drawStringWithShadow("${SkyblockPlayer.overflowMana.commas()}ʬ", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("${SkyblockPlayer.overflowMana.commas()}ʬ", 0.0, 0.0, overflowManaColour.value.rgb)
         }
 
         override fun preview() {
-            FontUtil.drawStringWithShadow("600ʬ", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("600ʬ", 0.0, 0.0, overflowManaColour.value.rgb)
         }
     }
 
@@ -322,11 +328,11 @@ object PlayerDisplay: Module(
 
         override fun renderHud() {
             if (!inSkyblock) return
-            FontUtil.drawStringWithShadow("✦${SkyblockPlayer.speed}", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("✦${SkyblockPlayer.speed}", 0.0, 0.0, speedColour.value.rgb)
         }
 
         override fun preview() {
-            FontUtil.drawStringWithShadow("✦500", 0.0, 0.0)
+            FontUtil.drawStringWithShadow("✦500", 0.0, 0.0, speedColour.value.rgb)
         }
     }
 
