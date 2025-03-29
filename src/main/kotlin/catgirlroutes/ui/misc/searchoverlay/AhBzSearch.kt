@@ -10,7 +10,6 @@ import catgirlroutes.ui.misc.elements.impl.MiscElementButton
 import catgirlroutes.ui.misc.elements.impl.MiscElementSelector
 import catgirlroutes.ui.misc.elements.impl.MiscElementText
 import catgirlroutes.utils.ChatUtils.commandAny
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo
 import catgirlroutes.utils.NeuRepo.toStack
 import catgirlroutes.utils.Utils.noControlCodes
@@ -57,7 +56,12 @@ class AhBzSearch( // todo: recode some day
     private val petLvl: String
         get() = if (forcePetLvl.enabled) "[Lvl 100] " else ""
 
-    private var resHistory = if (type == OverlayType.AUCTION) ahHistory.value else bzHistory.value
+    private var resHistory
+        get() = if (type == OverlayType.AUCTION) ahHistory.value else bzHistory.value
+        set(value) {
+            if (type == OverlayType.AUCTION) ahHistory.value = value
+            else bzHistory.value = value
+        }
 
     private var scrollOffset = 0
     private var scrollHeight = 0.0
@@ -147,8 +151,6 @@ class AhBzSearch( // todo: recode some day
                     finalRes = finalRes.clean
 
                     resHistory.add(0, "REPOITEM:${it.name.clean}")
-                    resHistory = ArrayList(resHistory.distinct())
-                    if (resHistory.size > 9) resHistory.removeLast()
 
                     if (sign != null) {
                         sign.signText[0] = ChatComponentText(finalRes)
@@ -186,8 +188,7 @@ class AhBzSearch( // todo: recode some day
                     finalRes = finalRes.clean
 
                     resHistory.add(0, it.clean)
-                    resHistory = ArrayList(resHistory.distinct())
-                    if (resHistory.size > 9) resHistory.removeLast()
+
                     if (sign != null) {
                         sign.signText[0] = ChatComponentText(finalRes)
                         sign.markDirty()
@@ -286,11 +287,6 @@ class AhBzSearch( // todo: recode some day
         when (keyCode) {
             Keyboard.KEY_RETURN -> {
                 resHistory.add(0, searchBar.text)
-                resHistory = ArrayList(resHistory.distinct())
-
-                if (resHistory.size > 9) {
-                    resHistory.removeLast()
-                }
 
                 if (sign != null) {
                     sign.markDirty()
@@ -335,8 +331,7 @@ class AhBzSearch( // todo: recode some day
             mc.netHandler?.addToSendQueue(C12PacketUpdateSign(sign.pos, sign.signText))
             sign.setEditable(true)
         }
-        debugMessage(resHistory)
-        debugMessage(resHistory)
+        resHistory = resHistory.distinct().take(9).toMutableList()
         moduleConfig.saveConfig()
     }
 
