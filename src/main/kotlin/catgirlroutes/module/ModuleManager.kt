@@ -82,6 +82,7 @@ object ModuleManager {
         Inventory,
         PhoenixAuth,
         RendHelper,
+        ParticleHider,
 
         // Player
         AutoSprint,
