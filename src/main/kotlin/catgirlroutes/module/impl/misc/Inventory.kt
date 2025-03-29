@@ -228,13 +228,20 @@ object Inventory : Module(
 
     // dummy HudElement to move search bar position
     @RegisterHudElement
-    object SearchBar : HudElement(this, this.barX, this.barY, 200, 25, this.barScale) { override fun renderHud() {  } }
+    object SearchBar : HudElement(this, this.barX, this.barY, 200, 25, this.barScale) {
+        override val toggled: Boolean
+            get() = searchBar.enabled
+
+        override fun renderHud() {  }
+    }
 
     @RegisterHudElement
     object InventoryHUD : HudElement(this, width = 2 + 22 * 9, height = 2 + 22 * 3) {
-        override fun renderHud() {
-            if (!invHUD.enabled) return
 
+        override val toggled: Boolean
+            get() = invHUD.enabled
+
+        override fun renderHud() {
             this.width = 2 + if (playerModel.enabled) 22 * 11 else 22 * 9
             drawRoundedBorderedRect(0.0, 0.0, this.width.toDouble(), this.height.toDouble(), 5.0, 2.0, Color(139, 139, 139, 155), Color(250, 250, 250, 155))
             if (playerModel.enabled) drawPlayerOnScreen(this.width - 22.5, 62.5, this.partialTicks, 30.0)

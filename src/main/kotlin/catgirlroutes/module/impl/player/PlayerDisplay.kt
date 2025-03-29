@@ -156,11 +156,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("1,200/10,900"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("1,200/10,900", 0.0, 0.0, healthColour.value.rgb) }
     ) {
+        override val toggled: Boolean
+            get() = health.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !health.enabled) return
+            if (!inSkyblock) return
             FontUtil.drawStringWithShadow("${(SkyblockPlayer.health + SkyblockPlayer.absorption).commas()}/${SkyblockPlayer.maxHealth.commas()}", 0.0, 0.0, healthColour.value.rgb)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("1,200/10,900", 0.0, 0.0, healthColour.value.rgb)
         }
     }
 
@@ -168,17 +174,21 @@ object PlayerDisplay: Module(
     object HealthBarHud : HudElement(
         this, 0, 0,
         barWidth.toInt(), barHeight.toInt() + 4,
-        preview = {
-            drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
-            drawRoundedRect(0.0, 0.0, 50.0, barHeight, 5.0, healthBarColour.value)
-            drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
-        }
     ) {
+        override val toggled: Boolean
+            get() = healthBar.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !healthBar.enabled) return
+            if (!inSkyblock) return
             val fillWidth = SkyblockPlayer.health.toFloat() / SkyblockPlayer.maxHealth.toFloat() * barWidth
             drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
             drawRoundedRect(0.0, 0.0, fillWidth, barHeight, 5.0, healthBarColour.value)
+            drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
+        }
+
+        override fun preview() {
+            drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, 50.0, barHeight, 5.0, healthBarColour.value)
             drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
         }
     }
@@ -188,11 +198,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("54,879"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("54,879", 0.0, 0.0) }
     ) {
+        override val toggled: Boolean
+            get() = effectiveHealth.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !effectiveHealth.enabled) return
+            if (!inSkyblock) return
             FontUtil.drawStringWithShadow(SkyblockPlayer.effectiveHealth.commas(), 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("54,879", 0.0, 0.0)
         }
     }
 
@@ -201,11 +217,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("1,300/10,900"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("1,300/10,900", 0.0, 0.0, manaColour.value.rgb) }
     ) {
+        override val toggled: Boolean
+            get() = mana.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !mana.enabled) return
+            if (!inSkyblock) return
             FontUtil.drawStringWithShadow("${SkyblockPlayer.mana.commas()}/${SkyblockPlayer.maxMana.commas()}", 0.0, 0.0, manaColour.value.rgb)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("1,300/10,900", 0.0, 0.0, manaColour.value.rgb)
         }
     }
 
@@ -213,17 +235,21 @@ object PlayerDisplay: Module(
     object ManaBarHud : HudElement(
         this, 0, 0,
         barWidth.toInt(), barHeight.toInt() + 4,
-        preview = {
-            drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
-            drawRoundedRect(0.0, 0.0, 50.0, barHeight, 5.0, manaBarColour.value)
-            drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
-        }
     ) {
+        override val toggled: Boolean
+            get() = manaBar.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !manaBar.enabled) return
+            if (!inSkyblock) return
             val fillWidth = SkyblockPlayer.mana.toFloat() / SkyblockPlayer.maxMana.toFloat() * barWidth
             drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
             drawRoundedRect(0.0, 0.0, fillWidth, barHeight, 5.0, manaBarColour.value)
+            drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
+        }
+
+        override fun preview() {
+            drawRoundedRect(0.0, 0.0, barWidth, barHeight, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, 50.0, barHeight, 5.0, manaBarColour.value)
             drawRoundedOutline(0.0, 0.0, barWidth, barHeight, 5.0, 1.0, Color(208, 208, 208))
         }
     }
@@ -233,12 +259,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("§b-50 Mana (§6Speed Boost§b)"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("§b-50 Mana (§6Speed Boost§b)", 0.0, 0.0) }
-
     ) {
+        override val toggled: Boolean
+            get() = manaUsage.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !manaUsage.enabled || SkyblockPlayer.manaUsage.isEmpty()) return
+            if (!inSkyblock || SkyblockPlayer.manaUsage.isEmpty()) return
             FontUtil.drawStringWithShadow(SkyblockPlayer.manaUsage, 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("§b-50 Mana (§6Speed Boost§b)", 0.0, 0.0)
         }
     }
 
@@ -247,12 +278,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("600ʬ"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("600ʬ", 0.0, 0.0) }
-
     ) {
+        override val toggled: Boolean
+            get() = overflowMana.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !overflowMana.enabled || SkyblockPlayer.overflowMana == 0) return
+            if (!inSkyblock || SkyblockPlayer.overflowMana == 0) return
             FontUtil.drawStringWithShadow("${SkyblockPlayer.overflowMana.commas()}ʬ", 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("600ʬ", 0.0, 0.0)
         }
     }
 
@@ -261,11 +297,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("10,000"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("10,000", 0.0, 0.0, defenceColour.value.rgb) }
     ) {
+        override val toggled: Boolean
+            get() = defence.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !defence.enabled) return
+            if (!inSkyblock) return
             FontUtil.drawStringWithShadow(SkyblockPlayer.defence.commas(), 0.0, 0.0, defenceColour.value.rgb)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("10,000", 0.0, 0.0, defenceColour.value.rgb)
         }
     }
 
@@ -274,11 +316,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("✦500"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("✦500", 0.0, 0.0) }
     ) {
+        override val toggled: Boolean
+            get() = speed.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !speed.enabled) return
+            if (!inSkyblock) return
             FontUtil.drawStringWithShadow("✦${SkyblockPlayer.speed}", 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("✦500", 0.0, 0.0)
         }
     }
 
@@ -287,11 +335,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("10ᝐ"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("10ᝐ", 0.0, 0.0) }
     ) {
+        override val toggled: Boolean
+            get() = stacks.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !stacks.enabled || SkyblockPlayer.stacks.isEmpty()) return
+            if (!inSkyblock || SkyblockPlayer.stacks.isEmpty()) return
             FontUtil.drawStringWithShadow(SkyblockPlayer.stacks, 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("10ᝐ", 0.0, 0.0)
         }
     }
 
@@ -300,11 +354,17 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("T3!"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = { FontUtil.drawStringWithShadow("T3!", 0.0, 0.0) }
     ) {
+        override val toggled: Boolean
+            get() = salvation.enabled
+
         override fun renderHud() {
-            if (!inSkyblock || !salvation.enabled || SkyblockPlayer.salvation == 0) return
+            if (!inSkyblock || SkyblockPlayer.salvation == 0) return
             FontUtil.drawStringWithShadow("T${SkyblockPlayer.salvation}!", 0.0, 0.0)
+        }
+
+        override fun preview() {
+            FontUtil.drawStringWithShadow("T3!", 0.0, 0.0)
         }
     }
 
@@ -313,20 +373,12 @@ object PlayerDisplay: Module(
         this, 0, 0,
         mc.fontRendererObj.getStringWidth("5/10 Secrets"),
         mc.fontRendererObj.FONT_HEIGHT + 2,
-        preview = {
-            if (sbaStyle.enabled) {
-                drawItemStackWithText(ItemStack(Blocks.chest), 0.0, 0.0)
-                FontUtil.drawStringWithShadow("§7Secrets", 16.0, 0.0)
-                val textWidth = FontUtil.getStringWidth("Secrets")
-                val totalWidth = FontUtil.getStringWidth("5/10")
-                FontUtil.drawStringWithShadow("§e5§7/§e10", 16.0 + 2.0 + textWidth / 2.0 - totalWidth / 2.0, 11.0)
-            } else {
-                FontUtil.drawStringWithShadow("§e5/10 Secrets", 0.0, 0.0)
-            }
-        }
     ) {
+        override val toggled: Boolean
+            get() = secrets.enabled
+
         override fun renderHud() {
-            if (!inDungeons || inBoss || !secrets.enabled) return
+            if (!inDungeons || inBoss) return
             val colour = when (currentSecrets / maxSecrets.toDouble()) {
                 in 0.0..0.5 -> "§c"
                 in 0.5..0.75 -> "§e"
@@ -344,6 +396,18 @@ object PlayerDisplay: Module(
             }
         }
 
+        override fun preview() {
+            if (sbaStyle.enabled) {
+                drawItemStackWithText(ItemStack(Blocks.chest), 0.0, 0.0)
+                FontUtil.drawStringWithShadow("§7Secrets", 16.0, 0.0)
+                val textWidth = FontUtil.getStringWidth("Secrets")
+                val totalWidth = FontUtil.getStringWidth("5/10")
+                FontUtil.drawStringWithShadow("§e5§7/§e10", 16.0 + 2.0 + textWidth / 2.0 - totalWidth / 2.0, 11.0)
+            } else {
+                FontUtil.drawStringWithShadow("§e5/10 Secrets", 0.0, 0.0)
+            }
+        }
+
         override fun setDimensions() {
             if (sbaStyle.enabled) {
                 this.width = 16 + 2 + FontUtil.getStringWidth("Secrets")
@@ -356,6 +420,4 @@ object PlayerDisplay: Module(
     }
 
     private fun Number.commas(): String = NumberFormat.getInstance(Locale.US).format(this)
-
-    fun String.formatMana(): String = this.split(" (", ")").let { "§b${it[0]} (§6${it[1]}§b)" } // temp maybe
 }
