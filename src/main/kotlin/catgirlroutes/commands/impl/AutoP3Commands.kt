@@ -32,7 +32,7 @@ object RingManager {
     fun loadRings() {
         if (file.exists()) {
             allRings = gson.fromJson(file.readText(), object : TypeToken<List<Ring>>() {}.type)
-            rings = allRings.filter { it.route == route }.toMutableList()
+            rings = allRings.filter { it.route in route }.toMutableList()
         }
     }
 
@@ -57,7 +57,7 @@ data class Ring(
     var route: String,
 )
 
-var route: String = selectedRoute.value
+var route: List<String> = listOf(selectedRoute.value)
 var ringEditMode: Boolean = false
 var blinkEditMode: Boolean = false
 var ringTypes: List<String> = listOf("velo", "walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
@@ -75,7 +75,7 @@ val autoP3Commands = commodore("p3") {
               §7/p3 undo §8: §rremoves last placed node
               §7/p3 clearroute §8: §rclears current route
               §7/p3 clear §8: §rclears ALL routes
-              §7/p3 load §5[§droute§5]§r §8: §rloads selected route
+              §7/p3 load §5[§droute§5]§r §8: §rloads selected route/routes
               §7/p3 save §8: §rsaves current route
               §7/p3 help §8: §rshows this message
         """.trimIndent())
@@ -113,6 +113,7 @@ val autoP3Commands = commodore("p3") {
         }
 
         runs { type: String, text: GreedyString? ->
+            if (route.size > 1) return@runs modMessage("Can't edit when multiple routes loaded. Loaded routes: ${route.joinToString(", ")}")
             var depth: Float? = null
             var height = 1F
             var width = 1F
@@ -177,7 +178,7 @@ val autoP3Commands = commodore("p3") {
             val yaw = mc.renderManager.playerViewY
             val pitch = mc.renderManager.playerViewX
 
-            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, packets, route)
+            val ring = Ring(type, location, yaw, pitch, height, width, lookBlock, depth, arguments, delay, command, packets, route[0])
 
             allRings.add(ring)
 
@@ -208,13 +209,15 @@ val autoP3Commands = commodore("p3") {
     }
 
     literal("remove").runs { range: Double? ->
-        allRings = allRings.filter { ring -> ring.route != route || distanceToPlayer(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord) >= (range ?: 2.0) }.toMutableList()
+        if (route.size > 1) return@runs modMessage("Can't edit when multiple routes loaded. Loaded routes: ${route.joinToString(", ")}")
+        allRings = allRings.filter { ring -> ring.route != route[0] || distanceToPlayer(ring.location.xCoord, ring.location.yCoord, ring.location.zCoord) >= (range ?: 2.0) }.toMutableList()
         modMessage("Removed")
         saveRings()
         loadRings()
     }
 
     literal("undo").runs {
+        if (route.size > 1) return@runs modMessage("Can't edit when multiple routes loaded. Loaded routes: ${route.joinToString(", ")}")
         modMessage("Undone " + allRings.last().type)
         allRings.removeLast()
         saveRings()
@@ -222,6 +225,7 @@ val autoP3Commands = commodore("p3") {
     }
 
     literal("clearroute").runs {
+        if (route.size > 1) return@runs modMessage("Can't edit when multiple routes loaded. Loaded routes: ${route.joinToString(", ")}")
         mc.thePlayer?.addChatMessage(
             ChatComponentText("${getPrefix()} §8»§r Are you sure you want to clear §nCURRENT§r route?")
                 .apply {
@@ -237,8 +241,9 @@ val autoP3Commands = commodore("p3") {
     }
 
     literal("clearrouteconfirm").runs {
-        allRings = allRings.filter { ring -> ring.route != route }.toMutableList()
-        modMessage("$route cleared!")
+        if (route.size > 1) return@runs modMessage("Can't edit when multiple routes loaded. Loaded routes: ${route.joinToString(", ")}")
+        allRings = allRings.filter { ring -> ring.route != route[0] }.toMutableList()
+        modMessage("${route[0]} cleared!")
         saveRings()
         loadRings()
     }
@@ -265,10 +270,10 @@ val autoP3Commands = commodore("p3") {
         loadRings()
     }
 
-    literal("load").runs { routeName: String? ->
-        route = routeName ?: selectedRoute.value
-        selectedRoute.text = route
-        modMessage("Loaded $route")
+    literal("load").runs { routes: GreedyString? ->
+        route = (routes ?: selectedRoute.value).toString().split(" ")
+        selectedRoute.text = route.joinToString(" ")
+        modMessage("Loaded ${route.joinToString(", ")}")
         loadRings()
     }
 
