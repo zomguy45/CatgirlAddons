@@ -56,7 +56,7 @@ object InstaMid : Module(
         active = true
 
         modMessage("Attempting to instamid")
-    } // [BOSS] Necron: You went further than any human before, congratulations.
+    }
 
     @SubscribeEvent
     fun onChat(event: PacketReceiveEvent) {
@@ -82,6 +82,8 @@ object InstaMid : Module(
     }
 
     private fun isOnPlatform(): Boolean {
-        return mc.thePlayer.posY in 64.0..100.0 && abs(mc.thePlayer.posX - 54.5).pow(2) + abs(mc.thePlayer.posZ - 76.5).pow(2) < 56.25
+        return mc.thePlayer?.let { player ->
+            player.posY in 64.0..100.0 && abs(player.posX - 54.5).pow(2) + abs(player.posZ - 76.5).pow(2) < 56.25
+        } ?: false
     }
 }
