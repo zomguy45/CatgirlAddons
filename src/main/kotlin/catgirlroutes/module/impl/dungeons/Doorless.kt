@@ -5,6 +5,7 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.debugMessage
@@ -43,9 +44,9 @@ object Doorless: Module(
     private var doorClip = BooleanSetting("Clip")
     private var doorMotion = BooleanSetting("Motion")
     private val regenSkulls = BooleanSetting("Regenerate skulls")
-    private val regenDelay = NumberSetting("Skulls regeneration delay", 10.0, 0.0, 20.0, 1.0, unit = "t")
+    private val regenDelay = NumberSetting("Skulls regeneration delay", 10.0, 0.0, 20.0, 1.0, unit = "t").withDependency { this.regenSkulls.enabled }
     private val babyProof = BooleanSetting("Baby proof")
-    private val babyProofRadius = NumberSetting("Baby proof radius", 5.0, 1.0, 15.0, unit = "m")
+    private val babyProofRadius = NumberSetting("Baby proof radius", 5.0, 1.0, 15.0, unit = "m").withDependency { this.babyProof.enabled }
 
     init {
         this.addSettings(

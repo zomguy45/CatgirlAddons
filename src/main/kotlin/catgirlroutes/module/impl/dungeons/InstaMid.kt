@@ -60,7 +60,7 @@ object InstaMid : Module(
 
     @SubscribeEvent
     fun onChat(event: PacketReceiveEvent) {
-        if (event.packet !is S02PacketChat || event.packet.type.toInt() != 0) return
+        if (event.packet !is S02PacketChat || event.packet.type.toInt() != 0 || !isOnPlatform()) return
         val message = event.packet.chatComponent.unformattedText.noControlCodes
         if (message == "[BOSS] Necron: You went further than any human before, congratulations.") {
             modMessage("Preparing to instamid")
