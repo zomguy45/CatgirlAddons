@@ -42,6 +42,7 @@ import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
+import catgirlroutes.utils.render.WorldRenderUtils.vec3ToAABB
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
@@ -65,6 +66,7 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
 import java.awt.Color
+import java.awt.Color.WHITE
 import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.abs
@@ -188,6 +190,19 @@ object AutoP3 : Module(
         }
     }
 
+    fun intersects(): List<Vec3> {
+        val list = arrayListOf<Vec3>()
+        rings.forEach { p ->
+            val startVec = mc.thePlayer.getPositionEyes(1.0f)
+            val box = vec3ToAABB(p.location, 1, 1, 1)
+            val ray = mc.thePlayer.rayTrace(10.0, 1f).hitVec
+            if (box.calculateIntercept(startVec, ray) != null) {
+                list.add(p.location)
+            }
+        }
+        return list
+    }
+
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
         if (inBossOnly.enabled && floorNumber != 7 && !inBoss) return
@@ -199,13 +214,16 @@ object AutoP3 : Module(
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
             val color = if (cooldown) colour2.value else colour1.value
 
-            when (style.selected) {
+            if (ringEditMode && intersects().contains(ring.location)) {
+                drawP3boxWithLayers(x, y, z, ring.width, ring.height, WHITE, layers.value.toInt())
+            } else when (style.selected) {
                 "Trans"    -> renderTransFlag(x, y, z, ring.width, ring.height)
                 "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
                 "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
                 "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
+
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
                     val p1 = ring.packets[i]

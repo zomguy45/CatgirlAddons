@@ -6,6 +6,9 @@ import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
+import catgirlroutes.module.impl.render.BarRender.barSetter
+import catgirlroutes.module.impl.render.CustomHighlight.highlightCommands
+import catgirlroutes.module.impl.render.Waypoints.waypointCommands
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
@@ -48,7 +51,8 @@ class CatgirlRoutes {
         registerCommands(
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
-            autoP3Commands, autoRoutesCommands, rotationDebug
+            autoP3Commands, autoRoutesCommands, rotationDebug, barSetter,
+            waypointCommands, highlightCommands
         )
 
         listOf(
@@ -72,7 +76,8 @@ class CatgirlRoutes {
             LeapUtils,
             CgaUsers,
             NeuRepo,
-            SkyblockPlayer
+            SkyblockPlayer,
+            Intersect
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

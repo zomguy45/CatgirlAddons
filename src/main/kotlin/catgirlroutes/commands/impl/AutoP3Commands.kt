@@ -4,6 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.*
 import catgirlroutes.commands.impl.RingManager.allRings
 import catgirlroutes.commands.impl.RingManager.loadRings
+import catgirlroutes.commands.impl.RingManager.rings
 import catgirlroutes.commands.impl.RingManager.saveRings
 import catgirlroutes.module.impl.dungeons.AutoP3
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
@@ -12,15 +13,21 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.Utils.distanceToPlayer
+import catgirlroutes.utils.render.WorldRenderUtils.blockPosToAABB
+import catgirlroutes.utils.render.WorldRenderUtils.vec3ToAABB
 import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
+import net.minecraft.util.BlockPos
 import net.minecraft.util.ChatComponentText
 import net.minecraft.util.ChatStyle
 import net.minecraft.util.Vec3
+import net.minecraftforge.client.event.MouseEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.InputEvent.MouseInputEvent
 import java.io.File
 
 object RingManager {
@@ -282,3 +289,33 @@ val autoP3Commands = commodore("p3") {
         saveRings()
     }
 }
+
+object Intersect {
+     fun intersects(): List<Vec3> {
+        val list = arrayListOf<Vec3>()
+        rings.forEach { p ->
+            val startVec = mc.thePlayer.getPositionEyes(1.0f)
+            val box = vec3ToAABB(p.location, 1, 1, 1)
+            val ray = mc.thePlayer.rayTrace(10.0, 1f).hitVec
+            if (box.calculateIntercept(startVec, ray) != null) {
+                list.add(p.location)
+            }
+        }
+        return list
+    }
+
+    @SubscribeEvent
+    fun onMouse(event: MouseEvent) {
+        if (!event.buttonstate) return
+        if (event.button != 0) return
+        if (!ringEditMode) return
+
+        rings.removeAll{p ->
+            intersects().contains(p.location)
+        }
+    }
+
+
+}
+
+

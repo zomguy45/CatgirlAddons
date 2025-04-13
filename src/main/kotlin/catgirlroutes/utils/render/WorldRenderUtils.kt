@@ -5,6 +5,7 @@ import catgirlroutes.utils.Utils.addVec
 import catgirlroutes.utils.VecUtils.fastEyeHeight
 import catgirlroutes.utils.VecUtils.renderVec
 import catgirlroutes.utils.WorldToScreen
+import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.GlStateManager.translate
@@ -105,6 +106,43 @@ object WorldRenderUtils {
     }
 
     /**
+     * Converts a BlockPos to an AxisAlignedBB with specified dimensions
+     *
+     * @param pos The starting BlockPos
+     * @param width The width of the box (in blocks)
+     * @param height The height of the box (in blocks)
+     * @param depth The depth of the box (in blocks)
+     * @return An AxisAlignedBB representing the specified dimensions
+     */
+    fun blockPosToAABB(pos: BlockPos, width: Int, height: Int, depth: Int): AxisAlignedBB {
+        // Create the box starting at the BlockPos coordinates
+        return AxisAlignedBB(
+            pos.x.toDouble(),                 // minX
+            pos.y.toDouble(),                 // minY
+            pos.z.toDouble(),                 // minZ
+            pos.x.toDouble() + width,         // maxX
+            pos.y.toDouble() + height,        // maxY
+            pos.z.toDouble() + depth          // maxZ
+        )
+    }
+
+    fun vec3ToAABB(pos: Vec3, width: Int, height: Int, depth: Int): AxisAlignedBB {
+        val halfWidth = width / 2.0
+        val halfHeight = height / 2.0
+        val halfDepth = depth / 2.0
+
+        return AxisAlignedBB(
+            pos.xCoord - halfWidth,   // minX
+            pos.yCoord - halfHeight,  // minY
+            pos.zCoord - halfDepth,   // minZ
+            pos.xCoord + halfWidth,   // maxX
+            pos.yCoord + halfHeight,  // maxY
+            pos.zCoord + halfDepth    // maxZ
+        )
+    }
+
+
+    /**
      * Draws a cube outline of size 1 starting at [x], [y], [z] which extends by 1 along the axes in positive direction.
      *
      * This outline will be visible through walls. The depth test is disabled.
@@ -200,7 +238,7 @@ object WorldRenderUtils {
         tessellator.draw()
     }
 
-    private fun drawFilledAABB(aabb: AxisAlignedBB, color: Color) {
+    fun drawFilledAABB(aabb: AxisAlignedBB, color: Color) {
         glColor4f(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.begin(GL_QUADS, DefaultVertexFormats.POSITION)

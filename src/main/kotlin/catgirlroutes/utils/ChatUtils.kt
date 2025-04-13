@@ -8,6 +8,7 @@ import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ChatUtils.sendChat
 import catgirlroutes.utils.Utils.runOnMCThread
+import net.minecraft.event.ClickEvent
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.*
 import net.minecraftforge.client.ClientCommandHandler
@@ -189,6 +190,17 @@ object ChatUtils {
         val style = ChatStyle()
         style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText(hoverText))
         message.chatStyle = style
+        return message
+    }
+
+    fun createClickableText(text: String, hoverText: String, action: String): IChatComponent {
+        val message: IChatComponent = ChatComponentText(text)
+
+        val style = ChatStyle()
+        style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText(hoverText))
+        style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, action)
+        message.chatStyle = style
+        mc.thePlayer.addChatMessage(message)
         return message
     }
 }
