@@ -65,6 +65,7 @@ object ModuleManager {
         LeapOrganiser,
         AutoSS,
         Auto4,
+        Watcher,
 
         // Misc
         F7sim,
@@ -107,7 +108,7 @@ object ModuleManager {
         ScreenImage,
         BarRender,
         Waypoints,
-        CustomHighlight
+        CustomHighlight,
     )
 
     /**

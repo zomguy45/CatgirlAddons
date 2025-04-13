@@ -1,8 +1,6 @@
 package catgirlroutes.events.impl
 
-import net.minecraft.network.play.server.S2DPacketOpenWindow
+import net.minecraft.network.play.client.C02PacketUseEntity
 import net.minecraftforge.fml.common.eventhandler.Event
 
-open class TermOpenEvent : Event() {
-    class open(val packet: S2DPacketOpenWindow) : TermOpenEvent()
-}
+open class TermOpenEvent(val packet: C02PacketUseEntity) : Event()

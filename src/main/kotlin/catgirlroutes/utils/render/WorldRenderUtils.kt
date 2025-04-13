@@ -1,12 +1,21 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.commands.commodore
+import catgirlroutes.module.impl.dungeons.Watcher
+import catgirlroutes.module.settings.RegisterHudElement
+import catgirlroutes.ui.clickgui.util.ColorUtil.hex
+import catgirlroutes.ui.clickgui.util.ColorUtil.toInt
+import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.Utils.addVec
+import catgirlroutes.utils.Utils.renderText
 import catgirlroutes.utils.VecUtils.fastEyeHeight
 import catgirlroutes.utils.VecUtils.renderVec
 import catgirlroutes.utils.WorldToScreen
+import com.github.stivais.commodore.utils.GreedyString
 import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
+import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.Tessellator
@@ -16,6 +25,9 @@ import net.minecraft.entity.Entity
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
+import net.minecraftforge.client.event.RenderGameOverlayEvent
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.util.glu.Cylinder
@@ -846,4 +858,43 @@ object WorldRenderUtils {
         GlStateManager.popMatrix()
     }
 
+    private var displayTitle = ""
+    private var titleTicks = 0
+    private var titleColor = Color.PINK
+
+    fun displayTitle(title: String, ticks: Int, color: Color = PINK) {
+        displayTitle = title
+        titleTicks = ticks
+        titleColor = color
+    }
+
+    fun clearTitle() {
+        displayTitle = ""
+        titleTicks = 0
+    }
+
+    @SubscribeEvent
+    fun onOverlay(event: RenderGameOverlayEvent.Pre) {
+        if (event.type != RenderGameOverlayEvent.ElementType.ALL || titleTicks <= 0) return
+        mc.entityRenderer.setupOverlayRendering()
+        val sr = ScaledResolution(mc)
+        renderText(
+            displayTitle,
+            sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(displayTitle) / 2 + 1,
+            sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT, color = titleColor.toInt,
+        )
+    }
+
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.START) return
+        titleTicks--
+    }
+
+    val displayCommands = commodore("display") {
+        literal("set").runs {
+            string: GreedyString ->
+            displayTitle(string.toString(), 80)
+        }
+    }
 }

@@ -16,6 +16,8 @@ import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.LeapUtils
 import catgirlroutes.utils.dungeon.ScanUtils
+import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.render.WorldRenderUtils.displayCommands
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import catgirlroutes.utils.rotation.RotationUtils
@@ -52,7 +54,7 @@ class CatgirlRoutes {
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
             autoP3Commands, autoRoutesCommands, rotationDebug, barSetter,
-            waypointCommands, highlightCommands
+            waypointCommands, highlightCommands, displayCommands
         )
 
         listOf(
@@ -77,7 +79,8 @@ class CatgirlRoutes {
             CgaUsers,
             NeuRepo,
             SkyblockPlayer,
-            Intersect
+            Intersect,
+            WorldRenderUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

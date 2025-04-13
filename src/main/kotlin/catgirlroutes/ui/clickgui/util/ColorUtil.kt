@@ -89,6 +89,12 @@ object ColorUtil {
             return String.format("%08X", rgba)
         }
 
+    val Color.toInt: Int
+        get() {
+            val rgb = (alpha shl 24) or (red shl 16) or (green shl 8) or blue
+            return rgb
+        }
+
     val Color.invert: Color
         get() {
             val alpha = (this.rgb shr 24) and 0xFF
