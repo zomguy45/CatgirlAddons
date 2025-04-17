@@ -97,6 +97,11 @@ class ModuleConfig(path: File) {
                                 @Suppress("UNCHECKED_CAST")
                                 (setting.value as MutableCollection<Any?>).addAll(configSetting.value as Collection<Any?>)
                             }
+                            is MapSetting<*, *, *> -> if (configSetting is MapSetting<*, *, *>) {
+                                setting.value.clear()
+                                @Suppress("UNCHECKED_CAST")
+                                (setting.value as MutableMap<Any?, Any?>).putAll(configSetting.value as Map<Any?, Any?>)
+                            }
                             is DropdownSetting ->   continue
                         }
                     }

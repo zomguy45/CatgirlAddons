@@ -43,9 +43,15 @@ object Test : Module(
         debugMessage(TestHud.width)
     }
 
-    private val listTest = ListSetting("Test list", mutableListOf<String>())
-    private val stupid4 = ActionSetting("Stupid4") { this.listTest.value.add("Test") }
+    private val listTest = ListSetting("Test list", mutableListOf<Stupid>())
+    private val stupid4 = ActionSetting("Stupid4") { this.listTest.value.add(Stupid("stupid", 1)) }
     private val stupid5 = ActionSetting("Stupid5") { debugMessage(this.listTest.value) }
+
+    private val mapTest = MapSetting("Test map", mutableMapOf<Double, Stupid>())
+    private val stupid6 = ActionSetting("Stupid6") { this.mapTest.value[Math.random()] = Stupid("stupid2", 2) }
+    private val stupid7 = ActionSetting("Stupid7") { debugMessage(this.mapTest.value) }
+
+    data class Stupid(val stupid1: String, val stupid2: Int)
 
     init {
         addSettings(
@@ -69,7 +75,11 @@ object Test : Module(
 
             this.listTest,
             this.stupid4,
-            this.stupid5
+            this.stupid5,
+
+            this.mapTest,
+            this.stupid6,
+            this.stupid7
         )
     }
 
