@@ -39,6 +39,22 @@ object Utils {
         return options.any { this.contains(it, ignoreCase) }
     }
 
+    fun String.substringSafe(start: Int, end: Int): String {
+        val safeStart = start.coerceIn(0, this.length)
+        val safeEnd = end.coerceIn(safeStart, this.length)
+        return this.substring(safeStart, safeEnd)
+    }
+
+    fun String.removeRangeSafe(from: Int, to: Int): String {
+        val f = kotlin.math.min(from, to)
+        val t = kotlin.math.max(to, from)
+        return removeRange(f, t)
+    }
+
+    fun String.dropAt(at: Int, amount: Int): String {
+        return removeRangeSafe(at, at + amount)
+    }
+
     /**
      * Checks if the first value in the pair equals the first argument and the second value in the pair equals the second argument.
      */

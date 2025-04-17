@@ -77,7 +77,14 @@ object Inventory : Module(
     private var overlay: OverlayType = OverlayType.NONE
     private var clickedSearch = false
 
-    private var textField = MiscElementText(width = 200.0, height = 20.0, bgColour = this.bgColour_.value, outlineColour = this.outlineColour_.value.darker()) // temp // todo calc
+    private var textField = textField {
+        size(200.0, 20.0)
+        thickness = 2.0
+        radius = 5.0
+        colour = bgColour_.value
+        outlineColour = outlineColour_.value.darker()
+    }
+
     private var highlightSlots = mutableMapOf<Int, HighlightSlot>()
     private val stupid get() = mc.theWorld == null || !inSkyblock || !this.searchBar.enabled || (mc.currentScreen !is GuiInventory && mc.currentScreen !is GuiChest)
 
@@ -190,14 +197,15 @@ object Inventory : Module(
         if (this.stupid) return
         GlStateManager.pushMatrix()
         GlStateManager.disableLighting()
-        this.textField.apply {
+
+        this.textField.update {
             x = barX.value
             y = barY.value
-            bgColour = bgColour_.value
+            colour = bgColour_.value
             outlineColour = outlineColour_.value.darker()
-            outlineFocusColour = outlineColour_.value
-            render(0, 0)
-        }
+            outlineHoverColour = outlineColour_.value
+        }.render(0, 0)
+
         GlStateManager.enableLighting()
         GlStateManager.popMatrix()
     }
@@ -210,12 +218,12 @@ object Inventory : Module(
 
     @SubscribeEvent
     fun onGuiScreenKeyboard2(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
-        if (!inSkyblock || !this.searchBar.enabled || !this.textField.focus || !Keyboard.getEventKeyState()) return
+        if (!inSkyblock || !this.searchBar.enabled || !this.textField.isFocused || !Keyboard.getEventKeyState()) return
         this.textField.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey())
 
         event.isCanceled = true
         if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
-            this.textField.focus = false
+            this.textField.isFocused = false
         }
     }
 

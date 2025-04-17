@@ -11,7 +11,8 @@ import catgirlroutes.ui.clickgui.elements.ModuleButton.Companion.whipIcon
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
-import catgirlroutes.ui.clickgui.util.FontUtil.wrapText
+import catgirlroutes.ui.clickgui.util.MouseUtils.mouseX
+import catgirlroutes.ui.clickgui.util.MouseUtils.mouseY
 import catgirlroutes.ui.clickguinew.Window
 import catgirlroutes.ui.clickguinew.Window.Companion.SCROLL_DISTANCE
 import catgirlroutes.ui.clickguinew.elements.menu.*
@@ -39,10 +40,6 @@ class ModuleButton(val module: Module, val window: Window) {
         get() = x + window.x
     val yAbsolute: Double
         get() = y + window.y
-
-    private val description: List<String> get() = wrapText(this.module.description, this.width - 5.0)
-
-    private val descHeight get() = fontHeight * this.description.size.toDouble()
 
     private val elementsHeight get() = this.menuElements.sumOf { it.height + 5.0 }
 
@@ -88,7 +85,7 @@ class ModuleButton(val module: Module, val window: Window) {
         this.keySetting = this.menuElements.removeAt(this.menuElements.lastIndex).setting as KeyBindSetting
     }
 
-    fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) : Double {
+    fun draw() : Double {
         GlStateManager.pushMatrix()
 
         if (!this.window.inModule) {
@@ -123,15 +120,15 @@ class ModuleButton(val module: Module, val window: Window) {
             this.menuElements.forEach {
                 it.y = drawY
                 it.update()
-                drawY += it.drawScreen(mouseX, mouseY, partialTicks)
+                drawY += it.draw()
             }
         }
         GlStateManager.popMatrix()
         return 0.0
     }
 
-    fun scroll(amount: Int, mouseX: Int = (this.window.x + 10.0).toInt(), mouseY: Int = (this.window.y + 10.0).toInt()): Boolean {
-        if (!this.extended || !this.window.isHovered(mouseX, mouseY)) return false
+    fun scroll(amount: Int): Boolean {
+        if (!this.extended || !this.window.isHovered()) return false
         val h = this.elementsHeight + 15.0
         if (h < this.window.height) {
             this.scrollTarget = 0.0
@@ -142,14 +139,14 @@ class ModuleButton(val module: Module, val window: Window) {
         return true
     }
 
-    fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
+    fun mouseClicked(mouseButton: Int): Boolean {
         if (this.listeningKey) {
             this.keySetting.value.key = -100 + mouseButton
             this.listeningKey = false
             return true
         }
         return when {
-            isButtonHovered(mouseX, mouseY) && (!this.window.inModule) -> when (mouseButton) {
+            isButtonHovered() && (!this.window.inModule) -> when (mouseButton) {
                 0 -> {
                     when {
                         isShiftKeyDown() -> {
@@ -178,8 +175,8 @@ class ModuleButton(val module: Module, val window: Window) {
                 }
                 else -> false
             }
-            this.isMouseUnderButton(mouseX, mouseY) -> this.menuElements.reversed().any {
-                it.mouseClicked(mouseX, mouseY, mouseButton).also { clicked ->
+            this.isMouseUnderButton() -> this.menuElements.reversed().any {
+                it.mouseClicked(mouseButton).also { clicked ->
                     if (clicked) {
                         if (it.parent.module.name == "ClickGUI" && it.displayName == "ClickGui") {
                             ClickGui.onEnable()
@@ -192,12 +189,12 @@ class ModuleButton(val module: Module, val window: Window) {
         }
     }
 
-    fun mouseReleased(mouseX: Int, mouseY: Int, state: Int) {
-        if (this.extended) this.menuElements.reversed().forEach { it.mouseReleased(mouseX, mouseY, state) }
+    fun mouseReleased(state: Int) {
+        if (this.extended) this.menuElements.reversed().forEach { it.mouseReleased(state) }
     }
 
-    fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
-        if (this.extended) this.menuElements.reversed().forEach { it.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick) }
+    fun mouseClickMove(mouseButton: Int, timeSinceLastClick: Long) {
+        if (this.extended) this.menuElements.reversed().forEach { it.mouseClickMove(mouseButton, timeSinceLastClick) }
     }
 
     fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
@@ -232,11 +229,11 @@ class ModuleButton(val module: Module, val window: Window) {
         return true
     }
 
-    private fun isButtonHovered(mouseX: Int, mouseY: Int): Boolean {
+    private fun isButtonHovered(): Boolean {
         return (!this.extended || !this.window.inModule) && mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + this.height
     }
 
-    private fun isMouseUnderButton(mouseX: Int, mouseY: Int): Boolean {
+    private fun isMouseUnderButton(): Boolean {
         return this.extended && mouseX >= this.window.x && mouseX <= this.window.x + this.width && mouseY > yAbsolute
     }
 

@@ -2,6 +2,7 @@ package catgirlroutes.ui.hud
 
 import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
 import catgirlroutes.ui.misc.elements.impl.MiscElementButton
+import catgirlroutes.ui.misc.elements.impl.button
 import catgirlroutes.utils.ChatUtils.modMessage
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.gui.ScaledResolution
@@ -29,12 +30,12 @@ object EditHudGUI : GuiScreen() {
 
     override fun initGui() {
         val sr = ScaledResolution(mc)
-        this.resetButton = MiscElementButton(
-            "Reset HUD",
-            sr.scaledWidth_double / 2.0 - 60.0 / 2.0,
-            sr.scaledHeight_double - 40.0,
-            60.0, 20.0
-        ) { modMessage("Resetting elements") }
+
+        this.resetButton = button {
+            text = "Reset HUD"
+            at(sr.scaledWidth_double / 2.0 - 60.0 / 2.0, sr.scaledHeight_double - 40.0)
+            size(60.0, 20.0)
+        } onClick { modMessage("Resetting elements") }
 
         hudElements.forEach { it.setDimensions() }
         super.initGui()
