@@ -125,7 +125,7 @@ class ClickGUI : Screen() { // todo: module description
         for (window in windows.reversed()) {
             if (window.scroll(amount)) return
         }
-        this.selectedWindow.moduleButtons.forEach { if (it.scroll(amount, mouseX, mouseY)) return }
+        this.selectedWindow.moduleButtons.forEach { if (it.scroll(amount)) return }
     }
 
     override fun onMouseClick(mouseButton: Int) {
