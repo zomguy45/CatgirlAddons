@@ -11,6 +11,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -23,14 +24,13 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Keyboard
+import java.awt.Color
 
 @AlwaysActive
 object Blink : Module(
     "Blink",
     category = Category.DUNGEON
 ) {
-
-    private val recordLength = NumberSetting("Recording length", 28.0, 1.0, 50.0)
     private val recordBind: KeyBindSetting = KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in editmode")
         .onPress {
             if (recorderActive) {
@@ -45,14 +45,21 @@ object Blink : Module(
                     mc.thePlayer.setPosition(ring.location.xCoord, mc.thePlayer.posY, ring.location.zCoord)
                     recorderActive = true
                     currentRing = ring
-                    currentRing!!.packets = mutableListOf<BlinkC06>()
+                    currentRing!!.packets = mutableListOf()
                 }
             }
         }
+    val lineColour = ColorSetting("AutoP3 line colour", Color.PINK, collapsible = false)
+    private val recordLength = NumberSetting("Recording length", 28.0, 1.0, 50.0)
     private val clearPackets = ActionSetting("Clear packets") { packetArray = 0 }
 
     init {
-        this.addSettings(this.recordBind, recordLength, clearPackets)
+        this.addSettings(
+            this.recordBind,
+            this.lineColour,
+            this.recordLength,
+            this.clearPackets
+        )
     }
 
     var packetArray = 0

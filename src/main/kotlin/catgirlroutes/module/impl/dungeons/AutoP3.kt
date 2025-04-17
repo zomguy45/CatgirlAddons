@@ -213,7 +213,7 @@ object AutoP3 : Module(
                     WorldRenderUtils.drawLine(
                         p1.x, p1.y + 0.1, p1.z,
                         p2.x, p2.y + 0.1, p2.z,
-                        Color.PINK, 4.0f, false
+                        Blink.lineColour.value, 4.0f, false
                     )
                 }
                 drawStringInWorld(ring.packets.size.toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
