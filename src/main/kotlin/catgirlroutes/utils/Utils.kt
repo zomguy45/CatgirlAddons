@@ -67,6 +67,8 @@ object Utils {
             List(it.tagCount()) { i -> it.getStringTagAt(i) }
         }.orEmpty()
 
+    fun ItemStack.getTooltip(advanced: Boolean = false): List<String> = this.getTooltip(mc.thePlayer, advanced)
+
 
     fun Event.postAndCatch(): Boolean {
         return runCatching {

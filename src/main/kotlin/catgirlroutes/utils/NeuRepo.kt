@@ -94,9 +94,9 @@ object NeuRepo {
 
     fun getItemFromName(name: String, contains: Boolean = true): RepoItem? {
         return if (contains) {
-            repoItems.find { it.name.noControlCodes.contains(name) }
+            repoItems.find { it.name.contains(name) || it.name.noControlCodes.contains(name) }
         } else {
-            repoItems.find { it.name == name }
+            repoItems.find { it.name == name || it.name.noControlCodes == name || it.name.noControlCodes.removePrefix("[Lvl {LVL}] ") == name }
         }
     }
 

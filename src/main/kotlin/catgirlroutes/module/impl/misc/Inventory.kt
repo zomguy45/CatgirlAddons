@@ -12,11 +12,12 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.clickgui.util.ColorUtil
-import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.hud.HudElement
-import catgirlroutes.ui.misc.elements.impl.MiscElementText
-import catgirlroutes.ui.misc.searchoverlay.AhBzSearch
-import catgirlroutes.ui.misc.searchoverlay.OverlayType
+import catgirlroutes.ui.misc.elements.impl.textField
+import catgirlroutes.ui.misc.elements.util.update
+import catgirlroutes.ui.misc.searchoverlay.AuctionOverlay
+import catgirlroutes.ui.misc.searchoverlay.BazaarOverlay
+import catgirlroutes.ui.misc.searchoverlay.SearchType
 import catgirlroutes.utils.LocationManager.inSkyblock
 import catgirlroutes.utils.Utils.lore
 import catgirlroutes.utils.Utils.noControlCodes
@@ -74,7 +75,7 @@ object Inventory : Module(
     val barY = NumberSetting("SEARCH_BAR_Y", visibility = Visibility.HIDDEN)
     val barScale = NumberSetting("SEARCH_BAR_SCALE", 1.0,1.0,1.0,0.02, visibility = Visibility.HIDDEN)
 
-    private var overlay: OverlayType = OverlayType.NONE
+    private var overlay: SearchType = SearchType.NONE
     private var clickedSearch = false
 
     private var textField = textField {
@@ -121,17 +122,17 @@ object Inventory : Module(
         if (!inSkyblock || event.packet !is S2DPacketOpenWindow) return
         val title = event.packet.windowTitle.unformattedText
         overlay = if ((title.contains("Auctions") || title.contains("Auction House")) && this.auctionOverlay.enabled) {
-            OverlayType.AUCTION
+            SearchType.AUCTION
         } else if (title.contains("Bazaar") && this.bazaarOverlay.enabled) {
-            OverlayType.BAZAAR
+            SearchType.BAZAAR
         } else {
-            OverlayType.NONE
+            SearchType.NONE
         }
     }
 
     @SubscribeEvent
     fun onC0EPacketClickWindow(event: PacketSentEvent) {
-        if (!inSkyblock || overlay == OverlayType.NONE || event.packet !is C0EPacketClickWindow) return
+        if (!inSkyblock || overlay == SearchType.NONE || event.packet !is C0EPacketClickWindow) return
         val registry = event.packet.clickedItem?.item?.registryName
         val name = event.packet.clickedItem?.displayName
         val slot = event.packet.slotId
@@ -140,10 +141,10 @@ object Inventory : Module(
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     fun onGuiScreenKeyboard(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
-        if (event.gui !is GuiChest || overlay == OverlayType.NONE || !this.ctrlF.enabled) return
+        if (event.gui !is GuiChest || overlay == SearchType.NONE || !this.ctrlF.enabled) return
         val openSlots = mc.thePlayer?.openContainer?.inventorySlots ?: return
 
-        val slotId = if (overlay == OverlayType.AUCTION) 48 else 45
+        val slotId = if (overlay == SearchType.AUCTION) 48 else 45
         val gui = event.gui as GuiChest
         val signStack = openSlots[slotId]?.stack
 
@@ -159,11 +160,15 @@ object Inventory : Module(
 
     @SubscribeEvent
     fun onGuiOpen(event: GuiOpenEvent) {
-        if (event.gui !is GuiEditSign || overlay == OverlayType.NONE || !clickedSearch) return
+        if (event.gui !is GuiEditSign || overlay == SearchType.NONE || !clickedSearch) return
 
         val sign = (event.gui as AccessorGuiEditSign).tileSign
         sign?.let {
-            event.gui = AhBzSearch(overlay, sign)
+            event.gui = when(overlay) {
+                SearchType.AUCTION -> AuctionOverlay(it)
+                SearchType.BAZAAR -> BazaarOverlay(it)
+                SearchType.NONE -> return
+            }
         }
     }
 
