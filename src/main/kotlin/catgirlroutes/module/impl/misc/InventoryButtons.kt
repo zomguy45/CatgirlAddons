@@ -13,8 +13,9 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.inventorybuttons.InventoryButtonEditor
 import catgirlroutes.utils.LocationManager.inSkyblock
-import catgirlroutes.utils.Utils.lore
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.lore
+import catgirlroutes.utils.noControlCodes
+import catgirlroutes.utils.render.HUDRenderUtils.drawHoveringText
 import catgirlroutes.utils.toItemStack
 import catgirlroutes.utils.toJson
 import catgirlroutes.utils.toJsonObject
@@ -54,35 +55,32 @@ object InventoryButtons : Module(
         if (!inSkyblock || mc.currentScreen !is GuiInventory) return
         val accessor = event.gui as AccessorGuiContainer
         GlStateManager.pushMatrix()
-        allButtons.filter { it.isActive }.forEach { button -> button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble()) }
-        // different loop so hovering text is always above the buttons
-        allButtons.filter { it.isActive }
-            .forEach { button ->
-                if (button.isHovered(event.mouseX - accessor.guiLeft, event.mouseY - accessor.guiTop)) {
-                    val textLines = when {
-                        button.isEquipment -> {
-                            if (button.icon == "barrier") {
-                                listOf("Empty")
-                            } else {
-                                button.icon.toJsonObject().toItemStack().let { itemStack ->
-                                    listOf(itemStack.displayName) + itemStack.lore
-                                }
+        allButtons.filter { it.isActive }.forEach { button ->
+            button.render(accessor.guiLeft.toDouble(), accessor.guiTop.toDouble())
+
+            if (button.isHovered(event.mouseX - accessor.guiLeft, event.mouseY - accessor.guiTop)) {
+                val textLines = when {
+                    button.isEquipment -> {
+                        if (button.icon == "barrier") {
+                            listOf("Empty")
+                        } else {
+                            button.icon.toJsonObject().toItemStack().let { itemStack ->
+                                listOf(itemStack.displayName) + itemStack.lore
                             }
                         }
-                        else -> listOf("§7/${button.command.replace("/", "")}")
                     }
-
-                    val xOff = if (button.isEquipment) calculateTooltipXOffset(textLines) else 0
-
-                    GuiUtils.drawHoveringText(
-                        textLines,
-                        event.mouseX - xOff, event.mouseY,
-                        event.gui.width, event.gui.height,
-                        -1, mc.fontRendererObj
-                    )
+                    else -> listOf("§7/${button.command.replace("/", "")}")
                 }
-            }
 
+                val xOff = if (button.isEquipment) calculateTooltipXOffset(textLines) else 0
+
+                drawHoveringText(
+                    textLines,
+                    event.mouseX - xOff, event.mouseY,
+                    event.gui.width, event.gui.height, themed = false
+                )
+            }
+        }
         GlStateManager.popMatrix()
     }
 

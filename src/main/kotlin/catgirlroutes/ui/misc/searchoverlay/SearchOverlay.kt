@@ -16,8 +16,8 @@ import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo
 import catgirlroutes.utils.NeuRepo.toStack
 import catgirlroutes.utils.RepoItem
-import catgirlroutes.utils.Utils.getTooltip
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.getTooltip
+import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawItemStackWithText

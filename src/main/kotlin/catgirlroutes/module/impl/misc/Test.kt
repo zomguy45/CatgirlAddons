@@ -2,6 +2,7 @@ package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
+import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.RegisterHudElement
@@ -10,12 +11,19 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.ui.notification.NotificationType
-import catgirlroutes.utils.ChatUtils
+import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.debugMessage
-import catgirlroutes.utils.Notifications
+import catgirlroutes.utils.EtherWarpHelper.etherPos
 import catgirlroutes.utils.dungeon.tiles.Room
+import catgirlroutes.utils.render.WorldRenderUtils
+import net.minecraft.block.Block.getIdFromBlock
+import net.minecraft.init.Blocks
+import net.minecraft.util.MovingObjectPosition
+import net.minecraft.util.Vec3
+import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
+import java.util.*
 
 object Test : Module(
     "Test",
@@ -93,6 +101,26 @@ object Test : Module(
         ChatUtils.chatMessage("ROT: " + room.rotation);
         ChatUtils.chatMessage("CLAY: " + room.clayPos);
         ChatUtils.chatMessage("------------");
+    }
+
+    @SubscribeEvent
+    fun onRenderWorldLast(event: RenderWorldLastEvent) {
+        if (mc.thePlayer?.usingEtherWarp == false) return
+        val player = mc.thePlayer as? IEntityPlayerSPAccessor ?: return
+        val positionLook = PositionLook(Vec3(player.lastReportedPosX, player.lastReportedPosY, player.lastReportedPosZ), player.lastReportedYaw, player.lastReportedPitch)
+
+        etherPos = EtherWarpHelper.getEtherPos(positionLook)
+
+        val succeeded = etherPos.succeeded && (mc.objectMouseOver?.typeOfHit != MovingObjectPosition.MovingObjectType.BLOCK || etherPos.state?.block?.let { invalidBlocks.get(getIdFromBlock(it)) } != true)
+
+        WorldRenderUtils.drawBlock(etherPos.pos ?: return, if (succeeded) Color.GREEN else Color.RED)
+    }
+
+    private val invalidBlocks = BitSet().apply {
+        setOf(
+            Blocks.hopper, Blocks.chest, Blocks.ender_chest, Blocks.furnace, Blocks.crafting_table, Blocks.cauldron,
+            Blocks.enchanting_table, Blocks.dispenser, Blocks.dropper, Blocks.brewing_stand, Blocks.trapdoor,
+        ).forEach { set(getIdFromBlock(it)) }
     }
 
     @RegisterHudElement

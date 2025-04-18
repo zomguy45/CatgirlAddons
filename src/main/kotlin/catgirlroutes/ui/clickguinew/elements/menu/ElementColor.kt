@@ -13,7 +13,7 @@ import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.textField
 import catgirlroutes.ui.misc.elements.util.update
 import catgirlroutes.utils.ChatUtils.debugMessage
-import catgirlroutes.utils.Utils.equalsOneOf
+import catgirlroutes.utils.equalsOneOf
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedOutline
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedHueBox

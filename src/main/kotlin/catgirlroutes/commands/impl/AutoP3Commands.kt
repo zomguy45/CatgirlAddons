@@ -11,7 +11,7 @@ import catgirlroutes.module.impl.dungeons.Blink
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Utils.distanceToPlayer
+import catgirlroutes.utils.distanceToPlayer
 import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder

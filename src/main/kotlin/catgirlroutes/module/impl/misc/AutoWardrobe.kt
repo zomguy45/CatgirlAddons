@@ -6,7 +6,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.utils.ChatUtils.command
-import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow

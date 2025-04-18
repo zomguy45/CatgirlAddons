@@ -8,8 +8,8 @@ import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.PlayerUtils
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posZ
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.VecUtils.multiply
+import catgirlroutes.utils.equalsOneOf
+import catgirlroutes.utils.multiply
 import net.minecraft.block.state.IBlockState
 import net.minecraft.init.Blocks
 import net.minecraft.util.BlockPos

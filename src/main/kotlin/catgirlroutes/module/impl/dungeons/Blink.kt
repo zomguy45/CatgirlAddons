@@ -15,7 +15,7 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Utils
+import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
@@ -130,6 +130,6 @@ object Blink : Module(
         val sr = ScaledResolution(mc)
         val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text.toString()) / 2
         val y = sr.scaledHeight / 2 + -20
-        Utils.renderText(text.toString(), x + 1, y)
+        renderText(text.toString(), x + 1, y)
     }
 }

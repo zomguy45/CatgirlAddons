@@ -71,7 +71,7 @@ object BlockAura {
     fun onTick2(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || breakArray.isEmpty()) return
         breakArray.forEach{block ->
-            if (Utils.distanceToPlayer(block.x, block.y, block.z) < 4) {
+            if (distanceToPlayer(block.x, block.y, block.z) < 4) {
                 val blockState = mc.theWorld.getBlockState(block)
                 blockState.block.setBlockBoundsBasedOnState(mc.theWorld, block)
                 val aabb = aabbConvert(blockState.block.getSelectedBoundingBox(mc.theWorld, block), block)

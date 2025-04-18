@@ -3,7 +3,7 @@ package catgirlroutes.ui.clickgui.util
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.impl.render.ClickGui
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.font.CFontRenderer
 import net.minecraft.client.gui.FontRenderer
 import net.minecraft.client.renderer.GlStateManager

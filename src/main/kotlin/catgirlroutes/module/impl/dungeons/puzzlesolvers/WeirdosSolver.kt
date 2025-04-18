@@ -9,8 +9,8 @@ import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.EntityAura
 import catgirlroutes.utils.EntityAura.entityArray
-import catgirlroutes.utils.Utils.noControlCodes
-import catgirlroutes.utils.VecUtils.addRotationCoords
+import catgirlroutes.utils.noControlCodes
+import catgirlroutes.utils.addRotationCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons

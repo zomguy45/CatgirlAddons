@@ -7,7 +7,7 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocksLegacy
 import catgirlroutes.utils.PlayerUtils.relativeClip
-import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraftforge.client.event.RenderGameOverlayEvent

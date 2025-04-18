@@ -1,20 +1,26 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.utils.Utils.addVec
-import catgirlroutes.utils.VecUtils.fastEyeHeight
-import catgirlroutes.utils.VecUtils.renderVec
+import catgirlroutes.utils.PlayerUtils.posX
+import catgirlroutes.utils.PlayerUtils.posY
+import catgirlroutes.utils.PlayerUtils.posZ
+import catgirlroutes.utils.addVec
+import catgirlroutes.utils.fastEyeHeight
 import catgirlroutes.utils.WorldToScreen
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
+import net.minecraft.client.renderer.entity.RenderPlayer
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.entity.Entity
 import net.minecraft.util.AxisAlignedBB
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
+import net.minecraftforge.client.event.RenderWorldLastEvent
+import net.minecraftforge.fml.common.eventhandler.EventPriority
+import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*
 import org.lwjgl.util.glu.Cylinder
@@ -61,6 +67,49 @@ object WorldRenderUtils {
 
     fun drawTracer(goal: Vec3, color: Color, thickness: Float = 3f, phase: Boolean = true) {
         drawLine(mc.thePlayer.renderVec.addVec(y = fastEyeHeight()), goal, color, thickness, phase)
+    }
+
+    /**
+     * Gets the rendered x-coordinate of an entity based on its last tick and current tick positions.
+     *
+     * @receiver The entity for which to retrieve the rendered x-coordinate.
+     * @return The rendered x-coordinate.
+     */
+    inline val Entity.renderX: Double
+        get() = prevPosX + (posX - prevPosX ) * partialTicks
+
+    /**
+     * Gets the rendered y-coordinate of an entity based on its last tick and current tick positions.
+     *
+     * @receiver The entity for which to retrieve the rendered y-coordinate.
+     * @return The rendered y-coordinate.
+     */
+    inline val Entity.renderY: Double
+        get() = prevPosY + (posY - prevPosY) * partialTicks
+
+    /**
+     * Gets the rendered z-coordinate of an entity based on its last tick and current tick positions.
+     *
+     * @receiver The entity for which to retrieve the rendered z-coordinate.
+     * @return The rendered z-coordinate.
+     */
+    inline val Entity.renderZ: Double
+        get() = prevPosZ + (posZ - prevPosZ) * partialTicks
+
+    /**
+     * Gets the rendered position of an entity as a `Vec3`.
+     *
+     * @receiver The entity for which to retrieve the rendered position.
+     * @return The rendered position as a `Vec3`.
+     */
+    inline val Entity.renderVec: Vec3
+        get() = Vec3(renderX, renderY, renderZ)
+
+    var partialTicks = 0f
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    fun onRenderWorld(event: RenderWorldLastEvent) {
+        this.partialTicks = event.partialTicks
     }
 
     /**
@@ -805,6 +854,24 @@ object WorldRenderUtils {
             GlStateManager.enableDepth()
             GlStateManager.depthMask(true)
         }
+        GlStateManager.popMatrix()
+    }
+
+    fun renderPlayer(partialTicks: Float = 0f) {
+        val renderPlayer = RenderPlayer(renderManager, mc.thePlayer.skinType == "slim")
+        val x = mc.thePlayer.lastTickPosX + (posX - mc.thePlayer.lastTickPosX) * partialTicks - renderManager.viewerPosX
+        val y = mc.thePlayer.lastTickPosY + (posY - mc.thePlayer.lastTickPosY) * partialTicks - renderManager.viewerPosY
+        val z = mc.thePlayer.lastTickPosZ + (posZ - mc.thePlayer.lastTickPosZ) * partialTicks - renderManager.viewerPosZ
+
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(x + 2, y, z)
+        GlStateManager.disableBlend()
+        GlStateManager.enableAlpha()
+
+        renderPlayer.doRender(mc.thePlayer, x + 2, y, z, mc.thePlayer.rotationYaw, partialTicks)
+
+        GlStateManager.enableBlend()
+        GlStateManager.disableAlpha()
         GlStateManager.popMatrix()
     }
 

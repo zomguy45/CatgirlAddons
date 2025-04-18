@@ -6,7 +6,7 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.utils.Utils.isOtherPlayer
+import catgirlroutes.utils.isOtherPlayer
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons

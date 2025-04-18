@@ -7,7 +7,6 @@ import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ChatUtils.sendChat
-import catgirlroutes.utils.Utils.runOnMCThread
 import net.minecraft.event.HoverEvent
 import net.minecraft.util.*
 import net.minecraftforge.client.ClientCommandHandler

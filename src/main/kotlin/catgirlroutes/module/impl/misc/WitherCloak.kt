@@ -9,7 +9,7 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.ui.clickgui.util.FontUtil.drawStringWithShadow
 import catgirlroutes.ui.hud.HudElement
-import catgirlroutes.utils.Utils.equalsOneOf
+import catgirlroutes.utils.equalsOneOf
 import net.minecraft.entity.EntityLivingBase
 import net.minecraft.entity.monster.EntityCreeper
 import net.minecraft.util.StringUtils

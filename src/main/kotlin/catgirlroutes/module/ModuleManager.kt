@@ -65,6 +65,7 @@ object ModuleManager {
         LeapOrganiser,
         AutoSS,
         Auto4,
+        Splits,
 
         // Misc
         F7sim,

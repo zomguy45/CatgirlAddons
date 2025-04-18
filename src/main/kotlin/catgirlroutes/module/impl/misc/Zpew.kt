@@ -15,13 +15,13 @@ import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
+import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.LocationManager.inSkyblock
 import catgirlroutes.utils.PlayerUtils.playLoudSound
-import catgirlroutes.utils.Utils.skyblockID
+import catgirlroutes.utils.skyblockID
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import me.odinmain.utils.skyblock.EtherWarpHelper
 import net.minecraft.block.Block
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C03PacketPlayer
@@ -85,29 +85,16 @@ object Zpew : Module(
     }
 
     private fun doZeroPingEtherWarp() {
-        val etherBlock = EtherWarpHelper.getEtherPos( // odin
+        val etherBlock = EtherWarpHelper.getEtherPos(
             Vec3(lastX, lastY, lastZ),
             lastYaw,
             lastPitch,
             57.0
         )
 
-//        val etherBlock = catgirlroutes.utils.EtherWarpHelper.getEtherPos( // 1 to 1 skid
-//            Vec3(lastX, lastY, lastZ),
-//            lastYaw,
-//            lastPitch,
-//            57.0
-//        )
-
         if (!etherBlock.succeeded) return
 
         val pos = etherBlock.pos!!
-
-//        val (succeeded, etherBlock) = RaytraceUtils.getEtherwarpBlockSuccess(lastPitch, lastYaw, Vec3(lastX, lastY, lastZ), 57.0) // from creampirog
-//
-//        if (!succeeded) return
-//
-//        val pos = BlockPos(etherBlock)
 
         val x: Double = pos.x.toDouble() + 0.5
         var y: Double = pos.y.toDouble() + 1.05
@@ -227,15 +214,9 @@ object Zpew : Module(
             return
         }
 
-        //debugMessage("newYaw: $newYaw")
-        //debugMessage("newPitch: $newPitch")
-        //debugMessage("newX: $newX")
-        //debugMessage("newY: $newY")
-        //debugMessage("newZ: $newZ")
         debugMessage("receivedS08($newX, $newY, $newZ)")
         debugMessage("sentC06(${sentC06.x}, ${sentC06.y}, ${sentC06.z})")
         debugMessage(recentlySentC06s)
-        //debugMessage(sentC06)
         debugMessage("Failed")
 
         recentFails.add(System.currentTimeMillis())
@@ -245,7 +226,7 @@ object Zpew : Module(
     @SubscribeEvent
     fun onS29(event: PacketReceiveEvent) {
         if (event.packet !is S29PacketSoundEffect) return
-        val packet: S29PacketSoundEffect = event.packet as S29PacketSoundEffect // I don't think it should be like that in kt lol
+        val packet: S29PacketSoundEffect = event.packet
         if (packet.soundName != "mob.enderdragon.hit" || packet.volume != 1f || packet.pitch != 0.53968257f || !checkAllowedFails()) return
         event.isCanceled = true
     }

@@ -19,8 +19,8 @@ import catgirlroutes.ui.misc.searchoverlay.AuctionOverlay
 import catgirlroutes.ui.misc.searchoverlay.BazaarOverlay
 import catgirlroutes.ui.misc.searchoverlay.SearchType
 import catgirlroutes.utils.LocationManager.inSkyblock
-import catgirlroutes.utils.Utils.lore
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.lore
+import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils
 import catgirlroutes.utils.render.HUDRenderUtils.drawPlayerOnScreen
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect

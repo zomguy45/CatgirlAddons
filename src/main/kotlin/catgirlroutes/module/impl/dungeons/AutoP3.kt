@@ -31,8 +31,8 @@ import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.equalsOneOf
+import catgirlroutes.utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.render.WorldRenderUtils

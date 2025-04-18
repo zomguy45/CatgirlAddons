@@ -7,7 +7,7 @@ import catgirlroutes.module.settings.impl.StringSelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.noControlCodes
 import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent

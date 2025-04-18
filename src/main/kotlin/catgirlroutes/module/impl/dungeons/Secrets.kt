@@ -11,7 +11,7 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.PlayerUtils.playLoudSound
-import catgirlroutes.utils.Utils.unformattedName
+import catgirlroutes.utils.unformattedName
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonItemDrops
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons

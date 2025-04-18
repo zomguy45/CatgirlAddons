@@ -17,10 +17,7 @@ import catgirlroutes.utils.MovementUtils.targetBlocks
 import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.isHolding
-import catgirlroutes.utils.Utils
-import catgirlroutes.utils.Utils.lore
-import catgirlroutes.utils.Utils.removeFormatting
-import catgirlroutes.utils.VecUtils.toVec3
+import catgirlroutes.utils.*
 import catgirlroutes.utils.dungeon.DungeonClass
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
@@ -28,7 +25,6 @@ import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.dungeon.LeapUtils.leap
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawSquare
-import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import net.minecraft.client.gui.ScaledResolution
@@ -176,7 +172,7 @@ object Auto4: Module(
         val textWidth = mc.fontRendererObj.getStringWidth(text) * scale
         val x = (sr.scaledWidth / 2 - textWidth / 2).toInt()
         val y = sr.scaledHeight / 2 - 28
-        Utils.renderText(text, x, y, scale, color)
+        renderText(text, x, y, scale, color)
     }
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             //Ava is such a good girl
     @SubscribeEvent

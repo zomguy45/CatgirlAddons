@@ -8,8 +8,8 @@ import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.PacketUtils
-import catgirlroutes.utils.Utils
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.renderText
+import catgirlroutes.utils.noControlCodes
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0CPacketInput
@@ -74,7 +74,7 @@ object InstaMid : Module(
         val sr = ScaledResolution(mc)
         val text = "Instamid active"
         val width = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
-        Utils.renderText(
+        renderText(
             text = text,
             x = width,
             y = sr.scaledHeight / 2 + 10

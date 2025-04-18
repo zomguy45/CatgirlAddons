@@ -13,6 +13,7 @@ import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.LeapUtils
 import catgirlroutes.utils.dungeon.ScanUtils
+import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import catgirlroutes.utils.rotation.RotationUtils
@@ -64,7 +65,6 @@ class CatgirlRoutes {
             MovementUtils,
             RotationUtils,
             EventDispatcher,
-            VecUtils,
             Notifications,
             PlayerUtils,
             EntityAura,
@@ -72,7 +72,8 @@ class CatgirlRoutes {
             LeapUtils,
             CgaUsers,
             NeuRepo,
-            SkyblockPlayer
+            SkyblockPlayer,
+            WorldRenderUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

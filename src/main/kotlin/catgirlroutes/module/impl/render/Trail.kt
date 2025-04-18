@@ -9,7 +9,7 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.utils.Utils.equalsOneOf
+import catgirlroutes.utils.equalsOneOf
 import catgirlroutes.utils.render.WorldRenderUtils.drawLine
 import catgirlroutes.utils.render.WorldRenderUtils.renderManager
 import net.minecraft.util.Vec3

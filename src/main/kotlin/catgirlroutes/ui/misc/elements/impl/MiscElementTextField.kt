@@ -6,9 +6,9 @@ import catgirlroutes.ui.clickgui.util.FontUtil.trimToWidth
 import catgirlroutes.ui.misc.elements.ElementDSL
 import catgirlroutes.ui.misc.elements.MiscElement
 import catgirlroutes.ui.misc.elements.MiscElementStyle
-import catgirlroutes.utils.Utils.dropAt
-import catgirlroutes.utils.Utils.noControlCodes
-import catgirlroutes.utils.Utils.substringSafe
+import catgirlroutes.utils.dropAt
+import catgirlroutes.utils.noControlCodes
+import catgirlroutes.utils.substringSafe
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import net.minecraft.client.gui.GuiScreen

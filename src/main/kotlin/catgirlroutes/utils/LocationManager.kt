@@ -3,7 +3,6 @@ package catgirlroutes.utils
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.SkyblockJoinIslandEvent
 import catgirlroutes.module.impl.render.ClickGui
-import catgirlroutes.utils.Utils.postAndCatch
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.clock.Executor.Companion.register
 import catgirlroutes.utils.dungeon.Dungeon

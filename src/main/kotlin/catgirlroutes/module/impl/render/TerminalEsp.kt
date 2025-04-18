@@ -4,7 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.utils.Utils.noControlCodes
+import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.M7Phases
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
