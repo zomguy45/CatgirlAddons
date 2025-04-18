@@ -18,7 +18,7 @@ import kotlin.math.floor
  * Provides functionality for game overlay elements.
  * @author Aton
  */
-abstract class HudElement {
+abstract class HudElement { // todo cleanup
 
     private var parentModule: Module
     val enabled: Boolean

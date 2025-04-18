@@ -55,16 +55,17 @@ object AutoSS : Module(
         this.addSettings(delay, forceDevice, resetSS, autoStart, smoothRotate, time, dontCheck)
     }
 
-    var lastClickAdded = System.currentTimeMillis()
-    var next = false
-    var progress = 0
-    var doneFirst = false
-    var doingSS = false
-    var clicked = false
-    var clicks = ArrayList<BlockPos>()
-    var wtflip = System.currentTimeMillis()
-    var clickedButton: Vec3? = null
-    var allButtons = ArrayList<Vec3>()
+    private var lastClickAdded = System.currentTimeMillis()
+    private var next = false
+    private var progress = 0
+    private var doneFirst = false
+    private var doingSS = false
+    private var clicked = false
+    private var clicks = ArrayList<BlockPos>()
+    private var wtflip = System.currentTimeMillis()
+    private var clickedButton: Vec3? = null
+    private var allButtons = ArrayList<Vec3>()
+    private val startButton = BlockPos(110, 121, 91)
 
     fun reset() {
         allButtons.clear()
@@ -88,7 +89,6 @@ object AutoSS : Module(
 
     fun start() {
         allButtons.clear()
-        val startButton: BlockPos = BlockPos(110, 121, 91)
         val (yaw, pitch) = getYawAndPitch(110.875, 121.5, 91.5)
         if (smoothRotate.value) {
             rotateSmoothly(yaw, pitch, time.value.toInt())
@@ -119,7 +119,6 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onChat(event: ClientChatReceivedEvent) {
         val msg = event.message.unformattedText
-        val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return
         if (msg.contains("Device")) {
             debugMessage(System.currentTimeMillis())
@@ -136,7 +135,6 @@ object AutoSS : Module(
             if (!this.enabled) return@Executor
             if (!LocationManager.inSkyblock && !forceDevice.value) return@Executor
             val detect: Block = mc.theWorld.getBlockState(BlockPos(110, 123, 92)).block
-            val startButton: BlockPos = BlockPos(110, 121, 91)
 
             if (mc.thePlayer.getDistanceSqToCenter(startButton) > 25) return@Executor
 
@@ -183,8 +181,6 @@ object AutoSS : Module(
         if (!LocationManager.inSkyblock && !forceDevice.value) return
         if (mc.theWorld == null) return
 
-        val startButton: BlockPos = BlockPos(110, 121, 91)
-
         if (System.currentTimeMillis() - lastClickAdded > delay.value) clickedButton = null
 
         if (mc.thePlayer.getDistanceSqToCenter(startButton) < 1600) {
@@ -202,7 +198,6 @@ object AutoSS : Module(
         val mop: MovingObjectPosition = mc.objectMouseOver ?: return
         if (System.currentTimeMillis() - wtflip < 1000) return
         wtflip = System.currentTimeMillis()
-        val startButton: BlockPos = BlockPos(110, 121, 91)
         if (mop.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK && startButton == event.pos && startButton == mop.blockPos && event.action == PlayerInteractEvent.Action.RIGHT_CLICK_BLOCK) {
             clicked = false
             reset()
@@ -213,7 +208,7 @@ object AutoSS : Module(
     @SubscribeEvent
     fun onBlockChange(event: BlockChangeEvent) {
         if (event.pos.x == 111 && event.pos.y >= 120 && event.pos.y <= 123 && event.pos.z >= 92 && event.pos.z <= 95) {
-            val button: BlockPos = BlockPos(110, event.pos.y, event.pos.z)
+            val button = BlockPos(110, event.pos.y, event.pos.z)
             if (event.update.block == Blocks.sea_lantern) {
                 if (clicks.size == 2) {
                     if (clicks[0] == button && !doneFirst) {
@@ -232,7 +227,7 @@ object AutoSS : Module(
         }
     }
 
-    fun clickButton(x: Int, y: Int, z: Int) {
+    private fun clickButton(x: Int, y: Int, z: Int) {
         if (mc.thePlayer.getDistanceSqToCenter(BlockPos(x, y, z)) > 25) return
         debugMessage("Clicked at: x: ${x}, y: ${y}, z: ${z}. Time: ${System.currentTimeMillis()}")
         clickedButton = Vec3(x.toDouble(), y.toDouble(), z.toDouble())

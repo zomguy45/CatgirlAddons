@@ -20,7 +20,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.random.Random
 
 
-object AutoClicker: Module(
+object AutoClicker: Module( // todo fix https://github.com/WompWatr/CatgirlAddons/issues/6
     "Auto Clicker",
     category = Category.MISC,
     description = "A simple auto clicker for both left and right click. Activates when the corresponding key is being held down. "

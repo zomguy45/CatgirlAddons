@@ -6,7 +6,6 @@ import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
-import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.SettingsCategory
 import catgirlroutes.module.settings.Visibility
@@ -19,7 +18,6 @@ import java.awt.Color
  * @author Aton
  */
 @AlwaysActive
-@NoShowInList
 @SettingsCategory
 object ClickGui: Module(
     "ClickGUI",

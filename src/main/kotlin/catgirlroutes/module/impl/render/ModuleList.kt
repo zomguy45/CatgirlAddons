@@ -4,9 +4,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.ModuleManager.modules
-import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.RegisterHudElement
-import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.hud.HudElement
@@ -17,8 +15,7 @@ import java.awt.Color
 
 //TODO: Maybe box idk. I would personally not. Maybe add a switch to modules for showing in list.
 
-@NoShowInList
-object ModuleList : Module(
+object ModuleList : Module( // todo fix shit
     name = "Array List",
     category = Category.RENDER,
     description = "ArrayList"

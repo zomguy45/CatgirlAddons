@@ -32,16 +32,17 @@ import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.equalsOneOf
-import catgirlroutes.utils.renderText
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
+import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
+import catgirlroutes.utils.renderText
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
@@ -49,7 +50,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraft.network.play.client.C0EPacketClickWindow
@@ -127,7 +127,7 @@ object AutoP3 : Module(
                     )
                     movementRecord = true
                     movementCurrentRing = ring
-                    movementCurrentRing!!.packets = mutableListOf<Blink.BlinkC06>()
+                    movementCurrentRing!!.packets = mutableListOf()
                 }
             }
         }
@@ -153,18 +153,18 @@ object AutoP3 : Module(
         )
     }
 
-    var termFound = false
-    var dir: Double? = null
-    var airTicks = 0
-    var lastX = 0.0
-    var lastZ = 0.0
+    private val cooldownMap = mutableMapOf<String, Boolean>()
+    private var termFound = false
+    private var dir: Double? = null
+    private var airTicks = 0
+    private var lastX = 0.0
+    private var lastZ = 0.0
+    private var blinkCd = false
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         loadRings()
     }
-
-    val cooldownMap = mutableMapOf<String, Boolean>()
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
@@ -202,7 +202,7 @@ object AutoP3 : Module(
             when (style.selected) {
                 "Trans"    -> renderTransFlag(x, y, z, ring.width, ring.height)
                 "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
-                "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
+                "Ring"     -> drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
                 "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
@@ -223,16 +223,12 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (!editTitle.enabled) return
-        if (inBossOnly.enabled && floorNumber != 7) return
-        val sr = ScaledResolution(mc)
-        val t: String
-        t = if (ringEditMode) "Edit Mode" else if (blinkEditMode) "Blink edit" else return
-        renderText(
-            t,
-            sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2,
-            sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT
-        )
+        if (!editTitle.enabled || (inBossOnly.enabled && floorNumber != 7)) return
+        renderText(when {
+            ringEditMode -> "Edit Mode"
+            blinkEditMode -> "Blink Edit"
+            else -> return
+        })
     }
 
     @SubscribeEvent
@@ -252,10 +248,8 @@ object AutoP3 : Module(
         return distanceX < (ring.width / 2) &&
                 distanceY < ring.height &&
                 distanceY >= -0.5 &&
-                distanceZ < (ring.width / 2);
+                distanceZ < (ring.width / 2)
     }
-
-    var blinkCd = false
 
     private suspend fun executeAction(ring: Ring) {
         val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
@@ -453,10 +447,10 @@ object AutoP3 : Module(
         mc.thePlayer.moveEntity(x, y, z)
     }
 
-    var ignoreNextC03 = false
-    var lastMoveX = 0.0
-    var lastMoveY = 0.0
-    var lastMoveZ = 0.0
+    private var ignoreNextC03 = false
+    private var lastMoveX = 0.0
+    private var lastMoveY = 0.0
+    private var lastMoveZ = 0.0
 
     @SubscribeEvent
     fun onPacketC03(event: PacketSentEvent) {
@@ -471,9 +465,9 @@ object AutoP3 : Module(
             return
         }
         val move = movementList.first()
-        val x = move.x - mc.thePlayer.posX
-        val y = move.y - mc.thePlayer.posY
-        val z = move.z - mc.thePlayer.posZ
+        move.x - mc.thePlayer.posX
+        move.y - mc.thePlayer.posY
+        move.z - mc.thePlayer.posZ
         movementList.removeFirst()
         event.isCanceled = true
         ignoreNextC03 = true
@@ -509,8 +503,7 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
-    var inMelody = false
-    var melodyClicked = System.currentTimeMillis()
+    private var melodyClicked = System.currentTimeMillis()
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
@@ -546,12 +539,12 @@ object AutoP3 : Module(
             }
         } else {
             //assume max acceleration
-            var thisshit2 = stupid2.value / 10000
-            lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+            val thisShit2 = stupid2.value / 10000
+            lastX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
             }
         }
     }
@@ -565,8 +558,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun stupid(event: InputEvent.KeyInputEvent) {
-        var keycode = Keyboard.getEventKey()
-        if (keycode == mc.gameSettings.keyBindBack.keyCode) {
+        if (Keyboard.getEventKey() == mc.gameSettings.keyBindBack.keyCode) {
             dir = null
         }
     }
@@ -585,6 +577,6 @@ object AutoP3 : Module(
                 debugMessage("Melody clicked!")
             }
         }
-        debugMessage(registry + ", " + metadata + ", " + slot + ", " + name)
+        debugMessage("$registry, $metadata, $slot, $name")
     }
 }

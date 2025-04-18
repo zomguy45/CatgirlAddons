@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 //      Add S2D cancel.
 //      Add fail safes.
 
-object AutoLeap : Module(
+object AutoLeap : Module( // todo improve selectors
     name = "Auto Leap",
     category = Category.DUNGEON,
     tag = TagType.WHIP

@@ -37,11 +37,15 @@ object BarPhase: Module(
         )
     }
 
+    override fun onKeyBind() { // todo https://github.com/WompWatr/CatgirlAddons/issues/8#issuecomment-2728417654
+        super.onKeyBind()
+    }
+
     private var phaseTicks = 0
 
-    const val minCoord = 0.446f
-    const val maxCoord = 0.5455f
-    const val range = 0.018
+    private const val minCoord = 0.446f
+    private const val maxCoord = 0.5455f
+    private const val range = 0.018
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent){

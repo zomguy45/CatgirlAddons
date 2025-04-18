@@ -47,8 +47,8 @@ object Trail: Module(
 
     private var posToRender = mutableListOf<Vec3>()
 
-    val transColors = mutableListOf(Color(91, 206, 250), Color(245, 169, 184), Color(255, 255, 255), Color(245, 169, 184)) // todo: move to ColorUtil prob
-    val lesbianColors = mutableListOf(Color(213, 45, 0), Color(239, 118, 39), Color(255, 154, 86), Color(255, 255, 255), Color(209, 98, 164), Color(181, 86, 144), Color(163, 2, 98))
+    private val transColors = mutableListOf(Color(91, 206, 250), Color(245, 169, 184), Color(255, 255, 255), Color(245, 169, 184)) // todo: move to ColorUtil prob
+    private val lesbianColors = mutableListOf(Color(213, 45, 0), Color(239, 118, 39), Color(255, 154, 86), Color(255, 255, 255), Color(209, 98, 164), Color(181, 86, 144), Color(163, 2, 98))
 
     @SubscribeEvent
     fun onLoad(event: WorldEvent.Load) {

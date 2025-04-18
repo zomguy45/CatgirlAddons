@@ -18,7 +18,7 @@ import java.awt.image.BufferedImage
 import java.io.File
 import javax.imageio.ImageIO
 
-object ScreenImage: Module(
+object ScreenImage: Module( // todo imgur implementation
     "Screen image",
     Category.RENDER
 ){

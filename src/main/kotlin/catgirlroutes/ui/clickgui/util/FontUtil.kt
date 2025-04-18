@@ -19,7 +19,7 @@ import java.util.*
  * @author Aton
  */
 object FontUtil {
-    private lateinit var fontRenderer: FontRenderer
+    private var fontRenderer: FontRenderer = mc.fontRendererObj
     private lateinit var customFontRenderer: CFontRenderer
 
     val fontHeight: Int get() = fontRenderer.FONT_HEIGHT

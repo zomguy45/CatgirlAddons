@@ -1,8 +1,11 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
+import catgirlroutes.utils.render.HUDRenderUtils.sr
 import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -179,6 +182,16 @@ fun renderText(
     GlStateManager.popMatrix()
     GlStateManager.enableDepth()
     GlStateManager.enableBlend()
+}
+
+fun renderText(
+    text: String,
+    scale: Double = 1.0,
+    color: Int = 0xFFFFFF
+) {
+    val x = sr.scaledWidth / 2 - FontUtil.getStringWidth(text, scale = scale) / 2
+    val y = sr.scaledHeight / 2 + fontHeight
+    renderText(text, x, y, scale, color)
 }
 /**
  * Profiles the specified function with the specified string as profile section name.

@@ -14,6 +14,8 @@ import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -31,6 +33,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
+import catgirlroutes.utils.render.HUDRenderUtils.sr
 import catgirlroutes.utils.render.WorldRenderUtils.drawBlock
 import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
@@ -106,7 +109,7 @@ object AutoRoutes : Module( // todo recode this shit
     fun onBat(event: TickEvent.ClientTickEvent) {
         val stupid = mc.theWorld?.loadedEntityList
             ?.filterIsInstance<EntityBat>()
-            ?.any { distanceToPlayer(it.posX, it.posY, it.posZ) < 8 } == true
+            ?.any { distanceToPlayer(it.posX, it.posY, it.posZ) < 10 } == true
 
         if (stupid) {
             this.awaitBat.complete()
@@ -191,9 +194,7 @@ object AutoRoutes : Module( // todo recode this shit
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
         if (editTitle.enabled && nodeEditMode && inDungeons) {
-            val sr = ScaledResolution(mc)
-            val t = "Edit Mode"
-            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
+            renderText("Edit Mode")
         }
     }
 

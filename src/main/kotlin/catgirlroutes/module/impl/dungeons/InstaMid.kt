@@ -1,16 +1,15 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.PacketUtils
-import catgirlroutes.utils.renderText
 import catgirlroutes.utils.noControlCodes
-import net.minecraft.client.gui.ScaledResolution
+import catgirlroutes.utils.renderText
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0CPacketInput
 import net.minecraft.network.play.server.S02PacketChat
@@ -71,14 +70,7 @@ object InstaMid : Module(
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !riding || mc.ingameGUI == null) return
-        val sr = ScaledResolution(mc)
-        val text = "Instamid active"
-        val width = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
-        renderText(
-            text = text,
-            x = width,
-            y = sr.scaledHeight / 2 + 10
-        )
+        renderText("Insta mid active")
     }
 
     private fun isOnPlatform(): Boolean {

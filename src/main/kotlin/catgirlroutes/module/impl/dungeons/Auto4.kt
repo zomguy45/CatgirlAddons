@@ -18,6 +18,9 @@ import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.isHolding
 import catgirlroutes.utils.*
+import catgirlroutes.utils.PlayerUtils.posX
+import catgirlroutes.utils.PlayerUtils.posY
+import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.dungeon.DungeonClass
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
@@ -116,17 +119,9 @@ object Auto4: Module(
 
     private val classEnumMapping = arrayListOf(DungeonClass.Mage, DungeonClass.Berserk, DungeonClass.Archer, DungeonClass.Tank, DungeonClass.Healer, DungeonClass.Unknown)
 
-    private fun onDev(): Boolean {
-        return mc.thePlayer.posX in 62.0..65.0 && mc.thePlayer.posY == 127.0 && mc.thePlayer.posZ in 34.0..37.0
-    }
-
-    private fun platePressed(): Boolean {
-        val plate = mc.theWorld.getBlockState(BlockPos(63, 127, 35))
-        if (plate.block != Blocks.light_weighted_pressure_plate) return false
-        return plate.block.getMetaFromState(plate) > 0
-    }
-
-    var doneBlocks = mutableListOf<Vec3>()
+    private var doneBlocks = mutableListOf<Vec3>()
+    private var cancelNext = false
+    private var currentBlock: BlockPos? = null
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
@@ -167,12 +162,8 @@ object Auto4: Module(
             text = "${deviceTextOn.value} ${doneBlocks.size}/9"
             color = 0x00FF7F
         }
-        val sr = ScaledResolution(mc)
         val scale = 1.5
-        val textWidth = mc.fontRendererObj.getStringWidth(text) * scale
-        val x = (sr.scaledWidth / 2 - textWidth / 2).toInt()
-        val y = sr.scaledHeight / 2 - 28
-        renderText(text, x, y, scale, color)
+        renderText(text, scale, color)
     }
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             //Ava is such a good girl
     @SubscribeEvent
@@ -186,8 +177,6 @@ object Auto4: Module(
         }
         moveToBlock(63.5, 35.5)
     }
-
-    var cancelNext = false
 
     private fun shootBlock() {
         if (currentBlock == null || !onDev() || !inDungeons) return
@@ -207,13 +196,13 @@ object Auto4: Module(
             64 to 1.5
         )
 
-        var xoffset = offsetMap[coords.x]
-        if (!forceTerm.value) xoffset = 0.5
+        var xOffset = offsetMap[coords.x]
+        if (!forceTerm.value) xOffset = 0.5
 
-        return Vec3(coords.x + xoffset!!, coords.y + 1.1, coords.z.toDouble())
+        return Vec3(coords.x + xOffset!!, coords.y + 1.1, coords.z.toDouble())
     }
 
-    private fun getBow(): BowStats {
+    private fun getBow(): BowStats { // ???
         val isTerm = isHolding("TERMINATOR")
         var shotSpeed = 300
         val lore = mc.thePlayer.heldItem.lore
@@ -224,8 +213,6 @@ object Auto4: Module(
         }
         return BowStats(isTerm, shotSpeed)
     }
-
-    var currentBlock: BlockPos? = null
 
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
@@ -247,5 +234,14 @@ object Auto4: Module(
             cancelNext = false
             event.isCanceled = true
         }
+    }
+
+    private fun onDev(): Boolean {
+        return posX in 62.0..65.0 && posY == 127.0 && posZ in 34.0..37.0
+    }
+
+    private fun platePressed(): Boolean {
+        val plate = mc.theWorld.getBlockState(BlockPos(63, 127, 35))
+        return plate.block === Blocks.light_weighted_pressure_plate && plate.block.getMetaFromState(plate) > 0
     }
 }

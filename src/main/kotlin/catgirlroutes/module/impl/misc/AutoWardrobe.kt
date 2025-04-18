@@ -5,7 +5,10 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.KeyBindSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.ChatUtils.command
+import catgirlroutes.utils.render.HUDRenderUtils.sr
 import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C0DPacketCloseWindow
@@ -20,15 +23,15 @@ object AutoWardrobe : Module(
     name = "Auto Wardrobe",
     category = Category.MISC
 ) {
-    val wd1 = KeyBindSetting("Wardrobe 1", Keyboard.KEY_NONE, "...").onPress { targetSlot = 36; openMenu() }
-    val wd2 = KeyBindSetting("Wardrobe 2", Keyboard.KEY_NONE, "...").onPress { targetSlot = 37; openMenu() }
-    val wd3 = KeyBindSetting("Wardrobe 3", Keyboard.KEY_NONE, "...").onPress { targetSlot = 38; openMenu() }
-    val wd4 = KeyBindSetting("Wardrobe 4", Keyboard.KEY_NONE, "...").onPress { targetSlot = 39; openMenu() }
-    val wd5 = KeyBindSetting("Wardrobe 5", Keyboard.KEY_NONE, "...").onPress { targetSlot = 40; openMenu() }
-    val wd6 = KeyBindSetting("Wardrobe 6", Keyboard.KEY_NONE, "...").onPress { targetSlot = 41; openMenu() }
-    val wd7 = KeyBindSetting("Wardrobe 7", Keyboard.KEY_NONE, "...").onPress { targetSlot = 42; openMenu() }
-    val wd8 = KeyBindSetting("Wardrobe 8", Keyboard.KEY_NONE, "...").onPress { targetSlot = 43; openMenu() }
-    val wd9 = KeyBindSetting("Wardrobe 9", Keyboard.KEY_NONE, "...").onPress { targetSlot = 44; openMenu() }
+    private val wd1 = KeyBindSetting("Wardrobe 1", Keyboard.KEY_NONE, "...").onPress { targetSlot = 36; openMenu() }
+    private val wd2 = KeyBindSetting("Wardrobe 2", Keyboard.KEY_NONE, "...").onPress { targetSlot = 37; openMenu() }
+    private val wd3 = KeyBindSetting("Wardrobe 3", Keyboard.KEY_NONE, "...").onPress { targetSlot = 38; openMenu() }
+    private val wd4 = KeyBindSetting("Wardrobe 4", Keyboard.KEY_NONE, "...").onPress { targetSlot = 39; openMenu() }
+    private val wd5 = KeyBindSetting("Wardrobe 5", Keyboard.KEY_NONE, "...").onPress { targetSlot = 40; openMenu() }
+    private val wd6 = KeyBindSetting("Wardrobe 6", Keyboard.KEY_NONE, "...").onPress { targetSlot = 41; openMenu() }
+    private val wd7 = KeyBindSetting("Wardrobe 7", Keyboard.KEY_NONE, "...").onPress { targetSlot = 42; openMenu() }
+    private val wd8 = KeyBindSetting("Wardrobe 8", Keyboard.KEY_NONE, "...").onPress { targetSlot = 43; openMenu() }
+    private val wd9 = KeyBindSetting("Wardrobe 9", Keyboard.KEY_NONE, "...").onPress { targetSlot = 44; openMenu() }
 
     init {
         this.addSettings(
@@ -39,7 +42,7 @@ object AutoWardrobe : Module(
     var targetSlot = 0
     var cwid = -1
 
-    fun openMenu() {
+    private fun openMenu() {
         active = true
         command("wd", false)
     }
@@ -47,13 +50,7 @@ object AutoWardrobe : Module(
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !active || mc.ingameGUI == null) return
-
-        val text = "§5[§dEquipping WD:§c ${targetSlot - 35}§5]"
-
-        val sr = ScaledResolution(mc)
-        val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
-        val y = sr.scaledHeight / 2 + 10
-        renderText(text, x, y)
+        renderText("§5[§dEquipping WD:§c ${targetSlot - 35}§5]")
     }
 
     @SubscribeEvent

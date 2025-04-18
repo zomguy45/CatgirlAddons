@@ -1,6 +1,7 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.ui.Screen.Companion.CLICK_GUI_SCALE
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -35,6 +36,9 @@ object HUDRenderUtils {
 
     private val tessellator: Tessellator = Tessellator.getInstance()
     private val worldRenderer: WorldRenderer = tessellator.worldRenderer
+
+    val sr get() = ScaledResolution(mc)
+    val scale get() = CLICK_GUI_SCALE / sr.scaleFactor
 
     fun renderRect(x: Double, y: Double, w: Double, h: Double, color: Color) {
         if (color.alpha == 0) return

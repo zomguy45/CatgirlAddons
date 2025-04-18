@@ -24,7 +24,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.util.concurrent.CopyOnWriteArrayList
 
-object Secrets : Module( // todo: use secretevent
+object Secrets : Module(
     "Secrets",
      Category.DUNGEON,
 ) {

@@ -5,8 +5,11 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocksLegacy
 import catgirlroutes.utils.PlayerUtils.relativeClip
+import catgirlroutes.utils.render.HUDRenderUtils.sr
 import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S12PacketEntityVelocity
@@ -20,11 +23,11 @@ object LavaClip : Module(
     category = Category.DUNGEON,
     description = "Clips you x blocks down when jumping into lava."
 ){
-    private val lavaclipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to clip down")
+    private val lavaClipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to clip down")
 
     init {
         this.addSettings(
-            lavaclipDistance
+            lavaClipDistance
         )
     }
 
@@ -32,10 +35,10 @@ object LavaClip : Module(
     private var veloCancelled = true
 
     override fun onKeyBind() {
-        if (this.enabled) lavaClipToggle(lavaclipDistance.value * -1)
+        if (this.enabled) lavaClipToggle(lavaClipDistance.value * -1)
     }
 
-    private var adjustedDistance: Double? = lavaclipDistance.value * -1
+    private var adjustedDistance: Double? = lavaClipDistance.value * -1
 
     fun lavaClipToggle(distance: Double = 0.0, onlyToggle: Boolean = false) {
         lavaClipping = !lavaClipping
@@ -59,13 +62,7 @@ object LavaClip : Module(
     @SubscribeEvent
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !lavaClipping || mc.ingameGUI == null) return
-
-        val text = if (adjustedDistance == 0.0) "Lava clipping" else "Lava clipping $adjustedDistance"
-
-        val sr = ScaledResolution(mc)
-        val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text) / 2
-        val y = sr.scaledHeight / 2 + 10
-        renderText(text, x, y)
+        renderText(if (adjustedDistance == 0.0) "Lava clipping" else "Lava clipping $adjustedDistance")
     }
 
     @SubscribeEvent

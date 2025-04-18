@@ -1,6 +1,5 @@
 package catgirlroutes.module.impl.misc
 
-//import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.CatgirlRoutes.Companion.onHypixel
 import catgirlroutes.events.impl.PacketReceiveEvent
@@ -63,7 +62,7 @@ object Zpew : Module(
     private const val MAXQUEUEDPACKETS: Int = 5
 
     private var updatePosition = true
-    val recentlySentC06s = mutableListOf<SentC06>()
+    private val recentlySentC06s = mutableListOf<SentC06>()
     private val recentFails = mutableListOf<Long>()
     private val blackListedBlocks = arrayListOf(Blocks.chest, Blocks.trapped_chest, Blocks.enchanting_table, Blocks.hopper, Blocks.furnace, Blocks.crafting_table)
 

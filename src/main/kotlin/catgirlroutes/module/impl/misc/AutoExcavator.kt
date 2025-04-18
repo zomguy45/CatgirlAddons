@@ -19,19 +19,19 @@ object AutoExcavator : Module(
     name = "Auto Excavator",
     category = Category.MISC
 ) {
-    val clickDelay = NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0, unit = "ms")
+    private val clickDelay = NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0, unit = "ms")
     init {
         this.addSettings(
             clickDelay
         )
     }
     var phase = 1
-    var menuOne = mutableListOf<Int>()
-    var menuTwo = mutableListOf<Int>()
-    var scrapFound = false
-    var chiselFound = false
-    var lastClick = System.currentTimeMillis()
-    var shouldClick = false
+    private var menuOne = mutableListOf<Int>()
+    private var menuTwo = mutableListOf<Int>()
+    private var scrapFound = false
+    private var chiselFound = false
+    private var lastClick = System.currentTimeMillis()
+    private var shouldClick = false
 
     @SubscribeEvent
     fun onS2D(event: PacketReceiveEvent) {

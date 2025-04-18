@@ -26,13 +26,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.awt.Color
 
-object Relics: Module(
+object Relics: Module( // todo aura to place
     "Relics",
     Category.DUNGEON
-){
+) {
     private val relicAura: BooleanSetting = BooleanSetting("Aura", false)
-    private val relicBlink: BooleanSetting = BooleanSetting("Blink", false).withDependency {relicAura.value}
-    private val relicLook: BooleanSetting = BooleanSetting("Look", false).withDependency {relicAura.value}
+    private val relicBlink: BooleanSetting = BooleanSetting("Blink", false).withDependency { relicAura.enabled }
+    private val relicLook: BooleanSetting = BooleanSetting("Look", false).withDependency { relicAura.enabled }
 
     init {
         addSettings(
@@ -135,7 +135,7 @@ object Relics: Module(
             it is EntityArmorStand && it.inventory?.get(4)?.displayName?.contains("Relic") == true && mc.thePlayer.getDistanceToEntity(it) < 4.5 } ?: return
         auraCooldown = true
         interactWithEntity(armorStands)
-        scheduleTask(20) {auraCooldown = false}
+        scheduleTask(20) { auraCooldown = false }
     }
 
     private fun interactWithEntity(entity: Entity) {

@@ -7,6 +7,7 @@ import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.ui.clickgui.ClickGUI
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -79,6 +80,7 @@ class CatgirlRoutes {
     @Mod.EventHandler
     fun postInit(event: FMLLoadCompleteEvent) = runBlocking {
         //Load in the module config post init so that all the minecraft classes are already present.
+        FontUtil.setupFontUtils()
         runBlocking {
             launch(Dispatchers.IO) {
                 moduleConfig.loadConfig()
