@@ -56,13 +56,14 @@ class ModuleButton(val module: Module, val panel: Panel) {
                 val newElement = when (setting) {
                     is BooleanSetting ->    ElementCheckBox(this, setting)
                     is NumberSetting ->     ElementSlider(this, setting)
-                    is StringSelectorSetting ->   ElementStringSelector(this, setting)
-                    is SelectorSetting ->   ElementSelector(this, setting)
+                    is SelectorSetting ->   ElementStringSelector(this, setting)
+                    is tSelectorSetting ->   ElementSelector(this, setting)
                     is StringSetting ->     ElementTextField(this, setting)
                     is ColorSetting ->      ElementColor(this, setting)
                     is ActionSetting ->     ElementAction(this, setting)
                     is KeyBindSetting ->    ElementKeyBind(this, setting)
                     is DropdownSetting ->   ElementDropdown(this, setting)
+                    is HudSetting ->        ElementHud(this, setting)
                     else -> return@addElement
                 }
                 menuElements.add(position, newElement)

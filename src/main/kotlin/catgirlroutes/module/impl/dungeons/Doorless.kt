@@ -38,26 +38,15 @@ import kotlin.math.*
 
 object Doorless: Module(
     "Doorless",
-    category = Category.DUNGEON,
+    Category.DUNGEON,
     tag = TagType.WHIP
 ){
-    private var doorClip = BooleanSetting("Clip")
-    private var doorMotion = BooleanSetting("Motion")
-    private val regenSkulls = BooleanSetting("Regenerate skulls")
-    private val regenDelay = NumberSetting("Skulls regeneration delay", 10.0, 0.0, 20.0, 1.0, unit = "t").withDependency { this.regenSkulls.enabled }
-    private val babyProof = BooleanSetting("Baby proof")
-    private val babyProofRadius = NumberSetting("Baby proof radius", 5.0, 1.0, 15.0, unit = "m").withDependency { this.babyProof.enabled }
-
-    init {
-        this.addSettings(
-            this.doorClip,
-            this.doorMotion,
-            this.regenSkulls,
-            this.regenDelay,
-            this.babyProof,
-            this.babyProofRadius
-        )
-    }
+    private var doorClip by BooleanSetting("Clip", "Clips through doors.")
+    private var doorMotion by BooleanSetting("Motion", "Uses velocity to go through doors.")
+    private val regenSkulls by BooleanSetting("Regenerate skulls", "Regenerates skulls after skipping the door.")
+    private val regenDelay by NumberSetting("Skulls regeneration delay", 10.0, 0.0, 20.0, unit = "t").withDependency { this.regenSkulls }
+    private val babyProof by BooleanSetting("Baby proof", "Adds blocks around doors (buggy).")
+    private val babyProofRadius by NumberSetting("Baby proof radius", 5.0, 1.0, 15.0, unit = "m").withDependency { this.babyProof }
 
     private var inDoor = false
     private var lastUse = System.currentTimeMillis()
@@ -148,11 +137,11 @@ object Doorless: Module(
         stopMovement()
         scheduleTask(0) {
             snapTo(initialYaw, initialPitch)
-            if (doorClip.value) clipForward(distance)
+            if (doorClip) clipForward(distance)
         }
         scheduleTask(1) {
             restartMovement()
-            if (doorMotion.value) motion(walkSpeed)
+            if (doorMotion) motion(walkSpeed)
         }
 
         setBlocksInLine(posX, posY, posZ, 0, 4)
@@ -160,7 +149,7 @@ object Doorless: Module(
         setWalls(posX, posY, posZ)
         setWalls(posX, posY + 1, posZ)
 
-        if (this.regenSkulls.enabled) scheduleTask(regenDelay.value.toInt()) {
+        if (this.regenSkulls) scheduleTask(regenDelay.toInt()) {
             setBlockAt(posX + xOffset * 4, posY, posZ + zOffset * 4)
         }
         waitingForS08 = false
@@ -170,9 +159,9 @@ object Doorless: Module(
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (mc.thePlayer == null || !inDungeons || !this.babyProof.enabled || event.phase != TickEvent.Phase.START) return
+        if (mc.thePlayer == null || !inDungeons || !this.babyProof || event.phase != TickEvent.Phase.START) return
 
-        val xz = getXZinRadius(this.babyProofRadius.value.toInt())
+        val xz = getXZinRadius(this.babyProofRadius.toInt())
         if (xz.any { (x, z) -> isValidBlock(mc.theWorld.getBlockState(BlockPos(x, 69, z))) }) {
             val glass = findGlassPos(xz)
             glass?.let {

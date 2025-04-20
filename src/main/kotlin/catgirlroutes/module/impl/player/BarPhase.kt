@@ -24,18 +24,11 @@ import kotlin.math.sin
 
 // edited flopper
 object BarPhase: Module(
-    "Bar phase",
+    "Bar Phase",
     Category.PLAYER
 ) {
-    private val phaseDelay = NumberSetting("Phase delay", 0.0, 0.0, 5.0, 1.0, unit = "t")
-//    private val blockClip = BooleanSetting("Block clip in TP Maze", false) // todo
-
-    init {
-        addSettings(
-            phaseDelay,
-//            blockClip
-        )
-    }
+    private val phaseDelay by NumberSetting("Phase delay", 0.0, 0.0, 5.0, 1.0, unit = "t")
+//    private val blockClip by BooleanSetting("Block clip in TP Maze", false) // todo
 
     override fun onKeyBind() { // todo https://github.com/WompWatr/CatgirlAddons/issues/8#issuecomment-2728417654
         super.onKeyBind()
@@ -67,7 +60,7 @@ object BarPhase: Module(
             val flag = flag(loc, offsVec, dir)
             val flag2 = flag(loc.addVector(0.0, 0.5, 0.0), offsVec, dir)
 
-            if ((flag || flag2) && this.phaseTicks >= this.phaseDelay.value) {
+            if ((flag || flag2) && this.phaseTicks >= this.phaseDelay) {
                 PlayerUtils.relativeClip(
                     -sin((dir.horizontalIndex * 90f) * Math.PI / 180) * 0.7,
                     if (!flag) 0.5 else 0.0,

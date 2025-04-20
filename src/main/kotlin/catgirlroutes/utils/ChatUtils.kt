@@ -75,15 +75,8 @@ object ChatUtils {
         return when (ClickGui.prefixStyle.index) {
             0 -> CatgirlRoutes.CHAT_PREFIX;
             1 -> CatgirlRoutes.SHORT_PREFIX
-            else -> reformatString( ClickGui.customPrefix.text)
+            else -> reformatString( ClickGui.customPrefix)
         }
-    }
-
-    /**
-     * Remove control codes from the [receiver][String] with the [vanilla function][StringUtils.stripControlCodes] for it.
-     */
-    fun String.stripControlCodes(): String {
-        return StringUtils.stripControlCodes(this)
     }
 
     /**
@@ -130,7 +123,7 @@ object ChatUtils {
      * @see chatMessage
      */
     fun devMessage(message: Any?) {
-        if (!ClickGui.devMode.enabled) return;
+        if (!ClickGui.devMode) return;
         modMessage(message, prefix = "§5[§dCga§cDev§5]")
     }
 
@@ -139,7 +132,7 @@ object ChatUtils {
      * @see chatMessage
      */
     fun debugMessage(message: Any?) {
-        if (!ClickGui.debugMode.enabled) return;
+        if (!ClickGui.debugMode) return;
         modMessage(message, prefix = "§5[§dCga§fDebug§5]")
     }
 

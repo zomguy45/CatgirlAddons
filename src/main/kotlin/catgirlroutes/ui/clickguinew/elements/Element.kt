@@ -2,7 +2,7 @@ package catgirlroutes.ui.clickguinew.elements
 
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.ColorSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.ui.clickgui.util.FontUtil.wrapText
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseX
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseY
@@ -45,6 +45,7 @@ abstract class Element<S: Setting<*>>(
             ElementType.SLIDER -> 18.0
             ElementType.BOOLEAN -> 11.0
             ElementType.KEY_BIND -> 11.0
+            ElementType.HUD -> if (setting.name.isEmpty()) -5.0 else 11.0
             else -> DEFAULT_HEIGHT
         }
     }
@@ -54,7 +55,7 @@ abstract class Element<S: Setting<*>>(
         when (type) {
             ElementType.SELECTOR -> {
                 height = if (extended)
-                    ((setting as StringSelectorSetting).options.size * DEFAULT_HEIGHT + DEFAULT_HEIGHT)
+                    ((setting as SelectorSetting).options.size * DEFAULT_HEIGHT + DEFAULT_HEIGHT)
                 else
                     DEFAULT_HEIGHT
             }

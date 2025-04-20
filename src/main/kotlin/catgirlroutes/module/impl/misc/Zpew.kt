@@ -9,7 +9,7 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils.chatMessage
 import catgirlroutes.utils.ChatUtils.debugMessage
@@ -33,12 +33,12 @@ import net.minecraft.util.Vec3
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object Zpew : Module(
-    name = "Zpew",
-    category = Category.MISC
+    "Zpew",
+    Category.MISC
 ) {
 
-    private val zpewOffset: BooleanSetting = BooleanSetting("Offset", false, "Offsets your position onto the block instead of 0.05 blocks above it")
-    private val dingdingding: BooleanSetting = BooleanSetting("dingdingding", false)
+    private val zpewOffset by BooleanSetting("Offset", false, "Offsets your position onto the block instead of 0.05 blocks above it")
+    private val dingdingding by BooleanSetting("dingdingding", false)
 
     private val soundOptions = arrayListOf(
         "note.pling",
@@ -49,13 +49,9 @@ object Zpew : Module(
         "mob.guardian.land.hit",
         "Custom"
     )
-    private val soundSelector = StringSelectorSetting("Sound", soundOptions[0], soundOptions, "Sound Selection").withDependency { dingdingding.enabled }
-    private val customSound: StringSetting = StringSetting("Custom Sound", soundOptions[0], description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding.enabled && soundSelector.selected == "Custom" }
-    private val pitch: NumberSetting = NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding.enabled }
-
-    init {
-        addSettings(zpewOffset, dingdingding, soundSelector, customSound, pitch)
-    }
+    private val soundSelector by SelectorSetting("Sound", soundOptions[0], soundOptions, "Sound Selection").withDependency { dingdingding }
+    private val customSound by StringSetting("Custom Sound", soundOptions[0], description = "Name of a custom sound to play. This is used when Custom is selected in the Sound setting.").withDependency { dingdingding && soundSelector.selected == "Custom" }
+    private val pitch by NumberSetting("Pitch", 1.0, 0.1, 2.0, 0.1).withDependency { dingdingding }
 
     private const val FAILWATCHPERIOD: Int = 20
     private const val MAXFAILSPERFAILPERIOD: Int = 3
@@ -113,11 +109,11 @@ object Zpew : Module(
 
         recentlySentC06s.add(SentC06(yaw, pitch, x, y, z, System.currentTimeMillis()))
 
-        if (dingdingding.enabled) playLoudSound(getSound(), 100f, Zpew.pitch.value.toFloat())
+        if (dingdingding) playLoudSound(getSound(), 100f, Zpew.pitch.toFloat())
 
         scheduleTask(0) {
             mc.netHandler.addToSendQueue(C06PacketPlayerPosLook(x, y, z, yaw, pitch, mc.thePlayer.onGround))
-            if (zpewOffset.value) y -= 0.05
+            if (zpewOffset) y -= 0.05
             mc.thePlayer.setPosition(x, y, z)
             mc.thePlayer.setVelocity(0.0, 0.0, 0.0)
             updatePosition = true
@@ -237,7 +233,7 @@ object Zpew : Module(
         return if (soundSelector.index < soundSelector.options.size - 1)
             soundSelector.selected
         else
-            customSound.text
+            customSound
     }
 
     data class SentC06(

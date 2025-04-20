@@ -5,13 +5,9 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.PlayerUtils.findDistanceToAirBlocksLegacy
 import catgirlroutes.utils.PlayerUtils.relativeClip
-import catgirlroutes.utils.render.HUDRenderUtils.sr
 import catgirlroutes.utils.renderText
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -20,25 +16,19 @@ import kotlin.math.abs
 
 object LavaClip : Module(
     "Lava Clip",
-    category = Category.DUNGEON,
-    description = "Clips you x blocks down when jumping into lava."
+    Category.DUNGEON,
+    "Clips you x blocks down when jumping into lava."
 ){
-    private val lavaClipDistance: NumberSetting = NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to clip down")
-
-    init {
-        this.addSettings(
-            lavaClipDistance
-        )
-    }
+    private val lavaClipDistance by NumberSetting("Lava Clip distance", 15.0, 0.0, 50.0, 1.0, "Distance to lava clip down.")
 
     private var lavaClipping = false
     private var veloCancelled = true
 
     override fun onKeyBind() {
-        if (this.enabled) lavaClipToggle(lavaClipDistance.value * -1)
+        if (this.enabled) lavaClipToggle(lavaClipDistance * -1)
     }
 
-    private var adjustedDistance: Double? = lavaClipDistance.value * -1
+    private var adjustedDistance: Double? = lavaClipDistance * -1
 
     fun lavaClipToggle(distance: Double = 0.0, onlyToggle: Boolean = false) {
         lavaClipping = !lavaClipping

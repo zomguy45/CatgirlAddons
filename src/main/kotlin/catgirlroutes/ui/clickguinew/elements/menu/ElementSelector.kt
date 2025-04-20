@@ -1,6 +1,6 @@
 package catgirlroutes.ui.clickguinew.elements.menu
 
-import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.ui.animations.impl.EaseOutQuadAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -14,8 +14,8 @@ import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import catgirlroutes.utils.render.StencilUtils
 import java.awt.Color
 
-class ElementSelector(parent: ModuleButton, setting: StringSelectorSetting) : // todo use misc element
-    Element<StringSelectorSetting>(parent, setting, ElementType.SELECTOR) {
+class ElementSelector(parent: ModuleButton, setting: SelectorSetting) : // todo use misc element
+    Element<SelectorSetting>(parent, setting, ElementType.SELECTOR) {
 
     private val extendAnimation = EaseOutQuadAnimation(300)
 

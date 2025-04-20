@@ -12,8 +12,8 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 object InstantSprint: Module(
-    name = "Instant Sprint",
-    category = Category.MISC,
+    "Instant Sprint",
+    Category.MISC,
     tag = TagType.WHIP
 ) {
     private val forwardKeyBind = (mc.gameSettings.keyBindForward)

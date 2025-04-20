@@ -17,9 +17,9 @@ import java.awt.Color
 class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
 
     override var history: MutableList<String>
-        get() = ahHistory.value.toMutableList()
+        get() = ahHistory.toMutableList()
         set(value) {
-            ahHistory.value = value
+            ahHistory = value
         }
 
     override var commandPrefix: String = "ah"

@@ -76,8 +76,8 @@ object IceFillSolver {
             val fy = mc.thePlayer.posY + 0.1
             val fz = floor(mc.thePlayer.posZ) + 0.5
 
-            if ((fx == p1.xCoord && fy == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && fy == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && targetBlocks.isEmpty() && fillAuto.value && !tpCooldown) {
-                scheduleTask(fillDelay.value.toInt() - 1) {
+            if ((fx == p1.xCoord && fy == p1.yCoord && fz == p1.zCoord) || (mc.thePlayer.posX == p1.xCoord && fy == p1.yCoord && mc.thePlayer.posZ == p1.zCoord) && targetBlocks.isEmpty() && fillAuto && !tpCooldown) {
+                scheduleTask(fillDelay.toInt() - 1) {
                     if(mc.thePlayer.isCollidedVertically && !teleported) {
                         stopVelo()
                         val x = p2.xCoord - mc.thePlayer.posX
@@ -93,7 +93,7 @@ object IceFillSolver {
 
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
-        if (event.packet !is S08PacketPlayerPosLook || !fillSolver.value) return
+        if (event.packet !is S08PacketPlayerPosLook || !fillSolver) return
         tpCooldown = true
 
     }

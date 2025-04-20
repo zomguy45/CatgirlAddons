@@ -6,6 +6,7 @@ import catgirlroutes.utils.render.HUDRenderUtils.sr
 import org.lwjgl.input.Mouse
 
 object MouseUtils {
+    val mouseButton get() = Mouse.getEventButton()
     val mx get() = Mouse.getX()
     val my get() = mc.displayHeight - Mouse.getY()
 

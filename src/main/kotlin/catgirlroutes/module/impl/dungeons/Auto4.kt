@@ -1,14 +1,12 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.ActionSetting
-import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
+import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.MovementUtils.clearBlocks
 import catgirlroutes.utils.MovementUtils.moveToBlock
@@ -30,7 +28,6 @@ import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawSquare
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C05PacketPlayerLook
@@ -49,52 +46,50 @@ import java.awt.Color
 
 object Auto4: Module(
     "Auto 4",
-    category = Category.DUNGEON,
-    description = "Automatically does fourth dev.",
-    tag = TagType.WHIP
+    Category.DUNGEON,
+    "Automatically does fourth dev.",
+    TagType.WHIP
 ){
 
-    private val autoPlate = BooleanSetting("Auto plate")
+    private val autoPlate by BooleanSetting("Auto plate", "Automatically puts the player on device start.")
 
-    private val aimSnap = BooleanSetting("Aim snapping")
+    private val aimSnap by BooleanSetting("Aim snapping", "Instantly snaps instead of smooth rotations.")
 
-    private val statusMessages = BooleanSetting("Status messages")
+    private val statusMessages by BooleanSetting("Status messages", "Sends status messages in chat.")
 
-    private val deviceTextOn = StringSetting("On text")
-    private val deviceTextOff = StringSetting("Off text")
+    private val deviceTextOn by StringSetting("On text", "Display text when on device.")
+    private val deviceTextOff by StringSetting("Off text", "Display text when off device.")
 
-    private var autoLeap = BooleanSetting("Auto leap")
-    private var leapMode = StringSelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class")).withDependency {autoLeap.enabled}
+    private var autoLeap by BooleanSetting("Auto leap", "Automatically leaps when the device is finished.")
+    private var leapMode by SelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class"), "Leap mode for Auto leap.").withDependency { autoLeap }
 
-    private var devLeap = StringSelectorSetting("Leap name", "None", arrayListOf("None")).withDependency { leapMode.selected == "Name" && autoLeap.enabled}
-    private var action = ActionSetting("update") { updateTeammates() }.withDependency { leapMode.selected == "Name" && autoLeap.enabled}
+    private var teamList by ListSetting("Teammates", mutableListOf("None"))
+    private var devLeap by SelectorSetting("Leap name", "None", ArrayList(teamList), "Player name to leap to after the device is finished.").withDependency { leapMode.selected == "Name" && autoLeap }
+    private var update by ActionSetting("Update.", "Updates teammates names (currently works in dungeon only)") { updateTeammates() }.withDependency { leapMode.selected == "Name" && autoLeap }
 
-    private var devLeapClass = StringSelectorSetting("Leap class", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency { leapMode.selected == "Class" && autoLeap.enabled}
+    private var devLeapClass by SelectorSetting("Leap class", "Mage", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal"), "Class name to leap to after the device is finished.").withDependency { leapMode.selected == "Class" && autoLeap }
 
-    private val forceTerm = BooleanSetting("Force term")
+    private val forceTerm by BooleanSetting("Force term", "Makes the mod think the player is using a terminator.")
 
     init {
-        addSettings(autoPlate, aimSnap, statusMessages, deviceTextOn, deviceTextOff, autoLeap, leapMode, devLeap, action, devLeapClass, forceTerm)
+        devLeap.options = teamList
     }
 
     private fun updateTeammates() {
-        val teammates = arrayListOf<String>()
         if (dungeonTeammatesNoSelf.isEmpty()) return
-        dungeonTeammatesNoSelf.forEach{ teammate ->
-            teammates.add(teammate.name)
-        }
-        teammates.add("None")
+        val teammates = dungeonTeammatesNoSelf.map { it.name } + "None"
+        teamList = teammates.toMutableList()
         devLeap.options = teammates
     }
 
     @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
-        if (!inDungeons || event.type.toInt() == 2 || !inBoss || !onDev()) return
-        val message = StringUtils.stripControlCodes(event.message.unformattedText)
+    fun onChat(event: ChatPacket) {
+        if (!inDungeons || !inBoss || !onDev()) return
+        val message = StringUtils.stripControlCodes(event.message)
         if (message.matches(Regex("(\\w+) completed a device! \\((.*?)\\)"))) {
-            if (leapMode.selected == "Name" && autoLeap.value) leap(devLeap.selected)
-            else if (leapMode.selected == "Class" && autoLeap.value) leap(classEnumMapping[devLeapClass.index])
-            if (statusMessages.value) ChatUtils.commandAny("/pc [CGA] I4 completed")
+            if (leapMode.selected == "Name" && autoLeap) leap(devLeap.selected)
+            else if (leapMode.selected == "Class" && autoLeap) leap(classEnumMapping[devLeapClass.index])
+            if (statusMessages) ChatUtils.commandAny("/pc [CGA] I4 completed")
         } else if (message.matches(Regex("☠ (\\w{1,16}) .* and became a ghost\\."))) {
             ChatUtils.commandAny("/pc [CGA] I4 not completed")
         }
@@ -135,7 +130,7 @@ object Auto4: Module(
             if (currentBlock == null) return
             val block = currentBlock!!.toVec3()
             drawCustomSizedBoxAt(block.xCoord, block.yCoord, block.zCoord, 1.0, 1.0, 1.0, Color.GREEN, filled = true)
-            if (forceTerm.value) {
+            if (forceTerm) {
                 if (block.xCoord == 64.0 && !doneBlocks.contains(Vec3(block.xCoord + 2, block.yCoord, block.zCoord))) drawCustomSizedBoxAt(block.xCoord + 2, block.yCoord, block.zCoord, 1.0, 1.0, 1.0, Color.ORANGE, filled = true)
                 else if (block.xCoord != 64.0 && !doneBlocks.contains(Vec3(block.xCoord - 2, block.yCoord, block.zCoord))) drawCustomSizedBoxAt(block.xCoord - 2, block.yCoord, block.zCoord, 1.0, 1.0, 1.0, Color.ORANGE, filled = true)
             }
@@ -156,10 +151,10 @@ object Auto4: Module(
     fun onOverlay(event: RenderGameOverlayEvent.Post) {
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || !onDev() || mc.ingameGUI == null || !inDungeons) return
 
-        var text = "${deviceTextOff.value} ${doneBlocks.size}/9"
+        var text = "$deviceTextOff ${doneBlocks.size}/9"
         var color = 0xFA5F55
         if (platePressed()) {
-            text = "${deviceTextOn.value} ${doneBlocks.size}/9"
+            text = "$deviceTextOn ${doneBlocks.size}/9"
             color = 0x00FF7F
         }
         val scale = 1.5
@@ -169,7 +164,7 @@ object Auto4: Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || !inDungeons) return
-        if (!onDev() || !autoPlate.value) return
+        if (!onDev() || !autoPlate) return
         if (mc.thePlayer.posX == 63.5 && mc.thePlayer.posZ == 35.5) return
         if (movementKeysDown()) {
             clearBlocks()
@@ -182,7 +177,7 @@ object Auto4: Module(
         if (currentBlock == null || !onDev() || !inDungeons) return
         val coords = aimCoords(currentBlock!!)
         val rotation = getYawAndPitch(coords.xCoord, coords.yCoord, coords.zCoord)
-        if (aimSnap.value) snapTo(rotation.first, rotation.second)
+        if (aimSnap) snapTo(rotation.first, rotation.second)
         //clickAt(rotation.first, rotation.second)
         sendPacket(C05PacketPlayerLook(rotation.first, rotation.second, mc.thePlayer.onGround))
         cancelNext = true
@@ -197,7 +192,7 @@ object Auto4: Module(
         )
 
         var xOffset = offsetMap[coords.x]
-        if (!forceTerm.value) xOffset = 0.5
+        if (!forceTerm) xOffset = 0.5
 
         return Vec3(coords.x + xOffset!!, coords.y + 1.1, coords.z.toDouble())
     }
@@ -228,7 +223,7 @@ object Auto4: Module(
                 shootBlock()
                 return
             }
-        } else if (event.packet is S08PacketPlayerPosLook && autoPlate.enabled && targetBlocks.isNotEmpty() && targetBlocks.first() == Vec3(63.5, 0.0, 35.5)) {
+        } else if (event.packet is S08PacketPlayerPosLook && autoPlate && targetBlocks.isNotEmpty() && targetBlocks.first() == Vec3(63.5, 0.0, 35.5)) {
             clearBlocks()
         } else if (event.packet is C03PacketPlayer && cancelNext) {
             cancelNext = false

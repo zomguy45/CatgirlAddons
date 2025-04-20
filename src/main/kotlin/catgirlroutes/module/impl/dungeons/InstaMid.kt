@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
@@ -8,11 +9,9 @@ import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.MovementUtils.setKey
 import catgirlroutes.utils.PacketUtils
-import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.renderText
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C0CPacketInput
-import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.network.play.server.S1BPacketEntityAttach
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -20,9 +19,9 @@ import kotlin.math.abs
 import kotlin.math.pow
 
 object InstaMid : Module(
-    "Insta mid",
-    category = Category.DUNGEON,
-    description = "A module that instantly teleports you to Necron's platform."
+    "Insta Mid",
+    Category.DUNGEON,
+    "A module that instantly teleports you to Necron's platform."
 ){
     private var preparing = false
     private var active = false
@@ -58,10 +57,9 @@ object InstaMid : Module(
     }
 
     @SubscribeEvent
-    fun onChat(event: PacketReceiveEvent) {
-        if (event.packet !is S02PacketChat || event.packet.type.toInt() != 0 || !isOnPlatform()) return
-        val message = event.packet.chatComponent.unformattedText.noControlCodes
-        if (message == "[BOSS] Necron: You went further than any human before, congratulations.") {
+    fun onChat(event: ChatPacket) {
+        if (!isOnPlatform()) return
+        if (event.message == "[BOSS] Necron: You went further than any human before, congratulations.") {
             modMessage("Preparing to instamid")
             setKey("shift", true)
         }

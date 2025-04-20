@@ -33,35 +33,22 @@ import java.util.*
 
 //Ty soshimishimi for inspiration https://github.com/soshimee/secretguide
 object SecretAura : Module( // TODO: RECODE
-    "Secret aura",
-    category = Category.DUNGEON,
-    description = "Automatically clicks secrets and levers."
+    "Secret Aura",
+    Category.DUNGEON,
+    "Automatically clicks secrets and levers."
 ){
-    private val auraRange: NumberSetting = NumberSetting("Range", 6.2, 2.1, 6.2, 0.1, description = "Maximum range for secret aura.")
-    private val auraSkullRange: NumberSetting = NumberSetting("Skull range", 4.7, 2.1, 4.7, 0.1, description = "Maximum range for secret aura when clicking skulls.")
+    private val auraRange by NumberSetting("Range", 6.2, 2.1, 6.2, 0.1, "Maximum range for secret aura.")
+    private val auraSkullRange by NumberSetting("Skull range", 4.7, 2.1, 4.7, 0.1, "Maximum range for secret aura when clicking skulls.")
 
-    private val swap = BooleanSetting("Item swap", false, description = "Makes secret aura swap to slot on click.")
-    private val swapInBoss = BooleanSetting("Swap in boss", false, description = "Makes secret aura swap in boss.").withDependency { swap.enabled }
-    private val swapBack = BooleanSetting("Swap back", false, description = "Makes secret aura swap back to previous item after swapping.").withDependency { swap.enabled }
-    private val swapSlot: NumberSetting = NumberSetting("Swap item slot", 1.0, 1.0, 9.0, 1.0, description = "Slot for secret aura to swap to.").withDependency { swap.enabled }
+    private val swap by BooleanSetting("Item swap", false, "Makes secret aura swap to slot on click.")
+    private val swapInBoss by BooleanSetting("Swap in boss", false, "Makes secret aura swap in boss.").withDependency { swap }
+    private val swapBack by BooleanSetting("Swap back", false, "Makes secret aura swap back to previous item after swapping.").withDependency { swap }
+    private val swapSlot by NumberSetting("Swap item slot", 1.0, 1.0, 9.0, 1.0, "Slot for secret aura to swap to.").withDependency { swap }
 
-    private val swing = BooleanSetting("Swing hand", false, description = "Makes secret aura swing hand on click.")
-    private val auraClose = BooleanSetting("Auto close", false, description = "Makes secret aura auto close chests.")
-    private val onlyDungeons = BooleanSetting("Only in dungeons", false, description = "Makes secret aura only work in dungeons.")
+    private val swing by BooleanSetting("Swing hand", false, "Makes secret aura swing hand on click.")
+    private val auraClose by BooleanSetting("Auto close", false, "Makes secret aura auto close chests.")
+    private val onlyDungeons by BooleanSetting("Only in dungeons", false, "Makes secret aura only work in dungeons.")
 
-    init {
-        this.addSettings(
-            auraRange,
-            auraSkullRange,
-            swap,
-            swapInBoss,
-            swapBack,
-            swapSlot,
-            swing,
-            onlyDungeons,
-            auraClose,
-        )
-    }
     private val blocksDone: MutableList<BlockPos> = LinkedList()
     private val blocksCooldown: MutableMap<BlockPos, Long> = HashMap()
     private var redstoneKey = false
@@ -69,11 +56,11 @@ object SecretAura : Module( // TODO: RECODE
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
-        if (!DungeonUtils.inDungeons && onlyDungeons.enabled) return
+        if (!DungeonUtils.inDungeons && onlyDungeons) return
         if (mc.thePlayer == null || mc.theWorld == null) return
         val eyePos = mc.thePlayer.getPositionEyes(0f)
-        val blockPos1: BlockPos = BlockPos(eyePos.xCoord - auraRange.value, eyePos.yCoord - auraRange.value, eyePos.zCoord - auraRange.value)
-        val blockPos2: BlockPos = BlockPos(eyePos.xCoord + auraRange.value, eyePos.yCoord + auraRange.value, eyePos.zCoord + auraRange.value)
+        val blockPos1 = BlockPos(eyePos.xCoord - auraRange, eyePos.yCoord - auraRange, eyePos.zCoord - auraRange)
+        val blockPos2 = BlockPos(eyePos.xCoord + auraRange, eyePos.yCoord + auraRange, eyePos.zCoord + auraRange)
         val blocks = BlockPos.getAllInBox(blockPos1, blockPos2)
         val time: Long = Date().time
         val roomName = DungeonUtils.currentRoomName
@@ -87,7 +74,7 @@ object SecretAura : Module( // TODO: RECODE
 
                 val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
 
-                if (eyePos.distanceTo(Vec3(block)) <= auraRange.value) {
+                if (eyePos.distanceTo(Vec3(block)) <= auraRange) {
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(
                         block,
                         AxisAlignedBB(0.0625, 0.0, 0.0625, 0.9375, 0.875, 0.9375),
@@ -95,10 +82,10 @@ object SecretAura : Module( // TODO: RECODE
                         centerPos
                     ) ?: continue
 
-                    val isSwap = swap.enabled && (!DungeonUtils.inBoss || swapInBoss.enabled)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.value.toInt() - 1) {
+                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
+                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
-                        mc.thePlayer.inventory.currentItem = swapSlot.value.toInt() - 1
+                        mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
                     }
 
@@ -113,7 +100,7 @@ object SecretAura : Module( // TODO: RECODE
                         )
                     )
 
-                    if (!mc.thePlayer.isSneaking && swing.enabled) mc.thePlayer.swingItem()
+                    if (!mc.thePlayer.isSneaking && swing) mc.thePlayer.swingItem()
                     blocksCooldown[block] = Date().time // System.currentTimeMillis()??
                     return
                 }
@@ -137,14 +124,14 @@ object SecretAura : Module( // TODO: RECODE
                     (aabb.minZ + aabb.maxZ) / 2
                 )
 
-                if (eyePos.distanceTo(Vec3(block)) <= auraRange.value) {
+                if (eyePos.distanceTo(Vec3(block)) <= auraRange) {
 
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(block, aabb, eyePos, centerPos) ?: continue
 
-                    val isSwap = swap.enabled && (!DungeonUtils.inBoss || swapInBoss.enabled)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.value.toInt() - 1) {
+                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
+                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
-                        mc.thePlayer.inventory.currentItem = swapSlot.value.toInt() - 1
+                        mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
                     }
 
@@ -159,7 +146,7 @@ object SecretAura : Module( // TODO: RECODE
                         )
                     )
 
-                    if (!mc.thePlayer.isSneaking && swing.value) mc.thePlayer.swingItem()
+                    if (!mc.thePlayer.isSneaking && swing) mc.thePlayer.swingItem()
 
                     blocksCooldown[block] = Date().time // System.currentTimeMillis()??
                     return
@@ -214,13 +201,13 @@ object SecretAura : Module( // TODO: RECODE
                     (aabb.minZ + aabb.maxZ) / 2
                 )
 
-                if (eyePos.distanceTo(centerPos) <= auraSkullRange.value) {
+                if (eyePos.distanceTo(centerPos) <= auraSkullRange) {
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(block, aabb, eyePos, centerPos) ?: continue
 
-                    val isSwap = swap.enabled && (!DungeonUtils.inBoss || swapInBoss.enabled)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.value.toInt() - 1) {
+                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
+                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
-                        mc.thePlayer.inventory.currentItem = swapSlot.value.toInt() - 1
+                        mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
                     }
 
@@ -266,7 +253,7 @@ object SecretAura : Module( // TODO: RECODE
                 }
 
                 val centerPos = Vec3(block).addVector(0.5, 0.5, 0.5)
-                if (eyePos.distanceTo(Vec3(block)) <= auraRange.value) {
+                if (eyePos.distanceTo(Vec3(block)) <= auraRange) {
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(
                         block,
                         AxisAlignedBB(0.0,0.0,0.0, 1.0,1.0,1.0),
@@ -275,10 +262,10 @@ object SecretAura : Module( // TODO: RECODE
                     ) ?: continue
                     if (movingObjectPosition.sideHit == EnumFacing.DOWN) continue
 
-                    val isSwap = swap.enabled && (!DungeonUtils.inBoss || swapInBoss.enabled)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.value.toInt() - 1) {
+                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
+                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
-                        mc.thePlayer.inventory.currentItem = swapSlot.value.toInt() - 1
+                        mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
                     }
 
@@ -298,7 +285,7 @@ object SecretAura : Module( // TODO: RECODE
                 }
             }
         }
-        if (swapBack.enabled && prevSlot >= 0) {
+        if (swapBack && prevSlot >= 0) {
             mc.thePlayer.inventory.currentItem = prevSlot
         }
         prevSlot = -1
@@ -390,8 +377,8 @@ object SecretAura : Module( // TODO: RECODE
 
     @SubscribeEvent
     fun onPacketReceive2(event: PacketReceiveEvent) {
-        if (!auraClose.value || !this.enabled || event.packet !is S2DPacketOpenWindow) return
-        if (!DungeonUtils.inDungeons && onlyDungeons.value) return
+        if (!auraClose || event.packet !is S2DPacketOpenWindow) return
+        if (!DungeonUtils.inDungeons && onlyDungeons) return
         val packet = event.packet
         if (packet.guiId != "minecraft:chest") return
         if ((packet.windowTitle.formattedText == "Chest§r" && packet.slotCount == 27) || (packet.windowTitle.formattedText == "Large Chest§r" && packet.slotCount == 54)) {

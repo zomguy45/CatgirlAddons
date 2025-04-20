@@ -67,15 +67,15 @@ class ClickGUI : Screen() { // todo: module description
     override fun draw() {
         var categoryOffset = 25.0
 
-        if (ClickGui.showUsageInfo.enabled) renderUsage()
+        if (ClickGui.showUsageInfo) renderUsage()
 
         drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
         drawRoundedBorderedRect(x, y, categoryWidth, guiHeight, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
 
         drawRoundedBorderedRect(x + categoryWidth + 5.0, y + 25.0, guiWidth - categoryWidth - 5.0, guiHeight - 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
 
-        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName.text)
-        FontUtil.drawStringWithShadow(ClickGui.clientName.text, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0)
+        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName)
+        FontUtil.drawStringWithShadow(ClickGui.clientName, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0)
 
         this.searchBar.update { // FIXME
             outlineColour = Color(ColorUtil.outlineColor)

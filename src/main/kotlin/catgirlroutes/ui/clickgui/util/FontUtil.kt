@@ -24,7 +24,7 @@ object FontUtil {
 
     val fontHeight: Int get() = fontRenderer.FONT_HEIGHT
 
-    private val font: Boolean get() = ClickGui.customFont.enabled
+    private val font: Boolean get() = ClickGui.customFont
 
     fun setupFontUtils() {
         val stream = mc.resourceManager.getResource(ResourceLocation(RESOURCE_DOMAIN, "Roboto-Regular.ttf")).inputStream

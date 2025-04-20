@@ -8,9 +8,9 @@ import net.minecraft.tileentity.TileEntitySign
 class BazaarOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
 
     override var history: MutableList<String>
-        get() = bzHistory.value
+        get() = bzHistory
         set(value) {
-            bzHistory.value = value
+            bzHistory = value
         }
 
     override var commandPrefix: String = "bz"

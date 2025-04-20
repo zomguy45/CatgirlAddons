@@ -16,15 +16,12 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
 object AutoExcavator : Module(
-    name = "Auto Excavator",
-    category = Category.MISC
+    "Auto Excavator",
+    Category.MISC,
+    "Automatically completes excavator in the glacite mines"
 ) {
-    private val clickDelay = NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0, unit = "ms")
-    init {
-        this.addSettings(
-            clickDelay
-        )
-    }
+    private val clickDelay by NumberSetting("Click Delay", 150.0, 0.0, 300.0, 10.0, unit = "ms")
+
     var phase = 1
     private var menuOne = mutableListOf<Int>()
     private var menuTwo = mutableListOf<Int>()
@@ -102,7 +99,7 @@ object AutoExcavator : Module(
     fun onTick(event: ClientTickEvent) {
         if (mc.ingameGUI == null) return
         if (!shouldClick) return
-        if (lastClick + clickDelay.value > System.currentTimeMillis()) return
+        if (lastClick + clickDelay > System.currentTimeMillis()) return
         lastClick = System.currentTimeMillis()
         if (phase == 2) {
             if (!scrapFound || !chiselFound) {

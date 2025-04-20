@@ -57,7 +57,7 @@ data class Ring(
     var route: String,
 )
 
-var route: List<String> = listOf(selectedRoute.value)
+var route: List<String> = listOf(selectedRoute)
 var ringEditMode: Boolean = false
 var blinkEditMode: Boolean = false
 var ringTypes: List<String> = listOf("velo", "walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "vclip", "jump", "align", "command", "blink", "movement")
@@ -271,8 +271,8 @@ val autoP3Commands = commodore("p3") {
     }
 
     literal("load").runs { routes: GreedyString? ->
-        route = (routes ?: selectedRoute.value).toString().split(" ")
-        selectedRoute.text = route.joinToString(" ")
+        route = (routes ?: selectedRoute).toString().split(" ")
+        selectedRoute = route.joinToString(" ")
         modMessage("Loaded ${route.joinToString(", ")}")
         loadRings()
     }

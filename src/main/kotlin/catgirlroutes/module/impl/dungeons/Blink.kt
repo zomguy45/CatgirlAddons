@@ -31,7 +31,7 @@ object Blink : Module(
     "Blink",
     category = Category.DUNGEON
 ) {
-    private val recordBind: KeyBindSetting = KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in editmode")
+    private val recordBind by KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in edit mode.")
         .onPress {
             if (recorderActive) {
                 recorderActive = false
@@ -49,18 +49,9 @@ object Blink : Module(
                 }
             }
         }
-    val lineColour = ColorSetting("AutoP3 line colour", Color.PINK, collapsible = false)
-    private val recordLength = NumberSetting("Recording length", 28.0, 1.0, 50.0)
-    private val clearPackets = ActionSetting("Clear packets") { packetArray = 0 }
-
-    init {
-        this.addSettings(
-            this.recordBind,
-            this.lineColour,
-            this.recordLength,
-            this.clearPackets
-        )
-    }
+    val lineColour by ColorSetting("AutoP3 line colour", Color.PINK, description = "Blink line colour for AutoP3 module.", collapsible = false)
+    private val recordLength by NumberSetting("Recording length", 28.0, 1.0, 50.0, description = "Maximum blink recording length.", unit = " packets")
+    private val clearPackets by ActionSetting("Clear packets") { packetArray = 0 }
 
     var packetArray = 0
     private var recorderActive = false
@@ -69,7 +60,7 @@ object Blink : Module(
     @SubscribeEvent
     fun onPacketRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !recorderActive) return
-        if (currentRing!!.packets.size == recordLength.value.toInt()) {
+        if (currentRing!!.packets.size == recordLength.toInt()) {
             recorderActive = false
             saveRings()
             modMessage("Done recording")

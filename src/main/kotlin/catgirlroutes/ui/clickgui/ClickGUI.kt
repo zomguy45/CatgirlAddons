@@ -89,7 +89,7 @@ class ClickGUI : GuiScreen() {
             p.drawScreen(scaledMouseX, scaledMouseY, partialTicks)
         }
 
-        if(ClickGui.showUsageInfo.enabled) {
+        if(ClickGui.showUsageInfo) {
             renderUsageInfo()
         }
 
@@ -118,7 +118,7 @@ class ClickGUI : GuiScreen() {
         )
 
         GL11.glScaled(2.0, 2.0, 2.0)
-        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName.text)
+        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName)
 
         GlStateManager.color(255f, 255f, 255f, 255f)
         CatgirlRoutes.mc.textureManager.bindTexture(LOGO)
@@ -129,7 +129,7 @@ class ClickGUI : GuiScreen() {
         )
 
         FontUtil.drawString(
-            ClickGui.clientName.text,
+            ClickGui.clientName,
             -titleWidth.toDouble() - 10.0 - logoSize,
             -FontUtil.fontHeight.toDouble() / 2.0 - 5.0 - logoSize / 2.0,
             ColorUtil.clickGUIColor.rgb
@@ -277,7 +277,7 @@ class ClickGUI : GuiScreen() {
     override fun initGui() {
         openedTime = System.currentTimeMillis()
         /** Start blur */
-        if (OpenGlHelper.shadersSupported && mc.renderViewEntity is EntityPlayer && ClickGui.blur.enabled) {
+        if (OpenGlHelper.shadersSupported && mc.renderViewEntity is EntityPlayer && ClickGui.blur) {
             mc.entityRenderer.stopUseShader()
             mc.entityRenderer.loadShader(ResourceLocation("shaders/post/blur.json"))
         }

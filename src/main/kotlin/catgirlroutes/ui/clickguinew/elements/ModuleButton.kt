@@ -65,12 +65,13 @@ class ModuleButton(val module: Module, val window: Window) {
                 val newElement = when (setting) {
                     is BooleanSetting ->    ElementBoolean(this, setting)
                     is NumberSetting ->     ElementSlider(this, setting)
-                    is StringSelectorSetting ->   ElementSelector(this, setting)
+                    is SelectorSetting ->   ElementSelector(this, setting)
                     is StringSetting ->     ElementTextField(this, setting)
                     is ColorSetting ->      ElementColor(this, setting)
                     is ActionSetting ->     ElementAction(this, setting)
                     is KeyBindSetting ->    ElementKeyBind(this, setting)
                     is DropdownSetting ->   ElementDropdown(this, setting)
+                    is HudSetting ->        ElementHud(this, setting)
                     else -> return@addElement
                 }
                 try { // for now ig
@@ -82,7 +83,12 @@ class ModuleButton(val module: Module, val window: Window) {
                 this.menuElements.removeIf { it.setting === setting }
             }
         }
-        this.keySetting = this.menuElements.removeAt(this.menuElements.lastIndex).setting as KeyBindSetting
+//        this.keySetting = this.menuElements.removeAt(this.menuElements.lastIndex).setting as KeyBindSetting
+        this.menuElements.last { it.setting is KeyBindSetting }
+            .let { element ->
+                this.keySetting = element.setting as KeyBindSetting
+                this.menuElements.remove(element)
+            }
     }
 
     fun draw() : Double {

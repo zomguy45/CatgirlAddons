@@ -28,7 +28,7 @@ import kotlin.math.floor
 object DungeonUtils {
 
     val inDungeons: Boolean
-        get() = LocationManager.currentArea.isArea(Island.Dungeon) || ClickGui.forceDungeon.enabled
+        get() = LocationManager.currentArea.isArea(Island.Dungeon) || ClickGui.forceDungeon
 
     val floorNumber: Int
         get() = currentDungeon?.floor?.floorNumber ?: 0

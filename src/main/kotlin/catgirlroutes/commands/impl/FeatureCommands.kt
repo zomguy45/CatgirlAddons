@@ -30,7 +30,7 @@ val aura = commodore("cgaaura") {
 
     literal("help").runs {
         modMessage("""
-            List of AutoP3 commands:
+            List of commands:
               §7/cgaaura enable §8: §renables Secret Aura
               §7/cgaaura disable §8: §rdisables Secret Aura
               §7/cgaaura clear §8: §rclears clicked blocks
@@ -55,7 +55,7 @@ val aura = commodore("cgaaura") {
 
 val inventoryButtons = commodore("cgabuttons") {
     runs {
-        InventoryButtons.editMode.doAction()
+        InventoryButtons.editMode.invoke()
     }
 }
 

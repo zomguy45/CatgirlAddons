@@ -93,10 +93,10 @@ class LeapOrganiser : GuiScreen() {
 
         slots.apply {
             clear()
-            add(Slot("Player 1\n${LeapOrganiser.player1Note.text}", centreX - boxWidth - spacing, centreY - boxHeight - spacing, Color(255, 170, 21)))
-            add(Slot("Player 2\n${LeapOrganiser.player2Note.text}", centreX + spacing, centreY - boxHeight - spacing, Color(170, 0, 0)))
-            add(Slot("Player 3\n${LeapOrganiser.player3Note.text}", centreX - boxWidth - spacing, centreY + spacing, Color(85, 255, 255)))
-            add(Slot("Player 4\n${LeapOrganiser.player4Note.text}", centreX + spacing, centreY + spacing, Color(0, 170, 0)))
+            add(Slot("Player 1\n${LeapOrganiser.player1Note}", centreX - boxWidth - spacing, centreY - boxHeight - spacing, Color(255, 170, 21)))
+            add(Slot("Player 2\n${LeapOrganiser.player2Note}", centreX + spacing, centreY - boxHeight - spacing, Color(170, 0, 0)))
+            add(Slot("Player 3\n${LeapOrganiser.player3Note}", centreX - boxWidth - spacing, centreY + spacing, Color(85, 255, 255)))
+            add(Slot("Player 4\n${LeapOrganiser.player4Note}", centreX + spacing, centreY + spacing, Color(0, 170, 0)))
         }
 
         boxes.apply {
@@ -200,7 +200,7 @@ class LeapOrganiser : GuiScreen() {
         val order = slots.joinToString(" ") { getBoxInSlot(it)?.name ?: "_" }
 
         modMessage("Setting ${LeapOrganiser.leapMenu.selected} leap order: $order")
-        LeapOrganiser.leapOrder.text = order
+        LeapOrganiser.leapOrder = order
         when (LeapOrganiser.leapMenu.selected) {
             "SA" -> commandAny("/sa leap $order")
             "Odin" -> commandAny("/od leap $order")
