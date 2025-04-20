@@ -83,6 +83,16 @@ object PlayerUtils {
         KeyBinding.onTick(mc.gameSettings.keyBindUseItem.keyCode)
     }
 
+    fun rightClick2() {
+        val clickMouse: Method = try {
+            Minecraft::class.java.getDeclaredMethod("func_147121_ag")
+        } catch (e: NoSuchMethodException) {
+            Minecraft::class.java.getDeclaredMethod("rightClickMouse")
+        }
+        clickMouse.isAccessible = true
+        clickMouse.invoke(mc)
+    }
+
     fun leftClick() {
         KeyBinding.onTick(mc.gameSettings.keyBindAttack.keyCode)
     }

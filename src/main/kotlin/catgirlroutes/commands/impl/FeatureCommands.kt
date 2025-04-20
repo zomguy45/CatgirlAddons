@@ -1,12 +1,15 @@
 package catgirlroutes.commands.impl
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.LavaClip
 import catgirlroutes.module.impl.dungeons.SecretAura
+import catgirlroutes.module.impl.misc.AutoClicker.favItemsList
 import catgirlroutes.module.impl.misc.InventoryButtons
 import catgirlroutes.module.impl.player.BlockClip
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.skyblockID
 
 val pearlClip = commodore("pearlclip") {
     runs { depth: Double? ->
@@ -56,6 +59,37 @@ val aura = commodore("cgaaura") {
 val inventoryButtons = commodore("cgabuttons") {
     runs {
         InventoryButtons.editMode.invoke()
+    }
+}
+
+val autoClicker = commodore("cgaac") {
+    literal("help").runs {
+        modMessage("""
+            List of commands:
+              §7/cgaac help
+              §7/cgaac add
+              §7/cgaac remove
+              §7/cgaac clear
+        """.trimIndent())
+    }
+
+    literal("add").runs {
+        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
+
+        favItemsList.add(held.skyblockID)
+        modMessage("Added ${held.displayName}!")
+    }
+
+    literal("remove").runs {
+        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
+
+        favItemsList.remove(held.skyblockID)
+        modMessage("Removed ${held.displayName}!")
+    }
+
+    literal("clear") {
+        favItemsList = mutableListOf()
+        modMessage("Cleared!")
     }
 }
 
