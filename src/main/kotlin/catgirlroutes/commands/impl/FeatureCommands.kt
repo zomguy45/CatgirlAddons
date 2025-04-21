@@ -87,7 +87,7 @@ val autoClicker = commodore("cgaac") {
         modMessage("Removed ${held.displayName}!")
     }
 
-    literal("clear") {
+    literal("clear").runs {
         favItemsList = mutableListOf()
         modMessage("Cleared!")
     }

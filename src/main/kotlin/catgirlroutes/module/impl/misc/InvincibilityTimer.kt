@@ -32,7 +32,7 @@ object InvincibilityTimer : Module(
     private val cataLevel by NumberSetting("Catacombs level", 0.0, 0.0, 50.0, 1.0, "Catacombs level for Bonzo's mask ability")
     private val hud by HudSetting {
         size("Phoenix: 30.2".getWidth() + 6, fontHeight * 3)
-        visibleIf { (dungeonOnly && !inDungeons) || (bossOnly && !inBoss) }
+        visibleIf { (!bossOnly || inBoss) && (!dungeonOnly || inDungeons || bossOnly) }
         render {
             val name = mc.thePlayer?.inventory?.armorInventory?.get(3)?.displayName
             val offset = when {
