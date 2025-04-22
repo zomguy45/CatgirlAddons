@@ -10,7 +10,7 @@ import catgirlroutes.module.settings.impl.ListSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.rightClick2
-import catgirlroutes.utils.skyblockID
+import catgirlroutes.utils.skyblockUUID
 import kotlinx.coroutines.*
 import net.minecraft.block.Block
 import net.minecraft.block.BlockLiquid
@@ -23,7 +23,7 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import kotlin.random.Random
 
 
-object AutoClicker: Module( // todo fix https://github.com/WompWatr/CatgirlAddons/issues/6
+object AutoClicker: Module(
     "Auto Clicker",
     Category.MISC,
     "A simple auto clicker for both left and right click. Activates when the corresponding key is being held down. "
@@ -58,7 +58,7 @@ object AutoClicker: Module( // todo fix https://github.com/WompWatr/CatgirlAddon
     private var leftClickJob: Job? = null
     private var rightClickJob: Job? = null
 
-    private val shouldClick get() = (clickInGui || mc.currentScreen == null) && (!favouriteItems || mc.thePlayer?.heldItem?.skyblockID in favItemsList)
+    private val shouldClick get() = (clickInGui || mc.currentScreen == null) && (!favouriteItems || mc.thePlayer?.heldItem?.skyblockUUID in favItemsList)
 
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent

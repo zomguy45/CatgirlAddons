@@ -115,6 +115,9 @@ val ItemStack?.extraAttributes: NBTTagCompound?
 val ItemStack?.skyblockID: String
     get() = this?.extraAttributes?.getString("id") ?: ""
 
+val ItemStack?.skyblockUUID: String
+    get() = this?.extraAttributes?.getString("uuid") ?: ""
+
 fun runOnMCThread(run: () -> Unit) {
     if (!mc.isCallingFromMinecraftThread) mc.addScheduledTask(run) else run()
 }

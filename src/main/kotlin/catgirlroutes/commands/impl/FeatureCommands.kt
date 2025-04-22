@@ -9,7 +9,7 @@ import catgirlroutes.module.impl.misc.InventoryButtons
 import catgirlroutes.module.impl.player.BlockClip
 import catgirlroutes.module.impl.player.PearlClip
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.skyblockID
+import catgirlroutes.utils.skyblockUUID
 
 val pearlClip = commodore("pearlclip") {
     runs { depth: Double? ->
@@ -74,16 +74,16 @@ val autoClicker = commodore("cgaac") {
     }
 
     literal("add").runs {
-        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
+        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockUUID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
 
-        favItemsList.add(held.skyblockID)
+        favItemsList.add(held.skyblockUUID)
         modMessage("Added ${held.displayName}!")
     }
 
     literal("remove").runs {
-        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
+        val held = mc.thePlayer?.heldItem?.takeIf { it.skyblockUUID.isNotEmpty() } ?: return@runs modMessage("Not holding skyblock item")
 
-        favItemsList.remove(held.skyblockID)
+        favItemsList.remove(held.skyblockUUID)
         modMessage("Removed ${held.displayName}!")
     }
 
