@@ -7,10 +7,18 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.utils.BlockUtils.collisionRayTrace
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.PacketUtils
 import catgirlroutes.utils.dungeon.DungeonUtils
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
+import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
+import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
+import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
+import catgirlroutes.utils.dungeon.PuzzleStatus
+import catgirlroutes.utils.equalsOneOf
+import catgirlroutes.utils.isAir
 import net.minecraft.block.BlockLever
 import net.minecraft.block.BlockLever.EnumOrientation
 import net.minecraft.block.BlockSkull
@@ -40,19 +48,19 @@ object SecretAura : Module( // TODO: RECODE
     private val auraRange by NumberSetting("Range", 6.2, 2.1, 6.2, 0.1, "Maximum range for secret aura.")
     private val auraSkullRange by NumberSetting("Skull range", 4.7, 2.1, 4.7, 0.1, "Maximum range for secret aura when clicking skulls.")
 
-    private val swap by BooleanSetting("Item swap", false, "Makes secret aura swap to slot on click.")
-    private val swapInBoss by BooleanSetting("Swap in boss", false, "Makes secret aura swap in boss.").withDependency { swap }
-    private val swapBack by BooleanSetting("Swap back", false, "Makes secret aura swap back to previous item after swapping.").withDependency { swap }
-    private val swapSlot by NumberSetting("Swap item slot", 1.0, 1.0, 9.0, 1.0, "Slot for secret aura to swap to.").withDependency { swap }
+    private val swapOn by SelectorSetting("Swap on", "Skulls", arrayListOf("None", "Skulls", "All"), "Makes secret aura swap")
+    private val swapBack by BooleanSetting("Swap back", true, "Makes secret aura swap back to previous item after swapping.").withDependency { swapOn.index >= 1 }
+    private val swapSlot by NumberSetting("Swap item slot", 1.0, 1.0, 9.0, 1.0, "Slot for secret aura to swap to.").withDependency { swapOn.index >= 1 }
 
-    private val swing by BooleanSetting("Swing hand", false, "Makes secret aura swing hand on click.")
-    private val auraClose by BooleanSetting("Auto close", false, "Makes secret aura auto close chests.")
-    private val onlyDungeons by BooleanSetting("Only in dungeons", false, "Makes secret aura only work in dungeons.")
+    private val swing by BooleanSetting("Swing hand", "Makes secret aura swing hand on click.")
+    private val auraClose by BooleanSetting("Auto close", "Makes secret aura auto close chests.")
+    private val onlyDungeons by BooleanSetting("Only in dungeons", true, "Makes secret aura only work in dungeons.")
 
     private val blocksDone: MutableList<BlockPos> = LinkedList()
     private val blocksCooldown: MutableMap<BlockPos, Long> = HashMap()
     private var redstoneKey = false
     private var prevSlot = -1
+
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return
@@ -63,14 +71,20 @@ object SecretAura : Module( // TODO: RECODE
         val blockPos2 = BlockPos(eyePos.xCoord + auraRange, eyePos.yCoord + auraRange, eyePos.zCoord + auraRange)
         val blocks = BlockPos.getAllInBox(blockPos1, blockPos2)
         val time: Long = Date().time
-        val roomName = DungeonUtils.currentRoomName
         for (block in blocks) {
             if (blocksDone.contains(block)) continue
             if (blocksCooldown.containsKey(block) && blocksCooldown[block]!! + 500 > time) continue
 
             val blockState = mc.theWorld.getBlockState(block)
             if (blockState.block === Blocks.chest || blockState.block === Blocks.trapped_chest) {
-                if (roomName == "Three Weirdos") continue
+                if (currentRoomName == "Three Weirdos") continue
+                if (currentRoomName == "Ice Path" && !isAir(currentRoom!!.getRealCoords(BlockPos(15, 68, 25)))) continue
+                if (currentRoomName == "Water Board" && (15..19).any { !isAir(currentRoom!!.getRealCoords(BlockPos(15, 57, it))) }) continue
+                if (currentRoomName.equalsOneOf("Higher Blaze", "Lower Blaze") &&
+                    DungeonUtils.puzzles.find { it.name == "Higher Or Lower" }?.status != PuzzleStatus.Completed &&
+                    currentRoom!!.getRelativeCoords(block).x != 2) continue
+
+
 
                 val centerPos = Vec3(block.x + 0.5, block.y + 0.4375, block.z + 0.5)
 
@@ -82,8 +96,7 @@ object SecretAura : Module( // TODO: RECODE
                         centerPos
                     ) ?: continue
 
-                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
+                    if (swapOn.index == 2 && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
                         mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
@@ -105,7 +118,8 @@ object SecretAura : Module( // TODO: RECODE
                     return
                 }
             } else if (blockState.block === Blocks.lever) {
-                if (roomName == "Water Board") continue
+                if (currentRoomName == "Water Board") continue
+                if (currentRoomName == "Tic Tac Toe") continue
 
                 val orientation = blockState.properties[BlockLever.FACING] as EnumOrientation
                 val aabb = when(orientation) {
@@ -128,8 +142,7 @@ object SecretAura : Module( // TODO: RECODE
 
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(block, aabb, eyePos, centerPos) ?: continue
 
-                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
+                    if (swapOn.index == 2 && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
                         mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
@@ -156,22 +169,7 @@ object SecretAura : Module( // TODO: RECODE
                 val tileEntity: TileEntity = mc.theWorld.getTileEntity(block) as? TileEntitySkull ?: continue // I think we have a util for this, but I cba
                 val profile = (tileEntity as TileEntitySkull).playerProfile ?: continue
                 val profileId = profile.id.toString()
-//                if (profileId != "e0f3e929-869e-3dca-9504-54c666ee6f23") { // cba to debug idk what's wrong
-//                    if (profileId == "fed95410-aba1-39df-9b95-1d4f361eb66e") {
-//                        val stupidRedstone = listOf(
-//                            block.down(),
-//                            block.north(),
-//                            block.south(),
-//                            block.west(),
-//                            block.east()
-//                        ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
-//
-//                        if (stupidRedstone) {
-//                            redstoneKey = false
-//                            blocksDone.add(block)
-//                        }
-//                    }
-//                    continue
+
                 if (!Objects.equals(profileId, "e0f3e929-869e-3dca-9504-54c666ee6f23")) {
                     if (!Objects.equals(profileId, "fed95410-aba1-39df-9b95-1d4f361eb66e")) continue
                     else if (
@@ -204,8 +202,7 @@ object SecretAura : Module( // TODO: RECODE
                 if (eyePos.distanceTo(centerPos) <= auraSkullRange) {
                     val movingObjectPosition: MovingObjectPosition = collisionRayTrace(block, aabb, eyePos, centerPos) ?: continue
 
-                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
+                    if (swapOn.index >= 1 && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
                         mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
@@ -229,18 +226,6 @@ object SecretAura : Module( // TODO: RECODE
                 if (!redstoneKey) continue
                 if (mc.thePlayer.posX < -200 || mc.thePlayer.posZ < -200 || mc.thePlayer.posX > 0 || mc.thePlayer.posZ > 0) continue
 
-//                val stupidRedstone = listOf( // no idea what's wrong cba to debug
-//                    block.down(),
-//                    block.north(),
-//                    block.south(),
-//                    block.west(),
-//                    block.east()
-//                ).any { mc.theWorld.getBlockState(it).block === Blocks.redstone_block }
-//                if (stupidRedstone) {
-//                    redstoneKey = false
-//                    blocksDone.add(block)
-//                    continue
-//                }
                 if (mc.theWorld.getBlockState(block.up()).block === Blocks.skull ||
                     mc.theWorld.getBlockState(block.north()).block === Blocks.skull ||
                     mc.theWorld.getBlockState(block.south()).block === Blocks.skull ||
@@ -262,8 +247,7 @@ object SecretAura : Module( // TODO: RECODE
                     ) ?: continue
                     if (movingObjectPosition.sideHit == EnumFacing.DOWN) continue
 
-                    val isSwap = swap && (!DungeonUtils.inBoss || swapInBoss)
-                    if (isSwap && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
+                    if (swapOn.index >= 1 && mc.thePlayer.inventory.currentItem != swapSlot.toInt() - 1) {
                         prevSlot = mc.thePlayer.inventory.currentItem
                         mc.thePlayer.inventory.currentItem = swapSlot.toInt() - 1
                         return
@@ -297,7 +281,6 @@ object SecretAura : Module( // TODO: RECODE
         redstoneKey = false
     }
 
-    // I don't wanna touch it after this
     @SubscribeEvent
     fun onPacketReceive(event: PacketReceiveEvent) {
         if (event.packet is S24PacketBlockAction) {
