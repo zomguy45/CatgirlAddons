@@ -3,6 +3,7 @@ package catgirlroutes.module.impl.render
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.ModuleManager.modules
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.HudSetting
 import catgirlroutes.ui.clickgui.util.FontUtil.drawStringWithShadow
@@ -21,6 +22,7 @@ object ModuleList : Module(
     "Displays a list of enabled modules"
 ) {
     private val textColour by ColorSetting("Text colour", Color.PINK, false, collapsible = false)
+    private val renderLine by BooleanSetting("Render line", "Renders a line on the side.")
     val hud by HudSetting {
         width { 150.0 * scale }
         height { activeModuleList.size * (fontHeight + 2) }
@@ -38,7 +40,7 @@ object ModuleList : Module(
                     GlStateManager.pushMatrix()
                     renderRect(xOffset - 2.0, i * 11.0 - 2.0, w + 2.0, fontHeight + 2.0, Color(0, 0, 0, 128))
                     drawStringWithShadow(module, xOffset, i * (fontHeight + 2.0), textColour.rgb)
-                    renderRect(stickX, i * 11.0 - 2.0, 2.0, fontHeight + 2.0, textColour)
+                    if (renderLine) renderRect(stickX, i * 11.0 - 2.0, 2.0, fontHeight + 2.0, textColour)
                     GlStateManager.popMatrix()
                 }
         }

@@ -84,8 +84,8 @@ object AutoP3 : Module(
 
     private val style by SelectorSetting("Ring style", "Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
     private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
-    private val colour1 by ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
-    private val colour2 by ColorSetting("Ring colour (active)", Color.white, false, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
 
     private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this
     private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
