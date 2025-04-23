@@ -208,6 +208,7 @@ object HUDRenderUtils {
         val scaledY = y * 2.0
         val scaledX1 = x1 * 2.0
         val scaledY1 = y1 * 2.0
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
         GlStateManager.enableBlend()
         GlStateManager.disableTexture2D()
         GL11.glEnable(GL11.GL_LINE_SMOOTH)
@@ -239,6 +240,7 @@ object HUDRenderUtils {
         val scaledY = y * 2.0
         val scaledX1 = x1 * 2.0
         val scaledY1 = y1 * 2.0
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
         GlStateManager.enableBlend()
         GlStateManager.disableTexture2D()
         setColor(colour.rgb)
