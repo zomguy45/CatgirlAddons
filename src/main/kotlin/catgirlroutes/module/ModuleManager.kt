@@ -84,6 +84,7 @@ object ModuleManager {
         PhoenixAuth,
         RendHelper,
         BuffDisplay,
+        ParticleHider,
 
         // Player
         AutoSprint,

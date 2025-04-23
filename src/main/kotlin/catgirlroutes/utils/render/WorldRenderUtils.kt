@@ -136,8 +136,8 @@ object WorldRenderUtils {
 
         GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
         worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
-        GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
-            color.blue.toFloat() / 255f, 1f)
+        GlStateManager.color(color.red / 255f, color.green / 255f,
+            color.blue / 255f, color.alpha / 255f)
 
         worldRenderer.pos(x, y, z).endVertex()
         worldRenderer.pos(x2, y2, z2).endVertex()
@@ -801,8 +801,8 @@ object WorldRenderUtils {
 
         worldRenderer.begin(GL11.GL_LINE_STRIP, DefaultVertexFormats.POSITION)
 
-        GlStateManager.color(color.red.toFloat() / 255f, color.green.toFloat() / 255f,
-            color.blue.toFloat() / 255f, 1f)
+        GlStateManager.color(color.red / 255f, color.green / 255f,
+            color.blue / 255f, color.alpha / 255f)
 
         val halfXWidth = xWidth / 2
         val halfZWidth = zWidth / 2
