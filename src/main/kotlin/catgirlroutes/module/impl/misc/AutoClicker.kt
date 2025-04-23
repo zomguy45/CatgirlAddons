@@ -6,8 +6,11 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.Setting.Companion.withInputTransform
 import catgirlroutes.module.settings.impl.BooleanSetting
+import catgirlroutes.module.settings.impl.ListSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.utils.PlayerUtils
+import catgirlroutes.utils.PlayerUtils.leftClick2
+import catgirlroutes.utils.PlayerUtils.rightClick2
+import catgirlroutes.utils.skyblockUUID
 import kotlinx.coroutines.*
 import net.minecraft.block.Block
 import net.minecraft.block.BlockLiquid
@@ -22,53 +25,53 @@ import kotlin.random.Random
 
 object AutoClicker: Module(
     "Auto Clicker",
-    category = Category.MISC,
-    description = "A simple auto clicker for both left and right click. Activates when the corresponding key is being held down. "
+    Category.MISC,
+    "A simple auto clicker for both left and right click. Activates when the corresponding key is being held down. "
 ) {
-    private val leftClick = BooleanSetting("Left Click", true, description = "Toggles the auto clicker for left click.")
-    private val leftMaxCps: NumberSetting = NumberSetting("Left max CPS", 12.0, 1.0, 20.0, 1.0, description = "Maximum cps for left click.")
+    private val clickInGui by BooleanSetting("Click while in container", "Continues to auto click while the player is in a container.")
+    private val favouriteItems by BooleanSetting("Favourite items only")
+    var favItemsList by ListSetting("FAVOURITE_ITEMS", mutableListOf<String>())
+    private val leftClick by BooleanSetting("Left Click", true, "Toggles the auto clicker for left click.")
+    private val leftMaxCps: Double by NumberSetting("Left max CPS", 12.0, 1.0, 20.0, 1.0, "Maximum cps for left click.")
         .withInputTransform { input, setting ->
-            MathHelper.clamp_double(input, leftMinCps.value, setting.max)
-        }.withDependency { leftClick.enabled }
+            MathHelper.clamp_double(input, leftMinCps, setting.max)
+        }.withDependency { leftClick }
 
-    private val leftMinCps: NumberSetting = NumberSetting("Left min CPS", 10.0, 1.0, 20.0, 1.0, description = "Minimum CPS for left click.")
+    private val leftMinCps: Double by NumberSetting("Left min CPS", 10.0, 1.0, 20.0, 1.0, "Minimum CPS for left click.")
         .withInputTransform { input, setting ->
-            MathHelper.clamp_double(input, setting.min, leftMaxCps.value)
-        }.withDependency { leftClick.enabled }
+            MathHelper.clamp_double(input, setting.min, leftMaxCps)
+        }.withDependency { leftClick }
 
-    private val rightClick = BooleanSetting("Right Click", false, description = "Toggles the auto clicker for right click.")
-    private val rightMaxCps: NumberSetting = NumberSetting("Right max CPS", 12.0, 1.0, 20.0, 1.0, description = "Maximum cps for left click.")
+    private val rightClick by BooleanSetting("Right Click", "Toggles the auto clicker for right click.")
+    private val rightMaxCps: Double by NumberSetting("Right max CPS", 12.0, 1.0, 20.0, 1.0, "Maximum cps for left click.")
         .withInputTransform { input, setting ->
-            MathHelper.clamp_double(input, rightMinCps.value, setting.max)
-        }.withDependency { rightClick.enabled }
+            MathHelper.clamp_double(input, rightMinCps, setting.max)
+        }.withDependency { rightClick }
 
-    private val rightMinCps: NumberSetting = NumberSetting("Right min CPS", 10.0, 1.0, 20.0, 1.0, description = "Minimum CPS for left click.")
+    private val rightMinCps: Double by NumberSetting("Right min CPS", 10.0, 1.0, 20.0, 1.0, "Minimum CPS for left click.")
         .withInputTransform { input, setting ->
-            MathHelper.clamp_double(input, setting.min, rightMaxCps.value)
-        }.withDependency { rightClick.enabled }
-
-    init {
-        this.addSettings(leftClick, leftMaxCps, leftMinCps, rightClick, rightMaxCps, rightMinCps)
-    }
+            MathHelper.clamp_double(input, setting.min, rightMaxCps)
+        }.withDependency { rightClick }
 
     private var leftClicking = false
     private var rightClicking = false
     private var leftClickJob: Job? = null
     private var rightClickJob: Job? = null
 
+    private val shouldClick get() = (clickInGui || mc.currentScreen == null) && (!favouriteItems || mc.thePlayer?.heldItem?.skyblockUUID in favItemsList)
+
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onMouse(event: MouseEvent) {
-        if (!this.enabled) return
         if (event.button != 0 && event.button != 1) return
 
-        if (event.buttonstate) {
-            if (event.button == 0 && leftClick.value && !breakBlock()) {
+        if (event.buttonstate && shouldClick) {
+            if (event.button == 0 && leftClick && !breakBlock()) {
                 event.isCanceled = true
                 leftClicking = true
                 leftClickJob?.cancel()
                 leftClickJob = GlobalScope.launch { leftClicker() }
-            } else if (event.button == 1 && rightClick.value) {
+            } else if (event.button == 1 && rightClick) {
                 event.isCanceled = true
                 rightClicking = true
                 rightClickJob?.cancel()
@@ -89,15 +92,15 @@ object AutoClicker: Module(
 
     private suspend fun leftClicker() {
         while (leftClicking) {
-            if (!breakBlock()) PlayerUtils.leftClick()
-            delay(Random.nextDouble(1000.0 / leftMaxCps.value, 1000.0 / leftMinCps.value).toLong())
+            if (!breakBlock()) leftClick2()
+            delay(Random.nextDouble(1000.0 / leftMaxCps, 1000.0 / leftMinCps).toLong())
         }
     }
 
     private suspend fun rightClicker() {
         while (rightClicking) {
-            PlayerUtils.rightClick()
-            delay(Random.nextDouble(1000.0 / rightMaxCps.value, 1000.0 / rightMinCps.value).toLong())
+            rightClick2()
+            delay(Random.nextDouble(1000.0 / rightMaxCps, 1000.0 / rightMinCps).toLong())
         }
     }
 

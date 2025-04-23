@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.CatgirlRoutes.Companion.totalTicks
 import catgirlroutes.commands.impl.Node
 import catgirlroutes.commands.impl.NodeManager
 import catgirlroutes.commands.impl.NodeManager.nodes
@@ -13,12 +14,11 @@ import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.NumberSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.commandAny
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.MovementUtils
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.leftClick2
 import catgirlroutes.utils.PlayerUtils.posX
@@ -26,14 +26,10 @@ import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.PlayerUtils.recentlySwapped
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.SwapState
-import catgirlroutes.utils.Utils.distanceToPlayer
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.renderText
-import catgirlroutes.utils.VecUtils.toBlockPos
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
+import catgirlroutes.utils.dungeon.DungeonUtils.isSecret
 import catgirlroutes.utils.dungeon.ScanUtils.currentRoom
 import catgirlroutes.utils.render.WorldRenderUtils.drawBlock
 import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
@@ -45,9 +41,9 @@ import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import kotlinx.coroutines.*
 import net.minecraft.block.Block
 import net.minecraft.block.state.IBlockState
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.entity.passive.EntityBat
 import net.minecraft.network.play.client.C03PacketPlayer
+import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
 import net.minecraft.network.play.server.S0FPacketSpawnMob
 import net.minecraft.util.BlockPos
 import net.minecraft.util.Vec3
@@ -64,26 +60,16 @@ import kotlin.math.floor
 
 object AutoRoutes : Module( // todo recode this shit
     "Auto Routes",
-    category = Category.DUNGEON,
-    description = "A module that allows you to place down nodes that execute various actions."
+    Category.DUNGEON,
+    "A module that allows you to place down nodes that execute various actions."
 ) {
-    private val editTitle = BooleanSetting("EditMode title", false)
-    private val boomType = StringSelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring")
-    private val preset = StringSelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), description = "Ring render style to be used.")
-    private val layers = NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
-    private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
-    private val colour2 = ColorSetting("Ring colour (active)", WHITE, false, "Colour of Normal ring style while active").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
+    private val editTitle by BooleanSetting("EditMode title", false)
+    private val boomType by SelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
-    init {
-        this.addSettings(
-            editTitle,
-            boomType,
-            preset,
-            layers,
-            colour1,
-            colour2
-        )
-    }
+    private val preset by SelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
+    private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
+    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
+    private val colour2 by ColorSetting("Ring colour (active)", WHITE, true, "Colour of Normal ring style while active").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
 
     private val cooldownMap = mutableMapOf<String, Boolean>()
 
@@ -110,7 +96,7 @@ object AutoRoutes : Module( // todo recode this shit
     fun onBat(event: TickEvent.ClientTickEvent) {
         val stupid = mc.theWorld?.loadedEntityList
             ?.filterIsInstance<EntityBat>()
-            ?.any { distanceToPlayer(it.posX, it.posY, it.posZ) < 8 } == true
+            ?.any { distanceToPlayer(it.posX, it.posY, it.posZ) < 10 } == true
 
         if (stupid) {
             this.awaitBat.complete()
@@ -125,10 +111,8 @@ object AutoRoutes : Module( // todo recode this shit
             cooldownMap[key] = false
         }
 
-        debugMessage(currentNode)
         currentNodes.forEach { node ->
             node.arguments?.let { arguments ->
-                debugMessage(arguments)
                 if (arguments.contains("await")) {
                     this.awaitSecret.complete()
                     return@forEach
@@ -175,11 +159,11 @@ object AutoRoutes : Module( // todo recode this shit
             val z: Double = realLocation.zCoord + 0.5
 
             val cooldown: Boolean = cooldownMap["${node.location.xCoord},${node.location.yCoord},${node.location.zCoord},${node.type}"] == true
-            val color = if (cooldown) colour2.value else colour1.value
+            val color = if (cooldown) colour2 else colour1
 
             when(preset.selected) {
                 "Trans"     -> renderTransFlag(x, y, z, node.width, node.height)
-                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.value.toInt())
+                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.toInt())
                 "Ring"      -> drawCylinder(Vec3(x, y, z), node.width / 2, node.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
                 "Lesbian"   -> renderLesbianFlag(x, y, z, node.width, node.height)
@@ -194,15 +178,18 @@ object AutoRoutes : Module( // todo recode this shit
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (editTitle.enabled && nodeEditMode && inDungeons) {
-            val sr = ScaledResolution(mc)
-            val t = "Edit Mode"
-            renderText(t, sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2, sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT)
+        if (editTitle && nodeEditMode && inDungeons) {
+            renderText("Edit Mode")
         }
     }
 
     private var shouldClick = false
     private var shouldLeftClick = false
+    private var shouldClip = false
+
+    private var lastC08 = 0L
+    private var stupid = false
+    private val canSendC08 get() = totalTicks - lastC08 > 2
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEventReturn) {
@@ -210,6 +197,9 @@ object AutoRoutes : Module( // todo recode this shit
         if (recentlySwapped) {
             return
         }
+
+        if (!canSendC08) return
+
         if (shouldClick) {
             shouldClick = false
             airClick()
@@ -217,6 +207,35 @@ object AutoRoutes : Module( // todo recode this shit
         if (shouldLeftClick) {
             shouldLeftClick = false
             leftClick2()
+        }
+
+        if (shouldClip) { // shout out schizo codebase
+            shouldClip = false
+            PearlClip.pearlClip((currentNode?.depth?.takeIf { it != 0F } ?: 0F).toDouble())
+        }
+    }
+
+    @SubscribeEvent
+    fun onSecretClick(event: PacketSentEvent) {
+        if (event.packet !is C08PacketPlayerBlockPlacement) return
+
+        if (event.packet.placedBlockDirection == 255) {
+            this.stupid = true
+            this.lastC08 = 0L
+            return
+        }
+
+        this.lastC08 = totalTicks
+        this.stupid = false
+
+        val blockPos = event.packet.position
+        val blockState = mc.theWorld.getBlockState(blockPos)
+        if (isSecret(blockState, blockPos)) {
+            scheduleTask {
+                if (this.stupid) {
+                    PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(event.packet.stack))
+                }
+            }
         }
     }
 
@@ -258,7 +277,7 @@ object AutoRoutes : Module( // todo recode this shit
                 val state = swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", true)
                 if (state == SwapState.SWAPPED) {
-                    scheduleTask(0) {
+                    scheduleTask {
                         shouldClick = true
                     }
                 } else if (state == SwapState.ALREADY_HELD) {
@@ -273,11 +292,11 @@ object AutoRoutes : Module( // todo recode this shit
             "aotv" -> {
                 swapFromName("aspect of the void")
                 MovementUtils.setKey("shift", false)
-                scheduleTask(0) {shouldClick = true}
+                scheduleTask { shouldClick = true }
             }
             "hype" -> {
                 swapFromName("hyperion")
-                scheduleTask(0) {shouldClick = true}
+                scheduleTask(0) { shouldClick = true }
             }
             "walk" -> {
                 modMessage("Walking!")
@@ -296,16 +315,16 @@ object AutoRoutes : Module( // todo recode this shit
             "boom" -> {
                 modMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
-                scheduleTask(0) { shouldLeftClick = true }
+                scheduleTask { shouldLeftClick = true }
             }
             "pearl" -> {
                 swapFromName("ender pearl")
                 MovementUtils.setKey("shift", false)
-                scheduleTask(0) {shouldClick = true}
+                scheduleTask { shouldClick = true }
             }
             "pearlclip" -> {
                 snapTo(mc.renderManager.playerViewY, 90f)
-                PearlClip.pearlClip((node.depth?.takeIf { it != 0F } ?: 0F).toDouble())
+                shouldClip = true
             }
             "look" -> {
                 modMessage("Looking!")

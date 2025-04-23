@@ -10,14 +10,7 @@ import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.LocationManager.currentDungeon
 import catgirlroutes.utils.PlayerUtils.getItemSlot
 import catgirlroutes.utils.PlayerUtils.posY
-import catgirlroutes.utils.Utils.addVec
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.noControlCodes
-import catgirlroutes.utils.Utils.romanToInt
-import catgirlroutes.utils.Utils.rotateAroundNorth
-import catgirlroutes.utils.Utils.rotateToNorth
-import catgirlroutes.utils.Utils.rotationNumber
-import catgirlroutes.utils.Utils.subtractVec
+import catgirlroutes.utils.*
 import catgirlroutes.utils.dungeon.tiles.Room
 import net.minecraft.block.BlockSkull
 import net.minecraft.block.state.IBlockState
@@ -35,7 +28,7 @@ import kotlin.math.floor
 object DungeonUtils {
 
     val inDungeons: Boolean
-        get() = LocationManager.currentArea.isArea(Island.Dungeon) || ClickGui.forceDungeon.enabled
+        get() = LocationManager.currentArea.isArea(Island.Dungeon) || ClickGui.forceDungeon
 
     val floorNumber: Int
         get() = currentDungeon?.floor?.floorNumber ?: 0

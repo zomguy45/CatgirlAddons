@@ -8,7 +8,6 @@ import catgirlroutes.module.impl.dungeons.puzzlesolvers.Puzzles
 import catgirlroutes.module.impl.misc.*
 import catgirlroutes.module.impl.player.*
 import catgirlroutes.module.impl.render.*
-import catgirlroutes.module.settings.NoShowInList
 import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
@@ -44,7 +43,7 @@ object ModuleManager {
     val modules: java.util.ArrayList<Module> = arrayListOf(
         // Dungeons
         AutoP3,
-        AutoP3ConfigOverlay,
+//        AutoP3ConfigOverlay,
         AutoRoutes,
         GhostBlocks,
         InstaMid,
@@ -66,6 +65,7 @@ object ModuleManager {
         AutoSS,
         Auto4,
         Watcher,
+//        Splits,
 
         // Misc
         F7sim,

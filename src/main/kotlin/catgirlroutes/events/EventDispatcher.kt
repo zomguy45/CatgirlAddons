@@ -6,6 +6,7 @@ import catgirlroutes.utils.Utils.containsOneOf
 import catgirlroutes.utils.Utils.equalsOneOf
 import catgirlroutes.utils.Utils.postAndCatch
 import catgirlroutes.utils.Utils.unformattedName
+import catgirlroutes.utils.*
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonItemDrops
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
@@ -14,6 +15,7 @@ import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.item.EntityItem
 import net.minecraft.network.play.client.C02PacketUseEntity
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
+import net.minecraft.network.play.server.S02PacketChat
 import net.minecraft.network.play.server.S29PacketSoundEffect
 import net.minecraft.network.play.server.S32PacketConfirmTransaction
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
@@ -36,6 +38,7 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet is S29PacketSoundEffect && inDungeons && !inBoss && (event.packet.soundName.equalsOneOf("mob.bat.hurt", "mob.bat.death") && event.packet.volume == 0.1f)) SecretPickupEvent.Bat(event.packet).postAndCatch()
         if (event.packet is S32PacketConfirmTransaction) ServerTickEvent().postAndCatch()
+        if (event.packet is S02PacketChat) ChatPacket(event.packet.chatComponent.unformattedText.noControlCodes).postAndCatch()
     }
 
     @SubscribeEvent

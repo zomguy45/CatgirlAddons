@@ -1,15 +1,15 @@
 package catgirlroutes.module.impl.dungeons.puzzlesolvers
 
+import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.commands.impl.Node
+import catgirlroutes.commands.impl.NodeManager
 import catgirlroutes.utils.BlockAura
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.VecUtils.equal
-import catgirlroutes.utils.VecUtils.toBlockPos
-import catgirlroutes.utils.VecUtils.toVec3
+import catgirlroutes.utils.*
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
-import catgirlroutes.utils.getBlockAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawLine
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.drawTracer

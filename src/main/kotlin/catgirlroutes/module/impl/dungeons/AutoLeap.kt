@@ -1,20 +1,24 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.StringSelectorSetting
-import catgirlroutes.utils.ChatUtils.stripControlCodes
+import catgirlroutes.module.settings.impl.ListSetting
+import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.PlayerUtils.posX
+import catgirlroutes.utils.PlayerUtils.posY
+import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.dungeon.DungeonClass
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.dungeon.LeapUtils.leap
-import net.minecraft.util.StringUtils.stripControlCodes
-import net.minecraftforge.client.event.ClientChatReceivedEvent
+import catgirlroutes.utils.noControlCodes
 import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
@@ -24,62 +28,43 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 //      Add S2D cancel.
 //      Add fail safes.
 
-object AutoLeap : Module(
-    name = "Auto Leap",
-    category = Category.DUNGEON,
+object AutoLeap : Module( // todo improve selectors
+    "Auto Leap",
+    Category.DUNGEON,
     tag = TagType.WHIP
 ) {
-    private val fastLeap = BooleanSetting("Fast leap", false)
-    private val autoLeap = BooleanSetting("Auto leap", false)
+    private val fastLeap by BooleanSetting("Fast leap", "Leaps to a set player on infinileap left click.")
+    private val autoLeap by BooleanSetting("Auto leap", "Automatically leaps to a set player.")
 
-    private var leapMode = StringSelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class"))
+    private var leapMode by SelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class"), "Leap mode for the module.")
 
-    private var clearLeap = StringSelectorSetting("Clear leap", "None", arrayListOf("None")).withDependency {leapMode.selected == "Name"}
-    private var s1leap = StringSelectorSetting("S1 leap", "None", arrayListOf("None")).withDependency {leapMode.selected == "Name"}
-    private var s2leap = StringSelectorSetting("S2 leap", "None", arrayListOf("None")).withDependency {leapMode.selected == "Name"}
-    private var s3leap = StringSelectorSetting("S3 leap", "None", arrayListOf("None")).withDependency {leapMode.selected == "Name"}
-    private var s4leap = StringSelectorSetting("S4 leap", "None", arrayListOf("None")).withDependency {leapMode.selected == "Name"}
-    var action = ActionSetting("update") {updateTeammates()}.withDependency {leapMode.selected == "Name"}
+    private var teamList by ListSetting("Teammates", mutableListOf("None"))
+    private var clearLeap by SelectorSetting("Clear leap", "None", ArrayList(teamList), "Player name to leap to during clear.").withDependency { leapMode.selected == "Name" }
+    private var s1leap by SelectorSetting("S1 leap", "None", ArrayList(teamList), "Player name to leap to when in S1.").withDependency { leapMode.selected == "Name" }
+    private var s2leap by SelectorSetting("S2 leap", "None", ArrayList(teamList), "Player name to leap to when in S2.").withDependency { leapMode.selected == "Name" }
+    private var s3leap by SelectorSetting("S3 leap", "None", ArrayList(teamList), "Player name to leap to when in S3.").withDependency { leapMode.selected == "Name" }
+    private var s4leap by SelectorSetting("S4 leap", "None", ArrayList(teamList), "Player name to leap to when in S4.").withDependency { leapMode.selected == "Name" }
+    private var update by ActionSetting("Update", "Updates teammates names (currently works in dungeon only)..") { updateTeammates() }.withDependency { leapMode.selected == "Name" }
 
-    private var clearLeapClass = StringSelectorSetting("Clear leap", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency {leapMode.selected == "Class"}
-    private var s1leapClass = StringSelectorSetting("S1 leap", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency {leapMode.selected == "Class"}
-    private var s2leapClass = StringSelectorSetting("S2 leap", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency {leapMode.selected == "Class"}
-    private var s3leapClass = StringSelectorSetting("S3 leap", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency {leapMode.selected == "Class"}
-    private var s4leapClass = StringSelectorSetting("S4 leap", "None", arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")).withDependency {leapMode.selected == "Class"}
-
-    init {
-        this.addSettings(
-            fastLeap,
-            autoLeap,
-            leapMode,
-            clearLeap,
-            s1leap,
-            s2leap,
-            s3leap,
-            s4leap,
-            action,
-            clearLeapClass,
-            s1leapClass,
-            s2leapClass,
-            s3leapClass,
-            s4leapClass
-        )
-    }
+    private val clazzArray = arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")
+    private var clearLeapClass by SelectorSetting("Clear leap", "None", clazzArray, "Player class to leap to during clear.").withDependency { leapMode.selected == "Class" }
+    private var s1leapClass by SelectorSetting("S1 leap", "None", clazzArray, "Player name to leap to when in S1.").withDependency { leapMode.selected == "Class" }
+    private var s2leapClass by SelectorSetting("S2 leap", "None", clazzArray, "Player name to leap to when in S2.").withDependency { leapMode.selected == "Class" }
+    private var s3leapClass by SelectorSetting("S3 leap", "None", clazzArray, "Player name to leap to when in S3.").withDependency { leapMode.selected == "Class" }
+    private var s4leapClass by SelectorSetting("S4 leap", "None", clazzArray, "Player name to leap to when in S4.").withDependency { leapMode.selected == "Class" }
 
     private val classEnumMapping = arrayListOf(DungeonClass.Mage, DungeonClass.Berserk, DungeonClass.Archer, DungeonClass.Tank, DungeonClass.Healer, DungeonClass.Unknown)
 
+    init {
+        listOf(clearLeap, s1leap, s2leap, s3leap, s4leap).forEach { it.options = teamList }
+    }
+
     private fun updateTeammates() {
-        val teammates = arrayListOf<String>()
         if (dungeonTeammatesNoSelf.isEmpty()) return
-        dungeonTeammatesNoSelf.forEach{teammate ->
-            teammates.add(teammate.name)
-        }
-        teammates.add("None")
-        clearLeap.options = teammates
-        s1leap.options = teammates
-        s2leap.options = teammates
-        s3leap.options = teammates
-        s4leap.options = teammates
+
+        val teammates = dungeonTeammatesNoSelf.map { it.name } + "None"
+        teamList = teammates.toMutableList()
+        listOf(clearLeap, s1leap, s2leap, s3leap, s4leap).forEach { it.options = teammates }
     }
 
     /*
@@ -91,47 +76,34 @@ object AutoLeap : Module(
 
     @SubscribeEvent
     fun onMouse(event: MouseEvent) {
-        if (!event.buttonstate || !inDungeons || !fastLeap.value) return
-        if (event.button != 0) return
-        if (mc.thePlayer.heldItem == null) return
-        if (mc.thePlayer.heldItem.displayName.stripControlCodes() != "Infinileap") return
+        if (!event.buttonstate || event.button != 0 || !inDungeons || !fastLeap) return
+        if (mc.thePlayer?.heldItem?.displayName?.noControlCodes != "Infinileap") return
         handleLeap()
     }
 
     @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
-        if (!inDungeons || event.type.toInt() == 2 || !inBoss || !autoLeap.value) return
-        val message = stripControlCodes(event.message.unformattedText)
-        if (message.contains("(7/7)") || message.contains("(8/8)")) {
+    fun onChat(event: ChatPacket) {
+        if (!inDungeons || !inBoss || !autoLeap) return
+        val message = event.message
+        if ("(7/7)" in message || "(8/8)" in message) {
             handleLeap()
         }
     }
 
     private fun handleLeap() {
-        val posX = mc.thePlayer.posX
-        val posY = mc.thePlayer.posY
-        val posZ = mc.thePlayer.posZ
-        when {
-            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 -> {
-                if (leapMode.selected == "Name") leap(s1leap.selected)
-                else if (leapMode.selected == "Class") leap(classEnumMapping[s1leapClass.index])
-            }
-            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> {
-                if (leapMode.selected == "Name") leap(s2leap.selected)
-                else if (leapMode.selected == "Class") leap(classEnumMapping[s2leapClass.index])
-            }
-            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> {
-                if (leapMode.selected == "Name") leap(s3leap.selected)
-                else if (leapMode.selected == "Class") leap(classEnumMapping[s3leapClass.index])
-            }
-            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> {
-                if (leapMode.selected == "Name") leap(s4leap.selected)
-                else if (leapMode.selected == "Class") leap(classEnumMapping[s4leapClass.index])
-            }
-            !inBoss -> {
-                if (leapMode.selected == "Name") leap(clearLeap.selected)
-                else if (leapMode.selected == "Class") leap(classEnumMapping[clearLeapClass.index])
-            }
+        val (name, clazz) = when {
+            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 -> s1leap.selected to s1leapClass.index
+            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> s2leap.selected to s2leapClass.index
+            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> s3leap.selected to s3leapClass.index
+            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> s4leap.selected to s4leapClass.index
+            !inBoss -> clearLeap.selected to clearLeapClass.index
+            else -> return
+        }
+        debugMessage("leaping to $name $clazz")
+
+        when (leapMode.selected) {
+            "Name" -> leap(name)
+            "Cass" -> leap(classEnumMapping[clazz])
         }
     }
 }

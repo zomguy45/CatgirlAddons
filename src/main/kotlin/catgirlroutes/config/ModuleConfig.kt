@@ -88,8 +88,8 @@ class ModuleConfig(path: File) {
                                     setting.brightness = hsb[2]
                                 }
                             }
-                            is StringSelectorSetting -> if (configSetting is StringSetting) setting.selected = configSetting.text
-                            is SelectorSetting ->   if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is SelectorSetting -> if (configSetting is StringSetting) setting.selected = configSetting.text
+                            is tSelectorSetting ->   if (configSetting is StringSetting) setting.selected = configSetting.text
                             is StringSetting ->     if (configSetting is StringSetting) setting.text = configSetting.text
                             is KeyBindSetting ->    if (configSetting is NumberSetting) { setting.value = Keybinding(configSetting.value.toInt()).apply { onPress = setting.value.onPress } }
                             is ListSetting<*, *> -> if (configSetting is ListSetting<*, *>) {
@@ -97,7 +97,14 @@ class ModuleConfig(path: File) {
                                 @Suppress("UNCHECKED_CAST")
                                 (setting.value as MutableCollection<Any?>).addAll(configSetting.value as Collection<Any?>)
                             }
-                            is DropdownSetting ->   continue
+                            is MapSetting<*, *, *> -> if (configSetting is MapSetting<*, *, *>) {
+                                setting.value.clear()
+                                @Suppress("UNCHECKED_CAST")
+                                (setting.value as MutableMap<Any?, Any?>).putAll(configSetting.value as Map<Any?, Any?>)
+                            }
+                            is OrderSetting -> if (configSetting is OrderSetting) {
+                                setting.value = HashMap(configSetting.value)
+                            }
                         }
                     }
                 }
@@ -125,7 +132,7 @@ class ModuleConfig(path: File) {
                         keyCode = module.keybinding.key,
                         category = module.category,
                         toggled = module.enabled,
-                        settings = ArrayList(module.settings.toList().filter { it !is DropdownSetting }), // simple way of preventing {} in config
+                        settings = ArrayList(module.settings.toList().filter { it !is DropdownSetting && it !is HudSetting }), // simple way of preventing {} in config
                         description = module.description
                     )
                 }

@@ -1,57 +1,93 @@
 package catgirlroutes.ui.misc.elements
 
-import catgirlroutes.ui.misc.elements.impl.MiscElementText
+import java.awt.Color
 
-/**
- * The base class for all [MiscElement]'s
- *
- * You can implement these elements anywhere you want
- *
- * Override the [render] method to define custom drawing behavior for the element.
- * Override the interaction methods like [mouseClicked], [mouseClickMove], and [keyTyped] to define how the element
- * should respond to user input.
- *
- * This class also provides basic hover detection with the [isHovered] method, which checks whether the mouse cursor
- * is within the bounds of the element.
- */
-abstract class MiscElement(
-    var x: Double = 0.0,
-    var y: Double = 0.0,
-    var width: Double = 100.0,
-    var height: Double = 20.0
-) {
+abstract class MiscElement(open val style: MiscElementStyle) {
+    var value: String // todo make better idk
+        get() = style.value
+        set(v) { updates.value = v }
 
-    /**
-     * Renders the element
-     */
-    abstract fun render(mouseX: Int, mouseY: Int)
+    var x: Double
+        get() = style.x
+        set(v) { updates.x = v }
 
-    /**
-     * Handles mouse clicks
-     * @return true if an action was performed.
-     */
-    open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean { return false }
+    var y: Double
+        get() = style.y
+        set(v) { updates.y = v }
 
-    /**
-     * Handles mouse click and move
-     */
-    open fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {  }
+    var width: Double
+        get() = style.width
+        set(v) { updates.width = v }
 
-    /**
-     * Dispatches key press.
-     * @return true if any of the elements used the input.
-     */
-    open fun keyTyped(typedChar: Char, keyCode: Int): Boolean { return false }
+    var height: Double
+        get() = style.height
+        set(v) { updates.height = v }
 
-    /**
-     * Checks if the element is being hovered over by the mouse.
-     */
-    open fun isHovered(mouseX: Int, mouseY: Int, xOff: Int = 0, yOff: Int = 0): Boolean {
+    var thickness: Double
+        get() = style.thickness
+        set(v) { updates.thickness = v }
+
+    var radius: Double
+        get() = style.radius
+        set(v) { updates.radius = v }
+
+    var colour: Color
+        get() = style.colour
+        set(v) { updates.colour = v }
+
+    var outlineColour: Color
+        get() = style.outlineColour
+        set(v) { updates.outlineColour = v }
+
+    var outlineHoverColour: Color
+        get() = style.outlineHoverColour
+        set(v) { updates.outlineHoverColour = v }
+
+    val updates: MiscElementStyle get() = style
+
+    open fun render(mouseX: Int, mouseY: Int) {  }
+    open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean = false
+    open fun mouseClickMove(mouseX: Int, mouseY: Int, mouseButton: Int, timeSinceLastClick: Long) {  }
+    open fun keyTyped(typedChar: Char, keyCode: Int): Boolean = false
+    open fun onScroll(amount: Int): Boolean = false
+
+    open fun isHovered(mouseX: Int, mouseY: Int, xOff: Double = 0.0, yOff: Double = 0.0): Boolean {
         return mouseX >= x + xOff && mouseX <= x + width + xOff &&
                 mouseY >= y + yOff && mouseY <= y + height + yOff
     }
 
     companion object {
-        var currentlyFocused: MiscElementText? = null
+        var currentlyFocused: MiscElement? = null
     }
+}
+
+abstract class ElementDSL<T : MiscElement> {
+    val _style = MiscElementStyle()
+
+    var _x by _style::x
+    var _y by _style::y
+    var width by _style::width
+    var height by _style::height
+    var thickness by _style::thickness
+    var radius by _style::radius
+    var colour by _style::colour
+    var outlineColour by _style::outlineColour
+    var outlineHoverColour by _style::outlineHoverColour
+    var alignment by _style::alignment
+    var vAlignment by _style::vAlignment
+    var textPadding by _style::textPadding
+
+    fun at(x: Number, y: Number) {
+        this._x = x.toDouble()
+        this._y = y.toDouble()
+    }
+
+    fun size(width: Number, height: Number) {
+        this.width = width.toDouble()
+        this.height = height.toDouble()
+    }
+
+    protected open fun createStyle(): MiscElementStyle = _style
+    protected abstract fun buildElement(): T
+    fun build(): T = buildElement()
 }

@@ -26,21 +26,13 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import java.awt.Color
 
-object Relics: Module(
+object Relics: Module( // todo aura to place
     "Relics",
     Category.DUNGEON
-){
-    private val relicAura: BooleanSetting = BooleanSetting("Aura", false)
-    private val relicBlink: BooleanSetting = BooleanSetting("Blink", false).withDependency {relicAura.value}
-    private val relicLook: BooleanSetting = BooleanSetting("Look", false).withDependency {relicAura.value}
-
-    init {
-        addSettings(
-            relicAura,
-            relicBlink,
-            relicLook
-        )
-    }
+) {
+    private val relicAura by BooleanSetting("Aura", "Automatically takes the relic.")
+    private val relicBlink by BooleanSetting("Blink", "Blinks from orange or red relics.").withDependency { relicAura }
+    private val relicLook by BooleanSetting("Look", "Looks and walks in the right direction after picking up the relic.").withDependency { relicAura }
 
     data class C04(val x: Double, val y: Double, val z: Double, val onGround: Boolean)
 
@@ -101,7 +93,7 @@ object Relics: Module(
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if ((!relicBlink.value && !relicLook.value) || !inBoss) return
+        if ((!relicBlink && !relicLook) || !inBoss) return
 
         val posX = mc.thePlayer.posX
         val posY = mc.thePlayer.posY
@@ -130,12 +122,12 @@ object Relics: Module(
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (auraCooldown || !relicAura.value) return
+        if (auraCooldown || !relicAura) return
         val armorStands = mc.theWorld?.loadedEntityList?.firstOrNull {
             it is EntityArmorStand && it.inventory?.get(4)?.displayName?.contains("Relic") == true && mc.thePlayer.getDistanceToEntity(it) < 4.5 } ?: return
         auraCooldown = true
         interactWithEntity(armorStands)
-        scheduleTask(20) {auraCooldown = false}
+        scheduleTask(20) { auraCooldown = false }
     }
 
     private fun interactWithEntity(entity: Entity) {
@@ -150,7 +142,7 @@ object Relics: Module(
         val posZ = mc.thePlayer.posZ
 
         if (posX in 90.0..90.7 && posY == 6.0 && posZ in 55.0..55.7) {
-            if (Blink.packetArray >= orangePackets.size && relicBlink.value) {
+            if (Blink.packetArray >= orangePackets.size && relicBlink) {
                 modMessage("Blinking orange")
                 snapTo(111F, 0F)
                 swapToSlot(8)
@@ -162,14 +154,14 @@ object Relics: Module(
                     }
                     mc.thePlayer.setPosition(orangePackets.last().x, orangePackets.last().y, orangePackets.last().z)
                 }
-            } else if (relicLook.value) {
+            } else if (relicLook) {
                 snapTo(111F, 0F)
                 setKey("w", true)
                 swapToSlot(8)
                 blockArray.add(BlockAura.BlockAuraAction(BlockPos(57.0, 7.0, 42.0), 6.0))
             }
         } else if (posX in 22.3..23.0 && posY == 6.0 && posZ in 58.0..58.7) {
-            if (relicBlink.value && Blink.packetArray >= redPackets.size) {
+            if (relicBlink && Blink.packetArray >= redPackets.size) {
                 modMessage("Blinking red")
                 snapTo(-120F, 0F)
                 swapToSlot(8)
@@ -181,7 +173,7 @@ object Relics: Module(
                     }
                     mc.thePlayer.setPosition(redPackets.last().x, redPackets.last().y, redPackets.last().z)
                 }
-            } else if (relicLook.value) {
+            } else if (relicLook) {
                 snapTo(-120F, 0F)
                 setKey("w", true)
                 swapToSlot(8)

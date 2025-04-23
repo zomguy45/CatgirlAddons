@@ -4,6 +4,8 @@ import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.ui.animations.impl.ColorAnimation
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.MouseUtils.mouseX
+import catgirlroutes.ui.clickgui.util.MouseUtils.mouseY
 import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
@@ -19,7 +21,7 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
     private val stringWidth = FontUtil.getStringWidth(displayName)
     private var keyWidth = 0.0
 
-    override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Double {
+    override fun renderElement(): Double {
         val keyName = if (this.setting.value.key > 0) Keyboard.getKeyName(this.setting.value.key) ?: "Err"
         else if (this.setting.value.key < 0) Mouse.getButtonName(this.setting.value.key + 100)
         else "None"
@@ -33,18 +35,18 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
 
         FontUtil.drawString(keyName, this.stringWidth + 5.0 + 3.0, 2.0)
 
-        return super.renderElement(mouseX, mouseY, partialTicks)
+        return super.renderElement()
     }
 
-    override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
-        if (mouseButton == 0 && this.isHovered(mouseX, mouseY) && !listening) {
+    override fun mouseClicked(mouseButton: Int): Boolean {
+        if (mouseButton == 0 && this.isHovered() && !listening) {
             if (this.colourAnimation.start()) listening = true
             return true
         } else if (listening) {
             this.setting.value.key = -100 + mouseButton
             if (this.colourAnimation.start()) listening = false
         }
-        return super.mouseClicked(mouseX, mouseY, mouseButton)
+        return super.mouseClicked(mouseButton)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
@@ -66,7 +68,7 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
         return true
     }
 
-    private fun isHovered(mouseX: Int, mouseY: Int): Boolean {
+    private fun isHovered(): Boolean {
         return mouseX >= xAbsolute + this.stringWidth + 5.0 && mouseX <= xAbsolute + (this.stringWidth + 5.0) + (this.keyWidth + 5.0) &&
                 mouseY >= yAbsolute && mouseY <= yAbsolute + height
     }

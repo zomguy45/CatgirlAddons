@@ -4,7 +4,7 @@ import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.InventoryButtonsConfig.allButtons
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.ui.misc.elements.impl.MiscElementText
+import catgirlroutes.ui.misc.elements.impl.textField
 import catgirlroutes.utils.render.HUDRenderUtils
 import net.minecraft.client.gui.GuiScreen
 import net.minecraft.client.renderer.GlStateManager
@@ -28,8 +28,8 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
     private var editorX = 0
     private var editorY = 0
 
-    private val commandTextField: MiscElementText = MiscElementText(width = editorWidth - 14, height = 16.0)
-    private val iconTextField: MiscElementText = MiscElementText(width = editorWidth - 14, height =  16.0)
+    private val commandTextField = textField { size(editorWidth - 14.0, 16.0) }
+    private val iconTextField = textField { size(editorWidth - 14.0, 16.0) }
 
     override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
         super.drawScreen(mouseX, mouseY, partialTicks)
@@ -110,11 +110,11 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
                 } else {
                     editingButton = button
 
-                    commandTextField.focus = true
+                    commandTextField.isFocused = true
                     commandTextField.text = editingButton!!.command
 
                     iconTextField.text = editingButton!!.icon
-                    iconTextField.focus = false
+                    iconTextField.isFocused = false
 
                     InventoryButtonsConfig.save()
                 }

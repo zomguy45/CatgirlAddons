@@ -11,10 +11,11 @@ import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.module.settings.impl.KeyBindSetting
 import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Utils
+import catgirlroutes.utils.renderText
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C04PacketPlayerPosition
@@ -23,15 +24,14 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Keyboard
+import java.awt.Color
 
 @AlwaysActive
 object Blink : Module(
     "Blink",
     category = Category.DUNGEON
 ) {
-
-    private val recordLength = NumberSetting("Recording length", 28.0, 1.0, 50.0)
-    private val recordBind: KeyBindSetting = KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in editmode")
+    private val recordBind by KeyBindSetting("Blink record", Keyboard.KEY_NONE, "Starts recording a blink if you are on a blink ring and in edit mode.")
         .onPress {
             if (recorderActive) {
                 recorderActive = false
@@ -45,15 +45,13 @@ object Blink : Module(
                     mc.thePlayer.setPosition(ring.location.xCoord, mc.thePlayer.posY, ring.location.zCoord)
                     recorderActive = true
                     currentRing = ring
-                    currentRing!!.packets = mutableListOf<BlinkC06>()
+                    currentRing!!.packets = mutableListOf()
                 }
             }
         }
-    private val clearPackets = ActionSetting("Clear packets") { packetArray = 0 }
-
-    init {
-        this.addSettings(this.recordBind, recordLength, clearPackets)
-    }
+    val lineColour by ColorSetting("AutoP3 line colour", Color.PINK, description = "Blink line colour for AutoP3 module.", collapsible = false)
+    private val recordLength by NumberSetting("Recording length", 28.0, 1.0, 50.0, description = "Maximum blink recording length.", unit = " packets")
+    private val clearPackets by ActionSetting("Clear packets") { packetArray = 0 }
 
     var packetArray = 0
     private var recorderActive = false
@@ -62,7 +60,7 @@ object Blink : Module(
     @SubscribeEvent
     fun onPacketRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !recorderActive) return
-        if (currentRing!!.packets.size == recordLength.value.toInt()) {
+        if (currentRing!!.packets.size == recordLength.toInt()) {
             recorderActive = false
             saveRings()
             modMessage("Done recording")
@@ -123,6 +121,6 @@ object Blink : Module(
         val sr = ScaledResolution(mc)
         val x = sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(text.toString()) / 2
         val y = sr.scaledHeight / 2 + -20
-        Utils.renderText(text.toString(), x + 1, y)
+        renderText(text.toString(), x + 1, y)
     }
 }

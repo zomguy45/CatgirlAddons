@@ -1,45 +1,38 @@
 package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.MovementUtils.jump
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import com.sun.org.apache.xpath.internal.operations.Bool
-import kotlinx.serialization.builtins.BooleanArraySerializer
-import me.odinmain.utils.skyblock.modMessage
 import net.minecraft.entity.monster.EntityMagmaCube
-import net.minecraft.network.play.server.S08PacketPlayerPosLook
 import net.minecraft.network.play.server.S2DPacketOpenWindow
-import net.minecraftforge.client.event.ClientChatReceivedEvent
 import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 
 object RendHelper : Module(
-    name = "Rend Helper",
-    category = Category.MISC
+    "Rend Helper",
+    Category.MISC
 ) {
-    val wardenSetting = BooleanSetting("Warden Swap", false)
-    val rotationSetting = BooleanSetting("Rotate", false)
+    private val wardenSetting by BooleanSetting("Warden Swap")
+    private val rotationSetting by BooleanSetting("Rotate")
 
-    init {
-        this.addSettings(wardenSetting, rotationSetting)
-    }
+    private var dpsPhase = false
+    private var clickedBone = true
+    private var clickedWarden = true
+    private var cancelWindow = false
+    private var rotated = true
 
-    var dpsPhase = false
-    var clickedBone = true
-    var clickedWarden = true
-    var cancelWindow = false
-    var rotated = true
-
-    fun getWarden(): Int? {
+    private fun getWarden(): Int? { // todo make a util
         val container = mc.thePlayer.openContainer ?: return null
         for ((index, slot) in container.inventory.withIndex()) {
             if (slot != null && slot.displayName != null) {
@@ -53,11 +46,11 @@ object RendHelper : Module(
     }
 
     @SubscribeEvent
-    fun onChat(event: ClientChatReceivedEvent) {
-        if (event.message.unformattedText.contains("POW! SURELY THAT'S IT! I don't think he has any more in him")) {
+    fun onChat(event: ChatPacket) {
+        if (event.message.contains("POW! SURELY THAT'S IT! I don't think he has any more in him")) {
             dpsPhase = true
             rotated = false
-            if (wardenSetting.value) {
+            if (wardenSetting) {
                 clickedBone = false
                 clickedWarden = false
             }
@@ -118,7 +111,7 @@ object RendHelper : Module(
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
         if (rotated) return
-        if (mc.thePlayer.posY in 5.9..6.1 && dpsPhase && rotationSetting.value) {
+        if (mc.thePlayer.posY in 5.9..6.1 && dpsPhase && rotationSetting) {
             val cubes = mc.theWorld.loadedEntityList
                 .filterIsInstance<EntityMagmaCube>()
 

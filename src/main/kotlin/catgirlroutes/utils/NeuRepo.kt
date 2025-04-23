@@ -2,8 +2,6 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.scope
 import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeOnlyFirst
-import catgirlroutes.utils.Utils.intToRoman
-import catgirlroutes.utils.Utils.noControlCodes
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
@@ -94,9 +92,9 @@ object NeuRepo {
 
     fun getItemFromName(name: String, contains: Boolean = true): RepoItem? {
         return if (contains) {
-            repoItems.find { it.name.noControlCodes.contains(name) }
+            repoItems.find { it.name.contains(name) || it.name.noControlCodes.contains(name) }
         } else {
-            repoItems.find { it.name == name }
+            repoItems.find { it.name == name || it.name.noControlCodes == name || it.name.noControlCodes.removePrefix("[Lvl {LVL}] ") == name }
         }
     }
 

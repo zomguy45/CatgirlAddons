@@ -13,7 +13,7 @@ import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.EtherWarpHelper
 import catgirlroutes.utils.LocationManager.getArea
-import catgirlroutes.utils.Utils.distanceToPlayer
+import catgirlroutes.utils.distanceToPlayer
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords

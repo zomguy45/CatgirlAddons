@@ -1,6 +1,10 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.ui.Screen.Companion.CLICK_GUI_SCALE
+import catgirlroutes.ui.clickgui.util.ColorUtil
+import catgirlroutes.ui.clickgui.util.ColorUtil.withAlpha
+import catgirlroutes.ui.clickgui.util.FontUtil
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.*
@@ -8,6 +12,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats
 import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
+import net.minecraftforge.fml.client.config.GuiUtils.drawGradientRect
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
@@ -31,6 +36,9 @@ object HUDRenderUtils {
 
     private val tessellator: Tessellator = Tessellator.getInstance()
     private val worldRenderer: WorldRenderer = tessellator.worldRenderer
+
+    val sr get() = ScaledResolution(mc)
+    val scale get() = CLICK_GUI_SCALE / sr.scaleFactor
 
     fun renderRect(x: Double, y: Double, w: Double, h: Double, color: Color) {
         if (color.alpha == 0) return
@@ -533,5 +541,121 @@ object HUDRenderUtils {
         GlStateManager.setActiveTexture(OpenGlHelper.lightmapTexUnit)
         GlStateManager.disableTexture2D()
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit)
+    }
+
+
+    fun drawHoveringText(
+        textLines: List<String>,
+        x: Int,
+        y: Int,
+        screenWidth: Int = mc.displayWidth,
+        screenHeight: Int = mc.displayHeight,
+        maxTextWidth: Int = -1,
+        themed: Boolean = true
+    ) {
+        if (textLines.isEmpty()) return
+        GlStateManager.pushMatrix()
+        GlStateManager.disableRescaleNormal()
+        GlStateManager.translate(0.0, 0.0, 300.0)
+
+        var tooltipTextWidth = textLines.maxOfOrNull { FontUtil.getStringWidth(it) } ?: 0
+
+        var needsWrap = false
+        var titleLinesCount = 1
+        var tooltipX = x + 12
+
+        if (tooltipX + tooltipTextWidth + 4 > screenWidth) {
+            tooltipX = x - 16 - tooltipTextWidth
+            if (tooltipX < 4) { // if the tooltip doesn't fit on the screen
+                tooltipTextWidth = if (x > screenWidth / 2) {
+                    x - 12 - 8
+                } else {
+                    screenWidth - 16 - x
+                }
+                needsWrap = true
+            }
+        }
+
+        if (maxTextWidth > 0 && tooltipTextWidth > maxTextWidth) {
+            tooltipTextWidth = maxTextWidth
+            needsWrap = true
+        }
+
+        val finalTextLines = if (needsWrap) {
+            var wrappedTooltipWidth = 0
+            val wrappedTextLines = mutableListOf<String>()
+
+            textLines.forEachIndexed { i, textLine ->
+                val wrappedLine = mc.fontRendererObj.listFormattedStringToWidth(textLine, tooltipTextWidth)
+                if (i == 0) {
+                    titleLinesCount = wrappedLine.size
+                }
+
+                wrappedLine.forEach { line ->
+                    val lineWidth = FontUtil.getStringWidth(line)
+                    if (lineWidth > wrappedTooltipWidth) {
+                        wrappedTooltipWidth = lineWidth
+                    }
+                    wrappedTextLines.add(line)
+                }
+            }
+
+            tooltipTextWidth = wrappedTooltipWidth
+
+            tooltipX = if (x > screenWidth / 2) {
+                x - 16 - tooltipTextWidth
+            } else {
+                x + 12
+            }
+
+            wrappedTextLines
+        } else {
+            textLines
+        }
+
+        var tooltipY = y - 12
+        var tooltipHeight = 8
+
+        if (finalTextLines.size > 1) {
+            tooltipHeight += (finalTextLines.size - 1) * 10
+            if (finalTextLines.size > titleLinesCount) {
+                tooltipHeight += 2 // gap between title lines and next lines
+            }
+        }
+
+        if (tooltipY + tooltipHeight + 6 > screenHeight) {
+            tooltipY = screenHeight - tooltipHeight - 6
+        }
+
+        if (!themed) {
+            val backgroundColor = 0xF0100010.toInt()
+            drawGradientRect(0, tooltipX - 3, tooltipY - 4, tooltipX + tooltipTextWidth + 3, tooltipY - 3, backgroundColor, backgroundColor)
+            drawGradientRect(0, tooltipX - 3, tooltipY + tooltipHeight + 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 4, backgroundColor, backgroundColor)
+            drawGradientRect(0, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor)
+            drawGradientRect(0, tooltipX - 4, tooltipY - 3, tooltipX - 3, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor)
+            drawGradientRect(0, tooltipX + tooltipTextWidth + 3, tooltipY - 3, tooltipX + tooltipTextWidth + 4, tooltipY + tooltipHeight + 3, backgroundColor, backgroundColor)
+
+            val borderColorStart = 0x505000FF
+            val borderColorEnd = (borderColorStart and 0xFEFEFE) shr 1 or (borderColorStart and 0xFF000000.toInt())
+            drawGradientRect(0, tooltipX - 3, tooltipY - 3 + 1, tooltipX - 3 + 1, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd)
+            drawGradientRect(0, tooltipX + tooltipTextWidth + 2, tooltipY - 3 + 1, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3 - 1, borderColorStart, borderColorEnd)
+            drawGradientRect(0, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart)
+            drawGradientRect(0, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd)
+        } else {
+            drawRoundedBorderedRect(tooltipX - 3.0, tooltipY - 3.0, tooltipTextWidth + 6.0, tooltipHeight + 6.0, 3.0, 1.0, Color(ColorUtil.buttonColor).withAlpha(0.94f), ColorUtil.clickGUIColor)
+        }
+
+        finalTextLines.forEachIndexed { lineNumber, line ->
+            FontUtil.drawStringWithShadow(line, tooltipX.toDouble(), tooltipY.toDouble(), -1)
+
+            if (lineNumber + 1 == titleLinesCount) {
+                tooltipY += 2
+            }
+
+            tooltipY += 10
+        }
+
+        GlStateManager.enableRescaleNormal()
+        GlStateManager.popMatrix()
     }
 }

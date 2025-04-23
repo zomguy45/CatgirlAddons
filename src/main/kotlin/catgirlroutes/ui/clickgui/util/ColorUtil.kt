@@ -10,7 +10,7 @@ import java.awt.Color
  */
 object ColorUtil {
     val clickGUIColor: Color
-        get() = ClickGui.color.value
+        get() = ClickGui.color
 
     val elementColor: Int
      get() = if (ClickGui.design.isSelected("New"))

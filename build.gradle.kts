@@ -22,39 +22,10 @@ val mixinGroup = "$baseGroup.mixin"
 val modID: String by project
 val transformerFile = file("src/main/resources/accesstransformer.cfg")
 
-val requiredOdin = project.findProperty("requiredOdin") as String
-val requiredOdinVersion = requiredOdin.substringAfterLast("-").substringBefore(".jar")
-
 blossom {
     replaceToken("@VER@", version)
-    replaceToken("@REQUIREDODINVERSION@", requiredOdinVersion)
     replaceToken("@MODVERSION@", version)
 }
-
-
-tasks.register("downloadOdin") {
-    val downloadUrl = "https://github.com/odtheking/Odin/releases/download/${requiredOdinVersion}/${requiredOdin}"
-    val targetFile = file("build/resources/Odin")
-
-    doLast {
-        targetFile.mkdirs()
-
-        URL(downloadUrl).openStream().use { input ->
-            FileOutputStream(File(targetFile, requiredOdin)).use { output ->
-                input.copyTo(output)
-            }
-        }
-    }
-}
-
-tasks.named("compileJava") {
-    dependsOn("downloadOdin")
-}
-
-tasks.named("compileKotlin") {
-    dependsOn("downloadOdin")
-}
-
 
 // Toolchains:
 java {
@@ -124,7 +95,6 @@ dependencies {
     minecraft("com.mojang:minecraft:1.8.9")
     mappings("de.oceanlabs.mcp:mcp_stable:22-1.8.9")
     forge("net.minecraftforge:forge:1.8.9-11.15.1.2318-1.8.9")
-    implementation(files("build/resources/Odin/${requiredOdin}"))
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")

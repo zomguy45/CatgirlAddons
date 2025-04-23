@@ -10,6 +10,7 @@ import catgirlroutes.module.impl.render.BarRender.barSetter
 import catgirlroutes.module.impl.render.CustomHighlight.highlightCommands
 import catgirlroutes.module.impl.render.Waypoints.waypointCommands
 import catgirlroutes.ui.clickgui.ClickGUI
+import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -55,6 +56,8 @@ class CatgirlRoutes {
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
             autoP3Commands, autoRoutesCommands, rotationDebug, barSetter,
             waypointCommands, highlightCommands, displayCommands
+            pearlClip, lavaClip, blockClip, aura, inventoryButtons, autoClicker,
+            autoP3Commands, autoRoutesCommands, rotationDebug
         )
 
         listOf(
@@ -70,7 +73,6 @@ class CatgirlRoutes {
             MovementUtils,
             RotationUtils,
             EventDispatcher,
-            VecUtils,
             Notifications,
             PlayerUtils,
             EntityAura,
@@ -79,13 +81,13 @@ class CatgirlRoutes {
             CgaUsers,
             NeuRepo,
             SkyblockPlayer,
-            Intersect,
             WorldRenderUtils
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
     fun postInit(event: FMLLoadCompleteEvent) = runBlocking {
         //Load in the module config post init so that all the minecraft classes are already present.
+        FontUtil.setupFontUtils()
         runBlocking {
             launch(Dispatchers.IO) {
                 moduleConfig.loadConfig()

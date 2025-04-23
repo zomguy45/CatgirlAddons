@@ -1,11 +1,10 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes
+import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.ReceiveChatPacketEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -19,24 +18,16 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 
 object AutoPot: Module(
     "Auto Pot",
-    category = Category.DUNGEON,
-    description = "Automatically gets a potion from your potion bag."
+    Category.DUNGEON,
+    "Automatically gets a potion from your potion bag."
 ){
-    private val potOnStart = BooleanSetting("On start", false, "Gets a pot on dungeon start.")
-    private val m7Only = BooleanSetting("M7 only")
-
-    init {
-        addSettings(this.potOnStart, this.m7Only)
-    }
+    private val potOnStart by BooleanSetting("On start", "Gets a pot on dungeon start.")
+    private val m7Only by BooleanSetting("M7 only", "Gets a pot only when the player is in M7.")
 
     @SubscribeEvent
-    fun onChat (event: ReceiveChatPacketEvent) {
-        if (!potOnStart.enabled || !(this.m7Only.enabled && DungeonUtils.floor == Floor.M7)) return
-
-        val message = event.packet.chatComponent.toString()
-        if (Regex("\\[NPC] Mort: Here, I found this map when I first entered the dungeon\\.").find(message) != null) {
-            activatePot()
-        }
+    fun onChat(event: ChatPacket) {
+        if (!potOnStart || !(this.m7Only && DungeonUtils.floor == Floor.M7)) return
+        if (event.message.matches(Regex("\\[NPC] Mort: Here, I found this map when I first entered the dungeon\\."))) activatePot()
     }
 
     override fun onKeyBind() {

@@ -31,18 +31,18 @@ import catgirlroutes.utils.MovementUtils.stopVelo
 import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.renderText
+import catgirlroutes.utils.equalsOneOf
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
+import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
 import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
-import catgirlroutes.utils.render.WorldRenderUtils.vec3ToAABB
+import catgirlroutes.utils.renderText
 import catgirlroutes.utils.rotation.FakeRotater.clickAt
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
@@ -50,7 +50,6 @@ import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.network.play.client.C03PacketPlayer
 import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
 import net.minecraft.network.play.client.C0EPacketClickWindow
@@ -66,7 +65,6 @@ import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
 import org.lwjgl.input.Keyboard
 import java.awt.Color
-import java.awt.Color.WHITE
 import java.awt.Color.black
 import kotlin.collections.set
 import kotlin.math.abs
@@ -76,42 +74,23 @@ import kotlin.math.sin
 
 object AutoP3 : Module(
     "Auto P3",
-    category = Category.DUNGEON,
-    description = "A module that allows you to place down rings that execute various actions."
+    Category.DUNGEON,
+    "A module that allows you to place down rings that execute various actions."
 ) {
-    val selectedRoute = StringSetting("Selected route", "1", description = "Name of the selected route for auto p3.")
-    private val inBossOnly = BooleanSetting("Boss only", true)
-    private val editTitle = BooleanSetting("EditMode title", false)
-    private val boomType = StringSelectorSetting(
-        "Boom type",
-        "Regular",
-        arrayListOf("Regular", "Infinity"),
-        "Superboom TNT type to use for BOOM ring"
-    )
-    private val style = StringSelectorSetting(
-        "Ring style",
-        "Trans",
-        arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"),
-        "Ring render style to be used."
-    )
-    private val layers = NumberSetting(
-        "Ring layers amount",
-        3.0,
-        1.0,
-        5.0,
-        1.0,
-        "Amount of ring layers to render"
-    ).withDependency { style.selected == "Normal" }
-    private val colour1 = ColorSetting("Ring colour (inactive)", black, false, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
-    private val colour2 = ColorSetting("Ring colour (active)", Color.white, false, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
-    private val disableLength = NumberSetting("Disable length", 50.0, 1.0, 100.0)
-    private val recordLength = NumberSetting("Recording length", 50.0, 1.0, 999.0)
-    private val packetMovement = BooleanSetting("Packet movement")
-    private val recordBind: KeyBindSetting = KeyBindSetting(
-        "Movement record",
-        Keyboard.KEY_NONE,
-        "Starts recording a movement replay if you are on a movement ring and in editmode"
-    )
+    var selectedRoute by StringSetting("Selected route", "1", 0, "Route name(-s)", "Name of the selected route for Auto P3.")
+    private val inBossOnly by BooleanSetting("Boss only", true, "Active in boss room only.")
+    private val editTitle by BooleanSetting("EditMode title", "Renders a title when edit mode is enabled.")
+    private val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
+
+    private val style by SelectorSetting("Ring style", "Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
+    private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
+    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+
+    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this
+    private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
+    private val packetMovement by BooleanSetting("Packet movement")
+    private val recordBind by KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in edit mode.")
         .onPress {
             if (movementRecord) {
                 movementRecord = false
@@ -129,49 +108,31 @@ object AutoP3 : Module(
                     )
                     movementRecord = true
                     movementCurrentRing = ring
-                    movementCurrentRing!!.packets = mutableListOf<Blink.BlinkC06>()
+                    movementCurrentRing!!.packets = mutableListOf()
                 }
             }
         }
 
-    private val stupid2: NumberSetting = NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+    private val stupid2 by NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
 
 
-    init {
-        this.addSettings(
-            selectedRoute,
-            inBossOnly,
-            editTitle,
-            boomType,
-            style,
-            layers,
-            colour1,
-            colour2,
-            disableLength,
-            recordLength,
-            packetMovement,
-            recordBind,
-            stupid2
-        )
-    }
-
-    var termFound = false
-    var dir: Double? = null
-    var airTicks = 0
-    var lastX = 0.0
-    var lastZ = 0.0
+    private val cooldownMap = mutableMapOf<String, Boolean>()
+    private var termFound = false
+    private var dir: Double? = null
+    private var airTicks = 0
+    private var lastX = 0.0
+    private var lastZ = 0.0
+    private var blinkCd = false
 
     @SubscribeEvent
     fun onWorldLoad(event: WorldEvent.Load) {
         loadRings()
     }
 
-    val cooldownMap = mutableMapOf<String, Boolean>()
-
     @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (ringEditMode || (inBossOnly.enabled && floorNumber != 7 && !inBoss)) return
+        if (ringEditMode || (inBossOnly && floorNumber != 7 && !inBoss)) return
         rings.forEach { ring ->
             val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
             val cooldown: Boolean = cooldownMap[key] == true
@@ -190,40 +151,24 @@ object AutoP3 : Module(
         }
     }
 
-    fun intersects(): List<Vec3> {
-        val list = arrayListOf<Vec3>()
-        rings.forEach { p ->
-            val startVec = mc.thePlayer.getPositionEyes(1.0f)
-            val box = vec3ToAABB(p.location, 1, 1, 1)
-            val ray = mc.thePlayer.rayTrace(10.0, 1f).hitVec
-            if (box.calculateIntercept(startVec, ray) != null) {
-                list.add(p.location)
-            }
-        }
-        return list
-    }
-
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (inBossOnly.enabled && floorNumber != 7 && !inBoss) return
+        if (inBossOnly && floorNumber != 7 && !inBoss) return
         rings.forEach { ring ->
             val x: Double = ring.location.xCoord
             val y: Double = ring.location.yCoord
             val z: Double = ring.location.zCoord
 
             val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
-            val color = if (cooldown) colour2.value else colour1.value
+            val color = if (cooldown) colour2 else colour1
 
-            if (ringEditMode && intersects().contains(ring.location)) {
-                drawP3boxWithLayers(x, y, z, ring.width, ring.height, WHITE, layers.value.toInt())
-            } else when (style.selected) {
+            when (style.selected) {
                 "Trans"    -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.value.toInt())
-                "Ring"     -> WorldRenderUtils.drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color)
+                "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.toInt())
+                "Ring"     -> drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
                 "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
-
             if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
                 for (i in 0 until ring.packets.size - 1) {
                     val p1 = ring.packets[i]
@@ -231,7 +176,7 @@ object AutoP3 : Module(
                     WorldRenderUtils.drawLine(
                         p1.x, p1.y + 0.1, p1.z,
                         p2.x, p2.y + 0.1, p2.z,
-                        Color.PINK, 4.0f, false
+                        Blink.lineColour, 4.0f, false
                     )
                 }
                 drawStringInWorld(ring.packets.size.toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
@@ -241,16 +186,12 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onRenderGameOverlay(event: RenderGameOverlayEvent.Post) {
-        if (!editTitle.enabled) return
-        if (inBossOnly.enabled && floorNumber != 7) return
-        val sr = ScaledResolution(mc)
-        val t: String
-        t = if (ringEditMode) "Edit Mode" else if (blinkEditMode) "Blink edit" else return
-        renderText(
-            t,
-            sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(t) / 2,
-            sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT
-        )
+        if (!editTitle || (inBossOnly && floorNumber != 7)) return
+        renderText(when {
+            ringEditMode -> "Edit Mode"
+            blinkEditMode -> "Blink Edit"
+            else -> return
+        })
     }
 
     @SubscribeEvent
@@ -270,10 +211,8 @@ object AutoP3 : Module(
         return distanceX < (ring.width / 2) &&
                 distanceY < ring.height &&
                 distanceY >= -0.5 &&
-                distanceZ < (ring.width / 2);
+                distanceZ < (ring.width / 2)
     }
-
-    var blinkCd = false
 
     private suspend fun executeAction(ring: Ring) {
         val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
@@ -430,7 +369,7 @@ object AutoP3 : Module(
     @SubscribeEvent
     fun onMovementRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !movementRecord) return
-        if (movementCurrentRing!!.packets.size == recordLength.value.toInt()) {
+        if (movementCurrentRing!!.packets.size == recordLength.toInt()) {
             movementRecord = false
             RingManager.saveRings()
             modMessage("Done recording")
@@ -457,7 +396,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun onTickMovement(event: MotionUpdateEvent.Pre) {
-        if (!movementOn || packetMovement.value) return
+        if (!movementOn || packetMovement) return
         if (movementList.isEmpty()) {
             movementOn = false
             return
@@ -471,14 +410,14 @@ object AutoP3 : Module(
         mc.thePlayer.moveEntity(x, y, z)
     }
 
-    var ignoreNextC03 = false
-    var lastMoveX = 0.0
-    var lastMoveY = 0.0
-    var lastMoveZ = 0.0
+    private var ignoreNextC03 = false
+    private var lastMoveX = 0.0
+    private var lastMoveY = 0.0
+    private var lastMoveZ = 0.0
 
     @SubscribeEvent
     fun onPacketC03(event: PacketSentEvent) {
-        if (!movementOn || !packetMovement.value || event.packet !is C03PacketPlayer) return
+        if (!movementOn || !packetMovement || event.packet !is C03PacketPlayer) return
         if (ignoreNextC03) {
             ignoreNextC03 = false
             return
@@ -489,9 +428,9 @@ object AutoP3 : Module(
             return
         }
         val move = movementList.first()
-        val x = move.x - mc.thePlayer.posX
-        val y = move.y - mc.thePlayer.posY
-        val z = move.z - mc.thePlayer.posZ
+        move.x - mc.thePlayer.posX
+        move.y - mc.thePlayer.posY
+        move.z - mc.thePlayer.posZ
         movementList.removeFirst()
         event.isCanceled = true
         ignoreNextC03 = true
@@ -504,7 +443,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun renderWorldMovement(event: RenderWorldLastEvent) {
-        if (!movementOn || !packetMovement.value) return
+        if (!movementOn || !packetMovement) return
         drawCustomSizedBoxAt(lastMoveX - mc.thePlayer.width / 2, lastMoveY, lastMoveZ - mc.thePlayer.width / 2, mc.thePlayer.width.toDouble(), mc.thePlayer.height.toDouble(), mc.thePlayer.width.toDouble(), Color.PINK)
     }
 
@@ -514,7 +453,7 @@ object AutoP3 : Module(
         if (event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
         if (event.packet.motionY == 28000) {
             onlyHorizontal = true
-            scheduleTask((disableLength.value - 1).toInt()) { onlyHorizontal = false }
+            scheduleTask((disableLength - 1).toInt()) { onlyHorizontal = false }
         }
     }
 
@@ -527,8 +466,7 @@ object AutoP3 : Module(
         movementList = mutableListOf()
     }
 
-    var inMelody = false
-    var melodyClicked = System.currentTimeMillis()
+    private var melodyClicked = System.currentTimeMillis()
 
     @SubscribeEvent
     fun onTick(event: ClientTickEvent) {
@@ -564,12 +502,12 @@ object AutoP3 : Module(
             }
         } else {
             //assume max acceleration
-            var thisshit2 = stupid2.value / 10000
-            lastX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+            val thisShit2 = stupid2 / 10000
+            lastX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
+            lastZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
             if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisshit2 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisshit2 * speed * cos(radians)
+                mc.thePlayer.motionX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
+                mc.thePlayer.motionZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
             }
         }
     }
@@ -583,8 +521,7 @@ object AutoP3 : Module(
 
     @SubscribeEvent
     fun stupid(event: InputEvent.KeyInputEvent) {
-        var keycode = Keyboard.getEventKey()
-        if (keycode == mc.gameSettings.keyBindBack.keyCode) {
+        if (Keyboard.getEventKey() == mc.gameSettings.keyBindBack.keyCode) {
             dir = null
         }
     }
@@ -603,6 +540,6 @@ object AutoP3 : Module(
                 debugMessage("Melody clicked!")
             }
         }
-        debugMessage(registry + ", " + metadata + ", " + slot + ", " + name)
+        debugMessage("$registry, $metadata, $slot, $name")
     }
 }

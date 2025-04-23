@@ -3,9 +3,8 @@ package catgirlroutes.ui.misc
 import catgirlroutes.module.impl.dungeons.LeapOrganiser
 import catgirlroutes.CatgirlRoutes.Companion.mc as mainMc
 import catgirlroutes.ui.clickgui.util.FontUtil
-import catgirlroutes.ui.misc.elements.impl.MiscElementButton
-import catgirlroutes.ui.misc.elements.impl.MiscElementSelector
-import catgirlroutes.ui.misc.elements.impl.MiscElementText
+import catgirlroutes.ui.misc.elements.MiscElementStyle
+import catgirlroutes.ui.misc.elements.impl.*
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -36,21 +35,55 @@ class LeapOrganiser : GuiScreen() {
     private val boxHeight = 80
 
     private val sr = ScaledResolution(mainMc)
-    private val updateButton = MiscElementButton("Update Party", sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120.0) {
-        debugMessage("Test button")
+    private val updateButton = button {
+        text = "Update Party"
+        at(sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120.0)
+        onClick { debugMessage("Test button") }
     }
 
-    private val leapOptions = MiscElementSelector(
-        "Leap Menu", "SA", LeapOrganiser.leapMenu.options,
-        sr.scaledWidth_double / 2.0 - 125.0, sr.scaledHeight_double / 2.0 + 120.0
+    private val leapOptions = selector {
+        text = "Leap menu"
+        default("SA")
+        options("SA", "Odin")
+        at(sr.scaledWidth_double / 2.0 - 125.0, sr.scaledHeight_double / 2.0 + 120.0)
+        size(75.0, 20.0)
+    }
+
+    private val horizontalSelector = selector {
+        text = "Horizontal"
+        default("1")
+        options("1", "2", "3")
+        horizontal(3)
+        at(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0)
+        size(100.0, 20.0)
+    }
+
+    private val textField = textField {
+        at(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 160.0)
+        width = 200.0
+        maxLength = 50
+        placeholder = "Placeholder"
+    }
+
+    private val textField2 = MiscElementTextField(
+        MiscElementStyle(
+            x = 50.0,
+            y = 50.0,
+            width = 200.0,
+            value = "123"
+        ),
+        maxLength = 90,
+        prependText = "Prepend: "
     )
 
-    private val horizontalSelector = MiscElementSelector(
-        "Horizontal", "1", arrayListOf("1", "2", "3"),
-        sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 120.0, vertical = false
+    private val textField3 = MiscElementTextField(
+        MiscElementStyle(
+            x = 50.0,
+            y = 80.0,
+            width = 200.0,
+            value = "123"
+        )
     )
-
-    private val textField = MiscElementText(sr.scaledWidth_double / 2.0 + 45.0, sr.scaledHeight_double / 2.0 + 160.0, 200.0, size = 50, placeholder = "Placeholder")
 
     override fun initGui() {
         if (boxes.isNotEmpty()) return
@@ -61,10 +94,10 @@ class LeapOrganiser : GuiScreen() {
 
         slots.apply {
             clear()
-            add(Slot("Player 1\n${LeapOrganiser.player1Note.text}", centreX - boxWidth - spacing, centreY - boxHeight - spacing, Color(255, 170, 21)))
-            add(Slot("Player 2\n${LeapOrganiser.player2Note.text}", centreX + spacing, centreY - boxHeight - spacing, Color(170, 0, 0)))
-            add(Slot("Player 3\n${LeapOrganiser.player3Note.text}", centreX - boxWidth - spacing, centreY + spacing, Color(85, 255, 255)))
-            add(Slot("Player 4\n${LeapOrganiser.player4Note.text}", centreX + spacing, centreY + spacing, Color(0, 170, 0)))
+            add(Slot("Player 1\n${LeapOrganiser.player1Note}", centreX - boxWidth - spacing, centreY - boxHeight - spacing, Color(255, 170, 21)))
+            add(Slot("Player 2\n${LeapOrganiser.player2Note}", centreX + spacing, centreY - boxHeight - spacing, Color(170, 0, 0)))
+            add(Slot("Player 3\n${LeapOrganiser.player3Note}", centreX - boxWidth - spacing, centreY + spacing, Color(85, 255, 255)))
+            add(Slot("Player 4\n${LeapOrganiser.player4Note}", centreX + spacing, centreY + spacing, Color(0, 170, 0)))
         }
 
         boxes.apply {
@@ -102,6 +135,8 @@ class LeapOrganiser : GuiScreen() {
         leapOptions.render(mouseX, mouseY)
         horizontalSelector.render(mouseX, mouseY)
         textField.render(mouseX, mouseY)
+        textField2.render(mouseX, mouseY)
+        textField3.render(mouseX, mouseY)
 
         super.drawScreen(mouseX, mouseY, partialTicks)
     }
@@ -118,6 +153,8 @@ class LeapOrganiser : GuiScreen() {
         updateButton.mouseClicked(mouseX, mouseY, mouseButton)
         horizontalSelector.mouseClicked(mouseX, mouseY, mouseButton)
         textField.mouseClicked(mouseX, mouseY, mouseButton)
+        textField2.mouseClicked(mouseX, mouseY, mouseButton)
+        textField3.mouseClicked(mouseX, mouseY, mouseButton)
         if (leapOptions.mouseClicked(mouseX, mouseY, mouseButton)) {
             if (mouseButton == 0) LeapOrganiser.leapMenu.selected = leapOptions.selected
         }
@@ -148,11 +185,15 @@ class LeapOrganiser : GuiScreen() {
 
     override fun mouseClickMove(mouseX: Int, mouseY: Int, clickedMouseButton: Int, timeSinceLastClick: Long) {
         textField.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
+        textField2.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
+        textField3.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
         super.mouseClickMove(mouseX, mouseY, clickedMouseButton, timeSinceLastClick)
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         textField.keyTyped(typedChar, keyCode)
+        textField2.keyTyped(typedChar, keyCode)
+        textField3.keyTyped(typedChar, keyCode)
         super.keyTyped(typedChar, keyCode)
     }
 
@@ -160,7 +201,7 @@ class LeapOrganiser : GuiScreen() {
         val order = slots.joinToString(" ") { getBoxInSlot(it)?.name ?: "_" }
 
         modMessage("Setting ${LeapOrganiser.leapMenu.selected} leap order: $order")
-        LeapOrganiser.leapOrder.text = order
+        LeapOrganiser.leapOrder = order
         when (LeapOrganiser.leapMenu.selected) {
             "SA" -> commandAny("/sa leap $order")
             "Odin" -> commandAny("/od leap $order")
