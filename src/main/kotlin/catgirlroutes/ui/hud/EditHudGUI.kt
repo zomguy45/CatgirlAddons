@@ -35,7 +35,8 @@ object EditHudGUI : GuiScreen() {
             text = "Reset HUD"
             at(sr.scaledWidth_double / 2.0 - 60.0 / 2.0, sr.scaledHeight_double - 40.0)
             size(60.0, 20.0)
-        } onClick { modMessage("Resetting elements") }
+            onClick { modMessage("Resetting elements") }
+        }
 
         hudElements.forEach { it.updateSize() }
         super.initGui()

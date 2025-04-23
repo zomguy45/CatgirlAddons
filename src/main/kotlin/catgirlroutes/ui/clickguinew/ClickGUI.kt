@@ -23,8 +23,8 @@ import java.awt.Color
 
 class ClickGUI : Screen() { // todo: module description
 
-    val guiWidth = 305.0
-    val guiHeight = 230.0
+    val guiWidth = 305.0 + 50.0
+    val guiHeight = 230.0 + 30.0
 
     var x = 0.0
     var y = 0.0
@@ -98,7 +98,8 @@ class ClickGUI : Screen() { // todo: module description
                 outlineHoverColour = Color.WHITE.withAlpha(0)
                 textPadding = 12.0
                 alignment = Alignment.LEFT
-            } onClick { this.selectedWindow = window }
+                onClick { selectedWindow = window }
+            }
 
             if (this.searchBar.text.isNotEmpty()) {
                 val containsSearch = window.moduleButtons.any { it.module.name.contains(this.searchBar.text, true) }

@@ -40,14 +40,14 @@ class ButtonBuilder : ElementDSL<MiscElementButton>() {
     private var onClickAction: () -> Unit = {}
     private var onHoverAction: () -> Unit = {}
 
-    infix fun onHover(action: () -> Unit): ButtonBuilder {
+    fun onHover(action: () -> Unit): ButtonBuilder { // todo make it in main class
         onHoverAction = action
         return this
     }
 
-    infix fun onClick(action: () -> Unit): MiscElementButton {
+    fun onClick(action: () -> Unit): ButtonBuilder {
         onClickAction = action
-        return build()
+        return this
     }
 
     override fun buildElement(): MiscElementButton {
@@ -55,6 +55,6 @@ class ButtonBuilder : ElementDSL<MiscElementButton>() {
     }
 }
 
-fun button(block: ButtonBuilder.() -> Unit): ButtonBuilder {
-    return ButtonBuilder().apply(block)
+fun button(block: ButtonBuilder.() -> Unit): MiscElementButton {
+    return ButtonBuilder().apply(block).build()
 }

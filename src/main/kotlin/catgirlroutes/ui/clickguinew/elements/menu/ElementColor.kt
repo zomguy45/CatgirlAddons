@@ -29,6 +29,10 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
 
     var dragging: Int? = null
 
+    init {
+        width = parent.width
+    }
+
     private inline val colorValue: Color
         get() = this.setting.value
 

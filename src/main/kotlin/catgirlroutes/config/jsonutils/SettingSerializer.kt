@@ -27,6 +27,11 @@ class SettingSerializer : JsonSerializer<Setting<*>> {
                         add(key.toString(), value.toJsonElement())
                     }
                 })
+                is OrderSetting -> add(src.name, JsonObject().apply {
+                    src.value.forEach { (key, value) ->
+                        addProperty(key, value)
+                    }
+                })
             }
         }
     }

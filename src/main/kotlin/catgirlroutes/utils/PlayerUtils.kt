@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.ClientListener.scheduleTask
 import net.minecraft.block.BlockAir
 import net.minecraft.client.Minecraft
 import net.minecraft.client.settings.KeyBinding
@@ -50,8 +51,17 @@ object PlayerUtils {
                 }
             }
         }
-        modMessage("$name not found.")
+        modMessage("$name §cnot found.")
         return SwapState.UNKNOWN
+    }
+
+    fun swapFromName(name: String, action: () -> Unit) {
+        val state = swapFromName(name)
+        when(state) {
+            SwapState.SWAPPED -> scheduleTask(1) { action() }
+            SwapState.ALREADY_HELD -> action()
+            else -> return
+        }
     }
 
     fun swapToSlot(slot: Int): SwapState {

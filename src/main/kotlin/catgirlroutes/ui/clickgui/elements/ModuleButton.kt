@@ -64,7 +64,7 @@ class ModuleButton(val module: Module, val panel: Panel) {
                     is KeyBindSetting ->    ElementKeyBind(this, setting)
                     is DropdownSetting ->   ElementDropdown(this, setting)
                     is HudSetting ->        ElementHud(this, setting)
-                    else -> return@addElement
+                    else ->                 ElementDummy(this, setting)
                 }
                 menuElements.add(position, newElement)
             }else {

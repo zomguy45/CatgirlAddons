@@ -38,7 +38,8 @@ class LeapOrganiser : GuiScreen() {
     private val updateButton = button {
         text = "Update Party"
         at(sr.scaledWidth_double / 2.0 - 40.0, sr.scaledHeight_double / 2.0 + 120.0)
-    } onClick { debugMessage("Test button") }
+        onClick { debugMessage("Test button") }
+    }
 
     private val leapOptions = selector {
         text = "Leap menu"

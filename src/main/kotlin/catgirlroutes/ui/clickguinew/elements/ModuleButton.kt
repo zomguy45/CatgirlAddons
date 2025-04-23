@@ -72,6 +72,7 @@ class ModuleButton(val module: Module, val window: Window) {
                     is KeyBindSetting ->    ElementKeyBind(this, setting)
                     is DropdownSetting ->   ElementDropdown(this, setting)
                     is HudSetting ->        ElementHud(this, setting)
+                    is OrderSetting ->      ElementOrder(this, setting)
                     else -> return@addElement
                 }
                 try { // for now ig

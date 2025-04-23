@@ -7,6 +7,7 @@ import catgirlroutes.ui.clickguinew.elements.Element
 import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.button
+import catgirlroutes.ui.misc.elements.util.update
 import java.awt.Color
 
 class ElementAction(parent: ModuleButton, setting: ActionSetting) :
@@ -16,10 +17,14 @@ class ElementAction(parent: ModuleButton, setting: ActionSetting) :
         text = displayName.capitalizeOnlyFirst()
         size(this@ElementAction.width, this@ElementAction.height)
         colour = Color(ColorUtil.elementColor)
-    } onClick { this.setting.doAction() }
+        onClick { setting.doAction() }
+    }
 
     override fun renderElement(): Double {
-        this.actionButton.render(mouseXRel, mouseYRel)
+        this.actionButton.update { // FIXME
+            outlineColour = Color(ColorUtil.outlineColor)
+            outlineHoverColour = ColorUtil.clickGUIColor
+        }.render(mouseXRel, mouseYRel)
         return super.renderElement()
     }
 

@@ -1,5 +1,6 @@
 package catgirlroutes.module.impl.misc
 
+import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
@@ -29,29 +30,42 @@ object Test : Module(
     "MODULE FOR VARIOUS TESTS. DO NOT USE",
     TagType.HARAM
 ) {
-    private val notifDropDown by DropdownSetting("Drop down", false)
-    private val notif by ActionSetting("notif", "nofiification") { Notifications.send("Info", "I think this is an info") }.withDependency(notifDropDown)
-    private val notifWarning by ActionSetting("notifWarning", "nofiification") { Notifications.send("Warning (long title test hello 123 herp me hurrep hai)", "I think this is a warning", 5000.0, NotificationType.WARNING) }.withDependency(notifDropDown)
-    private val notifErr by ActionSetting("notifErr", "nofiification") { Notifications.send("Error", "LONG DESCRIPTION TEST every day for the past month I've heard students non-stop joking about P. diddy, Epstein, R. kelly when a student has to go to take a piss he tells his friend group \"one minute bro i gotta pull an R kelly\" they say \"no diddy\" i think like another version of \"no homo\" one student was messing with the computer spamming the windows error sound and said \"this is how Stephen Hawking was moaning in those kids ears at epsteins island\" I've probably heard \"ain't no party like a diddy party\" a thousand times this month alone, im just tired of it all", type = NotificationType.ERROR, icon = "fallingkittens/bread.png") }.withDependency(notifDropDown)
-    private val notifErr2 by ActionSetting("notifErr", "nofiification") { Notifications.send("Error", "LONG DESCRIPTION TEST every day for the past month I've heard students non-stop joking about P. diddy, Epstein, R. kelly when a student has to go to take a piss he tells his friend group \"one minute bro i gotta pull an R kelly\" they say \"no diddy\" i think like another version of \"no homo\" one student was messing with the computer spamming the windows error sound and said \"this is how Stephen Hawking was moaning in those kids ears at epsteins island\" I've probably heard \"ain't no party like a diddy party\" a thousand times this month alone, im just tired of it all", type = NotificationType.ERROR) }.withDependency(notifDropDown)
-    private val notifIcon by ActionSetting("notifIcon", "nofiification") { Notifications.send("Info", "I think this is an info", icon = "Icon.png") }.withDependency(notifDropDown)
+//    private val notifDropDown by DropdownSetting("Drop down", false)
+//    private val notif by ActionSetting("notif", "nofiification") { Notifications.send("Info", "I think this is an info") }.withDependency(notifDropDown)
+//    private val notifWarning by ActionSetting("notifWarning", "nofiification") { Notifications.send("Warning (long title test hello 123 herp me hurrep hai)", "I think this is a warning", 5000.0, NotificationType.WARNING) }.withDependency(notifDropDown)
+//    private val notifErr by ActionSetting("notifErr", "nofiification") { Notifications.send("Error", "LONG DESCRIPTION TEST every day for the past month I've heard students non-stop joking about P. diddy, Epstein, R. kelly when a student has to go to take a piss he tells his friend group \"one minute bro i gotta pull an R kelly\" they say \"no diddy\" i think like another version of \"no homo\" one student was messing with the computer spamming the windows error sound and said \"this is how Stephen Hawking was moaning in those kids ears at epsteins island\" I've probably heard \"ain't no party like a diddy party\" a thousand times this month alone, im just tired of it all", type = NotificationType.ERROR, icon = "fallingkittens/bread.png") }.withDependency(notifDropDown)
+//    private val notifErr2 by ActionSetting("notifErr", "nofiification") { Notifications.send("Error", "LONG DESCRIPTION TEST every day for the past month I've heard students non-stop joking about P. diddy, Epstein, R. kelly when a student has to go to take a piss he tells his friend group \"one minute bro i gotta pull an R kelly\" they say \"no diddy\" i think like another version of \"no homo\" one student was messing with the computer spamming the windows error sound and said \"this is how Stephen Hawking was moaning in those kids ears at epsteins island\" I've probably heard \"ain't no party like a diddy party\" a thousand times this month alone, im just tired of it all", type = NotificationType.ERROR) }.withDependency(notifDropDown)
+//    private val notifIcon by ActionSetting("notifIcon", "nofiification") { Notifications.send("Info", "I think this is an info", icon = "Icon.png") }.withDependency(notifDropDown)
+//
+//    private val dropdownTest by DropdownSetting("Dropdown test")
+//    private val stupid1 by BooleanSetting("stupid1").withDependency(dropdownTest)
+//    private val stupid2 by BooleanSetting("stupid2").withDependency(dropdownTest) { this.stupid1 }
+//    private val stupid3 by ColorSetting("stupid3", Color.WHITE).withDependency(dropdownTest) { this.stupid1 }
+//
+//    private val colourTest by ColorSetting("Colour", Color.BLUE)
+//    private val colourTest2 by ColorSetting("Colour2", Color.BLUE, false)
+//
+//    private val slider by NumberSetting("Slider", 20.0, 0.0, 100.0, 5.0, unit = "px")
+//    private val getHudWidth by ActionSetting("Get hud width") {
+////        debugMessage(TestHud.width)
+//    }
+//
+//    private val listTest by ListSetting("Test list", mutableListOf<Stupid>())
+//    private val stupid4 by ActionSetting("Stupid4") { this.listTest.add(Stupid("stupid", 1)) }
+//    private val stupid5 by ActionSetting("Stupid5") { debugMessage(this.listTest) }
+//
+//    private val mapTest by MapSetting("Test map", mutableMapOf<Double, Stupid>())
+//    private val stupid6 by ActionSetting("Stupid6") { this.mapTest[Math.random()] = Stupid("stupid2", 2) }
+//    private val stupid7 by ActionSetting("Stupid7") { debugMessage(this.mapTest) }
+//
+//    private val hudTest3 by HudSetting {
+//        size(100.0, 100.0)
+//        render {
+//            drawString("this is a test", 0, 0)
+//        }
+//    }
 
-    private val dropdownTest by DropdownSetting("Dropdown test")
-    private val stupid1 by BooleanSetting("stupid1").withDependency(dropdownTest)
-    private val stupid2 by BooleanSetting("stupid2").withDependency(dropdownTest) { this.stupid1 }
-    private val stupid3 by ColorSetting("stupid3", Color.WHITE).withDependency(dropdownTest) { this.stupid1 }
-
-    private val colourTest by ColorSetting("Colour", Color.BLUE)
-    private val colourTest2 by ColorSetting("Colour2", Color.BLUE, false)
-
-    private val slider by NumberSetting("Slider", 20.0, 0.0, 100.0, 5.0, unit = "px")
-    private val getHudWidth by ActionSetting("Get hud width") {
-//        debugMessage(TestHud.width)
-    }
-
-    private val listTest by ListSetting("Test list", mutableListOf<Stupid>())
-    private val stupid4 by ActionSetting("Stupid4") { this.listTest.add(Stupid("stupid", 1)) }
-    private val stupid5 by ActionSetting("Stupid5") { debugMessage(this.listTest) }
+    private val orderSettingTest by OrderSetting("Order test", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4"))
 
     private val mapTest by MapSetting("Test map", mutableMapOf<Double, Stupid>())
     private val stupid6 by ActionSetting("Stupid6") { this.mapTest[Math.random()] = Stupid("stupid2", 2) }

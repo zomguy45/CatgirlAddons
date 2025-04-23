@@ -168,23 +168,28 @@ abstract class SearchOverlay(
                 colour = Color(ColorUtil.elementColor)
                 alignment = Alignment.LEFT
                 textPadding = 25.0
-            } onHover {
-                if (stack != null && mouseY.toDouble() in visibleRange) {
-                    StencilUtils.disable()
-                    HUDRenderUtils.drawHoveringText(stack.getTooltip(), mouseX, mouseY)
-                    StencilUtils.enable()
+
+                onHover {
+                    if (stack != null && mouseY.toDouble() in visibleRange) {
+                        StencilUtils.disable()
+                        HUDRenderUtils.drawHoveringText(stack.getTooltip(), mouseX, mouseY)
+                        StencilUtils.enable()
+                    }
                 }
-            } onClick {
-                val newEntry = if (item != null) "REPOITEM:${displayText.clean}" else displayText
-                debugMessage(newEntry)
-                val finalText = item?.let { processItem(it) } ?: displayText
-                debugMessage(finalText)
-                if (newEntry.isNotBlank()) history = history.addToHistory(newEntry)
-                sign?.let {
-                    it.signText[0] = ChatComponentText(finalText)
-                    it.markDirty()
-                } ?: commandAny("$commandPrefix ${finalText.noControlCodes}")
-                mc.displayGuiScreen(null)
+
+                onClick {
+                    val newEntry = if (item != null) "REPOITEM:${displayText.clean}" else displayText
+                    debugMessage(newEntry)
+                    val finalText = item?.let { processItem(it) } ?: displayText
+                    debugMessage(finalText)
+                    if (newEntry.isNotBlank()) history = history.addToHistory(newEntry)
+                    sign?.let {
+                        it.signText[0] = ChatComponentText(finalText)
+                        it.markDirty()
+                    } ?: commandAny("$commandPrefix ${finalText.noControlCodes}")
+                    mc.displayGuiScreen(null)
+                }
+
             }
             btn.render(mouseX, mouseY)
             stack?.let { drawItemStackWithText(it, x + 7.0, offsetY + 2.0) }

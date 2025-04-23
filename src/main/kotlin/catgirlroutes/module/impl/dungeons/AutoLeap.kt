@@ -9,6 +9,7 @@ import catgirlroutes.module.settings.impl.ActionSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ListSetting
 import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.PlayerUtils.posZ
@@ -98,6 +99,7 @@ object AutoLeap : Module( // todo improve selectors
             !inBoss -> clearLeap.selected to clearLeapClass.index
             else -> return
         }
+        debugMessage("leaping to $name $clazz")
 
         when (leapMode.selected) {
             "Name" -> leap(name)

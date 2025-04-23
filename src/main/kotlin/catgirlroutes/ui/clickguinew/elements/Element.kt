@@ -21,7 +21,7 @@ abstract class Element<S: Setting<*>>(
     var x = 0.0
     var y = 0.0
 
-    val width = this.parent.width
+    var width = this.parent.width * 0.836
     var height: Double
 
     var displayName: String = this.setting.name
