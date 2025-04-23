@@ -55,7 +55,7 @@ class CatgirlRoutes {
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
             autoP3Commands, autoRoutesCommands, rotationDebug, barSetter,
-            waypointCommands, highlightCommands, displayCommands
+            waypointCommands, highlightCommands, displayCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons, autoClicker,
             autoP3Commands, autoRoutesCommands, rotationDebug
         )

@@ -15,7 +15,6 @@ import com.google.gson.reflect.TypeToken
 import net.minecraft.client.gui.GuiScreen
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.EntityInteractEvent
-import net.minecraftforge.event.entity.player.PlayerInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import java.io.File

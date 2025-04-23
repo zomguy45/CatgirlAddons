@@ -2,9 +2,6 @@ package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
-import catgirlroutes.commands.impl.Intersect
-import catgirlroutes.commands.impl.RingManager.rings
-import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.ColorSetting

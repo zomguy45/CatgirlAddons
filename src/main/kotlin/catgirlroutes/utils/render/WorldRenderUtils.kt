@@ -2,15 +2,9 @@ package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
-import catgirlroutes.module.impl.dungeons.Watcher
-import catgirlroutes.module.settings.RegisterHudElement
-import catgirlroutes.ui.clickgui.util.ColorUtil.hex
+
 import catgirlroutes.ui.clickgui.util.ColorUtil.toInt
-import catgirlroutes.ui.hud.HudElement
-import catgirlroutes.utils.Utils.addVec
-import catgirlroutes.utils.Utils.renderText
-import catgirlroutes.utils.VecUtils.fastEyeHeight
-import catgirlroutes.utils.VecUtils.renderVec
+import catgirlroutes.utils.renderText
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.PlayerUtils.posZ
@@ -18,7 +12,6 @@ import catgirlroutes.utils.addVec
 import catgirlroutes.utils.fastEyeHeight
 import catgirlroutes.utils.WorldToScreen
 import com.github.stivais.commodore.utils.GreedyString
-import net.minecraft.client.Minecraft
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
@@ -35,7 +28,6 @@ import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.EventPriority
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.client.event.RenderGameOverlayEvent
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL11.*

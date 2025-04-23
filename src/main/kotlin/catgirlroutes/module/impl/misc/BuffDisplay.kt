@@ -5,6 +5,7 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.settings.RegisterHudElement
+import catgirlroutes.module.settings.impl.HudSetting
 import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.ChatUtils.modMessage
 import net.minecraft.network.play.client.C08PacketPlayerBlockPlacement
@@ -28,6 +29,20 @@ object BuffDisplay : Module(
     var thisY = 0f
     var enderman = false
     var readyForS08 = false
+    private val hud by HudSetting{
+        size(mc.fontRendererObj.getStringWidth("Enderman: 10.0") + 6,
+            (mc.fontRendererObj.FONT_HEIGHT + 2) * 3)
+        render {
+            if (!BuffDisplay.enabled) return@render
+            thisY = 0f
+            render(ragTime / 20.0, "Ragnarock: " )
+            render(reaperTime / 20.0, "Enrage: " )
+            render(endermanTime / 20.0, "Teleport Savvy: " )
+            render(tubaTime / 20.0, "Howl: ")
+            render(soBHTime / 20.0, "Bad Health: ")
+            render(endstoneSwordTime / 20.0, "Extreme Focus: ")
+        }
+    }
 
     @SubscribeEvent
     fun onPacket(event: PacketReceiveEvent) {
@@ -85,25 +100,6 @@ object BuffDisplay : Module(
         tubaTime -= 1
         soBHTime -= 1
         endstoneSwordTime -= 1
-    }
-
-    @RegisterHudElement
-    object BuffHud : HudElement(
-        this,
-        0, 0,
-        mc.fontRendererObj.getStringWidth("Enderman: 10.0") + 6,
-        (mc.fontRendererObj.FONT_HEIGHT + 2) * 3
-    ) {
-        override fun renderHud() {
-            if (!BuffHud.enabled) return
-            thisY = 0f
-            render(ragTime / 20.0, "Ragnarock: " )
-            render(reaperTime / 20.0, "Enrage: " )
-            render(endermanTime / 20.0, "Teleport Savvy: " )
-            render(tubaTime / 20.0, "Howl: ")
-            render(soBHTime / 20.0, "Bad Health: ")
-            render(endstoneSwordTime / 20.0, "Extreme Focus: ")
-        }
     }
 
     fun render(time: Double, type: String) {

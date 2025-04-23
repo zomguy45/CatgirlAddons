@@ -2,10 +2,6 @@ package catgirlroutes.events
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.*
-import catgirlroutes.utils.Utils.containsOneOf
-import catgirlroutes.utils.Utils.equalsOneOf
-import catgirlroutes.utils.Utils.postAndCatch
-import catgirlroutes.utils.Utils.unformattedName
 import catgirlroutes.utils.*
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonItemDrops
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
