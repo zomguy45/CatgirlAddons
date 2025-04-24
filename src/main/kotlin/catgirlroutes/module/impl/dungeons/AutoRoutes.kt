@@ -65,6 +65,7 @@ object AutoRoutes : Module( // todo recode this shit
 ) {
     private val editTitle by BooleanSetting("EditMode title", false)
     private val boomType by SelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
+    private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
 
     private val preset by SelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
     private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
@@ -150,7 +151,7 @@ object AutoRoutes : Module( // todo recode this shit
 
     @SubscribeEvent
     fun onRenderWorld(event: RenderWorldLastEvent) {
-        //modMessage(nodes.toString())
+        //feedbackMessage(nodes.toString())
         nodes.forEach { node ->
             val realLocation = currentRoom?.getRealCoords(node.location) ?: node.location
 
@@ -299,21 +300,21 @@ object AutoRoutes : Module( // todo recode this shit
                 scheduleTask(0) { shouldClick = true }
             }
             "walk" -> {
-                modMessage("Walking!")
+                feedbackMessage("Walking!")
                 MovementUtils.setKey("shift", false)
                 MovementUtils.setKey("w", true)
             }
             "jump" -> {
-                modMessage("Jumping!")
+                feedbackMessage("Jumping!")
                 MovementUtils.jump()
             }
             "stop" -> {
-                modMessage("Stopping!")
+                feedbackMessage("Stopping!")
                 MovementUtils.stopMovement()
                 MovementUtils.stopVelo()
             }
             "boom" -> {
-                modMessage("Bomb denmark!")
+                feedbackMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
                 scheduleTask { shouldLeftClick = true }
             }
@@ -327,15 +328,15 @@ object AutoRoutes : Module( // todo recode this shit
                 shouldClip = true
             }
             "look" -> {
-                modMessage("Looking!")
+                feedbackMessage("Looking!")
                 snapTo(yaw, node.pitch)
             }
             "align" -> {
-                modMessage("Aligning!")
+                feedbackMessage("Aligning!")
                 mc.thePlayer.setPosition(floor(mc.thePlayer.posX) + 0.5, mc.thePlayer.posY, floor(mc.thePlayer.posZ) + 0.5)
             }
             "command" -> {
-                modMessage("Sexecuting!")
+                feedbackMessage("Sexecuting!")
                 commandAny(node.command!!)
             }
         }
@@ -382,4 +383,9 @@ object AutoRoutes : Module( // todo recode this shit
             newDeferred.await()
         }
     }
+
+    private fun feedbackMessage(message: String) {
+        if (chatFeedback) modMessage(message)
+    }
+
 }
