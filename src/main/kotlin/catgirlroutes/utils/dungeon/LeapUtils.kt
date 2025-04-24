@@ -3,11 +3,13 @@ package catgirlroutes.utils.dungeon
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.devMessage
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
+import catgirlroutes.utils.dungeon.DungeonUtils.getMageCooldownMultiplier
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.client.C0EPacketClickWindow
@@ -22,6 +24,9 @@ object LeapUtils {
     private var inProgress = false
     private var clickedLeap = false
     private var cwid = -1
+
+    private var lastLeap = 0L
+    private val leapCD get() = 2400 * getMageCooldownMultiplier()
 
     private val currentLeap get() = leapQueue[0]
     private val inQueue get() = leapQueue.size > 0
@@ -43,6 +48,11 @@ object LeapUtils {
 
     fun leap(target: Any) {
         if (!inDungeons || inProgress || target == DungeonClass.Unknown) return
+        val elapsed = System.currentTimeMillis() - lastLeap
+        if (elapsed < leapCD) {
+            modMessage("§cFailed to leap! On cooldown: ${"%.1f".format((leapCD - elapsed) / 1000.0)}s")
+            return
+        }
         val teammate = when (target) {
             is String -> dungeonTeammatesNoSelf.firstOrNull { it.name == target }
             is DungeonClass -> dungeonTeammatesNoSelf.firstOrNull { it.clazz == target }
@@ -54,11 +64,13 @@ object LeapUtils {
             swapFromName("Infinileap") {
                 airClick()
                 clickedLeap = true
+                lastLeap = System.currentTimeMillis()
+                modMessage("§аLeaping to $target")
             }
             leapQueue.add(teammate.name)
         } else {
             inProgress = false
-            modMessage("Failed to leap! $target not found")
+            modMessage("§cFailed to leap! §r$target §cnot found")
         }
     }
 
@@ -73,7 +85,7 @@ object LeapUtils {
 
         devMessage("6")
         if (slot > 35) {
-            modMessage("Failed to leap! $currentLeap not found!")
+            modMessage("§cFailed to leap! §r$currentLeap §cnot found!")
             reloadGui()
             return
         }
