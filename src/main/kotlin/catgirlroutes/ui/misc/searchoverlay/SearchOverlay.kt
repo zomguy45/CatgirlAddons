@@ -179,7 +179,7 @@ abstract class SearchOverlay(
                 onClick {
                     val newEntry = if (item != null) "REPOITEM:${displayText.clean}" else displayText
                     debugMessage(newEntry)
-                    val finalText = item?.let { processItem(it) } ?: displayText
+                    val finalText = item?.let { processItem(it).noControlCodes } ?: displayText
                     debugMessage(finalText)
                     if (newEntry.isNotBlank()) history = history.addToHistory(newEntry)
                     sign?.let {

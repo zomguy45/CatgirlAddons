@@ -21,7 +21,7 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
             ahHistory = value
         }
 
-    override var commandPrefix: String = "ah"
+    override var commandPrefix: String = "ahs"
 
     private var lastSelected = "0"
 
