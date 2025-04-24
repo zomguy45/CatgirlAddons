@@ -644,7 +644,7 @@ object HUDRenderUtils {
             drawGradientRect(0, tooltipX - 3, tooltipY - 3, tooltipX + tooltipTextWidth + 3, tooltipY - 3 + 1, borderColorStart, borderColorStart)
             drawGradientRect(0, tooltipX - 3, tooltipY + tooltipHeight + 2, tooltipX + tooltipTextWidth + 3, tooltipY + tooltipHeight + 3, borderColorEnd, borderColorEnd)
         } else {
-            drawRoundedBorderedRect(tooltipX - 3.0, tooltipY - 3.0, tooltipTextWidth + 6.0, tooltipHeight + 6.0, 3.0, 1.0, Color(ColorUtil.buttonColor).withAlpha(0.94f), ColorUtil.clickGUIColor)
+            drawRoundedBorderedRect(tooltipX - 3.0, tooltipY - 3.0, tooltipTextWidth + 6.0, tooltipHeight + 6.0, 3.0, 1.0, ColorUtil.buttonColor.withAlpha(0.94f), ColorUtil.clickGUIColor)
         }
 
         finalTextLines.forEachIndexed { lineNumber, line ->

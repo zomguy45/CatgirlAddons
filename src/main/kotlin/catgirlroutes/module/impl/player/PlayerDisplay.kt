@@ -64,12 +64,12 @@ object PlayerDisplay: Module(
         visibleIf { inSkyblock }
         render {
             val fillWidth = SkyblockPlayer.health.toFloat() / SkyblockPlayer.maxHealth.toFloat() * BAR_WIDTH
-            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, ColorUtil.bgColor)
             drawRoundedRect(0.0, 0.0, fillWidth, BAR_HEIGHT, 5.0, healthBarColour)
             drawRoundedOutline(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, 1.0, Color(208, 208, 208))
         }
         preview {
-            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, ColorUtil.bgColor)
             drawRoundedRect(0.0, 0.0, 50.0, BAR_HEIGHT, 5.0, healthBarColour)
             drawRoundedOutline(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, 1.0, Color(208, 208, 208))
         }
@@ -101,12 +101,12 @@ object PlayerDisplay: Module(
         visibleIf { inSkyblock }
         render {
             val fillWidth = SkyblockPlayer.mana.toFloat() / SkyblockPlayer.maxMana.toFloat() * BAR_WIDTH
-            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, ColorUtil.bgColor)
             drawRoundedRect(0.0, 0.0, fillWidth, BAR_HEIGHT, 5.0, manaBarColour)
             drawRoundedOutline(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, 1.0, Color(208, 208, 208))
         }
         preview {
-            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, Color(ColorUtil.bgColor))
+            drawRoundedRect(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, ColorUtil.bgColor)
             drawRoundedRect(0.0, 0.0, 50.0, BAR_HEIGHT, 5.0, manaBarColour)
             drawRoundedOutline(0.0, 0.0, BAR_WIDTH, BAR_HEIGHT, 5.0, 1.0, Color(208, 208, 208))
         }

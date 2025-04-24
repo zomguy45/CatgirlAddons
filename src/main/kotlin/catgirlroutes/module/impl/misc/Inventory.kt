@@ -77,7 +77,7 @@ object Inventory : Module(
 
     private val sbDropdown by DropdownSetting("Search bar dropdown")
     private val searchBar by HudSetting("Search bar", "Use \",\" separator to search for things like attributes") { size(200.0, 25.0) }.withDependency(this.sbDropdown)
-    private val bgColour_ by ColorSetting("Background colour", Color(ColorUtil.buttonColor)).withDependency(this.sbDropdown) { searchBar.enabled }
+    private val bgColour_ by ColorSetting("Background colour", ColorUtil.buttonColor).withDependency(this.sbDropdown) { searchBar.enabled }
     private val outlineColour_ by ColorSetting("Outline colour", ColorUtil.clickGUIColor).withDependency(this.sbDropdown) { searchBar.enabled }
     private val itemList by BooleanSetting("Item list").withDependency(this.sbDropdown) { searchBar.enabled }
 

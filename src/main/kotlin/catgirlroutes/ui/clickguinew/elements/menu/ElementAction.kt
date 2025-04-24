@@ -8,7 +8,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.button
 import catgirlroutes.ui.misc.elements.util.update
-import java.awt.Color
 
 class ElementAction(parent: ModuleButton, setting: ActionSetting) :
     Element<ActionSetting>(parent, setting, ElementType.ACTION) {
@@ -16,13 +15,13 @@ class ElementAction(parent: ModuleButton, setting: ActionSetting) :
     private val actionButton = button {
         text = displayName.capitalizeOnlyFirst()
         size(this@ElementAction.width, this@ElementAction.height)
-        colour = Color(ColorUtil.elementColor)
+        colour = ColorUtil.elementColor
         onClick { setting.doAction() }
     }
 
     override fun renderElement(): Double {
         this.actionButton.update { // FIXME
-            outlineColour = Color(ColorUtil.outlineColor)
+            outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
         }.render(mouseXRel, mouseYRel)
         return super.renderElement()

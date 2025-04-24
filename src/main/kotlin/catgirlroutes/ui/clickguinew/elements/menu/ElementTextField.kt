@@ -9,7 +9,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.textField
 import catgirlroutes.ui.misc.elements.util.update
-import java.awt.Color
 
 class ElementTextField(parent: ModuleButton, setting: StringSetting) :
     Element<StringSetting>(parent, setting, ElementType.TEXT_FIELD) {
@@ -37,7 +36,7 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
             this.lastKnownText = this.textField.text
         }
         this.textField.update { // FIXME
-            outlineColour = Color(ColorUtil.outlineColor)
+            outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
         }.render(mouseXRel, mouseYRel)
         return super.renderElement()

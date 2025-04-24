@@ -136,6 +136,18 @@ object FontUtil {
         return lines
     }
 
+    fun getTruncatedText(text: String, width: Double, ellipsis: String = "..."): String {
+        return if (text.getWidth() > width) {
+            var truncated = text
+            while(truncated.getWidth() + ellipsis.getWidth() > width && truncated.isNotEmpty()) {
+                truncated = truncated.dropLast(1)
+            }
+            "$truncated$ellipsis"
+        } else {
+            text
+        }
+    }
+
     /**
      * Returns a copy of the String where the first letter is capitalized.
      */
@@ -151,6 +163,8 @@ object FontUtil {
     fun Char.getWidth(): Double = this.toString().getWidth()
 
     fun String.trimToWidth(width: Number): String = fontRenderer.trimStringToWidth(this, width.toInt())
+
+    fun String.ellipsize(width: Number, ellipsis: String = ".."): String = getTruncatedText(this, width.toDouble(), ellipsis)
 }
 
 enum class Alignment {

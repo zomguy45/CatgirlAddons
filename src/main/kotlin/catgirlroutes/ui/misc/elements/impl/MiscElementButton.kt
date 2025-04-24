@@ -1,6 +1,7 @@
 package catgirlroutes.ui.misc.elements.impl
 
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.ellipsize
 import catgirlroutes.ui.misc.elements.ElementDSL
 import catgirlroutes.ui.misc.elements.MiscElement
 import catgirlroutes.ui.misc.elements.MiscElementStyle
@@ -21,7 +22,7 @@ class MiscElementButton(
             colour, if (isHovered(mouseX, mouseY)) outlineHoverColour else outlineColour
         )
         val (x, y) = this.calculateTextPosition()
-        FontUtil.drawAlignedString(value, x, y, this.style.alignment)
+        FontUtil.drawAlignedString(value.ellipsize(width - 3.0), x, y, this.style.alignment)
         if (isHovered(mouseX, mouseY)) this.onHover.invoke()
         GlStateManager.popMatrix()
     }

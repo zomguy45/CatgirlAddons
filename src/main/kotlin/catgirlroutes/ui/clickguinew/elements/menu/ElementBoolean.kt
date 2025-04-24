@@ -7,7 +7,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.boolean
 import catgirlroutes.ui.misc.elements.util.update
-import java.awt.Color
 
 class ElementBoolean(parent: ModuleButton, setting: BooleanSetting) :
     Element<BooleanSetting>(parent, setting, ElementType.BOOLEAN) {
@@ -26,7 +25,7 @@ class ElementBoolean(parent: ModuleButton, setting: BooleanSetting) :
 
     override fun renderElement(): Double {
         this.booleanElement.update { // FIXME
-            outlineColour = Color(ColorUtil.outlineColor)
+            outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
         }.render(mouseXRel, mouseYRel)
         return super.renderElement()

@@ -21,7 +21,7 @@ class ElementHud(parent: ModuleButton, setting: HudSetting) :
         if (height == 0) return super.renderElement(mouseX, mouseY, partialTicks)
         val buttonColor = if (setting.enabled)
             ColorUtil.clickGUIColor.rgb
-        else ColorUtil.buttonColor
+        else ColorUtil.buttonColor.rgb
 
         /** Rendering the name and the checkbox */
         FontUtil.drawString(displayName, 1, 3)

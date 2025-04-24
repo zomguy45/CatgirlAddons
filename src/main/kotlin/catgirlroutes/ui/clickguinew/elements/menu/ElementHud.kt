@@ -7,7 +7,6 @@ import catgirlroutes.ui.clickguinew.elements.ElementType
 import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.ui.misc.elements.impl.boolean
 import catgirlroutes.ui.misc.elements.util.update
-import java.awt.Color
 
 class ElementHud(parent: ModuleButton, setting: HudSetting) :
     Element<HudSetting>(parent, setting, ElementType.HUD) {
@@ -24,7 +23,7 @@ class ElementHud(parent: ModuleButton, setting: HudSetting) :
     override fun renderElement(): Double {
         if (height == -5.0) return super.renderElement()
         this.booleanElement.update { // FIXME
-            outlineColour = Color(ColorUtil.outlineColor)
+            outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
         }.render(mouseXRel, mouseYRel)
         return super.renderElement()

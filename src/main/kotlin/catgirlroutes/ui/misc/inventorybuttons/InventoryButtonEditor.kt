@@ -11,7 +11,6 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.opengl.GL11
-import java.awt.Color
 
 class InventoryButtonEditor : GuiScreen() { // todo: recode prob
 
@@ -69,7 +68,7 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
                 editorX.toDouble(), editorY.toDouble(),
                 editorWidth, editorHeight,
                 5.0, 1.0,
-                Color(ColorUtil.bgColor), Color(ColorUtil.outlineColor)
+                ColorUtil.bgColor, ColorUtil.outlineColor
             )
 
             FontUtil.drawString("Command", editorX + 7, editorY + 7, 0xffa0a0a0.toInt())

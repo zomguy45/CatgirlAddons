@@ -23,7 +23,6 @@ import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
-import java.awt.Color
 
 class ModuleButton(val module: Module, val window: Window) {
     val menuElements: ArrayList<Element<*>> = ArrayList()
@@ -41,7 +40,7 @@ class ModuleButton(val module: Module, val window: Window) {
     val yAbsolute: Double
         get() = y + window.y
 
-    private val elementsHeight get() = this.menuElements.sumOf { it.height + 5.0 }
+    private val elementsHeight get() = this.menuElements.sumOf { it.getElementHeight() + 5.0 }
 
     private val colourAnimation = ColorAnimation(100)
     private val scrollAnimation = LinearAnimation<Double>(200)
@@ -97,8 +96,8 @@ class ModuleButton(val module: Module, val window: Window) {
 
         if (!this.window.inModule) {
             GlStateManager.translate(x, y, 0.0)
-            val colour = this.colourAnimation.get(Color(ColorUtil.outlineColor), Color(ColorUtil.bgColor), this.module.enabled)
-            drawRoundedBorderedRect(0.0, 0.0, this.width, this.height, 3.0, 1.0, colour, Color(ColorUtil.outlineColor))
+            val colour = this.colourAnimation.get(ColorUtil.outlineColor, ColorUtil.bgColor, this.module.enabled)
+            drawRoundedBorderedRect(0.0, 0.0, this.width, this.height, 3.0, 1.0, colour, ColorUtil.outlineColor)
             FontUtil.drawString(module.name, 9.5, 2 + fontHeight / 2.0)
 
             if (this.menuElements.isNotEmpty()) {

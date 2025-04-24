@@ -29,7 +29,7 @@ object ClickGui: Module(
             "§00...§ff§r are colors, l is §lBold§r, n is §nUnderlined§r, o is §oItalic§r, m is §mStrikethrough§r, k is §kObfuscated§r, r is Reset."
 ) {
 
-    private val clickGui by SelectorSetting("ClickGui", "Cga", arrayListOf("Cga", "Flopper"))
+    val clickGui by SelectorSetting("ClickGui", "Cga", arrayListOf("Cga", "Flopper"))
     val design by SelectorSetting("Design", "New", arrayListOf("JellyLike", "New"), "Design theme of the gui.")
     val customFont by BooleanSetting("Custom font (WIP; scaling is schizo)")
     val notifications by BooleanSetting("Notifications", true, "Send notifications instead of chat messages")

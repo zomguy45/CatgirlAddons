@@ -15,7 +15,6 @@ import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import catgirlroutes.utils.render.HUDRenderUtils.drawTexturedRect
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.util.ResourceLocation
-import java.awt.Color
 
 class ElementDropdown(parent: ModuleButton, setting: DropdownSetting) :
     Element<DropdownSetting>(parent, setting, ElementType.DROPDOWN) {
@@ -24,7 +23,7 @@ class ElementDropdown(parent: ModuleButton, setting: DropdownSetting) :
 
     override fun renderElement(): Double {
         val extraHeight = this.getElementsForSettings(this.setting.dependentModules.filter { it.shouldBeVisible }).sumOf { it.height + 5.0 } + 2.0
-        drawRoundedBorderedRect(-2.0, 0.0, width + 4.0, height + extraHeight, 3.0, 1.0, Color(ColorUtil.outlineColor).darker(), ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(-2.0, 0.0, width + 4.0, height + extraHeight, 3.0, 1.0, ColorUtil.outlineColor.darker(), ColorUtil.clickGUIColor)
         FontUtil.drawString(displayName, 0.0, 3.0)
 
         val rotation = this.arrowAnimation.get(0.0, -90.0, !this.setting.enabled)
