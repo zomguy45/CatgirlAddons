@@ -65,6 +65,7 @@ object ModuleManager {
         AutoSS,
         Auto4,
         Watcher,
+        PartyFinder,
 //        Splits,
 
         // Misc
