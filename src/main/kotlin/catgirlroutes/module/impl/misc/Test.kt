@@ -7,7 +7,7 @@ import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.ui.misc.OrderingGui
+//import catgirlroutes.ui.misc.OrderingGui
 import catgirlroutes.utils.*
 import catgirlroutes.utils.EtherWarpHelper.etherPos
 import catgirlroutes.utils.dungeon.tiles.Room
@@ -70,12 +70,7 @@ object Test : Module(
 
     private val orderSettingTest3 by OrderSetting("Order test 3", mapOf("1" to "name1", "2" to "name2", "3" to "name3", "4" to "name4"), 2)
 
-    private val hudTest3 by HudSetting {
-        size(100.0, 100.0)
-        render {
-            drawString("this is a test", 0, 0)
-        }
-    }
+//    private val stupid by ActionSetting("Stupid") { display = OrderingGui(mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4")) }
 
     data class Stupid(val stupid1: String, val stupid2: Int)
 
