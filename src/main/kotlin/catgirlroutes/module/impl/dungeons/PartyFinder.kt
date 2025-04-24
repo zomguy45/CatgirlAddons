@@ -6,7 +6,6 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Island
@@ -68,7 +67,7 @@ object PartyFinder : Module(
         if (!inPartyFinderGui) return
         if (currentArea !== Island.DungeonHub) return
 
-        scheduleTask(0) {
+        scheduleTask(1) {
             val slots = mc.thePlayer.openContainer.inventorySlots.filter { it.hasStack }.filterNotNull()
             coloredSlots.clear()
 
