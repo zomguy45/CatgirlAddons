@@ -4,11 +4,9 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.impl.ActionSetting
-import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.module.settings.impl.ListSetting
-import catgirlroutes.module.settings.impl.SelectorSetting
+import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
@@ -37,23 +35,31 @@ object AutoLeap : Module( // todo improve selectors
     private val autoLeap by BooleanSetting("Auto leap", "Automatically leaps to a set player.")
 
     private var leapMode by SelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class"), "Leap mode for the module.")
-
     private var teamList by ListSetting("Teammates", mutableListOf("None"))
-    private var clearLeap by SelectorSetting("Clear leap", "None", ArrayList(teamList), "Player name to leap to during clear.").withDependency { leapMode.selected == "Name" }
-    private var s1leap by SelectorSetting("S1 leap", "None", ArrayList(teamList), "Player name to leap to when in S1.").withDependency { leapMode.selected == "Name" }
-    private var s2leap by SelectorSetting("S2 leap", "None", ArrayList(teamList), "Player name to leap to when in S2.").withDependency { leapMode.selected == "Name" }
-    private var s3leap by SelectorSetting("S3 leap", "None", ArrayList(teamList), "Player name to leap to when in S3.").withDependency { leapMode.selected == "Name" }
-    private var s4leap by SelectorSetting("S4 leap", "None", ArrayList(teamList), "Player name to leap to when in S4.").withDependency { leapMode.selected == "Name" }
-    private var update by ActionSetting("Update", "Updates teammates names (currently works in dungeon only)..") { updateTeammates() }.withDependency { leapMode.selected == "Name" }
+
+    private var clearLeap by SelectorSetting("Clear leap", "None", ArrayList(teamList), "Player name to leap to during clear.").withDependency { isFlopper && leapMode.selected == "Name" }
+    private var s1leap by SelectorSetting("S1 leap", "None", ArrayList(teamList), "Player name to leap to when in S1.").withDependency { isFlopper && leapMode.selected == "Name" }
+    private var s2leap by SelectorSetting("S2 leap", "None", ArrayList(teamList), "Player name to leap to when in S2.").withDependency { isFlopper && leapMode.selected == "Name" }
+    private var s3leap by SelectorSetting("S3 leap", "None", ArrayList(teamList), "Player name to leap to when in S3.").withDependency { isFlopper && leapMode.selected == "Name" }
+    private var s4leap by SelectorSetting("S4 leap", "None", ArrayList(teamList), "Player name to leap to when in S4.").withDependency { isFlopper && leapMode.selected == "Name" }
+    private var update by ActionSetting("Update", "Updates teammates names (currently works in dungeon only)..") { updateTeammates() }.withDependency { isFlopper && leapMode.selected == "Name" }
 
     private val clazzArray = arrayListOf("Mage", "Bers", "Arch", "Tank", "Heal", "None")
-    private var clearLeapClass by SelectorSetting("Clear leap", "None", clazzArray, "Player class to leap to during clear.").withDependency { leapMode.selected == "Class" }
-    private var s1leapClass by SelectorSetting("S1 leap", "None", clazzArray, "Player name to leap to when in S1.").withDependency { leapMode.selected == "Class" }
-    private var s2leapClass by SelectorSetting("S2 leap", "None", clazzArray, "Player name to leap to when in S2.").withDependency { leapMode.selected == "Class" }
-    private var s3leapClass by SelectorSetting("S3 leap", "None", clazzArray, "Player name to leap to when in S3.").withDependency { leapMode.selected == "Class" }
-    private var s4leapClass by SelectorSetting("S4 leap", "None", clazzArray, "Player name to leap to when in S4.").withDependency { leapMode.selected == "Class" }
+    private var clearLeapClass by SelectorSetting("Clear leap", "None", clazzArray, "Player class to leap to during clear.").withDependency { isFlopper && leapMode.selected == "Class" }
+    private var s1leapClass by SelectorSetting("S1 leap", "None", clazzArray, "Player name to leap to when in S1.").withDependency { isFlopper && leapMode.selected == "Class" }
+    private var s2leapClass by SelectorSetting("S2 leap", "None", clazzArray, "Player name to leap to when in S2.").withDependency { isFlopper && leapMode.selected == "Class" }
+    private var s3leapClass by SelectorSetting("S3 leap", "None", clazzArray, "Player name to leap to when in S3.").withDependency { isFlopper && leapMode.selected == "Class" }
+    private var s4leapClass by SelectorSetting("S4 leap", "None", clazzArray, "Player name to leap to when in S4.").withDependency { isFlopper && leapMode.selected == "Class" }
+
+    private val clazzOrder by OrderSetting("Class order", mapOf("S1" to "Archer", "S2" to "Healer", "S3" to "Mage", "S4" to "Mage", "Clear" to "None"), 2, clazzArray).withDependency { !isFlopper && leapMode.selected == "Class" }
+
+    private val namesOrder by OrderSetting("Name order", mapOf("S1" to "None", "S2" to "None", "S3" to "None", "S4" to "None", "Clear" to "None"), 2, teamList) {
+        updateTeammates()
+    }.withDependency { !isFlopper && leapMode.selected == "Name" }
 
     private val classEnumMapping = arrayListOf(DungeonClass.Mage, DungeonClass.Berserk, DungeonClass.Archer, DungeonClass.Tank, DungeonClass.Healer, DungeonClass.Unknown)
+
+    private val isFlopper: Boolean get() = ClickGui.clickGui.selected == "Flopper"
 
     init {
         listOf(clearLeap, s1leap, s2leap, s3leap, s4leap).forEach { it.options = teamList }
@@ -90,20 +96,30 @@ object AutoLeap : Module( // todo improve selectors
         }
     }
 
+    data class LeapThing(val key: String, val name: String, val classIndex: Int)
+
+    private fun stupid(key: String): LeapThing =
+        LeapThing(
+            key,
+            if (isFlopper) s1leap.selected else namesOrder[key].toString(),
+            if (isFlopper) s1leapClass.index else clazzArray.indexOf(clazzOrder[key])
+        )
+
     private fun handleLeap() {
-        val (name, clazz) = when {
-            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 -> s1leap.selected to s1leapClass.index
-            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> s2leap.selected to s2leapClass.index
-            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> s3leap.selected to s3leapClass.index
-            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> s4leap.selected to s4leapClass.index
-            !inBoss -> clearLeap.selected to clearLeapClass.index
+        val thing = when {
+            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 -> stupid("S1")
+            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> stupid("S2")
+            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> stupid("S3")
+            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> stupid("S4")
+            !inBoss -> stupid("Clear")
             else -> return
         }
-        debugMessage("leaping to $name $clazz")
+
+        debugMessage("leaping to ${thing.name} ${classEnumMapping.getOrNull(thing.classIndex)}")
 
         when (leapMode.selected) {
-            "Name" -> leap(name)
-            "Cass" -> leap(classEnumMapping[clazz])
+            "Name" -> leap(thing.name)
+            "Class" -> leap(classEnumMapping.getOrElse(thing.classIndex) { DungeonClass.Unknown })
         }
     }
 }
