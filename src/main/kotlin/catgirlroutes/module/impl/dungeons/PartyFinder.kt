@@ -6,6 +6,8 @@ import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.Island
+import catgirlroutes.utils.LocationManager.currentArea
 import catgirlroutes.utils.getTooltip
 import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.Color
@@ -16,9 +18,6 @@ import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.network.play.server.S2EPacketCloseWindow
 import net.minecraft.network.play.server.S2FPacketSetSlot
-import net.minecraftforge.client.event.GuiScreenEvent
-import net.minecraftforge.client.event.GuiScreenEvent.BackgroundDrawnEvent
-import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color.*
 
@@ -32,7 +31,7 @@ object PartyFinder : Module(
     @SubscribeEvent
     fun onS2F(event: PacketReceiveEvent) {
         if (event.packet !is S2FPacketSetSlot) return
-
+        if (currentArea !== Island.DungeonHub) return
         val displayName = event.packet.func_149174_e()?.displayName ?: return
         val tooltip = event.packet.func_149174_e().getTooltip()
         val classRegex = Regex("Currently Selected: (?<class>Mage|Berserk|Archer|Tank|Healer)", RegexOption.IGNORE_CASE)
@@ -55,6 +54,7 @@ object PartyFinder : Module(
     @SubscribeEvent
     fun onRender(event: GuiContainerEvent.DrawSlotEvent) {
         if (!inPartyFinderGui) return
+        if (currentArea !== Island.DungeonHub) return
         val slots = mc.thePlayer.openContainer.inventorySlots.filter { it.hasStack }.filterNotNull()
 
         for (slot in slots) {
@@ -83,6 +83,7 @@ object PartyFinder : Module(
 
     @SubscribeEvent
     fun onWindowPacket(event: PacketReceiveEvent) {
+        if (currentArea !== Island.DungeonHub) return
         if (event.packet is S2DPacketOpenWindow) {
             if (event.packet.windowTitle.unformattedText.noControlCodes.contains("Party Finder", true)) {
                 inPartyFinderGui = true
