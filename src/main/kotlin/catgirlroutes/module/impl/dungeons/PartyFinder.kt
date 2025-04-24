@@ -3,17 +3,18 @@ package catgirlroutes.module.impl.dungeons
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.GuiContainerEvent
 import catgirlroutes.events.impl.PacketReceiveEvent
+import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.Island
 import catgirlroutes.utils.LocationManager.currentArea
 import catgirlroutes.utils.getTooltip
 import catgirlroutes.utils.noControlCodes
-import catgirlroutes.utils.render.Color
 import catgirlroutes.utils.render.HUDRenderUtils.highlight
-import net.minecraft.client.Minecraft
-import net.minecraft.client.gui.inventory.GuiChest
+import net.minecraft.inventory.Slot
 import net.minecraft.network.play.client.C0DPacketCloseWindow
 import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.network.play.server.S2EPacketCloseWindow
@@ -27,6 +28,7 @@ object PartyFinder : Module(
 ) {
     private var currClass: String = ""
     private var inPartyFinderGui = false
+    private var coloredSlots = mutableListOf<Slots>()
 
     @SubscribeEvent
     fun onS2F(event: PacketReceiveEvent) {
@@ -55,28 +57,43 @@ object PartyFinder : Module(
     fun onRender(event: GuiContainerEvent.DrawSlotEvent) {
         if (!inPartyFinderGui) return
         if (currentArea !== Island.DungeonHub) return
-        val slots = mc.thePlayer.openContainer.inventorySlots.filter { it.hasStack }.filterNotNull()
+        coloredSlots.forEach{
+            s -> s.slot.highlight(s.color)
+        }
+    }
 
-        for (slot in slots) {
-            val item = slot.stack
-            val toolTip = item.getTooltip()
-            var missingClass = true
-            var requirementsFilled = true
+    @SubscribeEvent
+    fun onS2D(event: PacketReceiveEvent) {
+        if (event.packet !is S2DPacketOpenWindow) return
+        if (!inPartyFinderGui) return
+        if (currentArea !== Island.DungeonHub) return
 
-            if (item.displayName.noControlCodes.contains("Party", true)) {
-                for (line in toolTip) {
-                    val foundClass = foundClassRegex.find(line.noControlCodes)
-                    if (foundClass != null) {
-                        if (foundClass.value.noControlCodes == currClass.noControlCodes) missingClass = false
+        scheduleTask(0) {
+            val slots = mc.thePlayer.openContainer.inventorySlots.filter { it.hasStack }.filterNotNull()
+            coloredSlots.clear()
+
+            for (slot in slots) {
+                val item = slot.stack
+                val toolTip = item.getTooltip()
+                var missingClass = true
+                var requirementsFilled = true
+
+                if (item.displayName.contains("s Party", true)) {
+                    for (line in toolTip) {
+                        val foundClass = foundClassRegex.find(line.noControlCodes)
+                        if (foundClass != null) {
+                            if (foundClass.value.noControlCodes == currClass.noControlCodes) missingClass = false
+                        }
+                        if (requirementRegex.matches(line.noControlCodes)) requirementsFilled = false
                     }
-                    if (requirementRegex.matches(line.noControlCodes)) requirementsFilled = false
-                }
 
-                if (!requirementsFilled) {
-                    slot.highlight(red)
-                } else if (!missingClass) {
-                    slot.highlight(magenta)
-                } else (slot.highlight(pink))
+                    val color = when {
+                        !requirementsFilled -> red
+                        !missingClass -> magenta
+                        else -> pink
+                    }
+                    coloredSlots.add(Slots(slot, color))
+                }
             }
         }
     }
@@ -93,4 +110,13 @@ object PartyFinder : Module(
             inPartyFinderGui = false
         }
     }
+
+    @SubscribeEvent
+    fun onWindowClose(event: PacketSentEvent) {
+        if (event.packet is C0DPacketCloseWindow) {
+            inPartyFinderGui = false
+        }
+    }
 }
+
+data class Slots(val slot: Slot, val color: java.awt.Color)
