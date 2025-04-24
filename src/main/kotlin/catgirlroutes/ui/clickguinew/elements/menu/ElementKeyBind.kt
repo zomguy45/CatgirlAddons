@@ -12,7 +12,6 @@ import catgirlroutes.ui.clickguinew.elements.ModuleButton
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
-import java.awt.Color
 
 class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
     Element<KeyBindSetting>(parent, setting, ElementType.KEY_BIND) {
@@ -29,8 +28,8 @@ class ElementKeyBind(parent: ModuleButton, setting: KeyBindSetting) :
 
         FontUtil.drawString(displayName, 0.0, 1.0)
 
-        val colour = this.colourAnimation.get(ColorUtil.clickGUIColor, Color(ColorUtil.outlineColor), listening)
-        val colour2 = this.colourAnimation.get(Color(ColorUtil.outlineColor).darker().darker(), Color(ColorUtil.buttonColor), listening)
+        val colour = this.colourAnimation.get(ColorUtil.clickGUIColor, ColorUtil.outlineColor, listening)
+        val colour2 = this.colourAnimation.get(ColorUtil.outlineColor.darker().darker(), ColorUtil.buttonColor, listening)
         drawRoundedBorderedRect(this.stringWidth + 5.0, 0.0, this.keyWidth + 5.0, height, 3.0, 1.0, colour2, colour)
 
         FontUtil.drawString(keyName, this.stringWidth + 5.0 + 3.0, 2.0)

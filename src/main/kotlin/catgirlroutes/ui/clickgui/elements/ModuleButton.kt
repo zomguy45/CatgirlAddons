@@ -86,12 +86,12 @@ class ModuleButton(val module: Module, val panel: Panel) {
 
         Gui.drawRect(0, 0, width, height + 1, ColorUtil.moduleButtonColor)
         if (ClickGui.design.isSelected("New")) {
-            Gui.drawRect(0, 0, 2, height + 1, ColorUtil.outlineColor)
+            Gui.drawRect(0, 0, 2, height + 1, ColorUtil.outlineColor.rgb)
         }
 
         /** Draw the highlight when the module is enabled. */
         if (module.enabled) {
-            Gui.drawRect(0, 0, width, height + 1, ColorUtil.outlineColor)
+            Gui.drawRect(0, 0, width, height + 1, ColorUtil.outlineColor.rgb)
         }
 
         /** Change color on hover */

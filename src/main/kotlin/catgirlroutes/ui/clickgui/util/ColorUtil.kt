@@ -12,24 +12,24 @@ object ColorUtil {
     val clickGUIColor: Color
         get() = ClickGui.color
 
-    val elementColor: Int
+    val elementColor: Color
      get() = if (ClickGui.design.isSelected("New"))
-             newColor
+             Color(newColor)
          else if (ClickGui.design.isSelected("JellyLike"))
-             jellyColor
+             Color(jellyColor)
          else
-             0
+             Color.black
 
-    val bgColor: Int
+    val bgColor: Color
         get() = if (ClickGui.design.isSelected("New"))
-            newColor
+            Color(newColor)
         else if (ClickGui.design.isSelected("JellyLike"))
-            Color(255,255,255,50).rgb
+            Color(255,255,255,50)
         else
-            0
+            Color.black
 
-    val outlineColor : Int
-        get() = clickGUIColor.darker().rgb
+    val outlineColor : Color
+        get() = clickGUIColor.darker()
 
     val hoverColor: Int
         get() {
@@ -121,6 +121,6 @@ object ColorUtil {
     const val boxHoverColor = 0x55111111
     const val sliderBackground = -0xefeff0
 
-    const val buttonColor = -0x1000000
+    val buttonColor = Color(-0x1000000)
 
 }

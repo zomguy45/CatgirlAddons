@@ -97,14 +97,14 @@ abstract class Element<S: Setting<*>>(
         val color = if (listening) {
             ColorUtil.clickGUIColor.rgb
         }else {
-            ColorUtil.elementColor
+            ColorUtil.elementColor.rgb
         }
 
         /** Rendering the box */
         Gui.drawRect(0, 0, width, height, color)
         /** The decor */
         if (ClickGui.design.isSelected("New")) {
-            Gui.drawRect(width, 0, width + 2, height, ColorUtil.outlineColor)
+            Gui.drawRect(width, 0, width + 2, height, ColorUtil.outlineColor.rgb)
         }
 
         // Render the element.

@@ -6,13 +6,16 @@ import catgirlroutes.module.settings.Visibility
 class OrderSetting(
     name: String,
     override val default: Map<String, String>,
+    val valuesPerRow: Int = 2,
+    var options: List<String> = listOf(),
     description: String? = null,
     visibility: Visibility = Visibility.VISIBLE,
+    var updateAction: (OrderSetting.() -> Unit)? = null
 ) : Setting<Map<String, String>>(name, description, visibility) {
 
     override var value: Map<String, String> = default
 
-    var options: List<String>
+    var values: List<String>
         get() = value.values.toList()
         set(values) {
             val keys = value.keys.toList()
@@ -27,4 +30,8 @@ class OrderSetting(
             val newKeys = keys.take(values.size).plus(List(values.size - keys.size) { "key_${it}" })
             value = newKeys.zip(values).toMap()
         }
+
+    fun update() {
+        updateAction?.invoke(this)
+    }
 }

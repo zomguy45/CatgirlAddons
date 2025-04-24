@@ -36,7 +36,7 @@ class ClickGUI : Screen() { // todo: module description
     val searchBar = textField {
         size(guiWidth - categoryWidth - 5.0, 20.0)
         placeholder = "Search..."
-        colour = Color(ColorUtil.bgColor)
+        colour = ColorUtil.bgColor
         thickness = 2.0
     }
 
@@ -69,16 +69,16 @@ class ClickGUI : Screen() { // todo: module description
 
         if (ClickGui.showUsageInfo) renderUsage()
 
-        drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(x, y, categoryWidth, guiHeight, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(x, y, categoryWidth, guiHeight, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
-        drawRoundedBorderedRect(x + categoryWidth + 5.0, y + 25.0, guiWidth - categoryWidth - 5.0, guiHeight - 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(x + categoryWidth + 5.0, y + 25.0, guiWidth - categoryWidth - 5.0, guiHeight - 25.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
         val titleWidth = FontUtil.getStringWidth(ClickGui.clientName)
         FontUtil.drawStringWithShadow(ClickGui.clientName, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0)
 
         this.searchBar.update { // FIXME
-            outlineColour = Color(ColorUtil.outlineColor)
+            outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
         }.render(mouseX, mouseY)
 
@@ -113,7 +113,7 @@ class ClickGUI : Screen() { // todo: module description
             window.draw()
 
             if (this.selectedWindow == window) {
-                drawRoundedBorderedRect(x + 5.0, y + offset + 2.0, categoryWidth - 9.0, 14.0, 3.0, 1.0, Color(ColorUtil.outlineColor), Color(ColorUtil.outlineColor))
+                drawRoundedBorderedRect(x + 5.0, y + offset + 2.0, categoryWidth - 9.0, 14.0, 3.0, 1.0, ColorUtil.outlineColor, ColorUtil.outlineColor)
             }
             categoryButton.render(mouseX, mouseY)
 

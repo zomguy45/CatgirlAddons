@@ -107,6 +107,8 @@ abstract class Element<S: Setting<*>>(
 
     open fun mouseClickMove(mouseButton: Int, timeSinceLastClick: Long) {  }
 
+    open fun getElementHeight(): Double = height
+
     private fun isHovered(): Boolean {
         return mouseX >= this.xAbsolute && mouseX <= this.xAbsolute + this.width && mouseY >= this.yAbsolute && mouseY <= this.yAbsolute + this.height
     }

@@ -27,7 +27,6 @@ import net.minecraft.network.play.client.C12PacketUpdateSign
 import net.minecraft.tileentity.TileEntitySign
 import net.minecraft.util.ChatComponentText
 import org.lwjgl.input.Keyboard
-import java.awt.Color
 
 abstract class SearchOverlay(
     val sign: TileEntitySign? = null
@@ -44,7 +43,7 @@ abstract class SearchOverlay(
     val searchBar = textField {
         at(x, y)
         size(guiWidth, 20.0)
-        colour = Color(ColorUtil.elementColor)
+        colour = ColorUtil.elementColor
         thickness = 2.0
         isFocused = true
     }
@@ -75,16 +74,16 @@ abstract class SearchOverlay(
         GlStateManager.pushMatrix()
         scrollOffset = scrollAnimation.get(scrollOffset, scrollTarget)
 
-        drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
         drawRoundedBorderedRect(x, y + 25.0,
-            guiWidth, guiHeight - 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+            guiWidth, guiHeight - 25.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
         searchBar.render(mouseX, mouseY)
         drawScreenExtra(mouseX, mouseY)
 
         StencilUtils.write(false)
         drawRoundedBorderedRect(x, y + 26.0,
-            guiWidth, guiHeight - 27.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+            guiWidth, guiHeight - 27.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
         StencilUtils.erase(true)
         renderResults()
         StencilUtils.dispose()
@@ -165,7 +164,7 @@ abstract class SearchOverlay(
                 at(x + 5.0, offsetY)
                 size(guiWidth - 10.0, 20.0)
                 text = displayText
-                colour = Color(ColorUtil.elementColor)
+                colour = ColorUtil.elementColor
                 alignment = Alignment.LEFT
                 textPadding = 25.0
 

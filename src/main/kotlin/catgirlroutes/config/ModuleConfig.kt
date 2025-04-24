@@ -102,8 +102,9 @@ class ModuleConfig(path: File) {
                                 @Suppress("UNCHECKED_CAST")
                                 (setting.value as MutableMap<Any?, Any?>).putAll(configSetting.value as Map<Any?, Any?>)
                             }
-                            is OrderSetting -> if (configSetting is OrderSetting) {
-                                setting.value = HashMap(configSetting.value)
+                            is OrderSetting -> if (configSetting is MapSetting<*, *, *>) {
+                                @Suppress("UNCHECKED_CAST")
+                                setting.value = LinkedHashMap(configSetting.value as Map<String, String>)
                             }
                         }
                     }

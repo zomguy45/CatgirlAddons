@@ -107,7 +107,7 @@ class AdvancedMenu(val module: Module) {
         GlStateManager.translate(x.toFloat(), y.toFloat(), 0f)
 
         /** Rendering the background box */
-        Gui.drawRect(0, 0,  width, height, ColorUtil.elementColor)
+        Gui.drawRect(0, 0,  width, height, ColorUtil.elementColor.rgb)
 
         // Render a title bar containing the name of the module
         Gui.drawRect(0, 0, width, 15, color)

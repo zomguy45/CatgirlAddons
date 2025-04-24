@@ -100,7 +100,7 @@ class MiscElementSelector( // todo recode vertical selector
             HUDRenderUtils.drawRoundedBorderedRect(
                 optionX, optionY, width, height, radius, thickness,
                 colour,
-                if (isSelected(option)) highlightColor else Color(ColorUtil.outlineColor)
+                if (isSelected(option)) highlightColor else ColorUtil.outlineColor
             )
 
             if (isSelected(option) || isHovered(mouseX, mouseY, optionX - x, optionY - y)) {

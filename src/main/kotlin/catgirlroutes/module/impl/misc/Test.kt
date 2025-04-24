@@ -6,12 +6,9 @@ import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.ui.clickgui.util.FontUtil.drawString
-import catgirlroutes.ui.notification.NotificationType
+import catgirlroutes.ui.misc.OrderingGui
 import catgirlroutes.utils.*
-import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.EtherWarpHelper.etherPos
 import catgirlroutes.utils.dungeon.tiles.Room
 import catgirlroutes.utils.render.WorldRenderUtils
@@ -65,11 +62,13 @@ object Test : Module(
 //        }
 //    }
 
-    private val orderSettingTest by OrderSetting("Order test", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4"))
+    private val orderSettingTest by OrderSetting("Order test 1", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("tom", "tim", "jim", "kim", "bob", "None")) {
+        options = listOf("aboba", "test321")
+    }
 
-    private val mapTest by MapSetting("Test map", mutableMapOf<Double, Stupid>())
-    private val stupid6 by ActionSetting("Stupid6") { this.mapTest[Math.random()] = Stupid("stupid2", 2) }
-    private val stupid7 by ActionSetting("Stupid7") { debugMessage(this.mapTest) }
+    private val orderSettingTest2 by OrderSetting("Order test 2", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("Archer", "Berserk", "Healer", "Mage", "Tank", "None"))
+
+    private val orderSettingTest3 by OrderSetting("Order test 3", mapOf("1" to "name1", "2" to "name2", "3" to "name3", "4" to "name4"), 2)
 
     private val hudTest3 by HudSetting {
         size(100.0, 100.0)

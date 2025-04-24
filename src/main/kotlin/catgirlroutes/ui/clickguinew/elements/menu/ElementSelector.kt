@@ -23,8 +23,8 @@ class ElementSelector(parent: ModuleButton, setting: SelectorSetting) : // todo 
         height = this.extendAnimation.get(13.0, this.setting.options.size * 13.0 + 13.0, !extended)
         val displayValue = "$displayName: ${this.setting.selected}"
 
-        drawRoundedBorderedRect(0.0, 0.0, width, height, 3.0, 1.0, Color(ColorUtil.bgColor).darker(),  ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(0.0, 0.0, width, 13.0, 3.0, 1.0, Color(ColorUtil.buttonColor),  ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(0.0, 0.0, width, height, 3.0, 1.0, ColorUtil.bgColor.darker(),  ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(0.0, 0.0, width, 13.0, 3.0, 1.0, ColorUtil.buttonColor,  ColorUtil.clickGUIColor)
         FontUtil.drawTotalCenteredString(displayValue, width / 2.0, 13.0 / 2.0)
 
         if (!extended && !this.extendAnimation.isAnimating()) return height
@@ -35,7 +35,7 @@ class ElementSelector(parent: ModuleButton, setting: SelectorSetting) : // todo 
         this.setting.options.forEachIndexed { i, option ->
             val yOff = (i + 1) * 13.0
             if (this.isHovered(yOff = yOff.toInt())) {
-                drawRoundedBorderedRect(0.0, yOff, width, 13.0, 3.0, 1.0, Color(ColorUtil.outlineColor).darker(), Color(ColorUtil.outlineColor))
+                drawRoundedBorderedRect(0.0, yOff, width, 13.0, 3.0, 1.0, ColorUtil.outlineColor.darker(), ColorUtil.outlineColor)
             }
             FontUtil.drawTotalCenteredString(option, width / 2.0, yOff + 13.0 / 2.0)
         }

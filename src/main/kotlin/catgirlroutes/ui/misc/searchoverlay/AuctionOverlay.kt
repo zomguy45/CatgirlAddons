@@ -12,7 +12,6 @@ import catgirlroutes.ui.misc.elements.util.update
 import catgirlroutes.utils.render.HUDRenderUtils.renderRect
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.tileentity.TileEntitySign
-import java.awt.Color
 
 class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
 
@@ -30,13 +29,13 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
         options("§6➊", "§6➋", "§6➌", "§6➍", "§6➎", "§c➊", "§c➋", "§c➌", "§c➍", "§c➎")
         horizontal(5, 5)
         size(15.0, 15.0)
-        colour = Color(ColorUtil.elementColor)
+        colour = ColorUtil.elementColor
     }
 
     private val petToggle = boolean {
         text = "Lvl 100 Pets"
         size(15.0, 15.0)
-        colour = Color(ColorUtil.elementColor)
+        colour = ColorUtil.elementColor
     } onChange { enabled ->
         petLvl = if (enabled) "[Lvl 100] " else ""
     }
@@ -65,20 +64,20 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
 
         GlStateManager.translate(0.0, 0.0, -50.0)
 
-        drawRoundedBorderedRect(ahX - 10.0, ahY - 5.0, ahW + 10.0, ahH + 10.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(ahX, ahY, ahW - 5.0, 55.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(ahX, ahY + 60.0, ahW - 5.0, 25.0, 3.0, 2.0, Color(ColorUtil.bgColor), ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(ahX - 10.0, ahY - 5.0, ahW + 10.0, ahH + 10.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(ahX, ahY, ahW - 5.0, 55.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(ahX, ahY + 60.0, ahW - 5.0, 25.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
         GlStateManager.translate(0.0, 0.0, 100.0)
-        renderRect(ahX - 10.0 + 4.0, ahY - 5.0 + 0.5, 2.0, ahH + 10.0 - 1.0, Color(ColorUtil.bgColor))
+        renderRect(ahX - 10.0 + 4.0, ahY - 5.0 + 0.5, 2.0, ahH + 10.0 - 1.0, ColorUtil.bgColor)
 
         // don't care
-        renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 - 0.5, 1.0, 1.0, Color(ColorUtil.bgColor))
+        renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 - 0.5, 1.0, 1.0, ColorUtil.bgColor)
         renderRect(ahX -10.0 + 4.0 + 1.5, ahY - 5.0 - 1.0, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
         renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 - 1.0, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
         renderRect(ahX -10.0 + 4.0 + 1.5, ahY - 5.0, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
 
-        renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 + ahH + 10.0 - 0.5, 1.0, 1.0, Color(ColorUtil.bgColor))
+        renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 + ahH + 10.0 - 0.5, 1.0, 1.0, ColorUtil.bgColor)
         renderRect(ahX -10.0 + 4.0 + 1.5, ahY - 5.0 + ahH + 10.0 + 0.5, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
         renderRect(ahX -10.0 + 4.0 + 0.5, ahY - 5.0 + ahH + 10.0 + 0.5, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
         renderRect(ahX -10.0 + 4.0 + 1.5, ahY - 5.0 + ahH + 10.0 - 0.5, 0.5, 0.5, ColorUtil.clickGUIColor.darker())
