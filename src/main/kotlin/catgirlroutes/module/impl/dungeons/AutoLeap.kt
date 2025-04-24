@@ -57,7 +57,14 @@ object AutoLeap : Module( // todo improve selectors
         updateTeammates()
     }.withDependency { !isFlopper && leapMode.selected == "Name" }
 
-    private val classEnumMapping = arrayListOf(DungeonClass.Mage, DungeonClass.Berserk, DungeonClass.Archer, DungeonClass.Tank, DungeonClass.Healer, DungeonClass.Unknown)
+    private val classMapping = mapOf(
+        "Mage" to DungeonClass.Mage,
+        "Berserk" to DungeonClass.Berserk,
+        "Archer" to DungeonClass.Archer,
+        "Tank" to DungeonClass.Tank,
+        "Healer" to DungeonClass.Healer,
+        "None" to DungeonClass.Unknown
+    )
 
     private val isFlopper: Boolean get() = ClickGui.clickGui.selected == "Flopper"
 
@@ -96,30 +103,37 @@ object AutoLeap : Module( // todo improve selectors
         }
     }
 
-    data class LeapThing(val key: String, val name: String, val classIndex: Int)
+    private val leapName get() = listOf(s1leap, s2leap, s3leap, s4leap, clearLeap)
+    private val leapClazz get() = listOf(s1leapClass, s2leapClass, s3leapClass, s4leapClass, clearLeapClass)
 
-    private fun stupid(key: String): LeapThing =
-        LeapThing(
-            key,
-            if (isFlopper) s1leap.selected else namesOrder[key].toString(),
-            if (isFlopper) s1leapClass.index else clazzArray.indexOf(clazzOrder[key])
-        )
+    private fun getLeapName(key: String): String {
+        val i = namesOrder.keys.indexOf(key)
+        return if (isFlopper) leapName[i].selected else namesOrder[key].toString()
+    }
+
+    private fun getLeapClass(key: String): DungeonClass? {
+        val i = clazzOrder.keys.indexOf(key)
+        return if (isFlopper) classMapping[leapClazz[i].selected] else classMapping[clazzOrder[key]]
+    }
 
     private fun handleLeap() {
-        val thing = when {
-            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 -> stupid("S1")
-            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> stupid("S2")
-            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> stupid("S3")
-            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> stupid("S4")
-            !inBoss -> stupid("Clear")
+        val key = when {
+            posX in 89.0..113.0 && posY in 100.0..160.0 && posZ in 48.0..122.0 ->"S1"
+            posX in 19.0..91.0 && posY in 100.0..160.0 && posZ in 121.0..145.0 -> "S2"
+            posX in -6.0..19.0 && posY in 100.0..160.0 && posZ in 50.0..123.0 -> "S3"
+            posX in 17.0..90.0 && posY in 100.0..160.0 && posZ in 27.0..50.0 -> "S4"
+            !inBoss -> "Clear"
             else -> return
         }
 
-        debugMessage("leaping to ${thing.name} ${classEnumMapping.getOrNull(thing.classIndex)}")
+        val name = getLeapName(key)
+        val clazz = getLeapClass(key) ?: DungeonClass.Unknown
+
+        debugMessage("leaping to $name $clazz")
 
         when (leapMode.selected) {
-            "Name" -> leap(thing.name)
-            "Class" -> leap(classEnumMapping.getOrElse(thing.classIndex) { DungeonClass.Unknown })
+            "Name" -> leap(key)
+            "Class" -> leap(clazz)
         }
     }
 }
