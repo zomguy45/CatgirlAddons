@@ -44,7 +44,7 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
         val entity = packet.getEntityFromWorld(mc.theWorld)
         if (entity !is EntityArmorStand) return
         val armorStand: EntityArmorStand = entity
-        if (armorStand.name == "Inactive Terminal") {
+        if (armorStand.name.noControlCodes.contains("Inactive Terminal", true)) {
             TermOpenEvent(C02PacketUseEntity()).postAndCatch()
         }
     }
