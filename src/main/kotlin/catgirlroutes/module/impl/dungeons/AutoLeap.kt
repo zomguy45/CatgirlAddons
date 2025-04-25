@@ -55,6 +55,7 @@ object AutoLeap : Module( // todo improve selectors
 
     private val namesOrder by OrderSetting("Name order", mapOf("S1" to "None", "S2" to "None", "S3" to "None", "S4" to "None", "Clear" to "None"), 2, teamList) {
         updateTeammates()
+        options = teamList
     }.withDependency { !isFlopper && leapMode.selected == "Name" }
 
     private val classMapping = mapOf(
