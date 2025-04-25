@@ -5,8 +5,9 @@ import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeOnlyFirst
 import com.google.gson.Gson
 import com.google.gson.JsonObject
 import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.minecraft.init.Blocks
 import net.minecraft.item.ItemStack
 import net.minecraft.nbt.*
@@ -17,70 +18,95 @@ object NeuRepo {
     var mobs = mutableListOf<JsonObject>()
     var constants = mutableListOf<JsonObject>()
 
+    private val gson = Gson()
+
     init {
         updateRepo()
     }
 
     private fun updateRepo() {
-        runBlocking(scope.coroutineContext) {
+        scope.launch {
+            val startTime = System.currentTimeMillis()
+
             val result = downloadRepo()
-            result?.let {
-                val gson = Gson()
+            result?.let { (items, mobsList, constantsList) ->
+                processRepoItems(items)
+                mobs = mobsList.toMutableList()
+                constants = constantsList.toMutableList()
 
-                val repoItemLists: List<RepoItem> = gson.fromJson(gson.toJson(it.first), object : TypeToken<List<RepoItem>>() {}.type)
+                val auctionJob = launch { updateItemsWithAuctionData() }
+                val bazaarJob = launch { updateItemsWithBazaarData() }
 
-                repoItems = repoItemLists.map { item ->
-                    // convert shitty neu skyblockID to normal format (WISDOM;2 -> ENCHANTMENT_WISDOM_2)
+                auctionJob.join()
+                bazaarJob.join()
+
+                val totalTime = System.currentTimeMillis() - startTime
+                println("Loaded NeuRepo in ${totalTime}ms (${repoItems.size} items)")
+            }
+        }
+    }
+
+    private suspend fun processRepoItems(items: List<JsonObject>) {
+        val processedItems = withContext(Dispatchers.IO) {
+            items.mapNotNull { itemJson ->
+                try {
+                    val item: RepoItem = gson.fromJson(itemJson, RepoItem::class.java)
+
                     if (item.skyblockID.contains(";") && item.id == "minecraft:enchanted_book") {
                         val parts = item.skyblockID.split(";")
                         if (parts.size == 2) {
                             var enchantment = parts[0]
                             val tier = parts[1]
-                            item.skyblockID = "ENCHANTMENT_${enchantment}_${tier}"
-                            // also change name of enchantments
+                            item.skyblockID = "ENCHANTMENT_${enchantment}_$tier"
+
                             val colour = if (enchantment.startsWith("ULTIMATE")) "§9§d§l" else "§9"
                             enchantment = if (enchantment.contains("WISE")) enchantment else enchantment.replace("ULTIMATE_", "")
                             item.name = "$colour${enchantment.replace("_", " ").capitalizeWords()} ${intToRoman(tier.toInt())}"
                         }
                     }
                     item
-                }.toMutableList()
-
-                mobs = it.second.toMutableList()
-                constants = it.third.toMutableList()
+                } catch (e: Exception) {
+                    null
+                }
             }
-            updateItemsWithAuctionData()
-            updateItemsWithBazaarData()
-            println("Successfully loaded NeuRepo")
         }
+        repoItems = processedItems.toMutableList()
     }
 
-    private fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.capitalizeOnlyFirst() }
-
-    private fun updateItemsWithAuctionData() = runBlocking {
+    private suspend fun updateItemsWithAuctionData() {
         val auctionDataJson = getDataFromServer("https://moulberry.codes/lowestbin.json")
         if (auctionDataJson.isNotEmpty()) {
-            val auctionMap = Gson().fromJson(auctionDataJson, JsonObject::class.java)
-                .entrySet().associate { it.key to it.value.asDouble }
+            val auctionMap = withContext(Dispatchers.IO) {
+                gson.fromJson(auctionDataJson, JsonObject::class.java)
+                    .entrySet().associate { it.key to it.value.asDouble }
+            }
 
-            repoItems.forEach { item ->
-                val price = auctionMap[item.skyblockID] ?: 0.0
-                item.auction = price > 0.0
-                item.price = price
+            val itemMap = repoItems.associateBy { it.skyblockID }
+
+            auctionMap.forEach { (id, price) ->
+                itemMap[id]?.let { item ->
+                    item.auction = price > 0.0
+                    item.price = price
+                }
             }
         }
     }
 
-    private fun updateItemsWithBazaarData() = runBlocking {
+    private suspend fun updateItemsWithBazaarData() {
         val bazaarDataJson = getDataFromServer("https://api.hypixel.net/v2/skyblock/bazaar")
-        if (bazaarDataJson.isNotEmpty()) {
-            val products = Gson().fromJson(bazaarDataJson, JsonObject::class.java)
-                .getAsJsonObject("products") ?: return@runBlocking
+        if (bazaarDataJson.isEmpty()) return
 
-            repoItems.forEach { item ->
-                val price = products[item.skyblockID]?.asJsonObject
-                    ?.getAsJsonObject("quick_status")?.get("buyPrice")?.asDouble ?: 0.0
-                if (price > 0.0) {
+        val jsonObject = withContext(Dispatchers.IO) {
+            gson.fromJson(bazaarDataJson, JsonObject::class.java)
+        }
+
+        val products = jsonObject.getAsJsonObject("products") ?: return
+
+        val itemMap = repoItems.associateBy { it.skyblockID }
+
+        products.entrySet().forEach { (id, product) ->
+            product.asJsonObject?.getAsJsonObject("quick_status")?.get("buyPrice")?.asDouble?.let { price ->
+                itemMap[id]?.let { item ->
                     item.bazaar = true
                     item.price = price
                 }
@@ -97,6 +123,8 @@ object NeuRepo {
             repoItems.find { it.name == name || it.name.noControlCodes == name || it.name.noControlCodes.removePrefix("[Lvl {LVL}] ") == name }
         }
     }
+
+    private fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.capitalizeOnlyFirst() }
 
     // modified schizo shit from neu
     private val itemStackCache: MutableMap<String, ItemStack> = HashMap()
