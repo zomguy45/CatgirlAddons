@@ -24,7 +24,7 @@ import kotlin.math.hypot
 class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
     Element<OrderSetting>(parent, setting, ElementType.ORDER) {
 
-    private val maxWidth = this.width * 0.9
+    private val maxWidth get() = if (setting.options.isEmpty()) this.width else this.width * 0.9
     private val minWidth = 10.0
 
     private lateinit var placeholders: List<String>
@@ -60,7 +60,6 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
     private val updateButton = button {
         text = "Update"
         size(maxWidth - 10.5, DEFAULT_HEIGHT)
-        colour = ColorUtil.elementColor
         onClick {
             setting.update()
             updateElements()
@@ -83,7 +82,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 text = value
                 at(pos.first, pos.second)
                 size(elementWidth, ELEMENT_HEIGHT)
-                colour = Color(0, 0, 0, 128)
+                colour = ColorUtil.bgColor.darker()
                 outlineColour = Color(208, 208, 208, 136)
                 outlineHoverColour = Color(136, 255, 136)
             })
@@ -98,7 +97,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 text = option
                 at(maxWidth + 5.0, fontHeight + 3.0 + PADDING + index * (optionElementHeight + PADDING))
                 size(optionsListWidth - 10.5, optionElementHeight)
-                colour = Color(0, 0, 0, 128)
+                colour = ColorUtil.bgColor.darker()
                 outlineColour = Color(208, 208, 208, 136)
                 outlineHoverColour = Color(136, 255, 136)
             })

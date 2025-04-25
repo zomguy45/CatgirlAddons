@@ -11,6 +11,8 @@ import catgirlroutes.utils.LocationManager.currentDungeon
 import catgirlroutes.utils.PlayerUtils.getItemSlot
 import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.*
+import catgirlroutes.utils.PlayerUtils.posX
+import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.dungeon.tiles.Room
 import net.minecraft.block.BlockSkull
 import net.minecraft.block.state.IBlockState
@@ -163,6 +165,18 @@ object DungeonUtils {
             posY > 100 -> M7Phases.P3
             posY > 45 -> M7Phases.P4
             else -> M7Phases.P5
+        }
+    }
+
+    fun getP3Section(): P3Sections {
+        if (getF7Phase() != M7Phases.P3) return P3Sections.Unknown
+
+        return when {
+            posX in 89.0..113.0 && posZ in 48.0..122.0 -> P3Sections.S1
+            posX in 19.0..91.0 && posZ in 121.0..145.0 -> P3Sections.S2
+            posX in -6.0..19.0 && posZ in 50.0..123.0 -> P3Sections.S3
+            posX in 17.0..90.0 && posZ in 27.0..50.0 -> P3Sections.S4
+            else -> P3Sections.Unknown
         }
     }
 

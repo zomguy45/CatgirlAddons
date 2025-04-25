@@ -38,7 +38,7 @@ object EventDispatcher { // I didn't come up with anything better so I'm just sk
     fun onPacket(event: PacketReceiveEvent) {
         if (event.packet is S29PacketSoundEffect && inDungeons && !inBoss && (event.packet.soundName.equalsOneOf("mob.bat.hurt", "mob.bat.death") && event.packet.volume == 0.1f)) SecretPickupEvent.Bat(event.packet).postAndCatch()
         if (event.packet is S32PacketConfirmTransaction) ServerTickEvent().postAndCatch()
-        if (event.packet is S02PacketChat) ChatPacket(event.packet.chatComponent.unformattedText.noControlCodes).postAndCatch()
+        if (event.packet is S02PacketChat) ChatPacket(event.packet.chatComponent.unformattedText.noControlCodes, event.packet.chatComponent.formattedText).postAndCatch()
     }
 
 //    @SubscribeEvent

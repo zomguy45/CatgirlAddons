@@ -1,32 +1,28 @@
 package catgirlroutes.module.impl.dungeons
 
-import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.Visibility
+import catgirlroutes.module.settings.impl.ActionSetting
+import catgirlroutes.module.settings.impl.OrderSetting
 import catgirlroutes.module.settings.impl.SelectorSetting
-import catgirlroutes.module.settings.impl.StringSetting
-import catgirlroutes.ui.misc.LeapOrganiser
+import catgirlroutes.utils.ChatUtils.commandAny
+import catgirlroutes.utils.Party
 
 object LeapOrganiser : Module(
     "Leap Organiser",
     Category.DUNGEON,
-    tag = TagType.WHIP
 ) {
-    var leapOrder by StringSetting("Leap order", "_ _ _ _", visibility = Visibility.HIDDEN)
-    val player1Note by StringSetting("Player1 note", "ee2", description = "Player 1 note")
-    val player2Note by StringSetting("Player2 note", "core", description = "Player 2 note")
-    val player3Note by StringSetting("Player3 note", "ee3", description = "Player 3 note")
-    val player4Note by StringSetting("Player4 note", "i4", description = "Player 4 note")
-    val leapMenu by SelectorSetting("Leap menu", "SA", arrayListOf("SA", "Odin"))
-
-    override fun onKeyBind() {
-        this.toggle()
+    val leapOrder by OrderSetting("Leap order", mapOf("1" to "None", "2" to "None", "3" to "None", "4" to "None")) {
+        values = Party.members
     }
 
-    override fun onEnable() {
-        display = LeapOrganiser()
-        toggle()
-        super.onEnable()
+    private val leapMenu by SelectorSetting("Leap menu", "SA", arrayListOf("SA", "Odin"))
+
+    private val updateParty by ActionSetting("Apply") {
+        val order = leapOrder.values.joinToString(" ") { it.ifBlank { "_" } }
+        when (leapMenu.selected) {
+            "SA" -> commandAny("/sa leap $order")
+            "Odin" -> commandAny("/od leaporder $order")
+        }
     }
 }

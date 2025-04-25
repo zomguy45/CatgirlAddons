@@ -2,6 +2,7 @@ package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.display
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.events.impl.RawPacketReceiveEvent
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.mixins.accessors.IEntityPlayerSPAccessor
 import catgirlroutes.module.Category
@@ -9,11 +10,13 @@ import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.*
 //import catgirlroutes.ui.misc.OrderingGui
 import catgirlroutes.utils.*
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.EtherWarpHelper.etherPos
 import catgirlroutes.utils.dungeon.tiles.Room
 import catgirlroutes.utils.render.WorldRenderUtils
 import net.minecraft.block.Block.getIdFromBlock
 import net.minecraft.init.Blocks
+import net.minecraft.network.play.server.S2DPacketOpenWindow
 import net.minecraft.util.MovingObjectPosition
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderWorldLastEvent
@@ -62,17 +65,25 @@ object Test : Module(
 //        }
 //    }
 
-    private val orderSettingTest by OrderSetting("Order test 1", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("tom", "tim", "jim", "kim", "bob", "None")) {
-        options = listOf("aboba", "test321")
-    }
-
-    private val orderSettingTest2 by OrderSetting("Order test 2", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("Archer", "Berserk", "Healer", "Mage", "Tank", "None"))
-
-    private val orderSettingTest3 by OrderSetting("Order test 3", mapOf("1" to "name1", "2" to "name2", "3" to "name3", "4" to "name4"), 2)
+//    private val orderSettingTest by OrderSetting("Order test 1", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("tom", "tim", "jim", "kim", "bob", "None")) {
+//        options = listOf("aboba", "test321")
+//    }
+//
+//    private val orderSettingTest2 by OrderSetting("Order test 2", mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4", "clear" to "none"), 2, listOf("Archer", "Berserk", "Healer", "Mage", "Tank", "None"))
+//
+//    private val orderSettingTest3 by OrderSetting("Order test 3", mapOf("1" to "name1", "2" to "name2", "3" to "name3", "4" to "name4"), 2)
 
 //    private val stupid by ActionSetting("Stupid") { display = OrderingGui(mapOf("s1" to "name1", "s2" to "name2", "s3" to "name3", "s4" to "name4")) }
 
+    private val stupid by ActionSetting("Stupid") { debugMessage(Party.members) }
+
     data class Stupid(val stupid1: String, val stupid2: Int)
+
+    @SubscribeEvent
+    fun onRawPacket(event: RawPacketReceiveEvent) {
+        if (event.packet !is S2DPacketOpenWindow) return
+        debugMessage(event.packet.windowTitle)
+    }
 
     @SubscribeEvent
     fun onRoomEnter(event: RoomEnterEvent) {

@@ -15,7 +15,6 @@ class ElementAction(parent: ModuleButton, setting: ActionSetting) :
     private val actionButton = button {
         text = displayName.capitalizeOnlyFirst()
         size(this@ElementAction.width, this@ElementAction.height)
-        colour = ColorUtil.elementColor
         onClick { setting.doAction() }
     }
 

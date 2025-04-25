@@ -14,7 +14,7 @@ data class MiscElementStyle(
     var radius: Double = 3.0,
     var thickness: Double = 1.0,
     var textColour: Color = Color(ColorUtil.textcolor),
-    var colour: Color = ColorUtil.buttonColor,
+    var colour: Color = ColorUtil.bgColor.darker(),
     var outlineColour: Color = ColorUtil.outlineColor,
     var outlineHoverColour: Color = ColorUtil.clickGUIColor,
     var alignment: Alignment = Alignment.CENTRE,

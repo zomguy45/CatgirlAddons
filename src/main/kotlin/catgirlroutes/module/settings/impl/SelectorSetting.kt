@@ -79,9 +79,15 @@ class SelectorSetting(
 }
 
 class StringSelector(
-    var options: List<String>,
+    options: List<String>,
     private var selectedIndex: Int = 0
 ) {
+    var options: List<String> = options
+        set(value) {
+            field = value
+            selectedIndex = selectedIndex.coerceIn(0, value.lastIndex)
+        }
+
     var selected: String
         get() = options[selectedIndex]
         set(value) = select(value)

@@ -81,7 +81,8 @@ class CatgirlRoutes {
             CgaUsers,
             NeuRepo,
             SkyblockPlayer,
-            WorldRenderUtils
+            WorldRenderUtils,
+            Party
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler

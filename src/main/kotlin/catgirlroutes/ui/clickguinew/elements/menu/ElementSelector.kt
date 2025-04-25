@@ -24,7 +24,7 @@ class ElementSelector(parent: ModuleButton, setting: SelectorSetting) : // todo 
         val displayValue = "$displayName: ${this.setting.selected}"
 
         drawRoundedBorderedRect(0.0, 0.0, width, height, 3.0, 1.0, ColorUtil.bgColor.darker(),  ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(0.0, 0.0, width, 13.0, 3.0, 1.0, ColorUtil.buttonColor,  ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(0.0, 0.0, width, 13.0, 3.0, 1.0, ColorUtil.bgColor.darker(),  ColorUtil.clickGUIColor)
         FontUtil.drawTotalCenteredString(displayValue, width / 2.0, 13.0 / 2.0)
 
         if (!extended && !this.extendAnimation.isAnimating()) return height
