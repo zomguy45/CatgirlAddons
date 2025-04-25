@@ -2,6 +2,7 @@ package catgirlroutes.ui.clickgui.util
 
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.module.impl.misc.NickHider
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.font.CFontRenderer
@@ -48,9 +49,10 @@ object FontUtil {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x, y, 0.0)
         GlStateManager.scale(scale, scale, 1.0)
+        val finalText = text.replace(mc.thePlayer.name, NickHider.nameInput)
 
-        if (customFont) customFontRenderer.drawString(text, 0.0, 0.0, color, shadow)
-        else fontRenderer.drawString(text, 0f, 0f, color, shadow)
+        if (customFont) customFontRenderer.drawString(finalText, 0.0, 0.0, color, shadow)
+        else fontRenderer.drawString(finalText, 0f, 0f, color, shadow)
 
         GlStateManager.popMatrix()
     }

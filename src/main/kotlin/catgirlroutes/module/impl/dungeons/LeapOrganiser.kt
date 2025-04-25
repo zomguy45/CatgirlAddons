@@ -25,4 +25,9 @@ object LeapOrganiser : Module(
             "Odin" -> commandAny("/od leaporder $order")
         }
     }
+
+    override fun onEnable() {
+        toggle()
+        super.onEnable()
+    }
 }

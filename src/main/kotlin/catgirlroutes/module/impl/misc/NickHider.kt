@@ -14,7 +14,7 @@ object NickHider: Module(
     "Nick Hider",
     Category.MISC
 ){
-    private var nameInput by StringSetting("Name", "meow", description = "Replaces player's name with a custom one")
+    var nameInput by StringSetting("Name", "meow", description = "Replaces player's name with a custom one")
     private var hideTeammates by BooleanSetting("Hide teammates", "Obfuscates teammates' names")
 
     @JvmStatic
