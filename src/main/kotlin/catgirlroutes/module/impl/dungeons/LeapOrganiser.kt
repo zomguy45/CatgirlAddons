@@ -16,8 +16,6 @@ object LeapOrganiser : Module(
         values = Party.members
     }
 
-    private val leapMenu by SelectorSetting("Leap menu", "SA", arrayListOf("SA", "Odin"))
-
     private val updateParty by ActionSetting("Apply") {
         val order = leapOrder.values.joinToString(" ") { it.ifBlank { "_" } }
         when (leapMenu.selected) {
@@ -25,6 +23,8 @@ object LeapOrganiser : Module(
             "Odin" -> commandAny("/od leaporder $order")
         }
     }
+
+    private val leapMenu by SelectorSetting("Leap menu", "SA", arrayListOf("SA", "Odin"))
 
     override fun onEnable() {
         toggle()

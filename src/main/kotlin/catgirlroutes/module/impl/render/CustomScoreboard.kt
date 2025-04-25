@@ -24,7 +24,7 @@ object CustomScoreboard : Module(
     "Custom Scoreboard",
     Category.RENDER
 ) {
-    private val footerText by StringSetting("Footer text", "§dCGA", 0)
+    private val footerText by StringSetting("Footer text", "§dCatgirlAddons", 0)
     private val hideLobby by BooleanSetting("Hide lobby", "Hides lobby ID.")
     private val background by BooleanSetting("Background", "Draws scoreboard background.")
     private val backgroundColour by ColorSetting("Background colour", Color(21, 21, 21, 100), true).withDependency { background }
