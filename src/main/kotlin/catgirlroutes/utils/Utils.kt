@@ -33,6 +33,9 @@ private val FORMATTING_CODE_PATTERN = Regex("§[0-9a-fk-or]", RegexOption.IGNORE
 val String?.noControlCodes: String
     get() = this?.let { FORMATTING_CODE_PATTERN.replace(it, "") } ?: ""
 
+val String?.stripRank: String
+    get() = this?.noControlCodes?.replace(Regex("\\[[\\w+-]+] "), "")?.trim() ?: ""
+
 fun Any?.equalsOneOf(vararg options: Any?): Boolean {
     return options.any { this == it }
 }
