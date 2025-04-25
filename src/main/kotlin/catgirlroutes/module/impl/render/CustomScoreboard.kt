@@ -16,7 +16,6 @@ import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedOutline
 import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.scoreboard.ScorePlayerTeam
-import net.minecraft.util.EnumChatFormatting
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 
@@ -49,23 +48,26 @@ object CustomScoreboard : Module(
 
         val filteredScores = if (list.size > 15) list.takeLast(15) else list
 
-        var stringWidth = event.objective.displayName.getWidth()
+        var widest = event.objective.displayName.getWidth()
 
         for (score in filteredScores) {
             val scorePlayerTeam = scoreboard.getPlayersTeam(score.playerName)
-            val s = ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score.playerName) +
-                    ": " + EnumChatFormatting.RED + score.scorePoints
-            stringWidth = maxOf(stringWidth, s.getWidth())
+            var s = ScorePlayerTeam.formatPlayerName(scorePlayerTeam, score.playerName)
+            val matcher = Regex("\\d\\d/\\d\\d/\\d\\d").find(s)
+            if (hideLobby && matcher != null) {
+                s = "§7${matcher.value}"
+            }
+            widest = maxOf(widest, s.getWidth())
         }
 
         val linesHeight = filteredScores.size * fontHeight
-        val x = event.resolution.scaledWidth - stringWidth - 3.0
+        val screenRight = event.resolution.scaledWidth - 3.0
+        val x = screenRight - widest
         val y = event.resolution.scaledHeight / 2.0 + linesHeight / 3.0
-        val w = event.resolution.scaledWidth - 5.0 + 2.0
 
         val bgX = x - 2.0
         val bgY = y - filteredScores.size * fontHeight - fontHeight - 4.0
-        val bgW = w - (bgX - 2.0)
+        val bgW = screenRight - (bgX - 2.0)
         val bgH = fontHeight * (filteredScores.size + 1) + 4.0
 
 
@@ -73,21 +75,21 @@ object CustomScoreboard : Module(
         if (outline) drawRoundedOutline(bgX, bgY, bgW, bgH, cornerRadius, outlineThickness, outlineColour)
 
 
-        collection.forEachIndexed { i, score2 ->
-            val scorePlayerTeam2 = scoreboard.getPlayersTeam(score2.playerName)
-            var s2 = ScorePlayerTeam.formatPlayerName(scorePlayerTeam2, score2.playerName)
+        collection.forEachIndexed { i, score ->
+            val scorePlayerTeam2 = scoreboard.getPlayersTeam(score.playerName)
+            var s = ScorePlayerTeam.formatPlayerName(scorePlayerTeam2, score.playerName)
                 .replace("§ewww.hypixel.ne\ud83c\udf82§et", footerText)
 
-            val y2 = bgH + bgY - (i + 1) * fontHeight
 
-            val matcher = Regex("\\d\\d/\\d\\d/\\d\\d").find(s2)
+            val matcher = Regex("\\d\\d/\\d\\d/\\d\\d").find(s)
             if (hideLobby && matcher != null) {
-                s2 = "§7${matcher.value}"
+                s = "§7${matcher.value}"
             }
 
-            val isFooter = s2 == footerText
+            val yPos = bgH + bgY - (i + 1) * fontHeight
+            val isFooter = s == footerText
             val xPos = if (isFooter) {
-                x + stringWidth / 2.0 - s2.getWidth() / 2.0
+                x + widest / 2.0 - s.getWidth() / 2.0
             } else {
                 x
             }
@@ -97,14 +99,14 @@ object CustomScoreboard : Module(
                 553648127
             }
 
-            drawString(s2, xPos, y2, color)
+            drawString(s, xPos, yPos, color)
 
             if (i == collection.size - 1) {
                 val s3 = event.objective.displayName
                 drawString(
                     s3,
-                    x + stringWidth / 2.0 - s3.getWidth() / 2.0,
-                    y2 - fontHeight,
+                    x + widest / 2.0 - s3.getWidth() / 2.0,
+                    yPos - fontHeight,
                 )
             }
         }
