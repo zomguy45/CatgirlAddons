@@ -93,8 +93,8 @@ object FontUtil {
         drawText(text, posX, posY, color, customFont, scale)
     }
 
-    fun drawString(text: String, x: Double, y: Double, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0) =
-        drawText(text, x, y, color, customFont, scale)
+    fun drawString(text: String, x: Double, y: Double, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0, shadow: Boolean = false) =
+        drawText(text, x, y, color, customFont, scale, shadow)
 
     fun drawString(text: String, x: Int, y: Int, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0) =
         drawString(text, x.toDouble(), y.toDouble(), color, customFont, scale)

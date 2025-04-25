@@ -24,6 +24,7 @@ object CustomScoreboard : Module(
     Category.RENDER
 ) {
     private val footerText by StringSetting("Footer text", "§dCatgirlAddons", 0)
+    private val textShadow by BooleanSetting("Text shadow")
     private val hideLobby by BooleanSetting("Hide lobby", "Hides lobby ID.")
     private val background by BooleanSetting("Background", "Draws scoreboard background.")
     private val backgroundColour by ColorSetting("Background colour", Color(21, 21, 21, 100), true).withDependency { background }
@@ -99,7 +100,7 @@ object CustomScoreboard : Module(
                 553648127
             }
 
-            drawString(s, xPos, yPos, color)
+            drawString(s, xPos, yPos, color, shadow = textShadow)
 
             if (i == collection.size - 1) {
                 val s3 = event.objective.displayName
@@ -107,6 +108,7 @@ object CustomScoreboard : Module(
                     s3,
                     x + widest / 2.0 - s3.getWidth() / 2.0,
                     yPos - fontHeight,
+                    shadow = textShadow
                 )
             }
         }
