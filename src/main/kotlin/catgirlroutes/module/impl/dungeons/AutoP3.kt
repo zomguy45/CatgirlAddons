@@ -80,6 +80,7 @@ object AutoP3 : Module(
     var selectedRoute by StringSetting("Selected route", "1", 0, "Route name(-s)", "Name of the selected route for Auto P3.")
     private val inBossOnly by BooleanSetting("Boss only", true, "Active in boss room only.")
     private val editTitle by BooleanSetting("EditMode title", "Renders a title when edit mode is enabled.")
+    private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
     private val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
     private val style by SelectorSetting("Ring style", "Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
@@ -240,28 +241,28 @@ object AutoP3 : Module(
         }
         when (ring.type) {
             "walk" -> {
-                modMessage("Walking!")
+                feedbackMessage("Walking!")
                 setKey("w", true)
             }
             "jump" -> {
-                modMessage("Jumping!")
+                feedbackMessage("Jumping!")
                 jump()
             }
             "stop" -> {
                 dir = null
-                modMessage("Stopping!")
+                feedbackMessage("Stopping!")
                 stopMovement()
                 stopVelo()
             }
             "boom" -> {
-                modMessage("Bomb denmark!")
+                feedbackMessage("Bomb denmark!")
                 if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
-                //modMessage(boomType.selected)
+                //feedbackMessage(boomType.selected)
                 scheduleTask(0) { leftClick() }
             }
             "hclip" -> {
                 dir = null
-                modMessage("Hclipping!")
+                feedbackMessage("Hclipping!")
                 hClip(ring.yaw)
                 ring.arguments?.let {
                     if ("walk" in it) {
@@ -273,22 +274,22 @@ object AutoP3 : Module(
             }
             "vclip" -> {
                 dir = null
-                modMessage("Vclipping!")
+                feedbackMessage("Vclipping!")
                 lavaClipToggle(ring.depth!!.toDouble(), true)
             }
             "bonzo" -> {
-                modMessage("Bonzoing!")
+                feedbackMessage("Bonzoing!")
                 swapFromName("bonzo's staff")
                 scheduleTask(0) {
                     clickAt(ring.yaw, ring.pitch)
                 }
             }
             "look" -> {
-                modMessage("Looking!")
+                feedbackMessage("Looking!")
                 snapTo(ring.yaw, ring.pitch)
             }
             "align" -> {
-                modMessage("Aligning!")
+                feedbackMessage("Aligning!")
                 mc.thePlayer.setPosition(
                     ring.location.xCoord,
                     mc.thePlayer.posY,
@@ -296,7 +297,7 @@ object AutoP3 : Module(
                 )
             }
             "block" -> {
-                modMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
+                feedbackMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
                 val (yaw, pitch) = getYawAndPitch(
                     ring.lookBlock!!.xCoord,
                     ring.lookBlock!!.yCoord,
@@ -305,11 +306,11 @@ object AutoP3 : Module(
                 snapTo(yaw, pitch)
             }
             "edge" -> {
-                modMessage("Edging!")
+                feedbackMessage("Edging!")
                 edge()
             }
             "command" -> {
-                modMessage("Sexecuting!")
+                feedbackMessage("Sexecuting!")
                 commandAny(ring.command!!)
             }
             "blink" -> {
@@ -349,7 +350,7 @@ object AutoP3 : Module(
                 lastX = 0.0
                 lastZ = 0.0
                 airTicks = 0
-                modMessage("Meowtion")
+                feedbackMessage("Meowtion")
                 if (mc.thePlayer.onGround) {
                     stopMovement()
                     dir = ring.yaw.toDouble()
@@ -541,5 +542,9 @@ object AutoP3 : Module(
             }
         }
         debugMessage("$registry, $metadata, $slot, $name")
+    }
+
+    private fun feedbackMessage(message: String) {
+        if (chatFeedback) modMessage(message)
     }
 }
