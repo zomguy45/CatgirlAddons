@@ -20,6 +20,7 @@ import net.minecraft.util.MathHelper
 import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
+import net.minecraftforge.fml.common.gameevent.TickEvent
 import kotlin.random.Random
 
 
@@ -57,6 +58,7 @@ object AutoClicker: Module(
     private var rightClicking = false
     private var leftClickJob: Job? = null
     private var rightClickJob: Job? = null
+    private var lastHeldSlot = -1
 
     private val shouldClick get() = (clickInGui || mc.currentScreen == null) && (!favouriteItems || mc.thePlayer?.heldItem?.skyblockUUID in favItemsList)
 
@@ -90,6 +92,30 @@ object AutoClicker: Module(
         }
     }
 
+    @SubscribeEvent
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (event.phase != TickEvent.Phase.END) return
+
+        val current = mc.thePlayer?.inventory?.currentItem ?: return
+
+        if (lastHeldSlot == -1) {
+            lastHeldSlot = current
+            return
+        }
+
+        if (current != lastHeldSlot) {
+            lastHeldSlot = current
+
+            rightClicking = false
+            rightClickJob?.cancel()
+            rightClickJob = null
+
+            leftClicking = false
+            leftClickJob?.cancel()
+            leftClickJob = null
+        }
+    }
+
     private suspend fun leftClicker() {
         while (leftClicking) {
             if (!breakBlock()) leftClick2()
@@ -113,6 +139,8 @@ object AutoClicker: Module(
         rightClicking = false
         rightClickJob?.cancel()
         rightClickJob = null
+
+        lastHeldSlot = -1
     }
 
     private var breakHeld: Boolean = false

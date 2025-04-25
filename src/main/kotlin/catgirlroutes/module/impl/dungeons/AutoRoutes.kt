@@ -64,8 +64,8 @@ object AutoRoutes : Module( // todo recode this shit
     "A module that allows you to place down nodes that execute various actions."
 ) {
     private val editTitle by BooleanSetting("EditMode title", false)
-    private val boomType by SelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
     private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
+    private val boomType by SelectorSetting("Boom type","Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
     private val preset by SelectorSetting("Node style","Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
     private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { preset.selected.equalsOneOf("Normal", "Ring") }
