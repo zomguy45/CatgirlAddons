@@ -67,8 +67,8 @@ object CustomHighlight : Module(
             ) {
                 val name = e.name
                 if (e.name == mc.thePlayer.name) return@forEach
-                createClickableText(getPrefix() + "Copy " + name, "Click to copy to clipboard!", "hl schizophrenia ${name}")
-                createClickableText(getPrefix() + "Add " + name, "Click to add to the list!", "hl add ${name}")
+                createClickableText(getPrefix() + "Copy " + name, "Click to copy to clipboard!", "/hl schizophrenia ${name}")
+                createClickableText(getPrefix() + "Add " + name, "Click to add to the list!", "/hl add ${name}")
 
             }
         }
