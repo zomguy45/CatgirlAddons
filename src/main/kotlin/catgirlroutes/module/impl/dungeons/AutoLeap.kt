@@ -43,7 +43,7 @@ object AutoLeap : Module(
         updateTeammates()
         options = teamList
     }.withDependency { !isFlopper && leapMode.selected == "Name" }
-    private val slotOrder by OrderSetting("Leap slot order", mapOf("S1" to "1", "S2" to "2", "S3" to "3", "S4" to "4", "Clear" to "None"), 2, listOf("1", "2", "3", "4", "None")).withDependency { !isFlopper && leapMode.selected == "Leap slot" }
+    private val slotOrder by OrderSetting("Leap slot order", mapOf("S1" to "1", "S2" to "2", "S3" to "3", "S4" to "4", "Clear" to "None"), 2, listOf("1", "2", "3", "4", "None")).withDependency { leapMode.selected == "Leap slot" }
 
     private var leapMode by SelectorSetting("Leap mode", "Name", arrayListOf("Name", "Class", "Leap slot"), "Leap mode for the module.")
 
