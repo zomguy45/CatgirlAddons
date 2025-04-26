@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.drawStringWithShadow
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.dungeon.tiles.Rotations
@@ -167,10 +168,9 @@ fun rotationNumber(rotation: Rotations): Int {
 }
 
 fun renderText(
-    // render utils probably?
     text: String,
-    x: Int,
-    y: Int,
+    x: Double,
+    y: Double,
     scale: Double = 1.0,
     color: Int = 0xFFFFFF,
 ) {
@@ -181,15 +181,14 @@ fun renderText(
 
     GlStateManager.scale(scale, scale, scale)
 
-    var yOffset = y - mc.fontRendererObj.FONT_HEIGHT
+    var yOffset = y - fontHeight
     text.split("\n").forEach {
-        yOffset += (mc.fontRendererObj.FONT_HEIGHT * scale).toInt()
-        mc.fontRendererObj.drawString(
+        yOffset += (fontHeight * scale).toInt()
+        drawStringWithShadow(
             it,
-            round(x / scale).toFloat(),
-            round(yOffset / scale).toFloat(),
-            color,
-            true
+            round(x / scale),
+            round(yOffset / scale),
+            color
         )
     }
 
@@ -203,8 +202,8 @@ fun renderText(
     scale: Double = 1.0,
     color: Int = 0xFFFFFF
 ) {
-    val x = sr.scaledWidth / 2 - FontUtil.getStringWidth(text, scale = scale) / 2
-    val y = sr.scaledHeight / 2 + fontHeight
+    val x = sr.scaledWidth_double / 2.0 - FontUtil.getStringWidth(text, scale = scale) / 2.0
+    val y = sr.scaledHeight_double / 2.0 + fontHeight
     renderText(text, x, y, scale, color)
 }
 /**

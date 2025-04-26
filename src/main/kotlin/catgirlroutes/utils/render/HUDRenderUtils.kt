@@ -13,6 +13,7 @@ import net.minecraft.inventory.Slot
 import net.minecraft.item.ItemStack
 import net.minecraft.util.ResourceLocation
 import net.minecraftforge.fml.client.config.GuiUtils.drawGradientRect
+import org.lwjgl.opengl.Display
 import org.lwjgl.opengl.GL11
 import org.lwjgl.opengl.GL14
 import java.awt.Color
@@ -39,6 +40,8 @@ object HUDRenderUtils {
 
     val sr get() = ScaledResolution(mc)
     val scale get() = CLICK_GUI_SCALE / sr.scaleFactor
+    val displayWidth get() = Display.getDesktopDisplayMode().width
+    val displayHeight get() = Display.getDesktopDisplayMode().height
 
     fun renderRect(x: Double, y: Double, w: Double, h: Double, color: Color) {
         if (color.alpha == 0) return

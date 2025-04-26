@@ -170,7 +170,7 @@ object AutoP3 : Module(
                 "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
                 "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
             }
-            if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0) {
+            if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0 && Blink.renderAutoP3Text) {
                 for (i in 0 until ring.packets.size - 1) {
                     val p1 = ring.packets[i]
                     val p2 = ring.packets[i + 1]

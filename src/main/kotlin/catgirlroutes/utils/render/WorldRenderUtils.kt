@@ -4,6 +4,8 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 
 import catgirlroutes.ui.clickgui.util.ColorUtil.toInt
+import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
+import catgirlroutes.ui.clickgui.util.FontUtil.getWidth
 import catgirlroutes.utils.renderText
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
@@ -11,6 +13,7 @@ import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.addVec
 import catgirlroutes.utils.fastEyeHeight
 import catgirlroutes.utils.WorldToScreen
+import catgirlroutes.utils.render.HUDRenderUtils.sr
 import com.github.stivais.commodore.utils.GreedyString
 import net.minecraft.client.gui.Gui
 import net.minecraft.client.gui.ScaledResolution
@@ -939,11 +942,10 @@ object WorldRenderUtils {
     fun onOverlay(event: RenderGameOverlayEvent.Pre) {
         if (event.type != RenderGameOverlayEvent.ElementType.ALL || titleTicks <= 0) return
         mc.entityRenderer.setupOverlayRendering()
-        val sr = ScaledResolution(mc)
         renderText(
             displayTitle,
-            sr.scaledWidth / 2 - mc.fontRendererObj.getStringWidth(displayTitle) / 2 + 1,
-            sr.scaledHeight / 2 + mc.fontRendererObj.FONT_HEIGHT, color = titleColor.toInt,
+            sr.scaledWidth_double / 2 - displayTitle.getWidth() / 2 + 1,
+            sr.scaledHeight_double / 2 + fontHeight, color = titleColor.toInt,
         )
     }
 
