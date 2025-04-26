@@ -235,6 +235,10 @@ class ModuleButton(val module: Module, val window: Window) {
         return true
     }
 
+    fun onGuiClosed() {
+        this.menuElements.reversed().forEach { it.onGuiClosed() }
+    }
+
     private fun isButtonHovered(): Boolean {
         return (!this.extended || !this.window.inModule) && mouseX >= xAbsolute && mouseX <= xAbsolute + width && mouseY >= yAbsolute && mouseY <= yAbsolute + this.height
     }

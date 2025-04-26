@@ -107,6 +107,8 @@ abstract class Element<S: Setting<*>>(
 
     open fun mouseClickMove(mouseButton: Int, timeSinceLastClick: Long) {  }
 
+    open fun onGuiClosed() {  }
+
     open fun getElementHeight(): Double = height
 
     private fun isHovered(): Boolean {

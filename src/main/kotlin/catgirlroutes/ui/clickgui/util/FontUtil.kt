@@ -49,7 +49,7 @@ object FontUtil {
         GlStateManager.pushMatrix()
         GlStateManager.translate(x, y, 0.0)
         GlStateManager.scale(scale, scale, 1.0)
-        val finalText = text.replace(mc.thePlayer.name, NickHider.nameInput)
+        val finalText = text.replace(mc.thePlayer?.name ?: return, NickHider.nameInput)
 
         if (customFont) customFontRenderer.drawString(finalText, 0.0, 0.0, color, shadow)
         else fontRenderer.drawString(finalText, 0f, 0f, color, shadow)

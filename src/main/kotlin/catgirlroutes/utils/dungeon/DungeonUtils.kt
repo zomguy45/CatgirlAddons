@@ -172,10 +172,10 @@ object DungeonUtils {
         if (getF7Phase() != M7Phases.P3) return P3Sections.Unknown
 
         return when {
-            posX in 89.0..113.0 && posZ in 48.0..122.0 -> P3Sections.S1
-            posX in 19.0..91.0 && posZ in 121.0..145.0 -> P3Sections.S2
-            posX in -6.0..19.0 && posZ in 50.0..123.0 -> P3Sections.S3
-            posX in 17.0..90.0 && posZ in 27.0..50.0 -> P3Sections.S4
+            posX in 89.0..113.0 && posZ in 30.0..122.0 -> P3Sections.S1
+            posX in 19.0..111.0 && posZ in 121.0..145.0 -> P3Sections.S2
+            posX in -6.0..19.0 && posZ in 51.0..143.0 -> P3Sections.S3
+            posX in -2.0..90.0 && posZ in 27.0..51.0 -> P3Sections.S4
             else -> P3Sections.Unknown
         }
     }

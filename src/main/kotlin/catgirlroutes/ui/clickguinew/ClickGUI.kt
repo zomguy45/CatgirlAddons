@@ -156,6 +156,7 @@ class ClickGUI : Screen() { // todo: module description
     }
 
     override fun onGuiClosed() {
+        windows.reversed().forEach { it.onGuiClosed() }
         this.searchBar.isFocused = false
         moduleConfig.saveConfig()
     }

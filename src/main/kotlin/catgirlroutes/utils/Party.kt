@@ -144,6 +144,7 @@ object Party {
     private fun addMember(player: String) {
         val playerNoRank = player.stripRank
         if (members.contains(playerNoRank) || playerNoRank == mc.thePlayer.name) return
+        if (playerNoRank.contains("You'll be partying")) return // cba to fix regex
         members.add(playerNoRank)
     }
 

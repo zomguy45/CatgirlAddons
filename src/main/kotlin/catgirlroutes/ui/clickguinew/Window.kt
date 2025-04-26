@@ -85,6 +85,10 @@ class Window(
         if (this.selected) this.moduleButtons.filtered().forEach { it.mouseClickMove(clickedMouseButton, timeSinceLastClick) }
     }
 
+    fun onGuiClosed() {
+        this.moduleButtons.filtered().forEach { it.onGuiClosed() }
+    }
+
     fun scroll(amount: Int): Boolean {
         if (inModule || !isHovered()) return false
         val h = moduleButtons.filtered().size * 25.0 + 5.0

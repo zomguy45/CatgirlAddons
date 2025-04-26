@@ -225,7 +225,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 y = fontHeight + 3.0 + PADDING + optionIndex * (optionElementHeight + PADDING)
                 width = optionsListWidth - 10.0
                 height = optionElementHeight
-                colour = Color(0, 0, 0, 128)
+                colour = ColorUtil.bgColor.darker()
             }
 
             draggedOption = null
@@ -249,11 +249,15 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 }
             }
 
-            dragged.colour = Color(0, 0, 0, 128)
+            dragged.colour = ColorUtil.bgColor.darker()
         }
 
         draggedButton = null
         hoveredButton = null
+    }
+
+    override fun onGuiClosed() {
+        setting.onGuiClosed()
     }
 
     override fun getElementHeight(): Double {

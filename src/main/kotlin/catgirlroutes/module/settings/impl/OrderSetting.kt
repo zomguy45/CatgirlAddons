@@ -10,6 +10,7 @@ class OrderSetting(
     var options: List<String> = listOf(),
     description: String? = null,
     visibility: Visibility = Visibility.VISIBLE,
+    var onGuiClosed: (OrderSetting.() -> Unit)? = null,
     var updateAction: (OrderSetting.() -> Unit)? = null
 ) : Setting<Map<String, String>>(name, description, visibility) {
 
@@ -33,5 +34,9 @@ class OrderSetting(
 
     fun update() {
         updateAction?.invoke(this)
+    }
+
+    fun onGuiClosed() {
+        onGuiClosed?.invoke(this)
     }
 }

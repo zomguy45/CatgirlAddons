@@ -13,7 +13,7 @@ class ElementDummy(parent: ModuleButton, setting: Setting<*>) :
 
     override fun renderElement(mouseX: Int, mouseY: Int, partialTicks: Float): Int {
         Gui.drawRect(width, 2, width, 13, Color.WHITE.rgb)
-        FontUtil.drawString("THIS IS A DUMMY SETTING", 1, 3)
+        FontUtil.drawString("THIS ELEMENT IS NOT IMPLEMENTED IN THIS GUI", 1, 3)
         return super.renderElement(mouseX, mouseY, partialTicks)
     }
 }
