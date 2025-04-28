@@ -3,6 +3,7 @@ package catgirlroutes.ui.clickgui
 import catgirlroutes.CatgirlRoutes
 import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
 import catgirlroutes.module.Category
+import catgirlroutes.module.Module
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.ui.clickgui.advanced.AdvancedMenu
 import catgirlroutes.ui.clickgui.elements.menu.ElementColor
@@ -340,6 +341,11 @@ class ClickGUI : GuiScreen() {
     fun getScaledMouseY(): Int {
         // maybe -1 or floor required here because of the inversion.
         return MathHelper.ceiling_double_int( (mc.displayHeight - Mouse.getY()) / CLICK_GUI_SCALE)
+    }
+
+    fun openModule(module: Module) {
+        val panel = panels.first { it.category == module.category }
+        panel.moduleButtons.first { it.module.name == module.name }.extended = true
     }
 
     companion object {

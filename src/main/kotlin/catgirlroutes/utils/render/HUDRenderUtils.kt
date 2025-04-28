@@ -575,8 +575,8 @@ object HUDRenderUtils {
         textLines: List<String>,
         x: Int,
         y: Int,
-        screenWidth: Int = mc.displayWidth,
-        screenHeight: Int = mc.displayHeight,
+        screenWidth: Int = sr.scaledWidth,
+        screenHeight: Int = sr.scaledHeight,
         maxTextWidth: Int = -1,
         themed: Boolean = true
     ) {

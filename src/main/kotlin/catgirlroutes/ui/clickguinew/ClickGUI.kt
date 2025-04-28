@@ -2,6 +2,7 @@ package catgirlroutes.ui.clickguinew
 
 import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
 import catgirlroutes.module.Category
+import catgirlroutes.module.Module
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.ui.Screen
 import catgirlroutes.ui.clickgui.util.Alignment
@@ -179,6 +180,11 @@ class ClickGUI : Screen() { // todo: module description
                 scale = 1.3
             )
         }
+    }
+
+    fun openModule(module: Module) {
+        selectedWindow = windows.first { it.category == module.category }
+        selectedWindow.moduleButtons.first { it.module.name == module.name }.extended = true
     }
 
     companion object {

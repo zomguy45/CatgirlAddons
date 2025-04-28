@@ -1,6 +1,8 @@
 package catgirlroutes.module
 
 import catgirlroutes.CatgirlRoutes
+import catgirlroutes.CatgirlRoutes.Companion.clickGUI
+import catgirlroutes.CatgirlRoutes.Companion.clickGUINew
 import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.RegisterHudElement
@@ -8,7 +10,6 @@ import catgirlroutes.module.settings.Setting
 import catgirlroutes.module.settings.impl.HudSetting
 import catgirlroutes.module.settings.impl.Keybinding
 import catgirlroutes.ui.hud.HudElement
-import catgirlroutes.ui.hud.HudElementDSL
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.Notifications
 import com.google.gson.annotations.Expose
@@ -284,6 +285,14 @@ abstract class Module(
 
     fun getSettingByName(name: String): Setting<*>? {
         return settings.find { it.name.equals(name, ignoreCase = true) }
+    }
+
+    fun openInGui() {
+        ClickGui.onKeyBind()
+        when (ClickGui.clickGui.selected) {
+            "Cga" -> clickGUINew.openModule(this)
+            "Flopper" -> clickGUI.openModule(this)
+        }
     }
 
     enum class TagType {

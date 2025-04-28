@@ -5,10 +5,9 @@ import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.input.Keyboard
 import org.lwjgl.input.Mouse
-import org.lwjgl.opengl.GL11
 import catgirlroutes.CatgirlRoutes.Companion.mc as mainMc
 
-abstract class Screen : GuiScreen() {
+abstract class Screen(private val forceScale: Boolean = true) : GuiScreen() {
 
     var sr = ScaledResolution(mainMc)
     var scale = CLICK_GUI_SCALE / sr.scaleFactor
@@ -22,16 +21,19 @@ abstract class Screen : GuiScreen() {
     open fun onInit() {  }
 
     final override fun drawScreen(mouseX: Int, mouseY: Int, partialTicks: Float) {
-        GlStateManager.pushMatrix()
-        val prevScale = mc.gameSettings.guiScale
-        mc.gameSettings.guiScale = 2
-        GL11.glScaled(scale, scale, scale)
+        if (forceScale) {
+            GlStateManager.pushMatrix()
+            val prevScale = mc.gameSettings.guiScale
+            mc.gameSettings.guiScale = 2
+            GlStateManager.scale(scale, scale, scale)
 
-        draw()
+            draw()
 
-        GlStateManager.popMatrix()
-        mc.gameSettings.guiScale = prevScale
-        super.drawScreen(mouseX, mouseY, partialTicks)
+            GlStateManager.popMatrix()
+            mc.gameSettings.guiScale = prevScale
+        } else {
+            draw()
+        }
     }
 
     open fun draw() {  }

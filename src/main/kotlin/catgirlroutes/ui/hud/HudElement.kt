@@ -1,19 +1,25 @@
 package catgirlroutes.ui.hud
 
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.AlwaysActive
 import catgirlroutes.module.settings.Visibility
-import catgirlroutes.module.settings.impl.NumberSetting
 import catgirlroutes.module.settings.impl.BooleanSetting
-import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.ui.clickgui.util.FontUtil.drawStringWithShadow
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.ui.clickgui.util.FontUtil.getWidth
-import catgirlroutes.utils.render.HUDRenderUtils
+import catgirlroutes.ui.clickgui.util.MouseUtils.mx
+import catgirlroutes.ui.clickgui.util.MouseUtils.my
+import catgirlroutes.utils.render.HUDRenderUtils.drawHoveringText
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedOutline
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedRect
 import catgirlroutes.utils.render.HUDRenderUtils.sr
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
 import kotlin.math.floor
+import kotlin.reflect.full.hasAnnotation
 
 
 /**
@@ -35,7 +41,7 @@ abstract class HudElement(
     lateinit var parentModule: Module
 
     val toggled: Boolean
-        get() = parentModule.enabled && enabled
+        get() = parentModule.enabled && enabled || parentModule::class.hasAnnotation<AlwaysActive>()
 
     val enabled get() = enabledSett.enabled
 
@@ -121,7 +127,7 @@ abstract class HudElement(
     open fun renderHud() = Unit
 
     open fun preview() {
-        FontUtil.drawStringWithShadow("${parentModule.name} $name", 0.0, 0.0)
+//        drawStringWithShadow("${parentModule.name} $name", 0.0, 0.0)
     }
 
     /**
@@ -131,6 +137,24 @@ abstract class HudElement(
      */
     open fun updateSize() = Unit
 
+    fun getBounds(x: Double = this.x, y: Double = this.y, scale: Double = this.scale, padding: Double = 2.5 * scale): ElementBounds {
+        val renderWidth = width * scale
+        val renderHeight = height * scale
+        return ElementBounds(
+            x - padding,
+            x + renderWidth + padding,
+            y - padding,
+            y + renderHeight + padding,
+            x + renderWidth / 2,
+            y + renderHeight / 2
+        )
+    }
+
+    fun isHovered(mouseX: Int = mx, mouseY: Int = my): Boolean {
+        if (!this.toggled) return false
+        return mouseX > (x - 2.5 * scale) && mouseX < (x + width * scale + 2.5 * scale)
+                && mouseY > (y - 2.5 * scale) && mouseY < (y + height * scale + 2.5 * scale)
+    }
     /**
      * Used for moving the hud element.
      * Draws a rectangle in place of the actual element
@@ -138,32 +162,45 @@ abstract class HudElement(
     fun renderPreview(isDragging: Boolean) {
         if (!this.toggled) return
         GlStateManager.pushMatrix()
-        GlStateManager.translate(x.toFloat(), y.toFloat(), 0f)
-        val scaleValue = scaleSett.value
-        GlStateManager.scale(scaleValue, scaleValue, 1.0)
+        GlStateManager.translate(x, y, 0.0)
+        GlStateManager.scale(scale, scale, 1.0)
 
-        // render coords and scale if dragging
+        GlStateManager.pushMatrix()
+        GlStateManager.scale(1.0 / scale, 1.0 / scale, 1.0)
+        GlStateManager.translate(-x, -y, 0.0)
+
         if (isDragging) {
-            val text = "x: ${x * 2} y: ${y * 2} ${if (scaleValue != 1.0) "${floor(scaleValue * 100) / 100}" else ""}"
+            val text = "x: ${x.toInt() * 2} y: ${y.toInt() * 2} ${if (scale != 1.0) "${floor(scale * 100) / 100} " else ""}"
+            val bounds = this.getBounds()
+            val textWidth = text.getWidth()
 
-            val w = text.getWidth() + 4.0
+            val xPos = -2.0 + if (sr.scaledWidth < bounds.right + textWidth + 5.0) bounds.left - textWidth + 1.0 else bounds.right + 2.0
+            val yPos = -2.0 + if (bounds.top - 12 < 5) bounds.bottom + 1.0 else bounds.top - 10.0
 
-            val x2 = 4.0 + if (sr.scaledWidth * scaleValue < (x + (width + w) * scaleValue) * scaleValue) -w else width
-            val y2 = -1.0 + if (y - 12 * scaleValue < 5 * scaleValue) height else -12.0
+            drawRoundedRect(xPos, yPos, textWidth, 12.0, 3.0, Color(21, 21, 21, 200))
+            drawStringWithShadow(text, xPos, yPos)
+        } else if (isHovered()) {
+            val text = listOfNotNull(
+                parentModule.name,
+                name.takeIf { it.isNotEmpty() }?.let { if (!it.contains("hud", true)) "$it hud" else it },
+                "   x: ${x.toInt() * 2}, y: ${y.toInt() * 2}, scale: ${floor(scale * 100) / 100}",
+                "",
+                "§7Right click to reset position",
+                "§7Middle click to open module",
+                "§7Scroll wheel to resize",
+                "§7Shift to disable snapping"
+            )
+            drawHoveringText(text, mx, my)
+        }
 
-            val adjX = x2 * scaleValue // still schizo but Idgaf
-            GlStateManager.pushMatrix()
-            GlStateManager.scale(1.0 / scaleValue, 1.0 / scaleValue, 1.0)
-            HUDRenderUtils.renderRect(adjX - 2, y2 - 2, w, 12.0, Color(21, 21, 21, 200))
-            FontUtil.drawStringWithShadow(text, adjX, y2, Color.WHITE.rgb)
-            GlStateManager.popMatrix()
-        } else {
-            HUDRenderUtils.renderRect(-2.0, -2.0, width + 4, height + 4, Color(21, 21, 21, 200)) // bg
+        GlStateManager.popMatrix()
+
+        if (!isDragging) {
+            drawRoundedRect(-2.0, -2.0, width + 4, height + 4, 3.0, Color(21, 21, 21, 200)) // bg
             this.preview()
         }
 
-        // border
-        HUDRenderUtils.renderRectBorder(-2.0, -2.0, width + 4, height + 4, 0.5, Color(208, 208, 208))
+        drawRoundedOutline(-2.0, -2.0, width + 4, height + 4, 3.0, 0.5, Color(208, 208, 208))
 
         GlStateManager.popMatrix()
     }
@@ -236,4 +273,13 @@ class HudElementDSL(val name: String) {
         }
     }
 }
+
+data class ElementBounds(
+    val left: Double,
+    val right: Double,
+    val top: Double,
+    val bottom: Double,
+    val centreX: Double,
+    val centreY: Double
+)
 

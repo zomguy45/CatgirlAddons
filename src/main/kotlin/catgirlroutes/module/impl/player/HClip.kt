@@ -25,7 +25,8 @@ object HClip : Module(
     "Boosts you forward when key bind is pressed"
 ){
     private val shouldJump by BooleanSetting("Auto jump", false, "Makes hclip automatically jump if on ground.")
-    private val shouldNotify by BooleanSetting("Notifications", false, "Makes hclip send notification on activation.")
+    private val feedback by BooleanSetting("Keybind feedback", true)
+    private val feedbackType by SelectorSetting("Type", "Notification", arrayListOf("Notification", "Message")).withDependency { feedback }
 
     private val dingdingding by BooleanSetting("Play sound", false)
 
@@ -46,8 +47,11 @@ object HClip : Module(
     private var yawToUse: Float? = null
 
     override fun onKeyBind() {
-        if (!this.enabled) return // todo: do something about it idk?!
-        if (shouldNotify) Notifications.send("Hclipping") else modMessage("Hclipping")
+        if (!this.enabled) return
+        when (feedbackType.index) {
+            0 -> Notifications.send("Hclipping")
+            1 -> modMessage("Hclipping")
+        }
         hClip()
     }
 

@@ -224,7 +224,7 @@ object Inventory : Module(
     @SubscribeEvent
     fun onGuiScreenMouse(event: GuiScreenEvent.MouseInputEvent.Pre) {
         if (this.stupid || !Mouse.getEventButtonState()) return
-        this.textField.mouseClicked(mx / mc.gameSettings.guiScale, my / mc.gameSettings.guiScale, mouseButton)
+        this.textField.mouseClicked(mx, my, mouseButton)
     }
 
     private fun matchType(name: String, lore: String, string: String) = when {
