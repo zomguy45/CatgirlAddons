@@ -45,7 +45,7 @@ object SecretAura : Module( // TODO: RECODE
     Category.DUNGEON,
     "Automatically clicks secrets and levers."
 ){
-    private val auraRange by NumberSetting("Range", 6.2, 2.1, 6.2, 0.1, "Maximum range for secret aura.")
+    private val auraRange by NumberSetting("Range", 6.2, 2.1, 6.5, 0.1, "Maximum range for secret aura.")
     private val auraSkullRange by NumberSetting("Skull range", 4.7, 2.1, 4.7, 0.1, "Maximum range for secret aura when clicking skulls.")
 
     private val swapOn by SelectorSetting("Swap on", "Skulls", arrayListOf("None", "Skulls", "All"), "Makes secret aura swap")
