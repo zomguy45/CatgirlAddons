@@ -4,12 +4,14 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.commands.commodore
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.utils.ChatUtils.createClickableText
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ConfigSystem
 import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
+import catgirlroutes.utils.render.WorldRenderUtils.drawTracer
 import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.reflect.TypeToken
 import net.minecraft.client.gui.GuiScreen
@@ -25,10 +27,10 @@ object CustomHighlight : Module(
     category = Category.RENDER
 ) {
     val hlColor = ColorSetting("Color", Color.PINK)
-
+    val tracer = BooleanSetting("Tracer", false)
 
     init {
-        this.addSettings(hlColor)
+        this.addSettings(hlColor, tracer)
     }
 
     private val highlightFile = File("config/catgirlroutes/highlight.json")
@@ -52,6 +54,9 @@ object CustomHighlight : Module(
 
                 if (highlightMatch != null) {
                     drawBoxByEntity(e, highlightMatch.color, e.width, e.height, phase = true)
+                    if (tracer.value) {
+                        drawTracer(e.positionVector, Color.PINK)
+                    }
                 }
         }
     }
