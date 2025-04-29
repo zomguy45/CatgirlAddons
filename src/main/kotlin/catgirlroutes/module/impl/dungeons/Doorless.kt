@@ -16,6 +16,7 @@ import catgirlroutes.utils.PacketUtils.sendPacket
 import catgirlroutes.utils.PlayerUtils.airClick
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posZ
+import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
 import catgirlroutes.utils.rotation.RotationUtils.snapTo
 import com.mojang.authlib.GameProfile
@@ -40,7 +41,7 @@ object Doorless: Module(
     "Doorless",
     Category.DUNGEON,
     tag = TagType.WHIP
-){
+){ // todo update to doorless 1.3.1
     private var doorClip by BooleanSetting("Clip", "Clips through doors.")
     private var doorMotion by BooleanSetting("Motion", "Uses velocity to go through doors.")
     private val regenSkulls by BooleanSetting("Regenerate skulls", "Regenerates skulls after skipping the door.")
@@ -64,7 +65,7 @@ object Doorless: Module(
 
     @SubscribeEvent
     fun onPacket(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer || !inDungeons || inDoor || !mc.thePlayer.isCollidedVertically ||
+        if (event.packet !is C03PacketPlayer || !inDungeons || inBoss || inDoor || !mc.thePlayer.isCollidedVertically ||
             mc.thePlayer?.heldItem?.item != Item.getItemById(368) || System.currentTimeMillis() - lastUse < 1000 ||
             !event.packet.isMoving) return
 
@@ -159,7 +160,7 @@ object Doorless: Module(
 
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
-        if (mc.thePlayer == null || !inDungeons || !this.babyProof || event.phase != TickEvent.Phase.START) return
+        if (mc.thePlayer == null || !inDungeons || inBoss || !this.babyProof || event.phase != TickEvent.Phase.START) return
 
         val xz = getXZinRadius(this.babyProofRadius.toInt())
         if (xz.any { (x, z) -> isValidBlock(mc.theWorld.getBlockState(BlockPos(x, 69, z))) }) {
