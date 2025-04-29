@@ -169,7 +169,7 @@ object Inventory : Module(
             return
         }
 
-        this.highlightSlots.entries.removeIf { (_, hs) -> hs.string != this.textField.text }
+        this.highlightSlots.clear()
 
         mc.thePlayer?.openContainer?.inventorySlots?.forEachIndexed { i, slot ->
             slot.stack?.let {
