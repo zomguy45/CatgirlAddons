@@ -5,6 +5,7 @@ import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.settings.Setting.Companion.withDependency
 import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.utils.ChatUtils.command
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -22,12 +23,14 @@ object AutoPot: Module(
     "Automatically gets a potion from your potion bag."
 ){
     private val potOnStart by BooleanSetting("On start", "Gets a pot on dungeon start.")
-    private val m7Only by BooleanSetting("M7 only", "Gets a pot only when the player is in M7.")
+    private val m7Only by BooleanSetting("M7 only", "Gets a pot only when the player is in M7.").withDependency { potOnStart }
 
     @SubscribeEvent
     fun onChat(event: ChatPacket) {
-        if (!potOnStart || !(this.m7Only && DungeonUtils.floor == Floor.M7)) return
-        if (event.message.matches(Regex("\\[NPC] Mort: Here, I found this map when I first entered the dungeon\\."))) activatePot()
+        if (!potOnStart || (m7Only && DungeonUtils.floor != Floor.M7)) return
+        if (event.message.matches(Regex("\\[NPC] Mort: Here, I found this map when I first entered the dungeon\\."))) {
+            activatePot()
+        }
     }
 
     override fun onKeyBind() {
