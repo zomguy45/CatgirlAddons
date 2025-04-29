@@ -79,7 +79,8 @@ object CustomScoreboard : Module(
         collection.forEachIndexed { i, score ->
             val scorePlayerTeam2 = scoreboard.getPlayersTeam(score.playerName)
             var s = ScorePlayerTeam.formatPlayerName(scorePlayerTeam2, score.playerName)
-                .replace("§ewww.hypixel.ne\ud83c\udf82§et", footerText)
+                .replace("\\P{ASCII}+§[0-9a-fk-or]|[^\\p{ASCII}§\\p{L}\\p{N}\\p{P}\\p{Z}]".toRegex(RegexOption.IGNORE_CASE), "")
+                .replace("§ewww.hypixel.net", footerText)
 
 
             val matcher = Regex("\\d\\d/\\d\\d/\\d\\d").find(s)
