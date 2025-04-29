@@ -117,14 +117,14 @@ object AutoClicker: Module(
     }
 
     private suspend fun leftClicker() {
-        while (leftClicking) {
+        while (leftClicking && shouldClick) {
             if (!breakBlock()) leftClick2()
             delay(Random.nextDouble(1000.0 / leftMaxCps, 1000.0 / leftMinCps).toLong())
         }
     }
 
     private suspend fun rightClicker() {
-        while (rightClicking) {
+        while (rightClicking && shouldClick) {
             rightClick2()
             delay(Random.nextDouble(1000.0 / rightMaxCps, 1000.0 / rightMinCps).toLong())
         }
