@@ -76,6 +76,7 @@ object ModuleManager {
         Inventory,
         InventoryButtons,
         InvincibilityTimer,
+        ItemValue,
         NickHider,
         ParticleHider,
         PhoenixAuth,

@@ -133,8 +133,12 @@ val devCommands = commodore("dev") {
             Items: ${NeuRepo.repoItems.size}
             |Bazaar: ${NeuRepo.repoItems.filter { it.bazaar }.size}
             |Auction: ${NeuRepo.repoItems.filter { it.auction }.size}
+            |Npc: ${NeuRepo.repoItems.filter { it.npcPrice > 0.0 }.size}
             Mobs: ${NeuRepo.mobs.size}
             Constants: ${NeuRepo.constants.size}
+            |Reforges: ${NeuRepo.reforges.size}
+            |Essence: ${NeuRepo.essence.size}
+            |Gemstones: ${NeuRepo.gemstones.size}
             ---------------
         """.trimIndent())
     }

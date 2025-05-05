@@ -158,6 +158,8 @@ object FontUtil {
      */
     fun String.capitalizeOnlyFirst(): String = this.substring(0, 1).uppercase(Locale.getDefault()) + this.substring(1, this.length).lowercase()
 
+    fun String.capitalizeWords(): String = split(" ").joinToString(" ") { it.capitalizeOnlyFirst() }
+
     fun String.getWidth(): Double = getStringWidthDouble(this)
 
     fun Char.getWidth(): Double = this.toString().getWidth()

@@ -2,6 +2,7 @@ package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.clickgui.util.FontUtil.capitalizeWords
 import catgirlroutes.ui.clickgui.util.FontUtil.drawStringWithShadow
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -122,6 +123,25 @@ val ItemStack?.skyblockID: String
 val ItemStack?.skyblockUUID: String
     get() = this?.extraAttributes?.getString("uuid") ?: ""
 
+fun ItemStack.getRarityOrNull(): String? {
+    val lastLine = this.getSubCompound("display", false)
+        .getTagList("Lore", 8)
+        .takeIf { it.tagCount() > 0 }
+        ?.let { it.getStringTagAt(it.tagCount() - 1) }
+
+    return when {
+        lastLine == null -> null
+        "COMMON" in lastLine -> "COMMON"
+        "UNCOMMON" in lastLine -> "UNCOMMON"
+        "RARE" in lastLine -> "RARE"
+        "EPIC" in lastLine -> "EPIC"
+        "LEGENDARY" in lastLine -> "LEGENDARY"
+        "MYTHIC" in lastLine -> "MYTHIC"
+        "DIVINE" in lastLine -> "DIVINE"
+        else -> null
+    }
+}
+
 fun runOnMCThread(run: () -> Unit) {
     if (!mc.isCallingFromMinecraftThread) mc.addScheduledTask(run) else run()
 }
@@ -136,6 +156,29 @@ fun runOnMCThread(run: () -> Unit) {
         }
         return result + (romanMap[s.last()] ?: 0)
     }
+fun Double.format(decimals: Int = 0): String {
+    return "%,.${decimals}f".format(this)
+}
+
+fun Double.formatCoins(): String {
+    val formatted = when {
+        this < 1e3 -> "%.2f".format(this)
+        this < 1e6 -> "%.2fk".format(this / 1e3)
+        this < 1e9 -> "%.2fm".format(this / 1e6)
+        else -> "%.2fb".format(this / 1e9)
+    }
+
+    return formatted
+        .removeSuffix(".00")
+        .removeSuffix(".0")
+}
+
+fun String.formatEnchantment(tier: Int): String {
+    val colour = if (this.startsWith("ULTIMATE", true)) "§9§d§l" else "§9"
+    val enchantment = if (this.contains("WISE", true)) this else this.replace("ULTIMATE_", "", true)
+    return "$colour${enchantment.replace("_", " ").capitalizeWords()} ${intToRoman(tier)}"
+}
+
 
 fun <T> Collection<T>.getSafe(index: Int?): T? {
     return try {
