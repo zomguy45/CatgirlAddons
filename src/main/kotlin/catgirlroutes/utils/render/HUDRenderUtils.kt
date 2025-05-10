@@ -685,4 +685,11 @@ object HUDRenderUtils {
         GlStateManager.enableRescaleNormal()
         GlStateManager.popMatrix()
     }
+
+    fun drawStringWithShadow(text: String, x: Float, y: Float, color: Int, scale: Float) {
+        GlStateManager.pushMatrix()
+        GlStateManager.scale(scale, scale, scale)
+        mc.fontRendererObj.drawStringWithShadow(text, x / scale, y / scale, color)
+        GlStateManager.popMatrix()
+    }
 }

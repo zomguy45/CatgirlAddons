@@ -8,6 +8,8 @@ import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.module.impl.render.BarRender.barSetter
 import catgirlroutes.module.impl.render.CustomHighlight.highlightCommands
+import catgirlroutes.module.impl.render.CustomStartMenu
+import catgirlroutes.module.impl.render.CustomStartScreen
 import catgirlroutes.module.impl.render.Waypoints.waypointCommands
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.ui.clickgui.util.FontUtil
@@ -28,7 +30,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.minecraft.client.Minecraft
+import net.minecraft.client.gui.GuiMainMenu
 import net.minecraft.client.gui.GuiScreen
+import net.minecraftforge.client.event.GuiScreenEvent
 import net.minecraftforge.common.MinecraftForge
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.Mod
@@ -54,7 +58,7 @@ class CatgirlRoutes {
         registerCommands(
             catgirlAddonsCommands, devCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons,
-            autoP3Commands, autoRoutesCommands, rotationDebug, barSetter,
+            autoP3Commands, autoRoutesCommands, rotationDebug,
             waypointCommands, highlightCommands, displayCommands,
             pearlClip, lavaClip, blockClip, aura, inventoryButtons, autoClicker,
             autoP3Commands, autoRoutesCommands, rotationDebug
@@ -82,7 +86,8 @@ class CatgirlRoutes {
             NeuRepo,
             SkyblockPlayer,
             WorldRenderUtils,
-            Party
+            Party,
+            CustomStartScreen
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
     @Mod.EventHandler
@@ -99,6 +104,17 @@ class CatgirlRoutes {
 
         clickGUI = ClickGUI()
         clickGUINew = ClickGUINew()
+    }
+    private var replaced = false
+
+    @SubscribeEvent
+    fun onGuiInit(event: GuiScreenEvent.InitGuiEvent.Pre) {
+        if (event.gui is GuiMainMenu) {
+            replaced = true
+            if (CustomStartMenu.enabled) {
+                mc.displayGuiScreen(CustomStartScreen)
+            }
+        }
     }
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {

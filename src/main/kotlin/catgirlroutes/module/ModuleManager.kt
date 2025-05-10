@@ -107,7 +107,8 @@ object ModuleManager {
         ScreenImage,
         TerminalEsp,
         Trail,
-        Waypoints
+        Waypoints,
+        CustomStartMenu
     )
 
     /**
