@@ -16,7 +16,7 @@ data class MiscElementStyle(
     var textColour: Color = Color(ColorUtil.textcolor),
     var textShadow: Boolean = false,
     var colour: Color = ColorUtil.bgColor.darker(),
-    var hoverColour: Color = ColorUtil.bgColor.darker(),
+    var hoverColour: Color = colour,
     var outlineColour: Color = ColorUtil.outlineColor,
     var outlineHoverColour: Color = ColorUtil.clickGUIColor,
     var alignment: Alignment = Alignment.CENTRE,

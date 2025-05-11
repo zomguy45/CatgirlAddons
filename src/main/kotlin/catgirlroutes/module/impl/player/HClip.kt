@@ -48,7 +48,7 @@ object HClip : Module(
 
     override fun onKeyBind() {
         if (!this.enabled) return
-        when (feedbackType.index) {
+        if (feedback) when (feedbackType.index) {
             0 -> Notifications.send("Hclipping")
             1 -> modMessage("Hclipping")
         }

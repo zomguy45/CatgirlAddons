@@ -92,8 +92,9 @@ class ClickGUI : Screen() { // todo: module description
 
             val categoryButton = button {
                 text = window.category.name.capitalizeOnlyFirst()
-                at(this@ClickGUI.x + 5.0, this@ClickGUI.y + offset + 2.0)
+                at(x + 5.0, y + offset + 2.0)
                 size(categoryWidth - 9.0, 14.0)
+                textShadow = true
                 colour = Color.WHITE.withAlpha(0)
                 outlineColour = Color.WHITE.withAlpha(0)
                 outlineHoverColour = Color.WHITE.withAlpha(0)
