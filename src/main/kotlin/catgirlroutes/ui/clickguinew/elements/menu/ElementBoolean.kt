@@ -19,19 +19,20 @@ class ElementBoolean(parent: ModuleButton, setting: BooleanSetting) :
         thickness = 1.0
         radius = 3.0
         gap = 0.0
-    } onChange {
-        this.setting.toggle()
+        onClick {
+            setting.toggle()
+        }
     }
 
     override fun renderElement(): Double {
         this.booleanElement.update { // FIXME
             outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
-        }.render(mouseXRel, mouseYRel)
+        }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }
 
     override fun mouseClicked(mouseButton: Int): Boolean {
-        return this.booleanElement.mouseClicked(mouseXRel, mouseYRel, mouseButton)
+        return this.booleanElement.onMouseClick(mouseXRel, mouseYRel, mouseButton)
     }
 }

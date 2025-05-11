@@ -75,13 +75,13 @@ class ClickGUI : Screen() { // todo: module description
 
         drawRoundedBorderedRect(x + categoryWidth + 5.0, y + 25.0, guiWidth - categoryWidth - 5.0, guiHeight - 25.0, 3.0, 2.0, ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
-        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName)
-        FontUtil.drawStringWithShadow(ClickGui.clientName, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0)
+        val titleWidth = FontUtil.getStringWidth(ClickGui.guiName)
+        FontUtil.drawStringWithShadow(ClickGui.guiName, x + categoryWidth / 2.0 - titleWidth / 2.0, y + 6.0)
 
         this.searchBar.update { // FIXME
             outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
-        }.render(mouseX, mouseY)
+        }.draw(mouseX, mouseY)
 
         categoryButtons.clear()
 
@@ -116,7 +116,7 @@ class ClickGUI : Screen() { // todo: module description
             if (this.selectedWindow == window) {
                 drawRoundedBorderedRect(x + 5.0, y + offset + 2.0, categoryWidth - 9.0, 14.0, 3.0, 1.0, ColorUtil.outlineColor, ColorUtil.outlineColor)
             }
-            categoryButton.render(mouseX, mouseY)
+            categoryButton.draw(mouseX, mouseY)
 
             if (window.category != Category.SETTINGS) categoryOffset += 14.0
         }
@@ -131,8 +131,8 @@ class ClickGUI : Screen() { // todo: module description
     }
 
     override fun onMouseClick(mouseButton: Int) {
-        this.searchBar.mouseClicked(mouseX, mouseY, mouseButton)
-        categoryButtons.firstOrNull { it.mouseClicked(mouseX, mouseY, mouseButton) }?.let {
+        this.searchBar.onMouseClick(mouseX, mouseY, mouseButton)
+        categoryButtons.firstOrNull { it.onMouseClick(mouseX, mouseY, mouseButton) }?.let {
             selectedWindow.moduleButtons.forEach { moduleButton -> moduleButton.extended = false }
         }
         windows.reversed().forEach { if (it.mouseClicked(mouseButton)) return }
@@ -143,7 +143,7 @@ class ClickGUI : Screen() { // todo: module description
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
-        if (this.searchBar.keyTyped(typedChar, keyCode)) return
+        if (this.searchBar.onKey(typedChar, keyCode)) return
         windows.reversed().forEach { if (it.keyTyped(typedChar, keyCode)) return }
         when (keyCode) {
             Keyboard.KEY_F -> if (isCtrlKeyDown()) this.searchBar.isFocused = true

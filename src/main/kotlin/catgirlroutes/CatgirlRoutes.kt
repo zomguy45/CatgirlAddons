@@ -6,13 +6,12 @@ import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
-import catgirlroutes.module.impl.render.BarRender.barSetter
+import catgirlroutes.module.impl.render.ClickGui
 import catgirlroutes.module.impl.render.CustomHighlight.highlightCommands
-import catgirlroutes.module.impl.render.CustomStartMenu
-import catgirlroutes.module.impl.render.CustomStartScreen
 import catgirlroutes.module.impl.render.Waypoints.waypointCommands
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.ui.clickgui.util.FontUtil
+import catgirlroutes.ui.misc.CustomMainMenu
 import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
@@ -41,6 +40,7 @@ import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
+import org.lwjgl.opengl.Display
 import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -86,10 +86,10 @@ class CatgirlRoutes {
             NeuRepo,
             SkyblockPlayer,
             WorldRenderUtils,
-            Party,
-            CustomStartScreen
+            Party
         ).forEach(MinecraftForge.EVENT_BUS::register)
     }
+
     @Mod.EventHandler
     fun postInit(event: FMLLoadCompleteEvent) = runBlocking {
         //Load in the module config post init so that all the minecraft classes are already present.
@@ -105,17 +105,16 @@ class CatgirlRoutes {
         clickGUI = ClickGUI()
         clickGUINew = ClickGUINew()
     }
-    private var replaced = false
 
     @SubscribeEvent
     fun onGuiInit(event: GuiScreenEvent.InitGuiEvent.Pre) {
         if (event.gui is GuiMainMenu) {
-            replaced = true
-            if (CustomStartMenu.enabled) {
-                mc.displayGuiScreen(CustomStartScreen)
+            if (ClickGui.customMenu) {
+                mc.displayGuiScreen(CustomMainMenu)
             }
         }
     }
+
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START) return

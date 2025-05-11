@@ -76,14 +76,14 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
                 prependText = if (text.startsWith("/")) "" else "§7/§r"
                 this.x = editorX + 7.0
                 this.y = editorY + 19.0
-                render(mouseX, mouseY)
+                draw(mouseX, mouseY)
             }
 
             FontUtil.drawString("Icon", editorX + 7, editorY + 43, 0xffa0a0a0.toInt())
             iconTextField.apply {
                 this.x = editorX + 7.0
                 this.y = editorY + 55.0
-                render(mouseX, mouseY)
+                draw(mouseX, mouseY)
             }
             GlStateManager.popMatrix()
         }
@@ -96,8 +96,8 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
         if (mouseButton != 0) return
 
         editingButton?.takeIf { isHoveringEditor(mouseX, mouseY) }?.let {
-            if (commandTextField.mouseClicked(mouseX, mouseY, mouseButton)) it.command = commandTextField.text
-            if (iconTextField.mouseClicked(mouseX, mouseY, mouseButton)) it.icon = iconTextField.text
+            if (commandTextField.onMouseClick(mouseX, mouseY, mouseButton)) it.command = commandTextField.text
+            if (iconTextField.onMouseClick(mouseX, mouseY, mouseButton)) it.icon = iconTextField.text
         }
 
         if (isHoveringEditor(mouseX, mouseY)) return
@@ -124,8 +124,8 @@ class InventoryButtonEditor : GuiScreen() { // todo: recode prob
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         editingButton?.let {
-            if (commandTextField.keyTyped(typedChar, keyCode)) it.command = commandTextField.text
-            if (iconTextField.keyTyped(typedChar, keyCode)) it.icon = iconTextField.text
+            if (commandTextField.onKey(typedChar, keyCode)) it.command = commandTextField.text
+            if (iconTextField.onKey(typedChar, keyCode)) it.icon = iconTextField.text
             if (keyCode == Keyboard.KEY_ESCAPE) {
                 this.editingButton = null
                 return

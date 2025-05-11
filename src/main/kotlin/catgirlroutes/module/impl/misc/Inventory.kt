@@ -135,10 +135,10 @@ object Inventory : Module(
 
         val slotId = if (overlay == SearchType.AUCTION) 48 else 45
         val gui = event.gui as GuiChest
-        val signStack = openSlots[slotId]?.stack
+        val signStack = openSlots[slotId]?.stack ?: return
 
         if (Keyboard.isKeyDown(Keyboard.KEY_LCONTROL) && Keyboard.isKeyDown(Keyboard.KEY_F)) {
-            if (signStack?.item == Items.sign && signStack?.displayName == "§aSearch") {
+            if (signStack.item == Items.sign && signStack.displayName == "§aSearch") {
                 mc.playerController.windowClick(gui.inventorySlots.windowId, slotId, 0, 0, mc.thePlayer)
             } else {
 //                display = AhBzSearch(overlay) // todo: fix
@@ -198,7 +198,7 @@ object Inventory : Module(
             colour = bgColour_
             outlineColour = outlineColour_.darker()
             outlineHoverColour = outlineColour_
-        }.render(0, 0)
+        }.draw()
 
         GlStateManager.enableLighting()
         GlStateManager.popMatrix()
@@ -213,7 +213,7 @@ object Inventory : Module(
     @SubscribeEvent
     fun onGuiScreenKeyboard2(event: GuiScreenEvent.KeyboardInputEvent.Pre) {
         if (!inSkyblock || !this.searchBar.enabled || !this.textField.isFocused || !Keyboard.getEventKeyState()) return
-        this.textField.keyTyped(Keyboard.getEventCharacter(), Keyboard.getEventKey())
+        this.textField.onKey(Keyboard.getEventCharacter(), Keyboard.getEventKey())
 
         event.isCanceled = true
         if (Keyboard.getEventKey() == Keyboard.KEY_ESCAPE) {
@@ -224,7 +224,7 @@ object Inventory : Module(
     @SubscribeEvent
     fun onGuiScreenMouse(event: GuiScreenEvent.MouseInputEvent.Pre) {
         if (this.stupid || !Mouse.getEventButtonState()) return
-        this.textField.mouseClicked(mx, my, mouseButton)
+        this.textField.onMouseClick(mx, my, mouseButton)
     }
 
     private fun matchType(name: String, lore: String, string: String) = when {

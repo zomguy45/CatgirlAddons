@@ -22,11 +22,11 @@ class ElementAction(parent: ModuleButton, setting: ActionSetting) :
         this.actionButton.update { // FIXME
             outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
-        }.render(mouseXRel, mouseYRel)
+        }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }
 
     override fun mouseClicked(mouseButton: Int): Boolean {
-        return this.actionButton.mouseClicked(mouseXRel, mouseYRel, mouseButton)
+        return this.actionButton.onMouseClick(mouseXRel, mouseYRel, mouseButton)
     }
 }

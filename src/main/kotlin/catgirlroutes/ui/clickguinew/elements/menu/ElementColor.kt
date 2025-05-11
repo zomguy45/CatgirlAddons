@@ -144,7 +144,7 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
         }
 
         FontUtil.drawString("Hex", 0.0, DEFAULT_HEIGHT * 8 + 7.0)
-        this.hexTextField.render(mouseXRel, mouseYRel)
+        this.hexTextField.draw(mouseXRel, mouseYRel)
 
         /**
          * FAVOURITE
@@ -184,7 +184,7 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
                 return true
             }
         }
-        return this.hexTextField.mouseClicked(mouseXRel, mouseYRel, mouseButton)
+        return this.hexTextField.onMouseClick(mouseXRel, mouseYRel, mouseButton)
     }
 
     override fun mouseClickMove(mouseButton: Int, timeSinceLastClick: Long) {
@@ -198,7 +198,7 @@ class ElementColor(parent: ModuleButton, setting: ColorSetting) : // todo: shado
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
-        if (this.hexTextField.keyTyped(typedChar, keyCode)) {
+        if (this.hexTextField.onKey(typedChar, keyCode)) {
             if (keyCode == Keyboard.KEY_ESCAPE || keyCode == Keyboard.KEY_NUMPADENTER || keyCode == Keyboard.KEY_RETURN) {
                 this.hexTextField.text = this.hexTextField.text.completeHexString().removePrefix("#")
                 this.hexTextField.isFocused = false

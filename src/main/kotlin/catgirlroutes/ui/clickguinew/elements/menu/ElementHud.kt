@@ -16,8 +16,9 @@ class ElementHud(parent: ModuleButton, setting: HudSetting) :
         text = displayName
         enabled = setting.enabled
         gap = 0.0
-    } onChange {
-        this.setting.enabled = !this.setting.enabled
+        onClick {
+            setting.enabled = !setting.enabled
+        }
     }
 
     override fun renderElement(): Double {
@@ -25,12 +26,12 @@ class ElementHud(parent: ModuleButton, setting: HudSetting) :
         this.booleanElement.update { // FIXME
             outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
-        }.render(mouseXRel, mouseYRel)
+        }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }
 
     override fun mouseClicked(mouseButton: Int): Boolean {
         if (height == -5.0) return false
-        return this.booleanElement.mouseClicked(mouseXRel, mouseYRel, mouseButton)
+        return this.booleanElement.onMouseClick(mouseXRel, mouseYRel, mouseButton)
     }
 }

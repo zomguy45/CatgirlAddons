@@ -36,8 +36,9 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
         text = "Lvl 100 Pets"
         size(15.0, 15.0)
         colour = ColorUtil.elementColor
-    } onChange { enabled ->
-        petLvl = if (enabled) "[Lvl 100] " else ""
+        onClick {
+            petLvl = if (enabled) "[Lvl 100] " else ""
+        }
     }
 
     private var petLvl: String = ""
@@ -89,18 +90,18 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
         starSelector.update {
             x = ahX + 5.0
             y = ahY + 15.0
-        }.render(mouseX, mouseY)
+        }.draw(mouseX, mouseY)
         petToggle.update {
             x = ahX + 5.0
             y = ahY + 65.0
-        }.render(mouseX, mouseY)
+        }.draw(mouseX, mouseY)
 
         GlStateManager.translate(0.0, 0.0, 50.0)
     }
 
     override fun mouseClickedExtra(mouseX: Int, mouseY: Int, mouseButton: Int) {
-        petToggle.mouseClicked(mouseX, mouseY, mouseButton)
-        if (starSelector.mouseClicked(mouseX, mouseY, mouseButton)) {
+        petToggle.onMouseClick(mouseX, mouseY, mouseButton)
+        if (starSelector.onMouseClick(mouseX, mouseY, mouseButton)) {
             if (starSelector.selected == this.lastSelected) {
                 starSelector.selected = "0"
                 this.lastSelected = "00"

@@ -24,10 +24,10 @@ object ModuleList : Module(
     private val textColour by ColorSetting("Text colour", Color.PINK, false, collapsible = false)
     private val renderLine by BooleanSetting("Render line", "Renders a line on the side.")
     val hud by HudSetting {
-        width { 150.0 * scale }
-        height { activeModuleList.size * (fontHeight + 2) }
         visibleIf { activeModuleList.isNotEmpty() }
         render {
+            width = 150.0 * scale
+            height = activeModuleList.size * (fontHeight + 2.0)
             val isLeft = x + width / 2 < sr.scaledWidth / 2
             val isTop = y + height / 2 < sr.scaledHeight / 2
 

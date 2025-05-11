@@ -119,7 +119,7 @@ class ClickGUI : GuiScreen() {
         )
 
         GL11.glScaled(2.0, 2.0, 2.0)
-        val titleWidth = FontUtil.getStringWidth(ClickGui.clientName)
+        val titleWidth = FontUtil.getStringWidth(ClickGui.guiName)
 
         GlStateManager.color(255f, 255f, 255f, 255f)
         CatgirlRoutes.mc.textureManager.bindTexture(LOGO)
@@ -130,7 +130,7 @@ class ClickGUI : GuiScreen() {
         )
 
         FontUtil.drawString(
-            ClickGui.clientName,
+            ClickGui.guiName,
             -titleWidth.toDouble() - 10.0 - logoSize,
             -FontUtil.fontHeight.toDouble() / 2.0 - 5.0 - logoSize / 2.0,
             ColorUtil.clickGUIColor.rgb

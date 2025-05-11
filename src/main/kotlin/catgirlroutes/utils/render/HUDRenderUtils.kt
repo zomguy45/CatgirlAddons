@@ -324,6 +324,8 @@ object HUDRenderUtils {
         filter: Int
     ) {
         GlStateManager.enableBlend()
+        setColor(Color.WHITE.rgb)
+
         GL14.glBlendFuncSeparate(
             GL11.GL_SRC_ALPHA,
             GL11.GL_ONE_MINUS_SRC_ALPHA,
@@ -683,13 +685,6 @@ object HUDRenderUtils {
         }
 
         GlStateManager.enableRescaleNormal()
-        GlStateManager.popMatrix()
-    }
-
-    fun drawStringWithShadow(text: String, x: Float, y: Float, color: Int, scale: Float) {
-        GlStateManager.pushMatrix()
-        GlStateManager.scale(scale, scale, scale)
-        mc.fontRendererObj.drawStringWithShadow(text, x / scale, y / scale, color)
         GlStateManager.popMatrix()
     }
 }

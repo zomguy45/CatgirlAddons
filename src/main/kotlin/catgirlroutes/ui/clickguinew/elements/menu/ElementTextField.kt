@@ -38,12 +38,12 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
         this.textField.update { // FIXME
             outlineColour = ColorUtil.outlineColor
             outlineHoverColour = ColorUtil.clickGUIColor
-        }.render(mouseXRel, mouseYRel)
+        }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }
 
     override fun mouseClicked(mouseButton: Int): Boolean {
-        return this.textField.mouseClicked(mouseXRel, mouseYRel, mouseButton)
+        return this.textField.onMouseClick(mouseXRel, mouseYRel, mouseButton)
     }
 
     override fun mouseClickMove(mouseButton: Int, timeSinceLastClick: Long) {
@@ -51,7 +51,7 @@ class ElementTextField(parent: ModuleButton, setting: StringSetting) :
     }
 
     override fun keyTyped(typedChar: Char, keyCode: Int): Boolean {
-        return this.textField.keyTyped(typedChar, keyCode)
+        return this.textField.onKey(typedChar, keyCode)
     }
 
 }

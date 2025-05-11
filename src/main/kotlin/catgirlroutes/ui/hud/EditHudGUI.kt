@@ -49,7 +49,7 @@ object EditHudGUI : Screen(false) {
      */
     override fun draw() {
         if (this.draggingElement == null) {
-            resetButton.render(mx, my)
+            resetButton.draw(mx, my)
         } else {
             snapLines.forEach { (pos, isVertical) ->
                 val colour = if (pos.equalsOneOf(sr.scaledWidth_double / 2.0, sr.scaledHeight_double / 2.0)) Color.RED else Color.YELLOW
@@ -82,7 +82,7 @@ object EditHudGUI : Screen(false) {
                 if (this.draggingElement != null) {
                     this.startOffsetX = mx - this.draggingElement!!.x
                     this.startOffsetY = my - this.draggingElement!!.y
-                } else if (this.resetButton.mouseClicked(mx, my, mouseButton)) {
+                } else if (this.resetButton.onMouseClick(mx, my, mouseButton)) {
                     this.hudElements.reversed().forEach {
                         if (it.toggled) it.resetElement()
                     }

@@ -115,7 +115,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 outlineHoverColour = ColorUtil.clickGUIColor
                 x = 5.0
                 y = elementsHeight + DEFAULT_HEIGHT + 10.0
-            }.render(mouseXRel, mouseYRel)
+            }.draw(mouseXRel, mouseYRel)
         }
 
         buttons.forEach { button ->
@@ -124,7 +124,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 button.update {
                     x = origX
                     y = origY
-                }.render(mouseXRel, mouseYRel)
+                }.draw(mouseXRel, mouseYRel)
                 drawPlaceholder(button)
             }
         }
@@ -136,7 +136,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 button.update {
                     x = this@ElementOrder.maxWidth + 5.0
                     y = fontHeight + 3.0 + PADDING + index * (optionElementHeight + PADDING)
-                }.render(mouseXRel, mouseYRel)
+                }.draw(mouseXRel, mouseYRel)
             }
         }
 
@@ -153,7 +153,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                     hovered.update {
                         x = xPos
                         y = yPos
-                    }.render(mouseXRel, mouseYRel)
+                    }.draw(mouseXRel, mouseYRel)
                 }
 
                 drawPlaceholder(hovered)
@@ -169,7 +169,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
                 x = mouseXRel - offsetX
                 y = mouseYRel - offsetY
                 colour = Color(136, 255, 136, 128)
-            }.render(mouseXRel, mouseYRel)
+            }.draw(mouseXRel, mouseYRel)
         }
 
         return totalHeight
@@ -179,7 +179,7 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
 
         if (options.isNotEmpty()) {
             optionButtons.forEach { button ->
-                if (button.mouseClicked(mouseXRel, mouseYRel, mouseButton)) {
+                if (button.onMouseClick(mouseXRel, mouseYRel, mouseButton)) {
                     draggedOption = button
                     offsetX = mouseXRel - button.x
                     offsetY = mouseYRel - button.y
@@ -189,14 +189,14 @@ class ElementOrder(parent: ModuleButton, setting: OrderSetting) :
         }
 
         buttons.forEach { button ->
-            if (button.mouseClicked(mouseXRel, mouseYRel, mouseButton)) {
+            if (button.onMouseClick(mouseXRel, mouseYRel, mouseButton)) {
                 draggedButton = button
                 offsetX = mouseXRel - button.x
                 offsetY = mouseYRel - button.y
                 return true
             }
         }
-        setting.updateAction?.let { return updateButton.mouseClicked(mouseXRel, mouseYRel, mouseButton) }
+        setting.updateAction?.let { return updateButton.onMouseClick(mouseXRel, mouseYRel, mouseButton) }
         return false
     }
 

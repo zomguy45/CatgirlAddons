@@ -78,7 +78,7 @@ abstract class SearchOverlay(
         drawRoundedBorderedRect(x, y + 25.0,
             guiWidth, guiHeight - 25.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
-        searchBar.render(mouseX, mouseY)
+        searchBar.draw(mouseX, mouseY)
         drawScreenExtra(mouseX, mouseY)
 
         StencilUtils.write(false)
@@ -93,7 +93,7 @@ abstract class SearchOverlay(
 
     override fun keyTyped(typedChar: Char, keyCode: Int) {
         keyTypedExtra(typedChar, keyCode)
-        searchBar.keyTyped(typedChar, keyCode)
+        searchBar.onKey(typedChar, keyCode)
 
         when (keyCode) {
             Keyboard.KEY_RETURN -> {
@@ -115,11 +115,11 @@ abstract class SearchOverlay(
 
     override fun onMouseClick(mouseButton: Int) {
         mouseClickedExtra(mouseX, mouseY, mouseButton)
-        searchBar.mouseClicked(mouseX, mouseY, mouseButton)
+        searchBar.onMouseClick(mouseX, mouseY, mouseButton)
         searchBar.isFocused = true
 
         if (mouseY.toDouble() !in visibleRange) return
-        resultButtons.forEach { it.mouseClicked(mouseX, mouseY, mouseButton) }
+        resultButtons.forEach { it.onMouseClick(mouseX, mouseY, mouseButton) }
     }
 
     override fun onScroll(amount: Int) {
@@ -190,7 +190,7 @@ abstract class SearchOverlay(
                 }
 
             }
-            btn.render(mouseX, mouseY)
+            btn.draw(mouseX, mouseY)
             stack?.let { drawItemStackWithText(it, x + 7.0, offsetY + 2.0) }
             resultButtons.add(btn)
             offsetY += 25.0

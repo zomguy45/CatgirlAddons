@@ -75,7 +75,7 @@ object FontUtil {
 
     fun getFontHeight(scale: Double = 1.0): Int = (fontHeight * scale).toInt()
 
-    fun drawAlignedString(text: String, x: Double, y: Double, alignment: Alignment = Alignment.LEFT, vAlignment: VAlignment = VAlignment.CENTRE, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0) {
+    fun drawAlignedString(text: String, x: Double, y: Double, alignment: Alignment = Alignment.LEFT, vAlignment: VAlignment = VAlignment.CENTRE, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0, shadow: Boolean = false) {
         val posX = when (alignment) {
             Alignment.LEFT -> x
             Alignment.CENTRE -> x - (getStringWidth(text, customFont, scale) * scale / 2.0)
@@ -88,7 +88,7 @@ object FontUtil {
             VAlignment.BOTTOM -> y - getFontHeight(scale)
         }
 
-        drawText(text, posX, posY, color, customFont, scale)
+        drawText(text, posX, posY, color, customFont, scale, shadow)
     }
 
     fun drawString(text: String, x: Double, y: Double, color: Int = ColorUtil.textcolor, customFont: Boolean = font, scale: Double = 1.0, shadow: Boolean = false) =

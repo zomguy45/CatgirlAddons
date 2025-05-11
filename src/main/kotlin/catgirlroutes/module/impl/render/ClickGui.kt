@@ -36,18 +36,20 @@ object ClickGui: Module(
     val blur by BooleanSetting("Blur", false,  "Toggles the background blur for the gui.")
     val color by ColorSetting("Color", Color(255, 137, 213), false, "Color theme in the gui.", false)
 
-    val clientName by StringSetting("Name", "CatgirlAddons", 15, description = "Name that will be rendered in the gui.")
-    val prefixStyle by SelectorSetting("Prefix Style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
-    val customPrefix by StringSetting("Custom Prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  description = "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.").withDependency { this.prefixStyle.index == 2 }
+    val customMenu by BooleanSetting("Custom main menu")
+//    val windowName by StringSetting("Window name", "CatgirlAddons", description = "Sets window name to a custom one if not empty.")
+    val guiName by StringSetting("Gui name", "CatgirlAddons", 15, description = "Name that will be rendered in the gui.")
+    val prefixStyle by SelectorSetting("Prefix style", "Long", arrayListOf("Long", "Short", "Custom"), "Chat prefix selection for mod messages.")
+    val customPrefix by StringSetting("Custom prefix", "§0§l[§4§lCatgirlAddons§0§l]§r", 40,  description = "You can set a custom chat prefix that will be used when Custom is selected in the Prefix Style dropdown.").withDependency { this.prefixStyle.index == 2 }
 
-    private val devSettings by DropdownSetting("Dev Settings", false)
-    val devMode by BooleanSetting("Dev Mode", false, "Toggles developer mode").withDependency(devSettings)
-    val debugMode by BooleanSetting("Debug Mode", false, "Toggles debug mode").withDependency(devSettings)
-    val forceHypixel by BooleanSetting("Force Hypixel", false, "Makes the mod think that you're on Hypixel").withDependency(devSettings)
-    val forceSkyblock by BooleanSetting("Force Skyblock", false, "Makes the mod think that you're in Skyblock").withDependency(devSettings)
-    val forceDungeon by BooleanSetting("Force Dungeon", false, "Makes the mod think that you're in Dungeon").withDependency(devSettings)
+    private val devSettings by DropdownSetting("Dev settings", false)
+    val devMode by BooleanSetting("Dev mode", false, "Toggles developer mode").withDependency(devSettings)
+    val debugMode by BooleanSetting("Debug mode", false, "Toggles debug mode").withDependency(devSettings)
+    val forceHypixel by BooleanSetting("Force hypixel", false, "Makes the mod think that you're on Hypixel").withDependency(devSettings)
+    val forceSkyblock by BooleanSetting("Force skyblock", false, "Makes the mod think that you're in Skyblock").withDependency(devSettings)
+    val forceDungeon by BooleanSetting("Force dungeon", false, "Makes the mod think that you're in Dungeon").withDependency(devSettings)
 
-    val showUsageInfo by BooleanSetting("Usage Information", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
+    val showUsageInfo by BooleanSetting("Usage information", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
 
     val panelX: MutableMap<Category, NumberSetting> = mutableMapOf()
     val panelY: MutableMap<Category, NumberSetting> = mutableMapOf()
