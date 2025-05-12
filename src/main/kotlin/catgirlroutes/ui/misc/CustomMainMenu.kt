@@ -36,7 +36,8 @@ object CustomMainMenu: Screen(false) { // todo add more shit
             button(10, 85, "Hypixel") { FMLClientHandler.instance().connectToServer(this, ServerData("Hypixel", "mc.hypixel.net:25565", false)) },
             button(10, this@CustomMainMenu.height - 30, "Quit") { mc.shutdown() },
             button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 30, "Open Github") { Desktop.getDesktop().browse(URI("https://github.com/WompWatr/CatgirlAddons")) },
-            button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 55, "Random cat picture") { downloadCatImage { catTexture = it } }
+            button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 55, "Discord Server") { Desktop.getDesktop().browse(URI("https://discord.gg/jK4AXeVK8u")) },
+            button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 80, "Random cat picture") { downloadCatImage { catTexture = it } }
         )
     }
 
@@ -69,7 +70,6 @@ object CustomMainMenu: Screen(false) { // todo add more shit
             callback(null)
         }
     }
-
     private fun button(x: Int, y: Int, title: String, action: () -> Unit) = button {
         at(x, y)
         size(200, 20)
