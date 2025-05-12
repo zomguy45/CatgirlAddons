@@ -96,6 +96,7 @@ class ClickGUI : Screen() { // todo: module description
                 size(categoryWidth - 9.0, 14.0)
                 textShadow = true
                 colour = Color.WHITE.withAlpha(0)
+                hoverColour = colour
                 outlineColour = Color.WHITE.withAlpha(0)
                 outlineHoverColour = Color.WHITE.withAlpha(0)
                 textPadding = 12.0

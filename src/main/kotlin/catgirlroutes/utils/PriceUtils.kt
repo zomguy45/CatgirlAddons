@@ -110,15 +110,15 @@ object PriceUtils {
         }
 
         if (extra.hasKey("upgrade_level")) {
-            val essenceData = NeuRepo.getEssenceDataFromID(sbId)!!
+            val essenceData = NeuRepo.getEssenceDataFromID(sbId)
 
-            val maxUpgrades = essenceData.upgrades.lastOrNull()?.star ?: 0
+            val maxUpgrades = essenceData?.upgrades?.lastOrNull()?.star ?: 0
             val upgradeLvl = extra.getInteger("upgrade_level")
 
-            val essenceUpgrades = essenceData.upgrades.take(minOf(upgradeLvl, maxUpgrades))
+            val essenceUpgrades = essenceData?.upgrades?.take(minOf(upgradeLvl, maxUpgrades))
 
-            val count = essenceUpgrades.size
-            val price = essenceUpgrades.sumOf { upgrade ->
+            val count = essenceUpgrades?.size
+            val price = essenceUpgrades?.sumOf { upgrade ->
                 getPrice(essenceData.essenceID) * upgrade.cost
             }
 

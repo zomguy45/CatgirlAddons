@@ -129,6 +129,7 @@ object Blink : Module(
         if (event.type != RenderGameOverlayEvent.ElementType.HOTBAR || mc.ingameGUI == null || packetArray == 0 || !alwaysRender) return
         GlStateManager.pushMatrix()
         GlStateManager.translate(hud.x, hud.y, 1.0)
+        GlStateManager.scale(hud.scale, hud.scale, 1.0)
         drawPackets()
         GlStateManager.popMatrix()
     }
