@@ -39,7 +39,7 @@ object DungeonUtils {
         get() = currentDungeon?.floor ?: Floor.E
 
     val inBoss: Boolean
-        get() = currentDungeon?.inBoss == true
+        get() = currentDungeon?.inBoss == true || ClickGui.forceBoss
 
     val secretCount: Int
         get() = currentDungeon?.dungeonStats?.secretsFound ?: 0
@@ -157,7 +157,7 @@ object DungeonUtils {
      * @return The current phase of floor 7 boss, or `null` if the player is not in the boss room.
      */
     fun getF7Phase(): M7Phases {
-        if (!isFloor(7) || !inBoss) return M7Phases.Unknown
+        if ((!isFloor(7) || !inBoss) && !ClickGui.forceBoss) return M7Phases.Unknown
 
         return when {
             posY > 210 -> M7Phases.P1
@@ -169,7 +169,7 @@ object DungeonUtils {
     }
 
     fun getP3Section(): P3Sections {
-        if (getF7Phase() != M7Phases.P3) return P3Sections.Unknown
+        if (getF7Phase() != M7Phases.P3 && !ClickGui.forceBoss) return P3Sections.Unknown
 
         return when {
             posX in 89.0..113.0 && posZ in 30.0..122.0 -> P3Sections.S1

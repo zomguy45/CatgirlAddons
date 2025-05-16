@@ -48,6 +48,7 @@ object ClickGui: Module(
     val forceHypixel by BooleanSetting("Force hypixel", false, "Makes the mod think that you're on Hypixel").withDependency(devSettings)
     val forceSkyblock by BooleanSetting("Force skyblock", false, "Makes the mod think that you're in Skyblock").withDependency(devSettings)
     val forceDungeon by BooleanSetting("Force dungeon", false, "Makes the mod think that you're in Dungeon").withDependency(devSettings)
+    val forceBoss by BooleanSetting("Force boss", false, "Makes the mod think that you're in a boss fight").withDependency(devSettings)
 
     val showUsageInfo by BooleanSetting("Usage information", true, "Show info on how to use the GUI.", Visibility.ADVANCED_ONLY)
 

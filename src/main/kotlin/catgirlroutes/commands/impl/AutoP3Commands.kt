@@ -8,6 +8,7 @@ import catgirlroutes.commands.impl.RingManager.saveRings
 import catgirlroutes.module.impl.dungeons.AutoP3
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
 import catgirlroutes.module.impl.dungeons.Blink
+import catgirlroutes.module.impl.dungeons.Relics
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
@@ -24,15 +25,21 @@ import net.minecraft.util.Vec3
 import java.io.File
 
 object RingManager {
-    var rings: MutableList<Ring> = mutableListOf()
+    var loadedRings: MutableList<Ring> = mutableListOf()
+    val rings: List<Ring> get() = loadedRings + if (Relics.blinkCustom) specialRings.filter { ring -> ring.route !in loadedRings.map { it.route } } else listOf() // TODO MAKE IT WORK WITH FUTURE SPECIAL RINGS
     var allRings: MutableList<Ring> = mutableListOf()
+
     private val gson: Gson = GsonBuilder().setPrettyPrinting().create()
     private val file = File("config/catgirlroutes/rings_data.json")
+
+    private val specialRoutes: List<String> = listOf("RelicsBlink")
+    private var specialRings: MutableList<Ring> = mutableListOf()
 
     fun loadRings() {
         if (file.exists()) {
             allRings = gson.fromJson(file.readText(), object : TypeToken<List<Ring>>() {}.type)
-            rings = allRings.filter { it.route in route }.toMutableList()
+            loadedRings = allRings.filter { it.route in route && it.route !in specialRoutes }.toMutableList()
+            specialRings = allRings.filter { it.route in specialRoutes }.toMutableList()
         }
     }
 

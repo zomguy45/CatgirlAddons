@@ -33,7 +33,9 @@ import catgirlroutes.utils.PlayerUtils.leftClick
 import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.equalsOneOf
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
+import catgirlroutes.utils.dungeon.DungeonUtils.getF7Phase
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
+import catgirlroutes.utils.dungeon.M7Phases
 import catgirlroutes.utils.render.WorldRenderUtils
 import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
@@ -72,7 +74,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-object AutoP3 : Module(
+object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more args
     "Auto P3",
     Category.DUNGEON,
     "A module that allows you to place down rings that execute various actions."
@@ -88,7 +90,7 @@ object AutoP3 : Module(
     private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
     private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
 
-    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this
+    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this // I still have no idea what this shit does
     private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
     private val packetMovement by BooleanSetting("Packet movement")
     private val recordBind by KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in edit mode.")
@@ -114,6 +116,7 @@ object AutoP3 : Module(
             }
         }
 
+    // this shit is a motion multiplier or smt
     private val stupid2 by NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
 
 
@@ -141,6 +144,9 @@ object AutoP3 : Module(
                 if (ring.arguments!!.contains("term") && !termFound) {
                     return
                 }
+
+                if (getF7Phase() == M7Phases.P5 && ring.route == "RelicsBlink" && !Relics.doCustomBlink) return@forEach
+
                 if (cooldown) return@forEach
                 cooldownMap[key] = true
                 GlobalScope.launch {

@@ -127,4 +127,14 @@ object BlockAura {
     fun onWorldUnload(event: WorldEvent.Unload) {
         blockArray.clear()
     }
+
+    fun addBlock(blockPos: BlockPos, reach: Double = 6.0) {
+        blockArray.add(BlockAuraAction(blockPos, reach))
+    }
+
+    fun addBlockNoDupe(blockPos: BlockPos, reach: Double = 6.0) {
+//        val block = BlockAuraAction(blockPos, reach)
+//        if (!blockArray.contains(block)) blockArray.add(block)
+        blockArray += BlockAuraAction(blockPos, reach)
+    }
 }

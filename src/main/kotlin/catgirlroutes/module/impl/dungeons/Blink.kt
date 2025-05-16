@@ -41,6 +41,7 @@ object Blink : Module(
             if (recorderActive) {
                 recorderActive = false
                 modMessage("Done recording")
+                saveRings()
                 return@onPress
             }
             if (!ringEditMode && !blinkEditMode) return@onPress
@@ -72,7 +73,7 @@ object Blink : Module(
     @SubscribeEvent
     fun onPacketRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !recorderActive) return
-        if (currentRing!!.packets.size == recordLength.toInt()) {
+        if (currentRing!!.packets.size - 1 == recordLength.toInt()) {
             recorderActive = false
             saveRings()
             modMessage("Done recording")
