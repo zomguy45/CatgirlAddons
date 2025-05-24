@@ -142,8 +142,8 @@ object Relics: Module(
     }
 
     private fun grabRelic(entity: Entity) {
-        val (x, y, z) = mc.objectMouseOver?.hitVec ?: return
-        PacketUtils.addToSendQueue(C02PacketUseEntity(entity, Vec3(x - entity.posX, y - entity.posY, z - entity.posZ)))
+        val objectMouseOver = mc.objectMouseOver?.hitVec ?: return
+        mc.netHandler.addToSendQueue(C02PacketUseEntity(entity, Vec3(objectMouseOver.xCoord - entity.posX, objectMouseOver.yCoord - entity.posY, objectMouseOver.zCoord - entity.posZ)))
     }
 
     private fun doBlinkOrLook() {
