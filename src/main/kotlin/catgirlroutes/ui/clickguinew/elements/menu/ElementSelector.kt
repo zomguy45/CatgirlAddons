@@ -29,9 +29,9 @@ class ElementSelector(parent: ModuleButton, setting: SelectorSetting) : // todo 
 
         if (!extended && !this.extendAnimation.isAnimating()) return height
 
-        StencilUtils.write(false, 3)
+        StencilUtils.write(false)
         drawRoundedRect(0.0, 0.0, width, height, 3.0, Color.WHITE)
-        StencilUtils.erase(true, 3)
+        StencilUtils.erase(true)
         this.setting.options.forEachIndexed { i, option ->
             val yOff = (i + 1) * 13.0
             if (this.isHovered(yOff = yOff.toInt())) {

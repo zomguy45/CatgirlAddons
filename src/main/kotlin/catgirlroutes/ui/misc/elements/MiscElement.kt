@@ -1,9 +1,10 @@
 package catgirlroutes.ui.misc.elements
 
+import catgirlroutes.utils.render.Radii
 import net.minecraft.client.renderer.GlStateManager
 import java.awt.Color
 
-abstract class MiscElement(open val style: MiscElementStyle) {
+abstract class MiscElement(open val style: MiscElementStyle) { // TODO fucking recode this shit it's disgusting
     var value: String // todo make better idk
         get() = style.value
         set(v) { updates.value = v }
@@ -28,9 +29,9 @@ abstract class MiscElement(open val style: MiscElementStyle) {
         get() = style.thickness
         set(v) { updates.thickness = v }
 
-    var radius: Double
-        get() = style.radius
-        set(v) { updates.radius = v }
+    var radii: Radii
+        get() = style.radii
+        set(v) { updates.radii = v }
 
     var colour: Color
         get() = style.colour
@@ -51,6 +52,7 @@ abstract class MiscElement(open val style: MiscElementStyle) {
     val updates: MiscElementStyle get() = style
 
     var onClickAction: (Int) -> Unit = { _ -> }
+    var onRenderAction: () -> Unit = {  }
     var onHoverAction: () -> Unit = {  }
     var onKeyAction: (Char, Int) -> Unit = { _, _, -> }
 
@@ -58,11 +60,12 @@ abstract class MiscElement(open val style: MiscElementStyle) {
     protected open fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean = false
     open fun mouseClickMove(mouseX: Int, mouseY: Int, mouseButton: Int, timeSinceLastClick: Long) {  }
     protected open fun keyTyped(typedChar: Char, keyCode: Int): Boolean = false
-    protected open fun onScroll(amount: Int): Boolean = false // todo add scrollable shit
+    open fun onScroll(mouseX: Int, mouseY: Int, amount: Int): Boolean = false // todo add scrollable shit
 
     fun draw(mouseX: Int = 0, mouseY: Int = 0) {
         GlStateManager.pushMatrix()
         this.render(mouseX, mouseY)
+        this.onRenderAction.invoke()
         if (this.isHovered(mouseX, mouseY)) this.onHoverAction.invoke()
         GlStateManager.popMatrix()
     }
@@ -79,7 +82,7 @@ abstract class MiscElement(open val style: MiscElementStyle) {
         return isTyped
     }
 
-    fun isHovered(mouseX: Int, mouseY: Int, xOff: Double = 0.0, yOff: Double = 0.0): Boolean {
+    open fun isHovered(mouseX: Int, mouseY: Int, xOff: Double = 0.0, yOff: Double = 0.0): Boolean {
         return mouseX >= x + xOff && mouseX <= x + width + xOff &&
                 mouseY >= y + yOff && mouseY <= y + height + yOff
     }
@@ -98,6 +101,7 @@ abstract class ElementDSL<T : MiscElement> {
     var height by _style::height
     var thickness by _style::thickness
     var radius by _style::radius
+    var radii by _style::radii
     var textColour by _style::textColour
     var textShadow by _style::textShadow
     var colour by _style::colour
@@ -108,7 +112,10 @@ abstract class ElementDSL<T : MiscElement> {
     var vAlignment by _style::vAlignment
     var textPadding by _style::textPadding
 
+    lateinit var element: MiscElement
+
     private var onClickAction: (Int) -> Unit = { _ -> }
+    private var onRenderAction: () -> Unit = {  }
     private var onHoverAction: () -> Unit = {  }
     private var onKeyAction: (Char, Int) -> Unit = { _, _, -> }
 
@@ -120,6 +127,10 @@ abstract class ElementDSL<T : MiscElement> {
     fun size(width: Number, height: Number) {
         this.width = width.toDouble()
         this.height = height.toDouble()
+    }
+
+    fun onRender(action: () -> Unit) {
+        this.onRenderAction = action
     }
 
     fun onHover(action: () -> Unit) {
@@ -137,10 +148,12 @@ abstract class ElementDSL<T : MiscElement> {
     protected open fun createStyle(): MiscElementStyle = _style
     protected abstract fun buildElement(): T
     fun build(): T {
-        val element = buildElement()
-        element.onClickAction = onClickAction
-        element.onHoverAction = onHoverAction
-        element.onKeyAction = onKeyAction
-        return element
+        val built = buildElement()
+        built.onClickAction = onClickAction
+        built.onRenderAction = onRenderAction
+        built.onHoverAction = onHoverAction
+        built.onKeyAction = onKeyAction
+        element = built
+        return built
     }
 }

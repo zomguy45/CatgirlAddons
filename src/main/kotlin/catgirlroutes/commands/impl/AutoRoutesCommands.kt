@@ -1,7 +1,6 @@
 package catgirlroutes.commands.impl
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.commodore
 import catgirlroutes.commands.impl.NodeManager.allNodes
 import catgirlroutes.commands.impl.NodeManager.loadNodes
 import catgirlroutes.commands.impl.NodeManager.saveNodes
@@ -19,6 +18,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.currentRoomName
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
+import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -54,16 +54,16 @@ object NodeManager {
 data class Node(
     val type: String,
     var location: Vec3,
-    var height: Float,
-    var width: Float,
     var yaw: Float,
     var pitch: Float,
-    var depth: Float?,
-    var block: Pair<Vec3, String>?,
-    var arguments: List<String>?,
-    var delay: Int?,
-    var command: String?,
     var room: String,
+    var height: Float = 1.0f,
+    var width: Float = 1.0f,
+    var depth: Float? = null,
+    var block: Pair<Vec3, String>? = null,
+    var arguments: List<String>? = null,
+    var delay: Int? = null,
+    var command: String? = null,
 )
 
 var nodeEditMode: Boolean = false
@@ -71,7 +71,7 @@ var nodeTypes: List<String> = listOf("warp", "walk", "look", "stop", "boom", "pe
 
 val removedNodes: MutableList<MutableList<Node>> = mutableListOf()
 
-val autoRoutesCommands = commodore("node") {
+val autoRoutesCommands = Commodore("node") {
 
     literal("help").runs {
         modMessage("""
@@ -181,13 +181,13 @@ val autoRoutesCommands = commodore("node") {
             }
             val pitch = mc.renderManager.playerViewX
 
-            val node = Node(type, location, height, width, yaw, pitch, depth, block, arguments, delay, command, name)
+            val node = Node(type, location, yaw, pitch, name, height, width, depth, block, arguments, delay, command)
 
             allNodes.add(node)
 
             modMessage("${type.capitalizeOnlyFirst()} placed!")
             saveAndLoadNodes()
-        }.suggests("type", nodeTypes)
+        }
     }
 
     literal("addarg") {
@@ -274,7 +274,7 @@ val autoRoutesCommands = commodore("node") {
         if (rmNodes.isEmpty()) return@runs modMessage("Nothing to remove")
 
         removedNodes.add(rmNodes.toMutableList())
-        modMessage("Removed ${rmNodes.joinToString(", ") { it.type } }}")
+        modMessage("Removed ${rmNodes.joinToString(", ") { it.type } }")
 
         saveAndLoadNodes()
     }

@@ -55,7 +55,7 @@ class MiscElementSelector( // todo recode vertical selector
 
         val totalHeight = if (extended) height * (options.size + 1) else height
         HUDRenderUtils.drawRoundedBorderedRect(
-            x, y, width, totalHeight, radius, thickness,
+            x, y, width, totalHeight, radii, thickness,
             colour, highlightColor
         )
 
@@ -74,7 +74,7 @@ class MiscElementSelector( // todo recode vertical selector
 
                 if (isSelected(option) || isHovered(mouseX, mouseY, yOff = optionY - y)) {
                     HUDRenderUtils.drawRoundedRect(
-                        x, optionY, width, height, radius, highlightColor
+                        x, optionY, width, height, radii, highlightColor
                     )
                 }
 
@@ -98,14 +98,14 @@ class MiscElementSelector( // todo recode vertical selector
             val textY = textY_ + row * (height + horizontalPadding)
 
             HUDRenderUtils.drawRoundedBorderedRect(
-                optionX, optionY, width, height, radius, thickness,
+                optionX, optionY, width, height, radii, thickness,
                 colour,
                 if (isSelected(option)) highlightColor else ColorUtil.outlineColor
             )
 
             if (isSelected(option) || isHovered(mouseX, mouseY, optionX - x, optionY - y)) {
                 HUDRenderUtils.drawRoundedOutline(
-                    optionX, optionY, width, height, radius, thickness, highlightColor
+                    optionX, optionY, width, height, radii, thickness, highlightColor
                 )
             }
 

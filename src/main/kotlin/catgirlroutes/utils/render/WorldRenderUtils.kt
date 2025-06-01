@@ -1,7 +1,6 @@
 package catgirlroutes.utils.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.commodore
 
 import catgirlroutes.ui.clickgui.util.ColorUtil.toInt
 import catgirlroutes.ui.clickgui.util.FontUtil.fontHeight
@@ -14,11 +13,8 @@ import catgirlroutes.utils.addVec
 import catgirlroutes.utils.fastEyeHeight
 import catgirlroutes.utils.WorldToScreen
 import catgirlroutes.utils.render.HUDRenderUtils.sr
-import com.github.stivais.commodore.utils.GreedyString
 import net.minecraft.client.gui.Gui
-import net.minecraft.client.gui.ScaledResolution
 import net.minecraft.client.renderer.GlStateManager
-import net.minecraft.client.renderer.GlStateManager.translate
 import net.minecraft.client.renderer.Tessellator
 import net.minecraft.client.renderer.WorldRenderer
 import net.minecraft.client.renderer.entity.RenderPlayer
@@ -38,6 +34,8 @@ import org.lwjgl.util.glu.Cylinder
 import org.lwjgl.util.vector.Vector3f
 import java.awt.Color
 import java.awt.Color.*
+import kotlin.math.cos
+import kotlin.math.sin
 
 
 /**
@@ -664,6 +662,52 @@ object WorldRenderUtils {
 
      */
 
+    /**
+     * Modified https://github.com/q12323/Meow-Client/blob/main/utils/RenderUtils.js#L46
+     */
+    fun drawEllipse(
+        x: Double,
+        y: Double,
+        z: Double,
+        radiusX: Float,  // width
+        radiusZ: Float,  // length
+        color: Color,
+        slices: Int = 30,
+        lineWidth: Float = 2f,
+        phase: Boolean = false
+    ) {
+        GlStateManager.disableLighting()
+        GlStateManager.enableBlend()
+        GlStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        GL11.glLineWidth(lineWidth)
+
+        if (phase) GlStateManager.disableDepth()
+        GlStateManager.disableTexture2D()
+
+        GlStateManager.pushMatrix()
+        GlStateManager.translate(x - renderManager.viewerPosX, y - renderManager.viewerPosY + 0.1, z - renderManager.viewerPosZ)
+
+        val deltaTheta = (Math.PI * 2) / slices
+        worldRenderer.begin(GL_LINE_LOOP, DefaultVertexFormats.POSITION)
+        GlStateManager.color(color.red / 255f, color.green / 255f, color.blue / 255f, color.alpha / 255f)
+
+        for (i in 0..slices) {
+            val theta = deltaTheta * i
+            worldRenderer.pos(
+                radiusX * cos(theta),
+                0.0,
+                radiusZ * sin(theta)
+            ).endVertex()
+        }
+
+        tessellator.draw()
+        GlStateManager.popMatrix()
+
+        GlStateManager.enableTexture2D()
+        GlStateManager.enableDepth()
+        GlStateManager.disableBlend()
+    }
+
     fun drawSquare(
         x: Double,
         y: Double,
@@ -714,6 +758,7 @@ object WorldRenderUtils {
         x: Double,
         y: Double,
         z: Double,
+        length: Float,
         width: Float,
         height: Float,
         colour: Color,
@@ -722,12 +767,12 @@ object WorldRenderUtils {
 
         val gap = height / (layers - 1)
         for (i in 1 until layers - 1) {
-            drawSquareTwo(x, y + (gap * i), z, width, width, colour, 4f, false)
+            drawSquareTwo(x, y + (gap * i), z, length, width, colour, 4f, false)
         }
 
-        drawSquareTwo(x, y + 0.01, z, width, width, colour, 4f, false)
+        drawSquareTwo(x, y + 0.01, z, length, width, colour, 4f, false)
         if (layers == 1) return
-        drawSquareTwo(x, y + height, z, width, width, colour, 4f, false)
+        drawSquareTwo(x, y + height, z, length, width, colour, 4f, false)
     }
 
 
@@ -781,8 +826,8 @@ object WorldRenderUtils {
         x: Double,
         y: Double,
         z: Double,
-        xWidth: Float,
-        zWidth: Float,
+        length: Float,
+        width: Float,
         color: Color,
         thickness: Float = 3f,
         phase: Boolean = true,
@@ -807,14 +852,14 @@ object WorldRenderUtils {
         GlStateManager.color(color.red / 255f, color.green / 255f,
             color.blue / 255f, color.alpha / 255f)
 
-        val halfXWidth = xWidth / 2
-        val halfZWidth = zWidth / 2
+        val halfLength = length / 2
+        val halfWidth = width / 2
 
-        worldRenderer.pos(x + halfXWidth, y, z + halfZWidth).endVertex()
-        worldRenderer.pos(x + halfXWidth, y, z - halfZWidth).endVertex()
-        worldRenderer.pos(x - halfXWidth, y, z - halfZWidth).endVertex()
-        worldRenderer.pos(x - halfXWidth, y, z + halfZWidth).endVertex()
-        worldRenderer.pos(x + halfXWidth, y, z + halfZWidth).endVertex()
+        worldRenderer.pos(x + halfWidth, y, z + halfLength).endVertex()
+        worldRenderer.pos(x + halfWidth, y, z - halfLength).endVertex()
+        worldRenderer.pos(x - halfWidth, y, z - halfLength).endVertex()
+        worldRenderer.pos(x - halfWidth, y, z + halfLength).endVertex()
+        worldRenderer.pos(x + halfWidth, y, z + halfLength).endVertex()
 
         tessellator.draw()
 
@@ -841,7 +886,7 @@ object WorldRenderUtils {
         GlStateManager.disableLighting()
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
 
-        translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+        GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
 
         GlStateManager.translate(vec3.xCoord, vec3.yCoord, vec3.zCoord)
         GlStateManager.rotate(-renderManager.playerViewY, 0.0f, 1.0f, 0.0f)
@@ -877,7 +922,7 @@ object WorldRenderUtils {
         GlStateManager.disableLighting()
         GlStateManager.disableTexture2D()
         GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
-        translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
+        GlStateManager.translate(-renderManager.viewerPosX, -renderManager.viewerPosY, -renderManager.viewerPosZ)
 
         if (depth) GlStateManager.enableDepth() else GlStateManager.disableDepth()
         GlStateManager.depthMask(depth)
@@ -955,10 +1000,10 @@ object WorldRenderUtils {
         titleTicks--
     }
 
-    val displayCommands = commodore("display") {
-        literal("set").runs {
-            string: GreedyString ->
-            displayTitle(string.toString(), 80)
-        }
-    }
+//    val displayCommands = Commodore("display") {
+//        literal("set").runs {
+//            string: GreedyString ->
+//            displayTitle(string.toString(), 80)
+//        }
+//    }
 }

@@ -8,18 +8,20 @@ import catgirlroutes.ui.misc.elements.MiscElement
 fun MiscElement.calculateTextPosition(
     hPadding: Double = this.style.textPadding,
     vPadding: Double = this.style.vTextPadding,
-    scale: Double = 1.0
+    scale: Double = 1.0,
+    h: Double = this.height,
+    w: Double = this.width
 ): Pair<Double, Double> {
     return Pair(
         when (this.style.alignment) {
             Alignment.LEFT -> x + hPadding
-            Alignment.CENTRE -> x + width / 2
-            Alignment.RIGHT -> x + width - hPadding
+            Alignment.CENTRE -> x + w / 2
+            Alignment.RIGHT -> x + w - hPadding
         },
         when (this.style.vAlignment) {
             VAlignment.TOP -> y + vPadding
-            VAlignment.CENTRE -> y + height / 2
-            VAlignment.BOTTOM -> y + height - vPadding - FontUtil.getFontHeight(scale)
+            VAlignment.CENTRE -> y + h / 2
+            VAlignment.BOTTOM -> y + h - vPadding - FontUtil.getFontHeight(scale)
         }
     )
 }

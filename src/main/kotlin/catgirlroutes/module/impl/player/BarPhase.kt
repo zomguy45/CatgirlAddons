@@ -3,8 +3,8 @@ package catgirlroutes.module.impl.player
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.NumberSetting
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.PlayerUtils
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posZ
@@ -36,8 +36,8 @@ object BarPhase: Module(
 
     private var phaseTicks = 0
 
-    private const val minCoord = 0.446f
-    private const val maxCoord = 0.5455f
+    private const val minCoord = 0.4375f
+    private const val maxCoord = 0.5625f
     private const val range = 0.018
 
     @SubscribeEvent
@@ -55,7 +55,7 @@ object BarPhase: Module(
             }
 
             val loc = Vec3(mc.thePlayer.posX, mc.thePlayer.posY, mc.thePlayer.posZ)
-            val offsVec = Vec3(0.0, 1.0,0.0).crossProduct(Vec3(dir.directionVec)).multiply(0.3)
+            val offsVec = Vec3(0.0, 1.0,0.0).crossProduct(Vec3(dir.directionVec)).multiply(0.3, 1.0, 0.3)
 
             val flag = flag(loc, offsVec, dir)
             val flag2 = flag(loc.addVector(0.0, 0.5, 0.0), offsVec, dir)
@@ -72,7 +72,7 @@ object BarPhase: Module(
         } else this.phaseTicks = 0
     }
 
-    private fun direction(): EnumFacing?{
+    private fun direction(): EnumFacing? {
         return  when {
             inRange(posX, this.minCoord - 0.3f) -> EnumFacing.EAST
             inRange(posZ, this.minCoord - 0.3f) -> EnumFacing.SOUTH
@@ -88,6 +88,10 @@ object BarPhase: Module(
     }
 
     private fun flag(loc: Vec3, offsVec: Vec3, dir: EnumFacing): Boolean {
+        debugMessage("1 " + mc.theWorld.getBlockState(BlockPos(loc.add(offsVec)).offset(dir)).block.registryName)
+        debugMessage("2 " + mc.theWorld.getBlockState(BlockPos(loc.subtract(offsVec)).offset(dir)).block.registryName)
+        debugMessage("3 " + mc.theWorld.getBlockState(BlockPos(loc.add(offsVec)).offset(dir).up()).block.registryName)
+        debugMessage("4 " + mc.theWorld.getBlockState(BlockPos(loc.subtract(offsVec)).offset(dir).up()).block.registryName)
         return mc.theWorld.getBlockState(BlockPos(loc.add(offsVec)).offset(dir)).isGoog
                 && mc.theWorld.getBlockState(BlockPos(loc.subtract(offsVec)).offset(dir)).isGoog
                 && mc.theWorld.getBlockState(BlockPos(loc.add(offsVec)).offset(dir).up()).isGoog

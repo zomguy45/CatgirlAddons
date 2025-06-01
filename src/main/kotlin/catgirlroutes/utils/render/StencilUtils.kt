@@ -6,7 +6,7 @@ import net.minecraft.client.shader.Framebuffer
 import org.lwjgl.opengl.EXTFramebufferObject
 import org.lwjgl.opengl.GL11
 
-object StencilUtils {
+object StencilUtils { // todo remove and use scissor
     fun dispose() {
         GL11.glDisable(GL11.GL_STENCIL_TEST)
         GlStateManager.disableAlpha()

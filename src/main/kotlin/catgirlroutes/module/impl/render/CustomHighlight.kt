@@ -1,7 +1,6 @@
 package catgirlroutes.module.impl.render
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.commodore
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.impl.BooleanSetting
@@ -9,41 +8,26 @@ import catgirlroutes.module.settings.impl.ColorSetting
 import catgirlroutes.utils.ChatUtils.createClickableText
 import catgirlroutes.utils.ChatUtils.getPrefix
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.ConfigSystem
-import catgirlroutes.utils.render.WorldRenderUtils.drawBoxByEntity
+import catgirlroutes.utils.configList
+import catgirlroutes.utils.render.WorldRenderUtils.drawEntityBox
 import catgirlroutes.utils.render.WorldRenderUtils.drawTracer
+import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
-import com.google.gson.reflect.TypeToken
 import net.minecraft.client.gui.GuiScreen
 import net.minecraftforge.client.event.RenderWorldLastEvent
 import net.minecraftforge.event.entity.player.EntityInteractEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import java.awt.Color
-import java.io.File
 import kotlin.math.abs
 
 object CustomHighlight : Module(
     name = "Custom Highlight",
     category = Category.RENDER
 ) {
-    val hlColor = ColorSetting("Color", Color.PINK)
-    val tracer = BooleanSetting("Tracer", false)
+    private val hlColor by ColorSetting("Color", Color.PINK)
+    private val tracer by BooleanSetting("Tracer", false)
 
-    init {
-        this.addSettings(hlColor, tracer)
-    }
-
-    private val highlightFile = File("config/catgirlroutes/highlight.json")
-
-    var highlightList: MutableList<Highlight> = loadHighlight()
-
-    private fun loadHighlight(): MutableList<Highlight> {
-        return ConfigSystem.loadConfig(highlightFile, object : TypeToken<MutableList<Highlight>>() {}.type) ?: mutableListOf()
-    }
-
-    private fun saveHighlight() {
-        ConfigSystem.saveConfig(highlightFile, highlightList)
-    }
+    private val highlightList by configList<Highlight>("highlight.json")
 
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
@@ -53,8 +37,8 @@ object CustomHighlight : Module(
                 val highlightMatch = highlightList.find { e.name.contains(it.tag, true)}
 
                 if (highlightMatch != null) {
-                    drawBoxByEntity(e, highlightMatch.color, e.width, e.height, phase = true)
-                    if (tracer.value) {
+                    drawEntityBox(e, highlightMatch.color, highlightMatch.color, true, false, event.partialTicks, 4.0f)
+                    if (tracer) {
                         drawTracer(e.positionVector, Color.PINK)
                     }
                 }
@@ -86,16 +70,14 @@ object CustomHighlight : Module(
         modMessage("Tagging is now ${if (active) "active" else "inactive"}!")
     }
 
-    val highlightCommands = commodore("hl") {
+    val highlightCommands = Commodore("hl") {
         literal("add").runs {
             tag: GreedyString ->
-            highlightList.add(Highlight(tag.toString(), hlColor.value))
-            saveHighlight()
-            modMessage("Added ${tag} to the list!")
+            highlightList.add(Highlight(tag.toString(), hlColor))
+            modMessage("Added $tag to the list!")
         }
         literal("clear").runs {
             highlightList.clear()
-            saveHighlight()
             modMessage("List cleared!")
         }
         literal("remove").runs {
@@ -103,7 +85,7 @@ object CustomHighlight : Module(
             highlightList.removeAll{h ->
                 tag.toString() == (h.tag)
             }
-            saveHighlight()
+            highlightList.save()
             modMessage("Removed ${tag} from the list!")
         }
         literal("list").runs {

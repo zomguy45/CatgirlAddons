@@ -99,34 +99,63 @@ object HUDRenderUtils {
         tessellator.draw()
     }
 
-    data class Scissor(val x: Double, val y: Double, val width: Double, val height: Double, val context: Int)
-    private val scissorList = mutableListOf(Scissor(0.0, 0.0, 16000.0, 16000.0, 0))
+    data class Scissor(val x: Float, val y: Float, val width: Float, val height: Float, val context: Int)
 
-    fun scissor(x: Double, y: Double, width: Double, height: Double): Scissor {
-        val scale = mc.displayHeight / ScaledResolution(mc).scaledHeight.toDouble()
+    private val scissorList = mutableListOf(Scissor(0.0f, 0.0f, 16000.0f, 16000.0f, 0))
+
+    private fun intersectScissors(a: Scissor, b: Scissor): Scissor? {
+        val nx = maxOf(a.x, b.x)
+        val ny = maxOf(a.y, b.y)
+        val nr = minOf(a.x + a.width, b.x + b.width)
+        val nb = minOf(a.y + a.height, b.y + b.height)
+        val nw = nr - nx
+        val nh = nb - ny
+        return if (nw > 0 && nh > 0) Scissor(nx, ny, nw, nh, 0) else null
+    }
+
+    fun scissor(x: Number, y: Number, width: Number, height: Number): Scissor {
+        val scale = sr.scaleFactor
+
+        val parentScissor = scissorList.last()
+
+        val newScissor = intersectScissors(parentScissor, Scissor(x.toFloat(), y.toFloat(), width.toFloat(), height.toFloat(), 0))
+            ?: return Scissor(0.0f, 0.0f, 0.0f, 0.0f, scissorList.size)
+
         GL11.glEnable(GL11.GL_SCISSOR_TEST)
         GL11.glScissor(
-            (x * scale).toInt(),
-            (mc.displayHeight - (height + y) * scale).toInt() ,
-            (width * scale).toInt(),
-            (height * scale).toInt()
+            (newScissor.x * scale).toInt(),
+            (mc.displayHeight - (newScissor.height + newScissor.y) * scale).toInt(),
+            (newScissor.width * scale).toInt(),
+            (newScissor.height * scale).toInt()
         )
-        val scissor = Scissor(x, y, width, height, scissorList.size)
+
+        val scissor = newScissor.copy(context = scissorList.size)
         scissorList.add(scissor)
         return scissor
     }
 
-    fun resetScissor(scissor: Scissor) {
-        val nextScissor = scissorList[scissor.context - 1]
-        val scale = mc.displayHeight / ScaledResolution(mc).scaledHeight.toDouble()
-        GL11.glScissor(
-            (nextScissor.x * scale).toInt(),
-            (nextScissor.y * scale).toInt(),
-            (nextScissor.width * scale).toInt(),
-            (nextScissor.height * scale).toInt()
-        )
-        GL11.glDisable(GL11.GL_SCISSOR_TEST)
+    fun resetScissor() {
         scissorList.removeLast()
+        val scale = sr.scaleFactor
+        if (scissorList.isNotEmpty()) {
+            val nextScissor = scissorList.last()
+            GL11.glScissor(
+                (nextScissor.x * scale).toInt(),
+                (mc.displayHeight - (nextScissor.height + nextScissor.y) * scale).toInt(),
+                (nextScissor.width * scale).toInt(),
+                (nextScissor.height * scale).toInt()
+            )
+        } else {
+            GL11.glDisable(GL11.GL_SCISSOR_TEST)
+        }
+    }
+
+    fun disableScissor() {
+        GL11.glDisable(GL11.GL_SCISSOR_TEST)
+    }
+
+    fun enableScissor() {
+        GL11.glEnable(GL11.GL_SCISSOR_TEST)
     }
 
     /**
@@ -201,12 +230,21 @@ object HUDRenderUtils {
         drawRoundedOutline(x, y, width, height, radius, thickness, colour2)
     }
 
+    fun drawRoundedBorderedRect(x: Double, y: Double, width: Double, height: Double, radii: Radii, thickness: Double, colour1: Color, colour2: Color) {
+        drawRoundedRect(x, y, width, height, radii, colour1)
+        drawRoundedOutline(x, y, width, height, radii, thickness, colour2)
+    }
+
     fun drawRoundedRect(x: Double, y: Double, width: Double, height: Double, radius: Double, colour: Color) {
+        drawRoundedRect(x, y, width, height, Radii(radius, radius, radius, radius), colour)
+    }
+
+    fun drawRoundedRect(x: Double, y: Double, width: Double, height: Double, radii: Radii, colour: Color) {
         if (colour.alpha == 0) return
         GlStateManager.pushMatrix()
-        GlStateManager.enableBlend();
-        GlStateManager.disableTexture2D();
-        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0);
+        GlStateManager.enableBlend()
+        GlStateManager.disableTexture2D()
+        GlStateManager.tryBlendFuncSeparate(770, 771, 1, 0)
 
         val color = colour.rgb
         var x1 = x
@@ -231,10 +269,10 @@ object HUDRenderUtils {
         GL11.glEnable(2848);
         GL11.glBegin(9);
 
-        drawArc(x1 + radius, y1 + radius, -radius, -radius, 0, 90, 3)
-        drawArc(x1 + radius, y2Scaled - radius, -radius, -radius, 90, 180, 3)
-        drawArc(x2Scaled - radius, y2Scaled - radius, radius, radius, 0, 90, 3)
-        drawArc(x2Scaled - radius, y1 + radius, radius, radius, 90, 180, 3)
+        drawArc(x1 + radii.topLeft, y1 + radii.topLeft, -radii.topLeft, -radii.topLeft, 0, 90, 3)
+        drawArc(x1 + radii.bottomLeft, y2Scaled - radii.bottomLeft, -radii.bottomLeft, -radii.bottomLeft, 90, 180, 3)
+        drawArc(x2Scaled - radii.bottomRight, y2Scaled - radii.bottomRight, radii.bottomRight, radii.bottomRight, 0, 90, 3)
+        drawArc(x2Scaled - radii.topRight, y1 + radii.topRight, radii.topRight, radii.topRight, 90, 180, 3)
 
         GL11.glEnd();
         GL11.glEnable(3553)
@@ -249,6 +287,10 @@ object HUDRenderUtils {
     }
 
     fun drawRoundedOutline(x: Double, y: Double, width: Double, height: Double, radius: Double, thickness: Double, colour: Color) {
+        drawRoundedOutline(x, y, width, height, Radii(radius, radius, radius, radius), thickness, colour)
+    }
+
+    fun drawRoundedOutline(x: Double, y: Double, width: Double, height: Double, radii: Radii, thickness: Double, colour: Color) {
         if (colour.alpha == 0) return
         GlStateManager.pushMatrix()
         GlStateManager.enableBlend()
@@ -272,10 +314,10 @@ object HUDRenderUtils {
         GL11.glEnable(2848)
         GL11.glBegin(2)
 
-        drawArc(x1 + radius, y1 + radius, -radius, -radius, 0, 90, 3)
-        drawArc(x1 + radius, y2 - radius, -radius, -radius, 90, 180, 3)
-        drawArc(x2 - radius, y2 - radius, radius, radius, 0, 90, 3)
-        drawArc(x2 - radius, y1 + radius, radius, radius, 90, 180, 3)
+        drawArc(x1 + radii.topLeft, y1 + radii.topLeft, -radii.topLeft, -radii.topLeft, 0, 90, 3)
+        drawArc(x1 + radii.bottomLeft, y2 - radii.bottomLeft, -radii.bottomLeft, -radii.bottomLeft, 90, 180, 3)
+        drawArc(x2 - radii.bottomRight, y2 - radii.bottomRight, radii.bottomRight, radii.bottomRight, 0, 90, 3)
+        drawArc(x2 - radii.topRight, y1 + radii.topRight, radii.topRight, radii.topRight, 90, 180, 3)
 
         GL11.glEnd();
         GL11.glEnable(3553)
@@ -572,6 +614,19 @@ object HUDRenderUtils {
         GlStateManager.setActiveTexture(OpenGlHelper.defaultTexUnit)
     }
 
+    fun drawHoveringText(
+        textLines: List<String>,
+        x: Int,
+        y: Int,
+        scrollOffset: Int
+    ) {
+        drawHoveringText(
+            textLines,
+            x,
+            y - scrollOffset,
+            screenHeight = sr.scaledHeight - scrollOffset
+        )
+    }
 
     fun drawHoveringText(
         textLines: List<String>,
@@ -580,7 +635,8 @@ object HUDRenderUtils {
         screenWidth: Int = sr.scaledWidth,
         screenHeight: Int = sr.scaledHeight,
         maxTextWidth: Int = -1,
-        themed: Boolean = true
+        themed: Boolean = true,
+        yOffset: Double = 0.0
     ) {
         if (textLines.isEmpty()) return
         GlStateManager.pushMatrix()
@@ -688,3 +744,11 @@ object HUDRenderUtils {
         GlStateManager.popMatrix()
     }
 }
+
+data class Radii(
+    val topLeft: Double,
+    val topRight: Double = topLeft,
+    val bottomRight: Double = topLeft,
+    val bottomLeft: Double = topLeft
+)
+

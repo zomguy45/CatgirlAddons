@@ -25,7 +25,7 @@ class ElementHud(parent: ModuleButton, setting: HudSetting) :
         if (height == -5.0) return super.renderElement()
         this.booleanElement.update { // FIXME
             outlineColour = ColorUtil.outlineColor
-            outlineHoverColour = ColorUtil.clickGUIColor
+            hoverColour = ColorUtil.clickGUIColor
         }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }

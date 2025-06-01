@@ -17,14 +17,14 @@ class MiscElementBoolean(
     private val colourAnimation = ColorAnimation(250)
 
     override fun render(mouseX: Int, mouseY: Int) {
-        val colour = colourAnimation.get(outlineHoverColour, colour, this.enabled)
-        drawRoundedBorderedRect(x + this.gap, y + this.gap, width - this.gap * 2, height - this.gap * 2, radius, thickness, colour, colour)
+        val colour = colourAnimation.get(hoverColour, colour, this.enabled) // enabledColour, disabledColour
+        drawRoundedBorderedRect(x + this.gap, y + this.gap, width - this.gap * 2, height - this.gap * 2, radii, thickness, colour, colour)
         drawRoundedOutline(
-            x, y, width, height, radius, thickness,
+            x, y, width, height, radii, thickness,
             if (isHovered(mouseX, mouseY)) outlineHoverColour else outlineColour
         )
 
-        FontUtil.drawString(this.value, x + width + 5.0, y + height / 2 - FontUtil.fontHeight / 2)
+        FontUtil.drawString(this.value, x + width + 5.0, y + height / 2 - FontUtil.fontHeight / 2, style.textColour.rgb)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {
@@ -38,6 +38,10 @@ class MiscElementBoolean(
 
 class BooleanBuilder : ElementDSL<MiscElementBoolean>() {
     var text by _style::value
+
+    var enabledColour by _style::hoverColour
+    var disabledColour by _style::colour
+
     var gap: Double = 1.0
     var enabled: Boolean = false
 

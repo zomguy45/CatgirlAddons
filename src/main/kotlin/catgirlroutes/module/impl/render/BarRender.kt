@@ -1,14 +1,12 @@
 package catgirlroutes.module.impl.render
 
-import catgirlroutes.commands.commodore
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.settings.RegisterHudElement
 import catgirlroutes.module.settings.impl.HudSetting
-import catgirlroutes.ui.hud.HudElement
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.render.HUDRenderUtils
+import com.github.stivais.commodore.Commodore
 import java.awt.Color
 import kotlin.math.abs
 
@@ -40,7 +38,7 @@ object BarRender : Module(
         }
     }
 
-    var barSetter = commodore("bar") {
+    var barSetter = Commodore("bar") { // todo move everything in one place, fuck you turtle
         literal("set").runs {
             num: Double ->
                 targetProgress = num

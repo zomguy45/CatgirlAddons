@@ -3,6 +3,7 @@ package catgirlroutes.ui.misc.elements
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.Alignment
 import catgirlroutes.ui.clickgui.util.VAlignment
+import catgirlroutes.utils.render.Radii
 import java.awt.Color
 
 data class MiscElementStyle(
@@ -11,7 +12,7 @@ data class MiscElementStyle(
     var y: Double = 0.0,
     var width: Double = 80.0,
     var height: Double = 20.0,
-    var radius: Double = 3.0,
+    private var _radii: Radii = Radii(3.0),
     var thickness: Double = 1.0,
     var textColour: Color = Color(ColorUtil.textcolor),
     var textShadow: Boolean = false,
@@ -28,4 +29,16 @@ data class MiscElementStyle(
         this.block()
         return this
     }
+
+    var radius: Double
+        get() = _radii.topLeft
+        set(value) {
+            _radii = Radii(value)
+        }
+
+    var radii: Radii
+        get() = _radii
+        set(value) {
+            _radii = value
+        }
 }

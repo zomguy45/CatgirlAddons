@@ -10,7 +10,6 @@ import catgirlroutes.module.settings.impl.*
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.Party
 import catgirlroutes.utils.dungeon.DungeonClass
-import catgirlroutes.utils.dungeon.DungeonUtils.dungeonTeammatesNoSelf
 import catgirlroutes.utils.dungeon.DungeonUtils.getP3Section
 import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
 import catgirlroutes.utils.dungeon.DungeonUtils.inDungeons
@@ -20,12 +19,6 @@ import catgirlroutes.utils.getSafe
 import catgirlroutes.utils.noControlCodes
 import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-
-//TODO: Change the lines that are being checked to the right ones.
-//      Add a way to select the player names.
-//      Make the triggers for the auto leap.
-//      Add S2D cancel.
-//      Add fail safes.
 
 object AutoLeap : Module(
     "Auto Leap",

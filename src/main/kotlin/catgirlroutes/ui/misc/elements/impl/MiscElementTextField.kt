@@ -31,7 +31,7 @@ class MiscElementTextField(
     private var scrollOffset = 0
     var isFocused = false
 
-    var text = value
+    var text by ::value
     val textNoCodes get() = text.noControlCodes
     private var _text: String
         get() = prependText + text
@@ -158,7 +158,7 @@ class MiscElementTextField(
     }
 
     override fun render(mouseX: Int, mouseY: Int) {
-        drawRoundedBorderedRect(x, y, width, height, radius, thickness, colour, if (this.isFocused) outlineHoverColour else outlineColour)
+        drawRoundedBorderedRect(x, y, width, height, radii, thickness, colour, if (this.isFocused) outlineHoverColour else outlineColour)
 
         val yPos = y + (height - 8) / 2
         val visibleText = _text.substring(scrollOffset).trimToWidth(availableWidth)

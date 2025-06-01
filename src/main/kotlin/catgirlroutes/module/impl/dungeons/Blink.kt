@@ -1,11 +1,6 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.impl.Ring
-import catgirlroutes.commands.impl.RingManager
-import catgirlroutes.commands.impl.RingManager.saveRings
-import catgirlroutes.commands.impl.blinkEditMode
-import catgirlroutes.commands.impl.ringEditMode
 import catgirlroutes.events.impl.PacketSentEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
@@ -16,6 +11,10 @@ import catgirlroutes.ui.clickgui.util.FontUtil.drawAlignedString
 import catgirlroutes.ui.clickgui.util.FontUtil.getWidth
 import catgirlroutes.ui.clickgui.util.VAlignment
 import catgirlroutes.utils.ChatUtils.modMessage
+import catgirlroutes.utils.autop3.Ring
+import catgirlroutes.utils.autop3.RingsManager
+import catgirlroutes.utils.autop3.RingsManager.blinkEditMode
+import catgirlroutes.utils.autop3.actions.BlinkRing
 import catgirlroutes.utils.render.HUDRenderUtils.displayHeight
 import catgirlroutes.utils.render.HUDRenderUtils.displayWidth
 import catgirlroutes.utils.render.HUDRenderUtils.sr
@@ -41,17 +40,19 @@ object Blink : Module(
             if (recorderActive) {
                 recorderActive = false
                 modMessage("Done recording")
-                saveRings()
+                RingsManager.loadSaveRoute()
                 return@onPress
             }
-            if (!ringEditMode && !blinkEditMode) return@onPress
-            RingManager.rings.forEach { ring ->
-                if (AutoP3.inRing(ring) && ring.type == "blink") {
+            if (RingsManager.currentRoute.isEmpty()) return@onPress
+            if (RingsManager.currentRoute.first().rings.isEmpty()) return@onPress
+            RingsManager.currentRoute.first().rings.forEach { ring ->
+                if (ring.inside() && ring.action is BlinkRing) {
+                    if (!blinkEditMode) return@onPress modMessage("Enable blink edit mode: /p3 bem")
                     modMessage("Started recording")
-                    mc.thePlayer.setPosition(ring.location.xCoord, mc.thePlayer.posY, ring.location.zCoord)
+                    mc.thePlayer.setPosition(ring.position.xCoord, mc.thePlayer.posY, ring.position.zCoord)
                     recorderActive = true
                     currentRing = ring
-                    currentRing!!.packets = mutableListOf()
+                    ring.action.packets = mutableListOf()
                 }
             }
         }
@@ -73,14 +74,27 @@ object Blink : Module(
     @SubscribeEvent
     fun onPacketRecorder(event: PacketSentEvent) {
         if (event.packet !is C03PacketPlayer || !recorderActive) return
-        if (currentRing!!.packets.size - 1 == recordLength.toInt()) {
+        val packets = (currentRing!!.action as BlinkRing).packets
+        if (packets.size + 1 == recordLength.toInt()) {
             recorderActive = false
-            saveRings()
+            RingsManager.loadSaveRoute()
             modMessage("Done recording")
         }
         if (event.packet is C06PacketPlayerPosLook || event.packet is C04PacketPlayerPosition) {
-            if (currentRing!!.packets.isNotEmpty() && currentRing!!.packets.last() == BlinkC06(event.packet.yaw, event.packet.pitch, event.packet.positionX, event.packet.positionY, event.packet.positionZ, event.packet.isOnGround)) return
-            currentRing!!.packets.add(BlinkC06(event.packet.yaw, event.packet.pitch, event.packet.positionX, event.packet.positionY, event.packet.positionZ, event.packet.isOnGround))
+            val lastPacket = packets.lastOrNull()
+            println(event.packet.yaw)
+            val newPacket = BlinkC06(
+                event.packet.yaw,
+                event.packet.pitch,
+                event.packet.positionX,
+                event.packet.positionY,
+                event.packet.positionZ,
+                event.packet.isOnGround
+            )
+
+            if (lastPacket != newPacket) {
+                packets.add(newPacket)
+            }
         }
     }
 

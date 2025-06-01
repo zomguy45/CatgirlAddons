@@ -35,7 +35,7 @@ class AuctionOverlay(sign: TileEntitySign? = null) : SearchOverlay(sign) {
     private val petToggle = boolean {
         text = "Lvl 100 Pets"
         size(15.0, 15.0)
-        colour = ColorUtil.elementColor
+        disabledColour = ColorUtil.elementColor
         onClick {
             petLvl = if (enabled) "[Lvl 100] " else ""
         }

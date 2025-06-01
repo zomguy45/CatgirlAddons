@@ -2,15 +2,11 @@ package catgirlroutes.ui.misc.searchoverlay
 
 import catgirlroutes.CatgirlRoutes.Companion.moduleConfig
 import catgirlroutes.ui.Screen
-import catgirlroutes.ui.animations.impl.LinearAnimation
 import catgirlroutes.ui.clickgui.util.Alignment
 import catgirlroutes.ui.clickgui.util.ColorUtil
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseX
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseY
-import catgirlroutes.ui.clickguinew.Window.Companion.SCROLL_DISTANCE
-import catgirlroutes.ui.misc.elements.impl.MiscElementButton
-import catgirlroutes.ui.misc.elements.impl.button
-import catgirlroutes.ui.misc.elements.impl.textField
+import catgirlroutes.ui.misc.elements.impl.*
 import catgirlroutes.utils.ChatUtils.commandAny
 import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.NeuRepo
@@ -19,9 +15,10 @@ import catgirlroutes.utils.RepoItem
 import catgirlroutes.utils.getTooltip
 import catgirlroutes.utils.noControlCodes
 import catgirlroutes.utils.render.HUDRenderUtils
-import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
+import catgirlroutes.utils.render.HUDRenderUtils.disableScissor
 import catgirlroutes.utils.render.HUDRenderUtils.drawItemStackWithText
-import catgirlroutes.utils.render.StencilUtils
+import catgirlroutes.utils.render.HUDRenderUtils.drawRoundedBorderedRect
+import catgirlroutes.utils.render.HUDRenderUtils.enableScissor
 import net.minecraft.client.renderer.GlStateManager
 import net.minecraft.network.play.client.C12PacketUpdateSign
 import net.minecraft.tileentity.TileEntitySign
@@ -46,13 +43,21 @@ abstract class SearchOverlay(
         colour = ColorUtil.elementColor
         thickness = 2.0
         isFocused = true
+
+        var lastText: String = text
+
+        onKey { _, _ ->
+            if (text != lastText) {
+                lastText = text
+                needsRefresh = true
+            }
+        }
     }
 
-    private val resultButtons = mutableListOf<MiscElementButton>()
+    private var scrollPanel: MiscElementScrollPanel = scrollPanel {  }
 
-    private var scrollTarget = 0.0
-    private var scrollOffset = 0.0
-    private val scrollAnimation = LinearAnimation<Double>(200)
+    private var currentEntries: List<Pair<String, RepoItem?>> = emptyList()
+    private var needsRefresh = true
 
     abstract var commandPrefix: String
 
@@ -72,21 +77,19 @@ abstract class SearchOverlay(
 
     override fun draw() {
         GlStateManager.pushMatrix()
-        scrollOffset = scrollAnimation.get(scrollOffset, scrollTarget)
 
         drawRoundedBorderedRect(x - 5.0, y - 5.0, guiWidth + 10.0, guiHeight + 10.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
-        drawRoundedBorderedRect(x, y + 25.0,
-            guiWidth, guiHeight - 25.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
+        drawRoundedBorderedRect(x, y + 25.0, guiWidth, guiHeight - 25.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
 
         searchBar.draw(mouseX, mouseY)
         drawScreenExtra(mouseX, mouseY)
 
-        StencilUtils.write(false)
-        drawRoundedBorderedRect(x, y + 26.0,
-            guiWidth, guiHeight - 27.0, 3.0, 2.0,ColorUtil.bgColor, ColorUtil.clickGUIColor)
-        StencilUtils.erase(true)
-        renderResults()
-        StencilUtils.dispose()
+        if (needsRefresh) {
+            updateResults()
+            needsRefresh = false
+        }
+
+        scrollPanel.draw(mouseX, mouseY)
 
         GlStateManager.popMatrix()
     }
@@ -118,15 +121,11 @@ abstract class SearchOverlay(
         searchBar.onMouseClick(mouseX, mouseY, mouseButton)
         searchBar.isFocused = true
 
-        if (mouseY.toDouble() !in visibleRange) return
-        resultButtons.forEach { it.onMouseClick(mouseX, mouseY, mouseButton) }
+        scrollPanel.onMouseClick(mouseX, mouseY, mouseButton)
     }
 
     override fun onScroll(amount: Int) {
-        val h = resultButtons.size * 25.0 + 5.0
-        if (h < guiHeight - 25.0) return
-        scrollTarget = (scrollTarget + amount * SCROLL_DISTANCE).coerceIn(-h + guiHeight - 25.0, 0.0)
-        scrollAnimation.start(true)
+        scrollPanel.onScroll(mouseX, mouseY, amount)
     }
 
     override fun onGuiClosed() {
@@ -138,27 +137,26 @@ abstract class SearchOverlay(
         moduleConfig.saveConfig()
     }
 
-    protected open fun renderResults() {
-        resultButtons.clear()
-        var offsetY = scrollOffset + y + 30.0
-
-        val entries: List<Pair<String, RepoItem?>> =
-            if (searchBar.textNoCodes.length > 2) {
-                filterItems(searchBar.text).map { item ->
-                    Pair(item.name, item)
-                }
-            } else {
-                history.filter { it.isNotBlank() }.map {
-                    if (it.startsWith("REPOITEM:")) {
-                        val item = NeuRepo.getItemFromName(it.removePrefix("REPOITEM:"), false)
-                        item?.let { Pair(item.name, item) } ?: Pair(it, null)
-                    } else {
-                        Pair(it, null)
-                    }
+    private fun updateResults() {
+        currentEntries = if (searchBar.textNoCodes.length > 2) {
+            filterItems(searchBar.text).map { item ->
+                Pair(item.name, item)
+            }
+        } else {
+            history.filter { it.isNotBlank() }.map {
+                if (it.startsWith("REPOITEM:")) {
+                    val item = NeuRepo.getItemFromName(it.removePrefix("REPOITEM:"), false)
+                    item?.let { Pair(item.name, item) } ?: Pair(it, null)
+                } else {
+                    Pair(it, null)
                 }
             }
+        }
 
-        entries.forEach { (displayText, item) ->
+        val resultButtons = mutableListOf<MiscElementButton>()
+        var offsetY = y + 30.0
+
+        currentEntries.forEach { (displayText, item) ->
             val stack = item?.toStack(true)
             val btn = button {
                 at(x + 5.0, offsetY)
@@ -168,11 +166,15 @@ abstract class SearchOverlay(
                 alignment = Alignment.LEFT
                 textPadding = 25.0
 
+                onRender {
+                    stack?.let { drawItemStackWithText(it, x + 7.0, this._y + 2.0) }
+                }
+
                 onHover {
                     if (stack != null && mouseY.toDouble() in visibleRange) {
-                        StencilUtils.disable()
+                        disableScissor()
                         HUDRenderUtils.drawHoveringText(stack.getTooltip(), mouseX, mouseY)
-                        StencilUtils.enable()
+                        enableScissor()
                     }
                 }
 
@@ -188,12 +190,15 @@ abstract class SearchOverlay(
                     } ?: commandAny("$commandPrefix ${finalText.noControlCodes}")
                     mc.displayGuiScreen(null)
                 }
-
             }
-            btn.draw(mouseX, mouseY)
-            stack?.let { drawItemStackWithText(it, x + 7.0, offsetY + 2.0) }
             resultButtons.add(btn)
             offsetY += 25.0
+        }
+
+        scrollPanel = scrollPanel {
+            at(x + 5.0, y + 26.0)
+            size(guiWidth - 10.0, guiHeight - 27.0)
+            elements(resultButtons)
         }
     }
 

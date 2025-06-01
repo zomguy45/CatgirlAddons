@@ -71,6 +71,7 @@ object ModuleManager {
         AutoWardrobe,
         BuffDisplay,
         CatMode,
+        CustomTriggers,
         F7sim,
         InstantSprint,
         Inventory,

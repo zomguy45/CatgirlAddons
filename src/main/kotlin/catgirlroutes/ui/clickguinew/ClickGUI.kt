@@ -22,10 +22,10 @@ import catgirlroutes.utils.render.HUDRenderUtils.scissor
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
-class ClickGUI : Screen() { // todo: module description
+class ClickGUI : Screen() { // todo: module description // TODO RECODE
 
-    val guiWidth = 305.0 + 50.0
-    val guiHeight = 230.0 + 30.0
+    val guiWidth = 355.0
+    val guiHeight = 260.0
 
     var x = 0.0
     var y = 0.0
@@ -85,7 +85,7 @@ class ClickGUI : Screen() { // todo: module description
 
         categoryButtons.clear()
 
-        val scissor = scissor(x, y + 26.0, guiWidth, guiHeight - 27.0)
+        scissor(x, y + 26.0, guiWidth, guiHeight - 27.0)
         for (window in windows) {
 
             val offset: Double = if (window.category == Category.SETTINGS) guiHeight - 20.0 else categoryOffset
@@ -122,7 +122,7 @@ class ClickGUI : Screen() { // todo: module description
 
             if (window.category != Category.SETTINGS) categoryOffset += 14.0
         }
-        resetScissor(scissor)
+        resetScissor()
     }
 
     override fun onScroll(amount: Int) {

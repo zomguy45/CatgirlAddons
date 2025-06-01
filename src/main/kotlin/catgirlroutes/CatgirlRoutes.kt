@@ -1,29 +1,23 @@
 package catgirlroutes
 
-import catgirlroutes.commands.impl.*
-import catgirlroutes.commands.registerCommands
+import catgirlroutes.commands.CommandRegistry
 import catgirlroutes.config.InventoryButtonsConfig
 import catgirlroutes.config.ModuleConfig
 import catgirlroutes.events.EventDispatcher
 import catgirlroutes.module.ModuleManager
 import catgirlroutes.module.impl.render.ClickGui
-import catgirlroutes.module.impl.render.CustomHighlight.highlightCommands
-import catgirlroutes.module.impl.render.Waypoints.waypointCommands
 import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.CustomMainMenu
-import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 import catgirlroutes.utils.*
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.LeapUtils
 import catgirlroutes.utils.dungeon.ScanUtils
 import catgirlroutes.utils.render.WorldRenderUtils
-import catgirlroutes.utils.render.WorldRenderUtils.displayCommands
 import catgirlroutes.utils.rotation.FakeRotater
 import catgirlroutes.utils.rotation.Rotater
 import catgirlroutes.utils.rotation.RotationUtils
-import catgirlroutes.utils.rotation.rotationDebug
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -40,9 +34,9 @@ import net.minecraftforge.fml.common.event.FMLLoadCompleteEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
 import net.minecraftforge.fml.common.network.FMLNetworkEvent
-import org.lwjgl.opengl.Display
 import java.io.File
 import kotlin.coroutines.EmptyCoroutineContext
+import catgirlroutes.ui.clickguinew.ClickGUI as ClickGUINew
 
 @Mod(
     modid = CatgirlRoutes.MOD_ID,
@@ -54,15 +48,6 @@ class CatgirlRoutes {
     @Mod.EventHandler
     fun onInit(event: FMLInitializationEvent) {
         ModuleManager.loadModules()
-
-        registerCommands(
-            catgirlAddonsCommands, devCommands,
-            pearlClip, lavaClip, blockClip, aura, inventoryButtons,
-            autoP3Commands, autoRoutesCommands, rotationDebug,
-            waypointCommands, highlightCommands, displayCommands,
-            pearlClip, lavaClip, blockClip, aura, inventoryButtons, autoClicker,
-            autoP3Commands, autoRoutesCommands, rotationDebug
-        )
 
         listOf(
             this,
@@ -88,6 +73,7 @@ class CatgirlRoutes {
             WorldRenderUtils,
             Party
         ).forEach(MinecraftForge.EVENT_BUS::register)
+        CommandRegistry.register()
     }
 
     @Mod.EventHandler

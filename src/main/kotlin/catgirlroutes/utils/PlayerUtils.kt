@@ -86,8 +86,10 @@ object PlayerUtils {
     val ItemStack?.skyblockID: String
         get() = this?.extraAttributes?.getString("id") ?: ""
 
-    fun isHolding(vararg id: String): Boolean =
-        mc.thePlayer?.heldItem?.skyblockID in id
+    fun isHolding(vararg id: String?): Boolean =
+        heldItem?.skyblockID in id
+
+    val heldItem get() = mc.thePlayer?.heldItem
 
     fun rightClick() {
         KeyBinding.onTick(mc.gameSettings.keyBindUseItem.keyCode)

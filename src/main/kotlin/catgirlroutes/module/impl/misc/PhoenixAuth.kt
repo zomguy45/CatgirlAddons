@@ -4,6 +4,9 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.ChatPacket
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
+import catgirlroutes.module.impl.render.ClickGui
+import catgirlroutes.module.settings.Setting.Companion.withDependency
+import catgirlroutes.module.settings.impl.BooleanSetting
 import catgirlroutes.module.settings.impl.SelectorSetting
 import catgirlroutes.module.settings.impl.StringSetting
 import catgirlroutes.utils.ChatUtils
@@ -16,8 +19,9 @@ object PhoenixAuth: Module(
     Category.MISC,
     "Automatically authenticate and toggle modules when connecting to your phoenix proxy."
 ) {
-    private val phoenixProxy by StringSetting("Proxy IP", "penixhypixel.duckdns.org", 0, "Your phoenix proxy IP.")
+    val phoenixProxy by StringSetting("Proxy IP", "penixhypixel.duckdns.org", 0, "Your phoenix proxy IP.")
     private val phoenixModule by SelectorSetting("Module", "autoterms", arrayListOf("autoterms", "zeropingterminals"))
+    val addToMainMenu by BooleanSetting("Main menu button").withDependency { ClickGui.customMenu }
     private var onPenix = false
 
     @SubscribeEvent

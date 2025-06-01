@@ -2,6 +2,7 @@ package catgirlroutes.ui.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.RESOURCE_DOMAIN
 import catgirlroutes.CatgirlRoutes.Companion.scope
+import catgirlroutes.module.impl.misc.PhoenixAuth
 import catgirlroutes.ui.Screen
 import catgirlroutes.ui.clickgui.util.MouseUtils.mx
 import catgirlroutes.ui.clickgui.util.MouseUtils.my
@@ -29,7 +30,7 @@ object CustomMainMenu: Screen(false) { // todo add more shit
     private var catTexture: ResourceLocation? = null
 
     override fun onInit() {
-        buttons = listOf(
+        buttons = mutableListOf(
             button(10, 10, "Singleplayer") { mc.displayGuiScreen(GuiSelectWorld(mc.currentScreen)) },
             button(10, 35, "Multiplayer") { mc.displayGuiScreen(GuiMultiplayer(mc.currentScreen)) },
             button(10, 60, "Options") { mc.displayGuiScreen(GuiOptions(mc.currentScreen, mc.gameSettings)) },
@@ -39,6 +40,11 @@ object CustomMainMenu: Screen(false) { // todo add more shit
             button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 55, "Discord Server") { Desktop.getDesktop().browse(URI("https://discord.gg/jK4AXeVK8u")) },
             button(this@CustomMainMenu.width - 210, this@CustomMainMenu.height - 80, "Random cat picture") { downloadCatImage { catTexture = it } }
         )
+        if (PhoenixAuth.addToMainMenu) {
+            (buttons as MutableList).add(4, button(10, 110, "Phoenix") {
+                FMLClientHandler.instance().connectToServer(this, ServerData("Phoenix", "${PhoenixAuth.phoenixProxy}:25565", false))
+            })
+        }
     }
 
     override fun draw() {

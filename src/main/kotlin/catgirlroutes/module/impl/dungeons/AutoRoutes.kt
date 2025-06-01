@@ -164,7 +164,7 @@ object AutoRoutes : Module( // todo recode this shit
 
             when(preset.selected) {
                 "Trans"     -> renderTransFlag(x, y, z, node.width, node.height)
-                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.height, color, layers.toInt())
+                "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.width, node.height, color, layers.toInt())
                 "Ring"      -> drawCylinder(Vec3(x, y, z), node.width / 2, node.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
                 "Lesbian"   -> renderLesbianFlag(x, y, z, node.width, node.height)
@@ -229,15 +229,15 @@ object AutoRoutes : Module( // todo recode this shit
         this.lastC08 = totalTicks
         this.stupid = false
 
-        val blockPos = event.packet.position
-        val blockState = mc.theWorld.getBlockState(blockPos)
-        if (isSecret(blockState, blockPos)) {
-            scheduleTask {
-                if (this.stupid) {
-                    PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(event.packet.stack))
-                }
-            }
-        }
+//        val blockPos = event.packet.position
+//        val blockState = mc.theWorld.getBlockState(blockPos)
+//        if (isSecret(blockState, blockPos)) {
+//            scheduleTask {
+//                if (this.stupid) {
+//                    PacketUtils.sendPacket(C08PacketPlayerBlockPlacement(event.packet.stack))
+//                }
+//            }
+//        }
     }
 
     @SubscribeEvent

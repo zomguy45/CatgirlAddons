@@ -1,6 +1,7 @@
 package catgirlroutes.module.impl.misc
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.CatgirlRoutes.Companion.scope
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
 import catgirlroutes.module.settings.Setting.Companion.withDependency
@@ -21,6 +22,7 @@ import net.minecraftforge.client.event.MouseEvent
 import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
+import org.lwjgl.input.Mouse
 import kotlin.random.Random
 
 
@@ -29,7 +31,8 @@ object AutoClicker: Module(
     Category.MISC,
     "A simple auto clicker for both left and right click. Activates when the corresponding key is being held down. "
 ) {
-    private val clickInGui by BooleanSetting("Click while in container", "Continues to auto click while the player is in a container.")
+    private val breakBlocks by BooleanSetting("Break blocks", "Allows the player to break blocks.")
+    private val clickInGui by BooleanSetting("Click while in inventory", "Continues to auto click while the player is in inventory.")
     private val favouriteItems by BooleanSetting("Favourite items only")
     var favItemsList by ListSetting("FAVOURITE_ITEMS", mutableListOf<String>())
     private val leftClick by BooleanSetting("Left Click", true, "Toggles the auto clicker for left click.")
@@ -67,17 +70,19 @@ object AutoClicker: Module(
     fun onMouse(event: MouseEvent) {
         if (event.button != 0 && event.button != 1) return
 
+        if (breakingBlocks()) return
+
         if (event.buttonstate && shouldClick) {
-            if (event.button == 0 && leftClick && !breakBlock()) {
+            if (event.button == 0 && leftClick) {
                 event.isCanceled = true
                 leftClicking = true
                 leftClickJob?.cancel()
-                leftClickJob = GlobalScope.launch { leftClicker() }
+                leftClickJob = scope.launch { leftClicker() }
             } else if (event.button == 1 && rightClick) {
                 event.isCanceled = true
                 rightClicking = true
                 rightClickJob?.cancel()
-                rightClickJob = GlobalScope.launch { rightClicker() }
+                rightClickJob = scope.launch { rightClicker() }
             }
         } else {
             if (event.button == 0) {
@@ -95,6 +100,12 @@ object AutoClicker: Module(
     @SubscribeEvent
     fun onTick(event: TickEvent.ClientTickEvent) {
         if (event.phase != TickEvent.Phase.END) return
+
+//        if (Mouse.isButtonDown(0) && !breakingBlocks() && !leftClicking && leftClick && shouldClick) { // should continue clicking after breaking blocks I think
+//            leftClicking = true
+//            leftClickJob?.cancel()
+//            leftClickJob = scope.launch { leftClicker() }
+//        }
 
         val current = mc.thePlayer?.inventory?.currentItem ?: return
 
@@ -118,7 +129,7 @@ object AutoClicker: Module(
 
     private suspend fun leftClicker() {
         while (leftClicking && shouldClick) {
-            if (!breakBlock()) leftClick2()
+            if (!breakingBlocks()) leftClick2()
             delay(Random.nextDouble(1000.0 / leftMaxCps, 1000.0 / leftMinCps).toLong())
         }
     }
@@ -145,7 +156,8 @@ object AutoClicker: Module(
 
     private var breakHeld: Boolean = false
 
-    private fun breakBlock(): Boolean {
+    private fun breakingBlocks(): Boolean {
+        if (!breakBlocks) return false
         if (mc.objectMouseOver != null) {
             if (mc.objectMouseOver.blockPos != null) {
                 val block: Block = mc.theWorld.getBlockState(mc.objectMouseOver.blockPos).block

@@ -1,77 +1,34 @@
 package catgirlroutes.module.impl.dungeons
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.impl.Ring
-import catgirlroutes.commands.impl.RingManager
-import catgirlroutes.commands.impl.RingManager.loadRings
-import catgirlroutes.commands.impl.RingManager.rings
-import catgirlroutes.commands.impl.blinkEditMode
-import catgirlroutes.commands.impl.ringEditMode
-import catgirlroutes.events.impl.MotionUpdateEvent
-import catgirlroutes.events.impl.PacketReceiveEvent
-import catgirlroutes.events.impl.PacketSentEvent
+import catgirlroutes.CatgirlRoutes.Companion.scope
 import catgirlroutes.events.impl.TermOpenEvent
 import catgirlroutes.module.Category
 import catgirlroutes.module.Module
-import catgirlroutes.module.impl.dungeons.Blink.packetArray
-import catgirlroutes.module.impl.dungeons.LavaClip.lavaClipToggle
-import catgirlroutes.module.impl.player.HClip.hClip
 import catgirlroutes.module.settings.Setting.Companion.withDependency
-import catgirlroutes.module.settings.Visibility
 import catgirlroutes.module.settings.impl.*
-import catgirlroutes.utils.ChatUtils.commandAny
-import catgirlroutes.utils.ChatUtils.debugMessage
+import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
-import catgirlroutes.utils.MovementUtils.edge
-import catgirlroutes.utils.MovementUtils.jump
-import catgirlroutes.utils.MovementUtils.setKey
-import catgirlroutes.utils.MovementUtils.stopMovement
-import catgirlroutes.utils.MovementUtils.stopVelo
-import catgirlroutes.utils.PacketUtils.sendPacket
-import catgirlroutes.utils.PlayerUtils.leftClick
-import catgirlroutes.utils.PlayerUtils.swapFromName
-import catgirlroutes.utils.equalsOneOf
+import catgirlroutes.utils.autop3.Ring
+import catgirlroutes.utils.autop3.RingsManager.SPECIAL_ROUTES
+import catgirlroutes.utils.autop3.RingsManager.blinkEditMode
+import catgirlroutes.utils.autop3.RingsManager.currentRoute
+import catgirlroutes.utils.autop3.RingsManager.ringEditMode
+import catgirlroutes.utils.autop3.actions.BlinkRing
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
-import catgirlroutes.utils.dungeon.DungeonUtils.getF7Phase
-import catgirlroutes.utils.dungeon.DungeonUtils.inBoss
-import catgirlroutes.utils.dungeon.M7Phases
-import catgirlroutes.utils.render.WorldRenderUtils
-import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
-import catgirlroutes.utils.render.WorldRenderUtils.drawCylinder
+import catgirlroutes.utils.render.WorldRenderUtils.drawEllipse
+import catgirlroutes.utils.render.WorldRenderUtils.drawLine
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
-import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
-import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
-import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
-import catgirlroutes.utils.renderText
-import catgirlroutes.utils.rotation.FakeRotater.clickAt
-import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
-import catgirlroutes.utils.rotation.RotationUtils.snapTo
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.minecraft.network.play.client.C03PacketPlayer
-import net.minecraft.network.play.client.C03PacketPlayer.C06PacketPlayerPosLook
-import net.minecraft.network.play.client.C0EPacketClickWindow
-import net.minecraft.network.play.server.S08PacketPlayerPosLook
-import net.minecraft.network.play.server.S12PacketEntityVelocity
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
 import net.minecraftforge.client.event.RenderWorldLastEvent
-import net.minecraftforge.event.world.WorldEvent
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
-import net.minecraftforge.fml.common.gameevent.InputEvent
 import net.minecraftforge.fml.common.gameevent.TickEvent
-import net.minecraftforge.fml.common.gameevent.TickEvent.ClientTickEvent
-import org.lwjgl.input.Keyboard
 import java.awt.Color
 import java.awt.Color.black
-import kotlin.collections.set
-import kotlin.math.abs
-import kotlin.math.cos
-import kotlin.math.sin
 
 
 object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more args
@@ -83,110 +40,93 @@ object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more arg
     private val inBossOnly by BooleanSetting("Boss only", true, "Active in boss room only.")
     private val editTitle by BooleanSetting("EditMode title", "Renders a title when edit mode is enabled.")
     private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
-    private val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
+    val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
-    private val style by SelectorSetting("Ring style", "Trans", arrayListOf("Trans", "Normal", "Ring", "LGBTQIA+", "Lesbian"), "Ring render style to be used.")
-    private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Normal" }
-    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
-    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Normal", "Ring") }
+    private val style by SelectorSetting("Ring style", "Layers", arrayListOf("Layers", "Ellipse"), "Ring render style to be used.") // "Trans", "LGBTQIA+", "Lesbian"
 
-    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this // I still have no idea what this shit does
-    private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
-    private val packetMovement by BooleanSetting("Packet movement")
-    private val recordBind by KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in edit mode.")
-        .onPress {
-            if (movementRecord) {
-                movementRecord = false
-                modMessage("Done recording")
-                return@onPress
-            }
-            if (!ringEditMode) return@onPress
-            rings.forEach { ring ->
-                if (inRing(ring) && ring.type == "movement") {
-                    modMessage("Started recording")
-                    mc.thePlayer.setPosition(
-                        ring.location.xCoord,
-                        mc.thePlayer.posY,
-                        ring.location.zCoord
-                    )
-                    movementRecord = true
-                    movementCurrentRing = ring
-                    movementCurrentRing!!.packets = mutableListOf()
-                }
-            }
-        }
+    private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Layers" }
 
-    // this shit is a motion multiplier or smt
-    private val stupid2 by NumberSetting("Stupid2", 400.0, 400.0, 550.0, 1.0, visibility = Visibility.ADVANCED_ONLY)
+    private val lineThickness by NumberSetting("Line thickness", 2.0, 1.0, 10.0, 1.0, "Ellipse line thickness").withDependency { style.selected == "Ellipse" }
+    private val ellipseSlices by NumberSetting("Ellipse slices", 30.0, 5.0, 60.0, 1.0, "Ellipse slices").withDependency { style.selected == "Ellipse" }
 
+    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Layers", "Ellipse") }
+    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Layers", "Ellipse") }
 
-    private val cooldownMap = mutableMapOf<String, Boolean>()
-    private var termFound = false
-    private var dir: Double? = null
-    private var airTicks = 0
-    private var lastX = 0.0
-    private var lastZ = 0.0
-    private var blinkCd = false
+//    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this // I still have no idea what this shit does
+//    private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
+//    private val packetMovement by BooleanSetting("Packet movement")
+//    private val recordBind by KeyBindSetting("Movement record", Keyboard.KEY_NONE, "Starts recording a movement replay if you are on a movement ring and in edit mode.")
+//        .onPress {
+//            if (movementRecord) {
+//                movementRecord = false
+//                modMessage("Done recording")
+//                return@onPress
+//            }
+//            if (!ringEditMode) return@onPress
+//            rings.forEach { ring ->
+//                if (inRing(ring) && ring.type == "movement") {
+//                    modMessage("Started recording")
+//                    mc.thePlayer.setPosition(
+//                        ring.location.xCoord,
+//                        mc.thePlayer.posY,
+//                        ring.location.zCoord
+//                    )
+//                    movementRecord = true
+//                    movementCurrentRing = ring
+//                    movementCurrentRing!!.packets = mutableListOf()
+//                }
+//            }
+//        }
+
+    var termFound = false
+
+    private val visited = mutableListOf<Ring>()
 
     @SubscribeEvent
-    fun onWorldLoad(event: WorldEvent.Load) {
-        loadRings()
+    fun onTick(event: TickEvent.ClientTickEvent) {
+        if (mc.thePlayer == null || event.phase != TickEvent.Phase.START || ringEditMode) return
+        currentRoute.forEach { route ->
+            if (SPECIAL_ROUTES[route.name]?.invoke() == false) return@forEach // untested
+            route.rings.forEach { ring ->
+                if (ring.inside() && !visited.contains(ring)) {
+                    if (ring.checkArgs()) {
+                        if (chatFeedback) modMessage(ring.action.typeName.capitalize())
+                        scope.launch { ring.execute() }
+                        visited.add(ring)
+                    }
+                }
+                visited.removeIf { !it.inside() }
+            }
+        }
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
     @SubscribeEvent
     fun onRender(event: RenderWorldLastEvent) {
-        if (ringEditMode || (inBossOnly && floorNumber != 7 && !inBoss)) return
-        rings.forEach { ring ->
-            val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
-            val cooldown: Boolean = cooldownMap[key] == true
-            if (inRing(ring)) {
-                if (ring.arguments!!.contains("term") && !termFound) {
-                    return
+        if (mc.theWorld == null) return
+
+        currentRoute.forEach { route ->
+            route.rings.forEach { ring ->
+                val (x, y, z) = ring.position
+                val colour = if (ring.inside()) colour2 else colour1
+                when (style.selected) {
+                    "Layers"    -> drawP3boxWithLayers(x, y, z, ring.length, ring.width, ring.height, colour, layers.toInt())
+                    "Ellipse"   -> drawEllipse(x, y, z, ring.width / 2, ring.length / 2, colour, ellipseSlices.toInt(), lineThickness.toFloat())
                 }
 
-                if (getF7Phase() == M7Phases.P5 && ring.route == "RelicsBlink" && !Relics.doCustomBlink) return@forEach
+                if (ring.action is BlinkRing) {
+                    val packets = ring.action.packets
+                    for (i in 0 until packets.size - 1) {
+                        val p1 = packets[i]
+                        val p2 = packets[i + 1]
+                        drawLine(
+                            p1.x, p1.y + 0.1, p1.z,
+                            p2.x, p2.y + 0.1, p2.z,
+                            Blink.lineColour, 4.0f, false
+                        )
 
-                if (cooldown) return@forEach
-                cooldownMap[key] = true
-                GlobalScope.launch {
-                    executeAction(ring)
+                        if (Blink.renderAutoP3Text) drawStringInWorld(packets.size.toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
+                    }
                 }
-            } else if (cooldown) {
-                cooldownMap[key] = false
-            }
-        }
-    }
-
-    @SubscribeEvent
-    fun onRenderWorld(event: RenderWorldLastEvent) {
-        if (inBossOnly && floorNumber != 7 && !inBoss) return
-        rings.forEach { ring ->
-            val x: Double = ring.location.xCoord
-            val y: Double = ring.location.yCoord
-            val z: Double = ring.location.zCoord
-
-            val cooldown: Boolean = cooldownMap["$x,$y,$z,${ring.type}"] == true
-            val color = if (cooldown) colour2 else colour1
-
-            when (style.selected) {
-                "Trans"    -> renderTransFlag(x, y, z, ring.width, ring.height)
-                "Normal"   -> drawP3boxWithLayers(x, y, z, ring.width, ring.height, color, layers.toInt())
-                "Ring"     -> drawCylinder(Vec3(x, y, z), ring.width / 2, ring.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
-                "LGBTQIA+" -> renderGayFlag(x, y, z, ring.width, ring.height)
-                "Lesbian"  -> renderLesbianFlag(x, y, z, ring.width, ring.height)
-            }
-            if ((ring.type == "blink" || ring.type == "movement") && ring.packets.size != 0 && Blink.renderAutoP3Text) {
-                for (i in 0 until ring.packets.size - 1) {
-                    val p1 = ring.packets[i]
-                    val p2 = ring.packets[i + 1]
-                    WorldRenderUtils.drawLine(
-                        p1.x, p1.y + 0.1, p1.z,
-                        p2.x, p2.y + 0.1, p2.z,
-                        Blink.lineColour, 4.0f, false
-                    )
-                }
-                drawStringInWorld(ring.packets.size.toString(), Vec3(x, y + ring.height, z), scale = 0.035F)
             }
         }
     }
@@ -207,350 +147,5 @@ object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more arg
         scheduleTask(2) {
             termFound = false
         }
-    }
-
-    fun inRing(ring: Ring): Boolean {
-        val viewerPos = mc.renderManager
-        val distanceX = abs(viewerPos.viewerPosX - ring.location.xCoord)
-        val distanceY = abs(viewerPos.viewerPosY - ring.location.yCoord)
-        val distanceZ = abs(viewerPos.viewerPosZ - ring.location.zCoord)
-
-        return distanceX < (ring.width / 2) &&
-                distanceY < ring.height &&
-                distanceY >= -0.5 &&
-                distanceZ < (ring.width / 2)
-    }
-
-    private suspend fun executeAction(ring: Ring) {
-        val actionDelay: Int = if (ring.delay == null) 0 else ring.delay!!
-        delay(actionDelay.toLong())
-        ring.arguments?.let {
-            if ("stop" in it) {
-                dir = null
-                stopVelo()
-            }
-            if ("walk" in it) setKey("w", true)
-            if ("look" in it) snapTo(ring.yaw, ring.pitch)
-            if ("fullstop" in it) {
-                dir = null
-                stopMovement()
-                stopVelo()
-            }
-            if ("block" in it) {
-                val (yaw, pitch) = getYawAndPitch(
-                    ring.lookBlock!!.xCoord,
-                    ring.lookBlock!!.yCoord,
-                    ring.lookBlock!!.zCoord
-                )
-                snapTo(yaw, pitch)
-            }
-        }
-        when (ring.type) {
-            "walk" -> {
-                feedbackMessage("Walking!")
-                setKey("w", true)
-            }
-            "jump" -> {
-                feedbackMessage("Jumping!")
-                jump()
-            }
-            "stop" -> {
-                dir = null
-                feedbackMessage("Stopping!")
-                stopMovement()
-                stopVelo()
-            }
-            "boom" -> {
-                feedbackMessage("Bomb denmark!")
-                if (boomType.selected == "Regular") swapFromName("superboom tnt") else swapFromName("infinityboom tnt")
-                //feedbackMessage(boomType.selected)
-                scheduleTask(0) { leftClick() }
-            }
-            "hclip" -> {
-                dir = null
-                feedbackMessage("Hclipping!")
-                hClip(ring.yaw)
-                ring.arguments?.let {
-                    if ("walk" in it) {
-                        scheduleTask(1) {
-                            setKey("w", true)
-                        }
-                    }
-                }
-            }
-            "vclip" -> {
-                dir = null
-                feedbackMessage("Vclipping!")
-                lavaClipToggle(ring.depth!!.toDouble(), true)
-            }
-            "bonzo" -> {
-                feedbackMessage("Bonzoing!")
-                swapFromName("bonzo's staff")
-                scheduleTask(0) {
-                    clickAt(ring.yaw, ring.pitch)
-                }
-            }
-            "look" -> {
-                feedbackMessage("Looking!")
-                snapTo(ring.yaw, ring.pitch)
-            }
-            "align" -> {
-                feedbackMessage("Aligning!")
-                mc.thePlayer.setPosition(
-                    ring.location.xCoord,
-                    mc.thePlayer.posY,
-                    ring.location.zCoord
-                )
-            }
-            "block" -> {
-                feedbackMessage("Snaping to [${ring.lookBlock!!.xCoord}, ${ring.lookBlock!!.yCoord}, ${ring.lookBlock!!.zCoord}]! ")
-                val (yaw, pitch) = getYawAndPitch(
-                    ring.lookBlock!!.xCoord,
-                    ring.lookBlock!!.yCoord,
-                    ring.lookBlock!!.zCoord
-                )
-                snapTo(yaw, pitch)
-            }
-            "edge" -> {
-                feedbackMessage("Edging!")
-                edge()
-            }
-            "command" -> {
-                feedbackMessage("Sexecuting!")
-                commandAny(ring.command!!)
-            }
-            "blink" -> {
-                dir = null
-                if (ring.packets.size == 0 || blinkEditMode) return
-                if (packetArray >= ring.packets.size && !blinkCd) {
-                    scheduleTask(0) {
-                        blinkCd = true
-                        ring.packets.forEach { packet ->
-                            mc.netHandler.networkManager.sendPacket(
-                                C03PacketPlayer.C04PacketPlayerPosition(
-                                    packet.x,
-                                    packet.y,
-                                    packet.z,
-                                    packet.onGround
-                                )
-                            )
-                            packetArray -= 1
-                        }
-                        mc.thePlayer.setPosition(ring.packets.last().x, ring.packets.last().y, ring.packets.last().z)
-                    }
-                    scheduleTask(10) {
-                        blinkCd = false
-                    }
-                } else {
-                    val key = "${ring.location.xCoord},${ring.location.yCoord},${ring.location.zCoord},${ring.type}"
-                    cooldownMap[key] = false
-                }
-            }
-            "movement" -> {
-                dir = null
-                if (ring.packets.size == 0 || movementOn) return
-                movementList = ring.packets.toMutableList()
-                movementOn = true
-            }
-            "velo" -> {
-                lastX = 0.0
-                lastZ = 0.0
-                airTicks = 0
-                feedbackMessage("Meowtion")
-                if (mc.thePlayer.onGround) {
-                    stopMovement()
-                    dir = ring.yaw.toDouble()
-                } else {
-                    stopMovement()
-                    stopVelo()
-                    stupid4 = true
-                    stupid5 = ring.yaw.toDouble()
-                }
-            }
-        }
-    }
-
-    private var movementRecord = false
-    private var movementCurrentRing: Ring? = null
-
-    @SubscribeEvent
-    fun onMovementRecorder(event: PacketSentEvent) {
-        if (event.packet !is C03PacketPlayer || !movementRecord) return
-        if (movementCurrentRing!!.packets.size == recordLength.toInt()) {
-            movementRecord = false
-            RingManager.saveRings()
-            modMessage("Done recording")
-        }
-        if (event.packet is C03PacketPlayer.C06PacketPlayerPosLook || event.packet is C03PacketPlayer.C04PacketPlayerPosition) {
-            movementCurrentRing!!.packets.add(
-                Blink.BlinkC06(
-                    event.packet.yaw,
-                    event.packet.pitch,
-                    event.packet.positionX,
-                    event.packet.positionY,
-                    event.packet.positionZ,
-                    event.packet.isOnGround
-                )
-            )
-        }
-    }
-
-    private var movementList = mutableListOf<Blink.BlinkC06>()
-    private var movementOn = false
-    private var onlyHorizontal = false
-    private var stupid4 = false
-    private var stupid5 = 0.0
-
-    @SubscribeEvent
-    fun onTickMovement(event: MotionUpdateEvent.Pre) {
-        if (!movementOn || packetMovement) return
-        if (movementList.isEmpty()) {
-            movementOn = false
-            return
-        }
-        val move = movementList.first()
-        val x = move.x - mc.thePlayer.posX
-        var y = move.y - mc.thePlayer.posY
-        val z = move.z - mc.thePlayer.posZ
-        if (onlyHorizontal) y = 0.0
-        movementList.removeFirst()
-        mc.thePlayer.moveEntity(x, y, z)
-    }
-
-    private var ignoreNextC03 = false
-    private var lastMoveX = 0.0
-    private var lastMoveY = 0.0
-    private var lastMoveZ = 0.0
-
-    @SubscribeEvent
-    fun onPacketC03(event: PacketSentEvent) {
-        if (!movementOn || !packetMovement || event.packet !is C03PacketPlayer) return
-        if (ignoreNextC03) {
-            ignoreNextC03 = false
-            return
-        }
-        if (movementList.isEmpty()) {
-            mc.thePlayer.setPosition(lastMoveX, lastMoveY, lastMoveZ)
-            movementOn = false
-            return
-        }
-        val move = movementList.first()
-        move.x - mc.thePlayer.posX
-        move.y - mc.thePlayer.posY
-        move.z - mc.thePlayer.posZ
-        movementList.removeFirst()
-        event.isCanceled = true
-        ignoreNextC03 = true
-        sendPacket(C06PacketPlayerPosLook(move.x, move.y, move.z, mc.thePlayer.rotationYaw, mc.thePlayer.rotationPitch, move.onGround))
-        lastMoveX = move.x
-        lastMoveY = move.y
-        lastMoveZ = move.z
-        //mc.thePlayer.moveEntity(x, y, z)
-    }
-
-    @SubscribeEvent
-    fun renderWorldMovement(event: RenderWorldLastEvent) {
-        if (!movementOn || !packetMovement) return
-        drawCustomSizedBoxAt(lastMoveX - mc.thePlayer.width / 2, lastMoveY, lastMoveZ - mc.thePlayer.width / 2, mc.thePlayer.width.toDouble(), mc.thePlayer.height.toDouble(), mc.thePlayer.width.toDouble(), Color.PINK)
-    }
-
-    @SubscribeEvent
-    fun onS12(event: PacketReceiveEvent) {
-        if (mc.thePlayer == null) return
-        if (event.packet !is S12PacketEntityVelocity || event.packet.entityID != mc.thePlayer.entityId) return
-        if (event.packet.motionY == 28000) {
-            onlyHorizontal = true
-            scheduleTask((disableLength - 1).toInt()) { onlyHorizontal = false }
-        }
-    }
-
-
-    @SubscribeEvent
-    fun onS08(event: PacketReceiveEvent) {
-        if (event.packet !is S08PacketPlayerPosLook) return
-        movementOn = false
-        dir = null
-        movementList = mutableListOf()
-    }
-
-    private var melodyClicked = System.currentTimeMillis()
-
-    @SubscribeEvent
-    fun onTick(event: ClientTickEvent) {
-        if (event.phase !== TickEvent.Phase.START) return
-        if (dir == null) {
-            return
-        }
-
-        val clickingMelody = (System.currentTimeMillis() - melodyClicked < 300)
-
-        if (mc.thePlayer?.onGround == true) {
-            airTicks = 0
-        } else {
-            airTicks += 1
-        }
-
-        val speed = if (!mc.thePlayer.isSneaking) {
-            mc.thePlayer.capabilities.walkSpeed
-        } else {
-            mc.thePlayer.capabilities.walkSpeed * 3 / 10 /// doesnt let me do 0.3???
-        }
-
-        val radians = dir!! * Math.PI / 180 // todo: MathUtils?
-        val x = -sin(radians) * speed * 2.806
-        val z = cos(radians) * speed * 2.806
-
-        if (airTicks < 2) {
-            lastX = x
-            lastZ = z
-            if (!clickingMelody) {
-                mc.thePlayer.motionX = x
-                mc.thePlayer.motionZ = z
-            }
-        } else {
-            //assume max acceleration
-            val thisShit2 = stupid2 / 10000
-            lastX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
-            lastZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
-            if (!clickingMelody) {
-                mc.thePlayer.motionX = lastX * 0.91 + thisShit2 * speed * -sin(radians)
-                mc.thePlayer.motionZ = lastZ * 0.91 + thisShit2 * speed * cos(radians)
-            }
-        }
-    }
-
-    @SubscribeEvent
-    fun stupid3(event: MotionUpdateEvent.Pre) {
-        if (!stupid4) return
-        stupid4 = false
-        dir = stupid5
-    }
-
-    @SubscribeEvent
-    fun stupid(event: InputEvent.KeyInputEvent) {
-        if (Keyboard.getEventKey() == mc.gameSettings.keyBindBack.keyCode) {
-            dir = null
-        }
-    }
-
-    @SubscribeEvent
-    fun melodyListener(event: PacketSentEvent) {
-        if (event.packet !is C0EPacketClickWindow) return
-        val metadata = event.packet.clickedItem?.metadata
-        val registry = event.packet.clickedItem?.item?.registryName
-        val name = event.packet.clickedItem?.displayName
-        val slot = event.packet.slotId
-
-        if(arrayListOf(16, 25, 34, 43).contains(slot)) {
-            if (name?.contains("Lock In Slot") == true || name?.contains("Row Not Active") == true) {
-                melodyClicked = System.currentTimeMillis()
-                debugMessage("Melody clicked!")
-            }
-        }
-        debugMessage("$registry, $metadata, $slot, $name")
-    }
-
-    private fun feedbackMessage(message: String) {
-        if (chatFeedback) modMessage(message)
     }
 }

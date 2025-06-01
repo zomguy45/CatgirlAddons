@@ -27,7 +27,7 @@ class ElementBoolean(parent: ModuleButton, setting: BooleanSetting) :
     override fun renderElement(): Double {
         this.booleanElement.update { // FIXME
             outlineColour = ColorUtil.outlineColor
-            outlineHoverColour = ColorUtil.clickGUIColor
+            hoverColour = ColorUtil.clickGUIColor
         }.draw(mouseXRel, mouseYRel)
         return super.renderElement()
     }

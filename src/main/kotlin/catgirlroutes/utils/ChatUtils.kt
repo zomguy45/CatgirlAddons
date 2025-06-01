@@ -192,7 +192,7 @@ object ChatUtils {
         style.chatHoverEvent = HoverEvent(HoverEvent.Action.SHOW_TEXT, ChatComponentText(hoverText))
         style.chatClickEvent = ClickEvent(ClickEvent.Action.RUN_COMMAND, action)
         message.chatStyle = style
-        mc.thePlayer.addChatMessage(message)
+        chatMessage(message)
         return message
     }
 }

@@ -88,7 +88,8 @@ repositories {
 
 val shadowImpl: Configuration by configurations.creating {
     configurations.implementation.get().extendsFrom(this)
-    dependencies.add(project.dependencies.create("com.github.Stivais:Commodore:3f4a14b1cf"))
+    dependencies.add(project.dependencies.create("com.github.Stivias:Commodore:bea320fe0a"))
+    dependencies.add(project.dependencies.create("com.mojang:brigadier:1.2.9"))
 }
 
 dependencies {
@@ -98,8 +99,6 @@ dependencies {
 
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.0")
-
-//    implementation("com.github.Stivais:Commodore:3f4a14b1cf")
 
     shadowImpl(kotlin("stdlib-jdk8"))
 
@@ -113,6 +112,7 @@ dependencies {
     runtimeOnly("me.djtheredstoner:DevAuth-forge-legacy:1.2.1")
     implementation(kotlin("stdlib-jdk8"))
 
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
 }
 
 // Tasks:
@@ -173,6 +173,7 @@ tasks.shadowJar {
     // If you want to include other dependencies and shadow them, you can relocate them in here
     fun relocate(name: String) = relocate(name, "$baseGroup.deps.$name")
     relocate("com.github.stivais.commodore")
+    relocate("com.mojang.brigadier")
 }
 
 tasks.assemble.get().dependsOn(tasks.remapJar)

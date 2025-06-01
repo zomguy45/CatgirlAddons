@@ -15,12 +15,12 @@ class MiscElementButton(
     override fun render(mouseX: Int, mouseY: Int) {
         val isHovered = isHovered(mouseX, mouseY)
         HUDRenderUtils.drawRoundedBorderedRect(
-            x, y, width, height, radius, thickness,
+            x, y, width, height, radii, thickness,
             if (isHovered) hoverColour else colour,
             if (isHovered) outlineHoverColour else outlineColour
         )
         val (x, y) = this.calculateTextPosition()
-        FontUtil.drawAlignedString(value.ellipsize(width - 3.0), x, y, this.style.alignment, shadow = style.textShadow)
+        FontUtil.drawAlignedString(value.ellipsize(width - 3.0), x, y, this.style.alignment, color = style.textColour.rgb, shadow = style.textShadow)
     }
 
     override fun mouseClicked(mouseX: Int, mouseY: Int, mouseButton: Int): Boolean {

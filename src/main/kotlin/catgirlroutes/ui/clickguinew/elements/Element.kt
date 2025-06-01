@@ -7,7 +7,9 @@ import catgirlroutes.ui.clickgui.util.FontUtil.wrapText
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseX
 import catgirlroutes.ui.clickgui.util.MouseUtils.mouseY
 import catgirlroutes.ui.clickguinew.ClickGUI
+import catgirlroutes.utils.render.HUDRenderUtils.disableScissor
 import catgirlroutes.utils.render.HUDRenderUtils.drawHoveringText
+import catgirlroutes.utils.render.HUDRenderUtils.enableScissor
 import net.minecraft.client.renderer.GlStateManager
 import org.lwjgl.opengl.GL11
 
@@ -82,10 +84,9 @@ abstract class Element<S: Setting<*>>(
             hoverStartTime = hoverStartTime ?: currentTime
 
             if (currentTime - hoverStartTime!! >= 1000) {
-                GlStateManager.pushAttrib()
-                GL11.glDisable(GL11.GL_SCISSOR_TEST)
+                disableScissor()
                 drawHoveringText(wrapText(setting.description!!, 150.0), mouseX - xAbsolute.toInt(), mouseY - yAbsolute.toInt())
-                GlStateManager.popAttrib()
+                enableScissor()
             }
         } else {
             hoverStartTime = null

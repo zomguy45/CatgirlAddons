@@ -1,12 +1,10 @@
 package catgirlroutes.commands.impl
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
-import catgirlroutes.commands.commodore
 import catgirlroutes.module.impl.dungeons.puzzlesolvers.IceFillSolver
 import catgirlroutes.utils.*
 import catgirlroutes.utils.BlockAura.blockArray
 import catgirlroutes.utils.BlockAura.breakArray
-import catgirlroutes.utils.ChatUtils.modMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.EntityAura.entityArray
 import catgirlroutes.utils.PlayerUtils.swapFromName
@@ -15,6 +13,7 @@ import catgirlroutes.utils.dungeon.DungeonUtils.currentRoom
 import catgirlroutes.utils.dungeon.DungeonUtils.getRealYaw
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeCoords
 import catgirlroutes.utils.dungeon.DungeonUtils.getRelativeYaw
+import com.github.stivais.commodore.Commodore
 import net.minecraft.entity.item.EntityArmorStand
 import net.minecraft.entity.monster.EntitySlime
 import net.minecraft.entity.passive.EntityHorse
@@ -23,17 +22,7 @@ import net.minecraft.network.play.client.C02PacketUseEntity
 import net.minecraft.util.BlockPos
 
 
-val devCommands = commodore("dev") {
-
-    literal("help").runs { // todo: add description
-        modMessage("""
-            List of commands:
-              §7/relativecoords
-              §7/relativeyaw
-              §7/realyaw
-        """.trimIndent())
-    }
-
+val devCommands = Commodore("cgadev") {
     literal("relativecoords").runs {
         val block = mc.objectMouseOver?.blockPos ?: return@runs
         ChatUtils.chatMessage(

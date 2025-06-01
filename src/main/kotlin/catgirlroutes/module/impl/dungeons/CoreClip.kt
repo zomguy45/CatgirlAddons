@@ -20,6 +20,7 @@ object CoreClip: Module(
     private var clipDelay by NumberSetting("Delay", 0.0, 0.0, 10.0, 1.0, unit = "t")
     private val hud by HudSetting("Delay hud") {
         size("Ticks: 5")
+        visibleIf { passedTicks > 0 }
         render { drawStringWithShadow("Ticks: $passedTicks", 0.0, 0.0) }
         preview { drawStringWithShadow("Ticks: 5", 0.0, 0.0) }
     }

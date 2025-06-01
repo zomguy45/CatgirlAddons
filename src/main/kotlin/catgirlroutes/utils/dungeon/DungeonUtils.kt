@@ -4,18 +4,15 @@ import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.events.impl.PacketReceiveEvent
 import catgirlroutes.events.impl.RoomEnterEvent
 import catgirlroutes.module.impl.render.ClickGui
+import catgirlroutes.utils.*
 import catgirlroutes.utils.ChatUtils.modMessage
-import catgirlroutes.utils.Island
-import catgirlroutes.utils.LocationManager
 import catgirlroutes.utils.LocationManager.currentDungeon
 import catgirlroutes.utils.PlayerUtils.getItemSlot
 import catgirlroutes.utils.PlayerUtils.posY
-import catgirlroutes.utils.*
-import catgirlroutes.utils.PlayerUtils.posX
-import catgirlroutes.utils.PlayerUtils.posZ
 import catgirlroutes.utils.dungeon.tiles.Room
 import net.minecraft.block.BlockSkull
 import net.minecraft.block.state.IBlockState
+import net.minecraft.entity.player.EntityPlayer
 import net.minecraft.init.Blocks
 import net.minecraft.network.play.server.S38PacketPlayerListItem
 import net.minecraft.tileentity.TileEntitySkull
@@ -168,14 +165,14 @@ object DungeonUtils {
         }
     }
 
-    fun getP3Section(): P3Sections {
+    fun getP3Section(player: EntityPlayer = mc.thePlayer): P3Sections {
         if (getF7Phase() != M7Phases.P3 && !ClickGui.forceBoss) return P3Sections.Unknown
 
         return when {
-            posX in 89.0..113.0 && posZ in 30.0..122.0 -> P3Sections.S1
-            posX in 19.0..111.0 && posZ in 121.0..145.0 -> P3Sections.S2
-            posX in -6.0..19.0 && posZ in 51.0..143.0 -> P3Sections.S3
-            posX in -2.0..90.0 && posZ in 27.0..51.0 -> P3Sections.S4
+            player.posX in 89.0..113.0 && player.posZ in 30.0..122.0 -> P3Sections.S1
+            player.posX in 19.0..111.0 && player.posZ in 121.0..145.0 -> P3Sections.S2
+            player.posX in -6.0..19.0 && player.posZ in 51.0..143.0 -> P3Sections.S3
+            player.posX in -2.0..90.0 && player.posZ in 27.0..51.0 -> P3Sections.S4
             else -> P3Sections.Unknown
         }
     }
