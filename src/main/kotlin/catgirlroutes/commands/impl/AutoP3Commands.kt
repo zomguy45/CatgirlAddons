@@ -160,7 +160,7 @@ val autoP3Commands = Commodore("p3") {
     literal("add") {
         runs { // todo make it auto build this
             modMessage("""
-            Usage: §7/p3 add §7<§btype§7> [§bdepth§7] [§bargs..§7]
+            Usage: §7/p3 add §7<§btype§7> [§bargs..§7]
                 List of types: §7${ringTypes.joinToString()}
                   §7- walk §8: §rmakes the player walk
                   §7- look §8: §rturns player's head
@@ -175,7 +175,7 @@ val autoP3Commands = Commodore("p3") {
                   §7- command §8: §rexecutes a specified command
                   §7- swap §8: §rswaps to a specified item
                   §7- blink §8: §rteleports you
-                List of args: §bl_, w_, r_, h_, delay_, look, walk, term, stop, fullstop, exact, block, centre, ground, leap_
+                List of args: §bl_, w_, r_, h_, delay_, look, walk, term, stop, fullstop, exact, block, centre, ground, leap_, distance_
                   §7- §blook §8: §rturns player's head
                   §7- §bwalk §8: §rmakes the player walk
                   §7- §bterm §8: §ractivates the node when terminal opens
@@ -185,6 +185,7 @@ val autoP3Commands = Commodore("p3") {
                   §7- §bcentre §8: §rexecutes the ring when the player is in the centre
                   §7- §bground §8: §rexecutes the ring when the player is on the ground
                   §7- §bleap_ §8: §rexecutes the ring when N people leapt to the player
+                  §7- §bdistance_ §8: §rsets the distance for lavaclip ring
         """.trimIndent())
         }
 

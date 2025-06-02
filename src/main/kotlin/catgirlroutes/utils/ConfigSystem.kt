@@ -137,7 +137,11 @@ class ConfigList<T>(
 ) : MutableList<T> by list {
 
     fun save() = ConfigSystem.saveConfig(file, list)
-    fun load() = ConfigSystem.loadConfig<T>(file, type)
+    fun load() {
+        val loaded = ConfigSystem.loadConfig<MutableList<T>>(file, type) ?: return
+        list.clear()
+        list.addAll(loaded)
+    }
 
     private inline fun <R> modify(block: () -> R): R {
         val result = block()
