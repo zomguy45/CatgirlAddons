@@ -46,12 +46,11 @@ object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more arg
     val inBossOnly by BooleanSetting("Boss only", true, "Active in boss room only.")
     private val editTitle by BooleanSetting("EditMode title", "Renders a title when edit mode is enabled.")
     private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
+    val legsOffset by NumberSetting("Legs bounding box offset", 0.0, 0.0, 1.0, 0.05, "Offsets bounding box for in ring detection")
     val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
     private val style by SelectorSetting("Ring style", "Layers", arrayListOf("Layers", "Box", "Ellipse", "Lesbian", "Gay", "Trans"), "Ring render style to be used.")
-
     private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Layers" }
-
     private val lineThickness by NumberSetting("Line thickness", 2.0, 1.0, 10.0, 1.0, "Ellipse line thickness").withDependency { style.selected.equalsOneOf("Box", "Ellipse") }
     private val ellipseSlices by NumberSetting("Ellipse slices", 30.0, 5.0, 60.0, 1.0, "Ellipse slices").withDependency { style.selected == "Ellipse" }
 

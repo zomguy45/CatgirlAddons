@@ -1,6 +1,7 @@
 package catgirlroutes.utils.autop3
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.module.impl.dungeons.AutoP3.legsOffset
 import catgirlroutes.utils.PlayerUtils.posX
 import catgirlroutes.utils.PlayerUtils.posY
 import catgirlroutes.utils.PlayerUtils.posZ
@@ -39,7 +40,7 @@ class Ring(
     }
 
     fun inside(): Boolean {
-        val feet = AxisAlignedBB(posX - 0.2, posY, posZ - 0.2, posX + 0.3, posY + 0.00001, posZ)
+        val feet = AxisAlignedBB(posX - 0.2, posY, posZ - 0.2, posX + 0.3, posY + 0.00001 + legsOffset, posZ)
         val ringBB: AxisAlignedBB = boundingBox()
         val a = Vec3(posX, posY, posZ)
         val b = Vec3(mc.thePlayer.prevPosX, mc.thePlayer.prevPosY, mc.thePlayer.prevPosZ)
