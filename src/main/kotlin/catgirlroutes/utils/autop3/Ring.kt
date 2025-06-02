@@ -36,7 +36,7 @@ class Ring(
         val minZ = position.zCoord - halfLength
         val maxZ = position.zCoord + halfLength
 
-        return AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).expand(0.0001, 0.0, 0.0001)
+        return AxisAlignedBB(minX, minY, minZ, maxX, maxY, maxZ).expand(0.0, -0.00001, 0.0)
     }
 
     fun inside(): Boolean {

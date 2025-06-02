@@ -6,8 +6,8 @@ import catgirlroutes.utils.customtriggers.TypeName
 
 @TypeName("motion")
 data object MotionRing : RingAction() {
-    override val description: String = "modifies player motion to move"
-    override val aliases: List<String> = listOf("velo", "velocity")
+//    override val description: String = "modifies player motion to move"
+//    override val aliases: List<String> = listOf("velo", "velocity")
 
     override fun execute(ring: Ring) {
         MovementUtils.stopMovement()

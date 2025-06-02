@@ -13,7 +13,7 @@ import net.minecraft.network.play.client.C03PacketPlayer
 
 @TypeName("blink")
 class BlinkRing(var packets: MutableList<Blink.BlinkC06> = mutableListOf()) : RingAction() {
-    override val description: String = "teleports the player"
+//    override val description: String = "teleports the player"
     override fun execute(ring: Ring) {
         if (blinkEditMode) return
         if (packets.size == 0) return modMessage("Not enough packets.")

@@ -6,7 +6,7 @@ import catgirlroutes.utils.customtriggers.TypeName
 
 @TypeName("jump")
 data object JumpRing : RingAction() {
-    override val description: String = "makes the player jump"
+//    override val description: String = "makes the player jump"
 
     override fun execute(ring: Ring) {
         MovementUtils.jump()

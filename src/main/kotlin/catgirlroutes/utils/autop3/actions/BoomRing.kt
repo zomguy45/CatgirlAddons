@@ -6,11 +6,12 @@ import catgirlroutes.utils.PlayerUtils.swapFromName
 import catgirlroutes.utils.autop3.Ring
 import catgirlroutes.utils.customtriggers.TypeName
 import catgirlroutes.utils.rotation.RotationUtils
+import net.minecraft.util.Vec3
 
 @TypeName("boom")
-data object BoomRing : RingAction() {
-    override val description: String = "places boom tnt"
-    override val aliases: List<String> = listOf("denmark")
+class BoomRing(val vec3: Vec3?) : RingAction() {
+//    override val description: String = "places boom tnt"
+//    override val aliases: List<String> = listOf("denmark")
 
     override fun execute(ring: Ring) {
         val type = if (boomType.selected == "Regular") "superboom tnt" else "infinityboom tnt"

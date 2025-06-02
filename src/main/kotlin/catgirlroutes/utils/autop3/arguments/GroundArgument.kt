@@ -6,8 +6,8 @@ import catgirlroutes.utils.customtriggers.TypeName
 
 @TypeName("onGround")
 data object GroundArgument : RingArgument() {
-    override val description: String = "executes the ring when the player is on the ground"
-    override val aliases: List<String> = listOf("ground")
+//    override val description: String = "executes the ring when the player is on the ground"
+//    override val aliases: List<String> = listOf("ground")
 
     override fun check(ring: Ring): Boolean {
         return mc.thePlayer.onGround

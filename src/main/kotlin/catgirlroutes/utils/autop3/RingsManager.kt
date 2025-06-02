@@ -39,7 +39,7 @@ object RingsManager {
 //    )
 
     fun init() {
-
+        loadRoute()
     }
 
     fun loadRoute(route: String = selectedRoute, msg: Boolean = false) {
@@ -80,17 +80,19 @@ object RingsManager {
         routes.clear()
     }
 
-    fun addRing(ring: Ring) {
+    fun addRing(ring: Ring): Boolean {
         val existingRoute = routes.firstOrNull { it.name == selectedRoute }
-        if (existingRoute == null) return modMessage("Route §7$selectedRoute§r doesn't exist. Do §7/p3 create §7<§bname§7>")
+        if (existingRoute == null) return false
         existingRoute.rings.add(ring)
         routes.save()
+        return true
     }
 
     fun createRoute(name: String) {
         if (routes.any { it.name == name }) return modMessage("Route §7$name§r already exists")
         val newRoute = AutoP3Route(name, mutableListOf())
         routes.add(newRoute)
+        loadRoute(name)
         modMessage("Route §7$name§r created")
     }
 

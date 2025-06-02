@@ -167,7 +167,7 @@ object AutoRoutes : Module( // todo recode this shit
                 "Normal"    -> drawP3boxWithLayers(x, y, z, node.width, node.width, node.height, color, layers.toInt())
                 "Ring"      -> drawCylinder(Vec3(x, y, z), node.width / 2, node.width / 2, .05f, 35, 1, 0f, 90f, 90f, color, true)
                 "LGBTQIA+"  -> renderGayFlag(x, y, z, node.width, node.height)
-                "Lesbian"   -> renderLesbianFlag(x, y, z, node.width, node.height)
+                "Lesbian"   -> renderLesbianFlag(x, y, z, node.width, node.width, node.height)
             }
 
             if (inNode(node) && node.block != null) {

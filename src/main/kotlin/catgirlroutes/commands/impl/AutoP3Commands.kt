@@ -2,6 +2,7 @@ package catgirlroutes.commands.impl
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
 import catgirlroutes.module.impl.dungeons.AutoP3
+import catgirlroutes.module.impl.dungeons.AutoP3.inBossOnly
 import catgirlroutes.module.impl.dungeons.AutoP3.selectedRoute
 import catgirlroutes.utils.ChatUtils
 import catgirlroutes.utils.ChatUtils.getPrefix
@@ -18,9 +19,12 @@ import catgirlroutes.utils.autop3.RingsManager.format
 import catgirlroutes.utils.autop3.RingsManager.ringEditMode
 import catgirlroutes.utils.autop3.actions.*
 import catgirlroutes.utils.autop3.arguments.*
+import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
+import catgirlroutes.utils.toVec3
 import com.github.stivais.commodore.Commodore
 import com.github.stivais.commodore.utils.GreedyString
 import net.minecraft.util.AxisAlignedBB
+import net.minecraft.util.MovingObjectPosition
 import net.minecraft.util.Vec3
 
 val ringTypes: List<String> = listOf("velo", "walk", "look", "stop", "bonzo", "boom", "hclip", "block", "edge", "lavaclip", "jump", "align", "command", "blink")
@@ -48,7 +52,6 @@ val autoP3Commands = Commodore("p3") {
 
     literal("create").runs { name: String ->
         RingsManager.createRoute(name)
-        selectedRoute = name
     }
 
     literal("em").runs {
@@ -66,7 +69,7 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("remove").runs { range: Double? ->
-        if (isMultiple) return@runs
+        if (!check) return@runs
         val originalRings = currentRoute.first().rings.toList()
 
         val r = range ?: 2.0
@@ -88,7 +91,7 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("undo").runs {
-        if (isMultiple) return@runs
+        if (!check) return@runs
         if (currentRoute.isEmpty()) return@runs modMessage("Nothing to undo")
 
         val lastRing = currentRoute.first().rings.removeLast()
@@ -98,7 +101,7 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("redo").runs {
-        if (isMultiple) return@runs
+        if (!check) return@runs
         if (removedRings.isEmpty()) return@runs modMessage("Nothing to redo")
 
         val lastRemoved = removedRings.removeLast()
@@ -108,7 +111,7 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("clearroute").runs {
-        if (isMultiple) return@runs
+        if (!check) return@runs
         ChatUtils.createClickableText(
             text = "${getPrefix()} §8»§r Are you sure you want to clear §nCURRENT§r route?",
             hoverText = "Click to clear §nCURRENT§r route!",
@@ -117,7 +120,7 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("clearrouteconfirm").runs {
-        if (isMultiple) return@runs
+        if (!check) return@runs
         val originalRings = currentRoute.first().rings
         currentRoute.first().rings.clear()
         removedRings.add(originalRings)
@@ -134,14 +137,13 @@ val autoP3Commands = Commodore("p3") {
     }
 
     literal("clearconfirm").runs {
-        if (isMultiple) return@runs
         modMessage("Cleared all routes")
         RingsManager.clearAll()
         RingsManager.loadRoute()
     }
 
     literal("save").runs {
-        if (isMultiple) return@runs
+        if (!check) return@runs
         modMessage("Saved $selectedRoute")
         RingsManager.saveRoute()
     }
@@ -187,7 +189,7 @@ val autoP3Commands = Commodore("p3") {
         }
 
         runs { type: String, arguments: GreedyString? -> // schizophrenia starts here
-            if (isMultiple) return@runs
+            if (!check) return@runs
             val args = arguments?.toString()?.split(" ") ?: emptyList()
 
             var x = Math.round(mc.renderManager.viewerPosX * 2) / 2.0
@@ -237,8 +239,8 @@ val autoP3Commands = Commodore("p3") {
                     }
 
                     stringHolder = when (type.lowercase()) {
-                        "command", "cmd" -> Regex(""""([^"]*)"""").find(arg)?.destructured?.component1()
-                        "swap" -> Regex(""""([^"]*)"""").find(arg)?.destructured?.component1()
+                        "command", "cmd" -> Regex(""""([^"]*)"""").find(arguments.toString())?.destructured?.component1()
+                        "swap" -> Regex(""""([^"]*)"""").find(arguments.toString())?.destructured?.component1()
                         else -> null
                     }
                 }
@@ -259,13 +261,12 @@ val autoP3Commands = Commodore("p3") {
                 "fullstop"  -> StopRing(true)
                 "bonzo"     -> UseItemRing("bonzo's staff")
                 "walk"      -> WalkRing
-                "boom"      -> BoomRing
-//                    mc.objectMouseOver
-//                    ?.takeIf { it.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK }
-//                    ?.blockPos
-//                    ?.toVec3()
-//                    ?.let { BoomRing(it) }
-//                    ?: return@runs modMessage("Look at block")
+                "boom"      -> mc.objectMouseOver
+                    ?.takeIf { it.typeOfHit == MovingObjectPosition.MovingObjectType.BLOCK }
+                    ?.blockPos
+                    ?.toVec3()
+                    ?.let { BoomRing(it) }
+                    ?: return@runs modMessage("Look at block")
                 else -> return@runs modMessage("Unknown ring type")
             }
 
@@ -276,11 +277,11 @@ val autoP3Commands = Commodore("p3") {
                 else length to width
             }
 
-            if (action is BlinkRing && (finalLength > 1.0f || finalWidth > 1.0f)) return@runs modMessage("Blink ring is too big")
+            if ((action is BlinkRing || action is BoomRing) && (finalLength > 1.0f || finalWidth > 1.0f)) return@runs modMessage("Ring is too big")
 
             val ring = Ring(action, Vec3(x, y, z), yaw, pitch, ringArgs, finalLength, finalWidth, height, delay)
+            if (!RingsManager.addRing(ring)) return@runs modMessage("Route §7$selectedRoute§r doesn't exist. Do §7/p3 create §7<§bname§7>")
             modMessage("Added ${ring.format()}")
-            RingsManager.addRing(ring)
             RingsManager.loadSaveRoute()
         } // schizophrenia ends here
     }
@@ -294,10 +295,13 @@ fun invalidUsageString(name: String, vararg  aliases: String) {
     modMessage("Usage: §7/p3 add §7$name \"§bvalue§7\" [§bargs..§7]" + if (aliases.isNotEmpty()) " §rAliases: ${aliases.joinToString(", ") { it }}" else "")
 }
 
-val isMultiple get(): Boolean {
+val check get(): Boolean {
     if (currentRoute.size > 1) {
         modMessage("Can't edit when multiple routes loaded. Loaded routes: §7${currentRoute.joinToString(", ") { it.name }}")
-        return true
+        return false
     }
-    return false
+    if (inBossOnly && floorNumber != 7) {
+        return false
+    }
+    return true
 }

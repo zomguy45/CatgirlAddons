@@ -10,6 +10,7 @@ import catgirlroutes.ui.clickgui.ClickGUI
 import catgirlroutes.ui.clickgui.util.FontUtil
 import catgirlroutes.ui.misc.CustomMainMenu
 import catgirlroutes.utils.*
+import catgirlroutes.utils.autop3.RingsManager
 import catgirlroutes.utils.clock.Executor
 import catgirlroutes.utils.dungeon.DungeonUtils
 import catgirlroutes.utils.dungeon.LeapUtils
@@ -74,6 +75,7 @@ class CatgirlRoutes {
             Party
         ).forEach(MinecraftForge.EVENT_BUS::register)
         CommandRegistry.register()
+        RingsManager.init()
     }
 
     @Mod.EventHandler

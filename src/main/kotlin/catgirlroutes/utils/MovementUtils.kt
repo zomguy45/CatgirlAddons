@@ -1,6 +1,7 @@
 package catgirlroutes.utils
 
 import catgirlroutes.CatgirlRoutes.Companion.mc
+import catgirlroutes.utils.ChatUtils.debugMessage
 import catgirlroutes.utils.ClientListener.scheduleTask
 import catgirlroutes.utils.rotation.RotationUtils.getYawAndPitch
 import net.minecraft.block.Block
@@ -125,8 +126,10 @@ object MovementUtils { // todo cleanup, add motion
 
     @SubscribeEvent
     fun onLivingJump(event: LivingEvent.LivingJumpEvent) {
-        if (event.entityLiving != mc.thePlayer) return
-        jumping = true
+        if (event.entity.worldObj.isRemote) {
+            jumping = true
+            debugMessage("jump living")
+        }
     }
 
     /**
@@ -136,7 +139,6 @@ object MovementUtils { // todo cleanup, add motion
     @SubscribeEvent
     fun onClientTick(event: ClientTickEvent) {
         if (event.phase != TickEvent.Phase.START || mc.thePlayer == null || dir == null) return
-
         if (mc.thePlayer.onGround) {
             airTicks = 0
         } else {
@@ -155,6 +157,7 @@ object MovementUtils { // todo cleanup, add motion
             val rad = dir!! * Math.PI / 180
             var speedMultiplier = 2.806
             if (jumping) {
+                debugMessage("we jumping")
                 jumping = false
                 speedMultiplier += 2
                 speedMultiplier *= 1.25

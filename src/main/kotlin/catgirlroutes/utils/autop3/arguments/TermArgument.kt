@@ -6,7 +6,7 @@ import catgirlroutes.utils.customtriggers.TypeName
 
 @TypeName("term")
 data object TermArgument : RingArgument() {
-    override val description: String = "activates the node when terminal opens"
+//    override val description: String = "activates the node when terminal opens"
 
     override fun check(ring: Ring): Boolean {
         return termFound
