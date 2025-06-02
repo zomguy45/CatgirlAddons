@@ -280,7 +280,7 @@ object DungeonUtils {
         "Decoy", "Inflatable Jerry", "Spirit Leap", "Trap", "Training Weights", "Defuse Kit", "Dungeon Chest Key", "Treasure Talisman", "Revive Stone", "Architect's First Draft"
     )
 
-    val termGuiTitles: Array<String> = arrayOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
+    val termGuiTitles = listOf("Click in order!", "Select all the", "What starts with:", "Change all to the same color!", "Correct all the panes!", "Click the button on time!")
 
     val termInactiveTitles: Array<String> = arrayOf("Inactive Terminal", "Inactive Device", "Not Activated");
 }
