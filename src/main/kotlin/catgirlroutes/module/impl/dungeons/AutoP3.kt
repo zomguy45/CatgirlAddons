@@ -18,11 +18,14 @@ import catgirlroutes.utils.autop3.RingsManager.ringEditMode
 import catgirlroutes.utils.autop3.actions.BlinkRing
 import catgirlroutes.utils.dungeon.DungeonUtils.floorNumber
 import catgirlroutes.utils.render.WorldRenderUtils
+import catgirlroutes.utils.render.WorldRenderUtils.drawCustomSizedBoxAt
 import catgirlroutes.utils.render.WorldRenderUtils.drawEllipse
 import catgirlroutes.utils.render.WorldRenderUtils.drawLine
 import catgirlroutes.utils.render.WorldRenderUtils.drawP3boxWithLayers
 import catgirlroutes.utils.render.WorldRenderUtils.drawStringInWorld
+import catgirlroutes.utils.render.WorldRenderUtils.renderGayFlag
 import catgirlroutes.utils.render.WorldRenderUtils.renderLesbianFlag
+import catgirlroutes.utils.render.WorldRenderUtils.renderTransFlag
 import kotlinx.coroutines.launch
 import net.minecraft.util.Vec3
 import net.minecraftforge.client.event.RenderGameOverlayEvent
@@ -45,15 +48,15 @@ object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more arg
     private val chatFeedback by BooleanSetting("Chat feedback", true, "Sends chat messages when the ring is activated.")
     val boomType by SelectorSetting("Boom type", "Regular", arrayListOf("Regular", "Infinity"), "Superboom TNT type to use for BOOM ring.")
 
-    private val style by SelectorSetting("Ring style", "Layers", arrayListOf("Layers", "Box", "Ellipse", "Lesbian"), "Ring render style to be used.") // "Trans", "LGBTQIA+"
+    private val style by SelectorSetting("Ring style", "Layers", arrayListOf("Layers", "Box", "Ellipse", "Lesbian", "Gay", "Trans"), "Ring render style to be used.")
 
     private val layers by NumberSetting("Ring layers amount", 3.0, 1.0, 5.0, 1.0, "Amount of ring layers to render").withDependency { style.selected == "Layers" }
 
     private val lineThickness by NumberSetting("Line thickness", 2.0, 1.0, 10.0, 1.0, "Ellipse line thickness").withDependency { style.selected.equalsOneOf("Box", "Ellipse") }
     private val ellipseSlices by NumberSetting("Ellipse slices", 30.0, 5.0, 60.0, 1.0, "Ellipse slices").withDependency { style.selected == "Ellipse" }
 
-    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Layers", "Ellipse") }
-    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Layers", "Ellipse") }
+    private val colour1 by ColorSetting("Ring colour (inactive)", black, true, "Colour of Normal ring style while inactive").withDependency { style.selected.equalsOneOf("Layers", "Ellipse", "Box") }
+    private val colour2 by ColorSetting("Ring colour (active)", Color.white, true, "Colour of Normal ring style while active").withDependency { style.selected.equalsOneOf("Layers", "Ellipse", "Box") }
 
 //    private val disableLength by NumberSetting("Disable length", 50.0, 1.0, 100.0, 1.0, "") // tf is this // I still have no idea what this shit does
 //    private val recordLength by NumberSetting("Recording length", 50.0, 1.0, 999.0, 1.0, "Maximum movement recording length.")
@@ -113,9 +116,11 @@ object AutoP3 : Module( // todo make it on tick; fix schizophrenia; add more arg
                 val colour = if (ring.inside()) colour2 else colour1
                 when (style.selected) {
                     "Layers"    -> drawP3boxWithLayers(x, y, z, ring.length, ring.width, ring.height, colour, layers.toInt())
-                    "Box"       -> WorldRenderUtils.drawCustomSizedBoxAt(x, y, z, ring.width.toDouble(), ring.height.toDouble(), ring.length.toDouble(), colour, lineThickness.toFloat())
+                    "Box"       -> drawCustomSizedBoxAt(x - ring.width / 2, y + 0.01, z - ring.length / 2, ring.width.toDouble(), ring.height.toDouble() - 0.01, ring.length.toDouble(), colour, lineThickness.toFloat(), false)
                     "Ellipse"   -> drawEllipse(x, y, z, ring.width / 2, ring.length / 2, colour, ellipseSlices.toInt(), lineThickness.toFloat())
                     "Lesbian"   -> renderLesbianFlag(x, y, z, ring.length, ring.width, ring.height)
+                    "Gay"       -> renderGayFlag(x, y, z, ring.length, ring.width, ring.height)
+                    "Trans"     -> renderTransFlag(x, y, z, ring.length, ring.width, ring.height)
                 }
 
                 if (ring.action is BlinkRing) {

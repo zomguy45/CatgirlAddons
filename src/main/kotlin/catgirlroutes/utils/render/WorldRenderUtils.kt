@@ -37,7 +37,7 @@ import java.awt.Color.*
 import kotlin.math.cos
 import kotlin.math.sin
 
-
+// TODO CLEAN UP
 /**
  * ## A Collection of Methods for Rendering within the 3D World.
  *
@@ -266,6 +266,22 @@ object WorldRenderUtils {
         glDepthMask(true)
         glPopAttrib()
         glPopMatrix()
+    }
+
+    fun drawOutlinedAABB(aabb: AxisAlignedBB, colour: Color, thickness: Float = 3.0f, phase: Boolean = false) {
+        GlStateManager.pushMatrix()
+        GlStateManager.disableBlend()
+        GlStateManager.disableTexture2D()
+        GlStateManager.blendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+        if (phase) GlStateManager.disableDepth()
+        glLineWidth(thickness)
+        drawOutlinedAABB(aabb, colour)
+
+        GlStateManager.enableDepth()
+        GlStateManager.enableBlend()
+        GlStateManager.enableTexture2D()
+        GlStateManager.popMatrix()
     }
 
     private fun drawOutlinedAABB(aabb: AxisAlignedBB, color: Color) {
@@ -780,29 +796,31 @@ object WorldRenderUtils {
         x: Double,
         y: Double,
         z: Double,
+        length: Float,
         width: Float,
         height: Float,
     ){
-        drawSquareTwo(x, y + 0.01, z, width, width, cyan, 4f, false)
-        drawSquareTwo(x, y + height * 0.25, z, width, width, pink, 4f, false)
-        drawSquareTwo(x, y + height * 0.5, z, width, width, white, 4f, false)
-        drawSquareTwo(x, y + height * 0.75, z, width, width, pink, 4f, false)
-        drawSquareTwo(x, y + height, z, width, width, cyan, 4f, false)
+        drawSquareTwo(x, y + 0.01, z, length, width, cyan, 4f, false)
+        drawSquareTwo(x, y + height * 0.25, z, length, width, pink, 4f, false)
+        drawSquareTwo(x, y + height * 0.5, z, length, width, white, 4f, false)
+        drawSquareTwo(x, y + height * 0.75, z, length, width, pink, 4f, false)
+        drawSquareTwo(x, y + height, z, length, width, cyan, 4f, false)
     }
 
     fun renderGayFlag(
         x: Double,
         y: Double,
         z: Double,
+        length: Float,
         width: Float,
         height: Float,
     ){
-        drawSquareTwo(x, y + 0.01, z, width, width, red, 4f, false)
-        drawSquareTwo(x, y + height * 0.2, z, width, width, orange, 4f, false)
-        drawSquareTwo(x, y + height * 0.4, z, width, width, yellow, 4f, false)
-        drawSquareTwo(x, y + height * 0.6, z, width, width, green, 4f, false)
-        drawSquareTwo(x, y + height * 0.8, z, width, width, blue, 4f, false)
-        drawSquareTwo(x, y + height, z, width, width, pink, 4f, false)
+        drawSquareTwo(x, y + 0.01, z, length, width, red, 4f, false)
+        drawSquareTwo(x, y + height * 0.2, z, length, width, orange, 4f, false)
+        drawSquareTwo(x, y + height * 0.4, z, length, width, yellow, 4f, false)
+        drawSquareTwo(x, y + height * 0.6, z, length, width, green, 4f, false)
+        drawSquareTwo(x, y + height * 0.8, z, length, width, blue, 4f, false)
+        drawSquareTwo(x, y + height, z, length, width, pink, 4f, false)
     }
 
     fun renderLesbianFlag(
