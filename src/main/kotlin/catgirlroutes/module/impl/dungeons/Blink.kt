@@ -69,7 +69,7 @@ object Blink : Module(
         preview { drawPackets() }
     }
 
-    var packetArray = 0
+    var packetArray = 0.0
     private var recorderActive = false
     private var currentRing: Ring? = null
 
