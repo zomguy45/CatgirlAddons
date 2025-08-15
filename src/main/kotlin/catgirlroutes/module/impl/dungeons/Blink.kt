@@ -138,7 +138,7 @@ object Blink : Module(
         }
         if (dontCancel) return
         event.isCanceled = true
-        packetArray += 1
+        packetArray += 1.5
     }
 
     @SubscribeEvent
