@@ -28,6 +28,8 @@ import net.minecraftforge.fml.common.eventhandler.SubscribeEvent
 import org.lwjgl.input.Keyboard
 import java.awt.Color
 
+import net.minecraftforge.fml.common.gameevent.TickEvent
+
 @AlwaysActive
 object Blink : Module(
     "Blink",
@@ -152,4 +154,15 @@ object Blink : Module(
     private fun drawPackets() {
         drawAlignedString(packetArray.toString(), hud.width / 2.0, hud.height / 2.0, Alignment.CENTRE, VAlignment.CENTRE)
     }
+    
+    @SubscribeEvent
+    fun onPlayerTick(event: TickEvent.PlayerTickEvent) {
+    if (event.phase != TickEvent.Phase.START) return
+    if (mc.thePlayer == null || mc.theWorld == null) return
+    if (!this.enabled) return
+
+    if (mc.thePlayer.motionX != 0.0 || mc.thePlayer.motionZ != 0.0) {
+        packetArray = 0
+    }
+}
 }
